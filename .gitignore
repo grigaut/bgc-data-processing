@@ -1,8 +1,7 @@
 # pycache
 __pycache__
 # Tests scripts
-scripts/sandbox.py
-test.py
+sandbox.py
 # Data saving folders
 bgc_figs
 bgc_data
