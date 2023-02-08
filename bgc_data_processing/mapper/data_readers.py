@@ -2,13 +2,9 @@
 
 
 import datetime as dt
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-
-if TYPE_CHECKING:
-    from bgc_data_processing.mapper.loaders import NetCDFStorer
 
 
 def read_depth_levels(
@@ -91,7 +87,7 @@ def interp_cphl(
 
 
 def read_cphl_data(
-    nc_files: list["NetCDFStorer"],
+    nc_files: list,
     gotm_depth: np.ndarray,
 ) -> pd.DataFrame:
     """Reads chlorophyll values from netCDF files.

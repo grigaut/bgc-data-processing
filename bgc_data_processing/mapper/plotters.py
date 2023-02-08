@@ -13,7 +13,6 @@ from bgc_data_processing.mapper.tracers import GeoTracerNetCDF
 from cartopy import crs, feature
 
 if TYPE_CHECKING:
-    from bgc_data_processing.mapper.loaders import NetCDFStorer
     from cartopy.mpl.geoaxes import GeoAxesSubplot
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
@@ -21,7 +20,7 @@ if TYPE_CHECKING:
 
 def add_netcdf_lines(
     ax: "GeoAxesSubplot",
-    to_plot: list["NetCDFStorer"],
+    to_plot: list,
     **kwargs,
 ) -> None:
     """Adds lines to an existing geo axes

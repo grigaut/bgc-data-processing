@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from bgc_data_processing.mapper.loaders import NetCDFStorer
     from matplotlib.axes import Axes
     from matplotlib.collections import PathCollection
 
@@ -256,7 +255,7 @@ class GeoTracerNetCDF(BaseGeoTracer):
 
     def __init__(
         self,
-        netcdf_data: "NetCDFStorer",
+        netcdf_data,
     ) -> None:
         data_start_date = dt.datetime(1950, 1, 1, 0, 0, 0)
         data = netcdf_data.get_content().variables
