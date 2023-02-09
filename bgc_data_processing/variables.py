@@ -296,10 +296,7 @@ class VariablesStorer:
         """
         mapping = {}
         for var in self._variables:
-            if type(var.alias) is list:
-                mapping = mapping | {alias: var.key for alias in var.alias}
-            else:
-                mapping[var.alias] = var.key
+            mapping = mapping | {alias: var.key for alias in var.alias}
         return mapping
 
     @property
