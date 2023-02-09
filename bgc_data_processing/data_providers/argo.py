@@ -5,7 +5,7 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="ARGO",
-    dirin=CONFIG["LOADING"]["ARGO"],
+    dirin=CONFIG["LOADING"]["ARGO"]["PATH"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
         # DEFAULT_VARS["provider"].not_here(),
