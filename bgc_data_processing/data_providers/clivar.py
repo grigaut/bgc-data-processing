@@ -5,7 +5,7 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="CLIVAR",
-    dirin=CONFIG["LOADING"]["CLIVAR"],
+    dirin=CONFIG["LOADING"]["CLIVAR"]["PATH"],
     files_pattern="clivar_({years})[0-9][0-9][0-9][0-9]_.*.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_here(),

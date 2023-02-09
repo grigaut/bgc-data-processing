@@ -1,12 +1,29 @@
 [LOADING]
-ARGO = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
-CLIVAR = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
-GLODAPv2 = "/mnt/data02/gaerig/synthesis/GLODAPv2/data"
-GLODAP_2019 = "/mnt/data02/gaerig/synthesis/GLODAPv2.2019/data"
-GLODAP_2022 = "/mnt/data02/gaerig/synthesis/GLODAPv2.2022/data"
-ICES = "/mnt/data02/gaerig/synthesis/ICES/data"
-IMR = "/mnt/data02/gaerig/synthesis/IMR/data"
-NMDC = "/mnt/data02/gaerig/synthesis/NMDC/data"
 LIST_DIR = "./lists"
+    [LOADING.ARGO]
+    PATH = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
+    CATEGORY = "in_situ"
+    [LOADING.CLIVAR]
+    PATH = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
+    CATEGORY = "in_situ"
+    [LOADING.GLODAPv2]
+    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2/data"
+    CATEGORY = "in_situ"
+    [LOADING.GLODAP_2019]
+    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2019/data"
+    CATEGORY = "in_situ"
+    [LOADING.GLODAP_2022]
+    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2022/data"
+    CATEGORY = "in_situ"
+    [LOADING.ICES]
+    PATH = "/mnt/data02/gaerig/synthesis/ICES/data"
+    CATEGORY = "in_situ"
+    [LOADING.IMR]
+    PATH = "/mnt/data02/gaerig/synthesis/IMR/data"
+    CATEGORY = "in_situ"
+    [LOADING.NMDC]
+    PATH = "/mnt/data02/gaerig/synthesis/NMDC/data"
+    CATEGORY = "in_situ"
+
 [SAVING]
 FILES_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
