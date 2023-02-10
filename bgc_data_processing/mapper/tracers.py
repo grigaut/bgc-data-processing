@@ -65,7 +65,7 @@ class GeoTracer:
         var_series = self._grouping_functions[how](group[var_col_name])
         dep_series = self._grouping_functions[how](group[dep_col_name])
         concatenated = pd.concat([dep_series, var_series], axis=1).reset_index()
-        slice = concatenated[[dep_col_name, var_col_name]]
+        slice = concatenated.filter([dep_col_name, var_col_name])
         lat_bins = pd.cut(concatenated[lat_col_name], bins=lat_bins).apply(
             lambda x: x.mid
         )
