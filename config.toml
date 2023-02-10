@@ -2,7 +2,7 @@
 LIST_DIR = "./lists"
     [LOADING.ARGO]
     PATH = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
-    CATEGORY = "in_situ"
+    CATEGORY = "float"
     [LOADING.CLIVAR]
     PATH = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
     CATEGORY = "in_situ"
