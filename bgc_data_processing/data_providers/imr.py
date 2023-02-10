@@ -6,6 +6,7 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
 loader = csv_tools.CSVLoader(
     provider_name="IMR",
     dirin=CONFIG["LOADING"]["IMR"]["PATH"],
+    category=CONFIG["LOADING"]["IMR"]["CATEGORY"],
     files_pattern="imr_({years}).csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_here(),

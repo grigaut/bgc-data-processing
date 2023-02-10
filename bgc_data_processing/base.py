@@ -18,6 +18,8 @@ class BaseLoader(ABC):
         Data provider name.
     dirin : str
         Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
     files_pattern : str
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
@@ -39,12 +41,14 @@ class BaseLoader(ABC):
         self,
         provider_name: str,
         dirin: str,
+        category: str,
         files_pattern: str,
         variables: "VariablesStorer",
     ) -> None:
 
         self._provider = provider_name
         self._dirin = dirin
+        self._category = category
         self._files_pattern = files_pattern
         self._variables = variables
 
@@ -58,6 +62,17 @@ class BaseLoader(ABC):
             data provider name.
         """
         return self._provider
+
+    @property
+    def category(self) -> str:
+        """Returns the category of the provider.
+
+        Returns
+        -------
+        str
+            Category provider belongs to.
+        """
+        return self._category
 
     @property
     def verbose(self) -> int:

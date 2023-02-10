@@ -19,6 +19,8 @@ class CSVLoader(BaseLoader):
         Data provider name.
     dirin : str
         Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
     files_pattern : str
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
@@ -33,13 +35,14 @@ class CSVLoader(BaseLoader):
         self,
         provider_name: str,
         dirin: str,
+        category: str,
         files_pattern: str,
         variables: "VariablesStorer",
         read_params: dict = {},
     ) -> None:
 
         self._read_params = read_params
-        super().__init__(provider_name, dirin, files_pattern, variables)
+        super().__init__(provider_name, dirin, category, files_pattern, variables)
 
     def _pattern(self) -> str:
         """Returns files pattern for given years for this provider.

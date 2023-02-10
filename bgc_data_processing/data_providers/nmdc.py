@@ -5,6 +5,7 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
 loader = csv_tools.CSVLoader(
     provider_name="NMDC",
     dirin=CONFIG["LOADING"]["NMDC"],
+    category=CONFIG["LOADING"]["NMDC"]["CATEGORY"],
     files_pattern="NMDC_1990-2019_all.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_here(),
