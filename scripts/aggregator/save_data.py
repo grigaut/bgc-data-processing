@@ -3,6 +3,7 @@ from time import time
 
 import pandas as pd
 from bgc_data_processing import CONFIG, data_providers, lists_reader
+from bgc_data_processing.base import Storer
 
 
 def get_args(sys_argv: list) -> tuple[list[str], list[str], int]:
@@ -50,7 +51,7 @@ if __name__ == "__main__":
         print("\n\t" + "-" * len(txt))
         print("\t" + txt)
         print("\t" + "-" * len(txt) + "\n")
-    data = []
+    data_dict = {}
     # Iterate over data sources
     t0 = time()
     for data_src in LIST_SRC:
@@ -112,33 +113,39 @@ if __name__ == "__main__":
                             data_src
                         )
                     )
-        data.append(df)
-    # -------------------------------
-    # AGGREGATING DATA
-    # -------------------------------
-    if VERBOSE > 0:
-        print("Aggregating data")
-    df = sum(data)
-    # -------------------------------
-    # SLICING AGGREGATED DATA
-    # -------------------------------
-    slices_index = DRNG.apply(
-        df.slice_on_dates,
-        axis=1,
-    )
-    # -------------------------------
-    # SAVING SLICES OF AGGREGATED DATA
-    # -------------------------------
-    if VERBOSE > 0:
-        print("Saving aggregated data")
-    to_save = pd.concat(
-        [aggr_date_names, slices_index], keys=["dates", "slice"], axis=1
-    )
-    make_name = lambda x: f"{CONFIG['SAVING']['FILES_DIR']}/bgc_insitu_{x['dates']}.txt"
-    to_save.apply(
-        lambda x: x["slice"].save(make_name(x)),
-        axis=1,
-    )
+        category = dset_loader.category
+        if category not in data_dict.keys():
+            data_dict[category] = []
+        data_dict[category].append(df)
+    for category, data in data_dict.items():
+        # -------------------------------
+        # AGGREGATING DATA
+        # -------------------------------
+        if VERBOSE > 0:
+            print("Aggregating data")
+        df: Storer = sum(data)
+        # -------------------------------
+        # SLICING AGGREGATED DATA
+        # -------------------------------
+        slices_index = DRNG.apply(
+            df.slice_on_dates,
+            axis=1,
+        )
+        # -------------------------------
+        # SAVING SLICES OF AGGREGATED DATA
+        # -------------------------------
+        if VERBOSE > 0:
+            print("Saving aggregated data")
+        to_save = pd.concat(
+            [aggr_date_names, slices_index], keys=["dates", "slice"], axis=1
+        )
+        make_name = (
+            lambda x: f"{CONFIG['SAVING']['FILES_DIR']}/bgc_{category}_{x['dates']}.txt"
+        )
+        to_save.apply(
+            lambda x: x["slice"].save(make_name(x)),
+            axis=1,
+        )
     if VERBOSE > 0:
         print("\n" + "\t" + "-" * len(txt))
         print("\t" + " " * (len(txt) // 2) + "DONE")
