@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import cartopy.crs as ccrs
 import numpy as np
@@ -6,6 +6,7 @@ import pandas as pd
 from bgc_data_processing.base import Storer
 
 if TYPE_CHECKING:
+    from bgc_data_processing.variables import VariablesStorer
     from matplotlib.axes import Axes
 
 
@@ -32,7 +33,22 @@ class GeoTracer:
         self._data = storer.data.sort_values(
             self._variables["DEPH"].key, ascending=False
         )
-        self._cols_to_group_with = []
+        self._grouping_columns = self._get_grouping_columns(self._variables)
+
+    def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
+        """Returns a list of columns to use when grouping the data.
+
+        Parameters
+        ----------
+        variables : VariablesStorer
+            Dtaa variables.
+
+        Returns
+        -------
+        list
+            Columns to use for grouping.
+        """
+        columns = []
         for var_name in [
             "PROVIDER",
             "EXPOCODE",
@@ -42,40 +58,141 @@ class GeoTracer:
             "LONGITUDE",
             "LATITUDE",
         ]:
-            if var_name in self._variables.keys():
-                series = self._data[self._variables[var_name].key]
-                self._cols_to_group_with.append(series)
+            if var_name in variables.keys():
+                columns.append(variables[var_name].key)
+        return columns
 
     def _group(
         self,
-        key: str,
-        how: str = "top",
-        bins: int | tuple[int, int] = 10,
+        var_key: str,
+        lat_key: str,
+        lon_key: str,
+        how: str,
     ) -> pd.DataFrame:
-        var_col_name = self._variables[key].key
-        dep_col_name = self._variables["DEPH"].key
-        lat_col_name = self._variables["LATITUDE"].key
-        lon_col_name = self._variables["LONGITUDE"].key
-        if isinstance(bins, tuple):
-            lat_bins, lon_bins = bins[0], bins[1]
+        """First grouping, to aggregate data points from the same measuring point.
+
+        Parameters
+        ----------
+        var_key : str
+            Variable to keep after grouping, it can't be one of the grouping variables.
+        lat_key : str
+            Latitude variable name.
+        lon_key : str
+            Longitude variable name.
+        how : str
+            Grouping function key to use with self._grouping_functions.
+
+        Returns
+        -------
+        pd.DataFrame
+            Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
+            Column names are the same as in self._data.
+        """
+        group = self._data.groupby(self._grouping_columns)
+        var_series: pd.Series = self._grouping_functions[how](group[var_key])
+        var_series.name = var_key
+        return var_series.reset_index().filter([lat_key, lon_key, var_key])
+
+    def _geo_linspace(
+        self,
+        column: pd.Series,
+        bin_size: float,
+        cut_name: str,
+    ) -> tuple[pd.Series, np.ndarray]:
+        """Generates evenly spaced points to use when creating the meshgrid.
+        Also performs a cut on the dataframe column to bin the values.
+
+        Parameters
+        ----------
+        column : pd.Series
+            Column to base point generation on and to bin.
+        bin_size : float
+            Bin size in degree.
+        cut_name : str
+            Name to give to the cut.
+
+        Returns
+        -------
+        tuple[pd.Series, np.ndarray]
+            Bins number for the column, value for each bin.
+        """
+        min_val, max_val = column.min(), column.max()
+        bin_nb = int((max_val - min_val) / bin_size) + 1
+        bins = np.linspace(min_val, max_val, bin_nb)
+        intervals_mid = (bins[1:] + bins[:-1]) / 2
+        cut: pd.Series = pd.cut(column, bins=bins, include_lowest=True, labels=False)
+        cut.name = cut_name
+        return cut, intervals_mid
+
+    def mesh(
+        self,
+        key: str,
+        group_aggr: str = "top",
+        pivot_aggr: Callable = np.mean,
+        bins_size: float | tuple[float, float] = 0.5,
+    ) -> tuple[np.ndarray]:
+        """Return the X,Y and Z 2D array to use with plt.pcolormesh.
+
+        Parameters
+        ----------
+        key : str
+            Name of the variable to map.
+        group_aggr : str, optional
+            Name of the function to use to aggregate data when group by similar measuring point., by default "top"
+        pivot_aggr : Callable
+            Function to aggregate when pivotting data., by default np.mean
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+
+        Returns
+        -------
+        tuple[np.ndarray]
+            Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
+        """
+        var = self._variables[key].key
+        lat = self._variables["LATITUDE"].key
+        lon = self._variables["LONGITUDE"].key
+        df = self._group(
+            var_key=var,
+            lat_key=lat,
+            lon_key=lon,
+            how=group_aggr,
+        )
+        if isinstance(bins_size, tuple):
+            lat_bins_size = bins_size[0]
+            lon_bins_size = bins_size[1]
         else:
-            lat_bins, lon_bins = bins, bins
-        grouping_series = self._cols_to_group_with
-        group = self._data.groupby(grouping_series)
-        var_series = self._grouping_functions[how](group[var_col_name])
-        dep_series = self._grouping_functions[how](group[dep_col_name])
-        concatenated = pd.concat([dep_series, var_series], axis=1).reset_index()
-        slice = concatenated.filter([dep_col_name, var_col_name])
-        lat_bins = pd.cut(concatenated[lat_col_name], bins=lat_bins).apply(
-            lambda x: x.mid
+            lat_bins_size = bins_size
+            lon_bins_size = bins_size
+
+        lat_cut, lat_points = self._geo_linspace(
+            column=df[lat],
+            bin_size=lat_bins_size,
+            cut_name="lat_cut",
         )
-        lon_bins = pd.cut(concatenated[lon_col_name], bins=lon_bins).apply(
-            lambda x: x.mid
+        lon_cut, lon_points = self._geo_linspace(
+            column=df[lon],
+            bin_size=lon_bins_size,
+            cut_name="lon_cut",
         )
-        slice["lat_bins"] = lat_bins
-        slice["lon_bins"] = lon_bins
-        group_by_bins = slice.groupby(["lat_bins", "lon_bins"], dropna=True).mean()
-        return group_by_bins[~group_by_bins.isna().all(axis=1)]
+        # Bining
+        bins_concat = pd.concat([lat_cut, lon_cut, df[var]], axis=1)
+        # Meshing
+        lons, lats = np.meshgrid(lon_points, lat_points)
+        vals = bins_concat.pivot_table(
+            values=var,
+            index="lat_cut",
+            columns="lon_cut",
+            aggfunc=pivot_aggr,
+        )
+        all_indexes = [index for index in range(lons.shape[0])]
+        all_columns = [colum for colum in range(lats.shape[1])]
+        vals: pd.DataFrame = vals.reindex(all_indexes, axis=0)
+        vals: pd.DataFrame = vals.reindex(all_columns, axis=1)
+
+        return lons, lats, vals.values
 
     def create_hexbin(
         self,
