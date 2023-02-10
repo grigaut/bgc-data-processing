@@ -5,7 +5,8 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="ICES",
-    dirin=CONFIG["LOADING"]["ICES"],
+    dirin=CONFIG["LOADING"]["ICES"]["PATH"],
+    category=CONFIG["LOADING"]["ICES"]["CATEGORY"],
     files_pattern="ices_({years}).csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_here(),

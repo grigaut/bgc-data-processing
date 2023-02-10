@@ -18,6 +18,8 @@ class BaseLoader(ABC):
         Data provider name.
     dirin : str
         Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
     files_pattern : str
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
@@ -26,7 +28,6 @@ class BaseLoader(ABC):
         both the one in the data file but and the one not represented in the file.
     """
 
-    _storer: "Storer" = None
     _verbose: int = 1
     _lon_min: int | float = None
     _lon_max: int | float = None
@@ -39,12 +40,14 @@ class BaseLoader(ABC):
         self,
         provider_name: str,
         dirin: str,
+        category: str,
         files_pattern: str,
         variables: "VariablesStorer",
     ) -> None:
 
         self._provider = provider_name
         self._dirin = dirin
+        self._category = category
         self._files_pattern = files_pattern
         self._variables = variables
 
@@ -60,6 +63,17 @@ class BaseLoader(ABC):
         return self._provider
 
     @property
+    def category(self) -> str:
+        """Returns the category of the provider.
+
+        Returns
+        -------
+        str
+            Category provider belongs to.
+        """
+        return self._category
+
+    @property
     def verbose(self) -> int:
         """_verbose attribute getter
 
@@ -69,17 +83,6 @@ class BaseLoader(ABC):
             Verbose value.
         """
         return self._verbose
-
-    @property
-    def data(self) -> "Storer":
-        """_storer attribute getter.
-
-        Returns
-        -------
-        Storer
-            Data storer.
-        """
-        return self._storer
 
     @property
     def variables(self) -> "VariablesStorer":
@@ -100,6 +103,7 @@ class BaseLoader(ABC):
         data = pd.concat(data_list, ignore_index=True, axis=0)
         return Storer(
             data=data,
+            category=self._category,
             providers=[self.provider],
             variables=self.variables,
             verbose=self.verbose,
@@ -288,12 +292,14 @@ class Storer:
     def __init__(
         self,
         data: pd.DataFrame,
+        category: str,
         providers: list,
         variables: "VariablesStorer",
         verbose: int = 0,
     ) -> None:
 
         self._data = data
+        self._category = category
         self._providers = providers
         self._variables = variables
         self._verbose = verbose
@@ -308,6 +314,17 @@ class Storer:
             Dataframe.
         """
         return self._data
+
+    @property
+    def category(self) -> str:
+        """Returns the category of the provider.
+
+        Returns
+        -------
+        str
+            Category provider belongs to.
+        """
+        return self._category
 
     @property
     def providers(self) -> list:
@@ -331,6 +348,17 @@ class Storer:
         """
         return self._variables
 
+    @property
+    def verbose(self) -> int:
+        """_verbose attribute getter
+
+        Returns
+        -------
+        int
+            Verbose value.
+        """
+        return self._verbose
+
     def __repr__(self) -> str:
         return repr(self.data)
 
@@ -344,22 +372,25 @@ class Storer:
             return self.__add__(other)
 
     def __add__(self, object: object) -> "Storer":
-        if isinstance(object, Storer):
-            # Assert variable from both dataframes are the same
-            if self.variables == object.variables:
-                concat_data = pd.concat([self._data, object._data], ignore_index=True)
-                concat_providers = list(set(self.providers + object.providers))
-                # Return Storer with similar variables
-                concat_storer = Storer(
-                    data=concat_data,
-                    providers=concat_providers,
-                    variables=self.variables,
-                )
-                return concat_storer
-            else:
-                raise ValueError("Variables are not compatible")
-        else:
+        if not isinstance(object, Storer):
             raise TypeError(f"Can't add CSVStorer object to {type(object)}")
+        # Assert variables are the same
+        if not (self.variables == object.variables):
+            raise ValueError("Variables or categories are not compatible")
+        # Assert categories are the same
+        if not (self.category == object.category):
+            raise ValueError("Categories are not compatible")
+
+        concat_data = pd.concat([self._data, object._data], ignore_index=True)
+        concat_providers = list(set(self.providers + object.providers))
+        # Return Storer with similar variables
+        concat_storer = Storer(
+            data=concat_data,
+            category=self.category,
+            providers=concat_providers,
+            variables=self.variables,
+        )
+        return concat_storer
 
     def save(self, filepath: str) -> None:
         """Saving method to save the Dataframe.
@@ -467,10 +498,11 @@ class Slice(Storer):
         self._slice_index = slice_index
         self._storer = storer
         super().__init__(
-            data=self._storer._data,
-            providers=self._storer._providers,
-            variables=self._storer._variables,
-            verbose=self._storer._verbose,
+            data=storer.data,
+            category=storer.category,
+            providers=storer.providers,
+            variables=storer.variables,
+            verbose=storer.verbose,
         )
 
     @property
