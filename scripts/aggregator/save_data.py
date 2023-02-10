@@ -4,25 +4,32 @@ from time import time
 import pandas as pd
 from bgc_data_processing import CONFIG, data_providers, lists_reader
 
+
+def get_args(sys_argv: list) -> tuple[list[str], list[str], int]:
+    years = sys_argv[1].split(",")
+    if len(sys_argv) > 2:
+        list_src = sys_argv[2].split(",")
+    else:
+        list_src = sorted(list(data_providers.LOADERS.keys()))
+    if len(sys_argv) > 3:
+        try:
+            verbose = int(sys_argv[3])
+        except ValueError:
+            verbose = 0
+    else:
+        verbose = 1
+    return years, list_src, verbose
+
+
 if __name__ == "__main__":
     # Script arguments
     SAVE_INTERMEDIARY = True
-    YEARS = sys.argv[1].split(",")
-    if len(sys.argv) > 2:
-        LIST_SRC = sys.argv[2].split(",")
-    else:
-        LIST_SRC = sorted(list(data_providers.LOADERS.keys()))
-    if len(sys.argv) > 3:
-        try:
-            VERBOSE = int(sys.argv[3])
-        except ValueError:
-            VERBOSE = 0
-    else:
-        VERBOSE = 1
+    YEARS, LIST_SRC, VERBOSE = get_args(sys.argv)
 
     drngs = []
     aggr_date_names = []
     full_year_rows = []
+    # cycle dates parsing
     for year in YEARS:
         # Collect cycle dates
         cycle_file = f"{CONFIG['LOADING']['LIST_DIR']}/ran_cycle_{year}.txt"
