@@ -74,7 +74,6 @@ class GeoTracer:
         )
         slice["lat_bins"] = lat_bins
         slice["lon_bins"] = lon_bins
-        print(slice)
         group_by_bins = slice.groupby(["lat_bins", "lon_bins"], dropna=True).mean()
         return group_by_bins[~group_by_bins.isna().all(axis=1)]
 
