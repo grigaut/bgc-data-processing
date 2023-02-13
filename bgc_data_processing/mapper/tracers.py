@@ -3,14 +3,15 @@ from typing import TYPE_CHECKING, Callable
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from bgc_data_processing.base import Storer
+from bgc_data_processing.base import BasePlot
+from bgc_data_processing.data_classes import Storer
 from cartopy import crs, feature
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
 
 
-class GeoMesher:
+class GeoMesher(BasePlot):
     """Base class for tracing on earthmaps.
 
     Parameters
@@ -244,3 +245,7 @@ class GeoMesher:
         )
         plt.show()
         plt.close()
+
+
+class GeoProfile(BasePlot):
+    pass
