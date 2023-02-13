@@ -19,8 +19,11 @@ class NetCDFLoader(BaseLoader):
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
 
-    def _select_filepaths(self) -> list[str]:
+    def _select_filepaths(self, exclude: list) -> list[str]:
         """Selects filepaths referring to the files to load.
+
+        exclude: list
+            List of files to exclude when loading.
 
         Returns
         -------
@@ -29,7 +32,10 @@ class NetCDFLoader(BaseLoader):
         """
         regex = re.compile(self._files_pattern)
         files = filter(regex.match, os.listdir(self._dirin))
-        full_paths = [f"{self._dirin}/{filename}" for filename in files]
+        full_paths = []
+        for filename in files:
+            if filename not in exclude:
+                full_paths.append(f"{self._dirin}/{filename}")
         return sorted(full_paths)
 
     def _get_id(self, filename: str) -> str:
@@ -321,6 +327,12 @@ class NetCDFLoader(BaseLoader):
             print("\tLoading data from {}".format(filepath.split("/")[-1]))
         file_id = self._get_id(filepath.split("/")[-1])
         nc_data = self._read(filepath=filepath)
+        if "CPHL_ADJUSTED" in nc_data.variables.keys():
+            print(filepath)
+            print(np.max(nc_data.variables["CPHL_ADJUSTED"][:]))
+        elif "CPHL" in nc_data.variables.keys():
+            print(filepath)
+            print(np.max(nc_data.variables["CPHL"][:]))
         df_format = self._format(nc_data)
         df_dates = self._set_dates(df_format)
         df_bdates = self._apply_boundaries(
