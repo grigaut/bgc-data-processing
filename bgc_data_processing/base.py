@@ -171,8 +171,8 @@ class BaseLoader(ABC):
 
     def set_date_boundaries(
         self,
-        date_min: dt.datetime | dt.date,
-        date_max: dt.datetime | dt.date,
+        date_min: dt.datetime | dt.date = None,
+        date_max: dt.datetime | dt.date = None,
     ) -> None:
         """Sets boundaries for date variable.
 
@@ -183,8 +183,14 @@ class BaseLoader(ABC):
         date_max : int | float
             Maximal value for date (included).
         """
-        self._date_min = pd.to_datetime(date_min)
-        self._date_max = pd.to_datetime(date_max + dt.timedelta(days=1))
+        if date_min is None:
+            self._date_min = None
+        else:
+            self._date_min = pd.to_datetime(date_min)
+        if date_max is None:
+            self._date_max = None
+        else:
+            self._date_max = pd.to_datetime(date_max + dt.timedelta(days=1))
 
     def _apply_boundaries(
         self,
