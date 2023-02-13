@@ -3,7 +3,7 @@ from time import time
 
 import pandas as pd
 from bgc_data_processing import CONFIG, data_providers, lists_reader
-from bgc_data_processing.base import Storer
+from bgc_data_processing.data_classes import Storer
 
 
 def get_args(sys_argv: list) -> tuple[list[str], list[str], int]:
