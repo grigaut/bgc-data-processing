@@ -1,104 +1,13 @@
 """Plotting tools"""
 
 
-import os
-from typing import TYPE_CHECKING
-
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from bgc_data_processing.mapper import config
-from bgc_data_processing.mapper.tracers import GeoTracerNetCDF
-from cartopy import crs, feature
-
-if TYPE_CHECKING:
-    from cartopy.mpl.geoaxes import GeoAxesSubplot
-    from matplotlib.axes import Axes
-    from matplotlib.figure import Figure
-
-
-def add_netcdf_lines(
-    ax: "GeoAxesSubplot",
-    to_plot: list,
-    **kwargs,
-) -> None:
-    """Adds lines to an existing geo axes
-
-    Parameters
-    ----------
-    ax : GeoAxesSubplot
-        geo axes to add lines on
-    to_plot : list[NetCDFStorer]
-        List of objects to plot
-    **kwargs : dict
-        Additional plotting arguments that will be passed to 'plt.Line2D'.
-    """
-    for ncstorer in to_plot:
-        GeoTracerNetCDF(ncstorer).create_line(ax=ax, **kwargs)
-
-
-def create_fig(
-    figsize: tuple[int],
-    title: str,
-) -> "Figure":
-    """Creates a matplotlib figure.
-
-    Parameters
-    ----------
-    figsize : tuple[int]
-        Figure size.
-    title : str
-        Figure title.
-
-    Returns
-    -------
-    Figure
-        Created figure.
-    """
-    fig = plt.figure(figsize=figsize)
-    fig.suptitle(title)
-    return fig
-
-
-def create_geoaxes(
-    fig: "Figure",
-    extent: tuple[int | float],
-) -> "GeoAxesSubplot":
-    """Creates a geoaxes on an existing figure.
-
-    Parameters
-    ----------
-    fig : Figure
-        Figure to add the axes on.
-    extent : tuple[int  |  float]
-        Location boundaries for the axes in the format (x0, x1, y0, y1)
-
-    Returns
-    -------
-    GeoAxesSubplot
-        Genrated Geoaxes.
-    """
-    ax = fig.add_subplot(
-        1,
-        1,
-        1,
-        projection=crs.Orthographic(0, 90),
-    )
-    ax.set_extent(
-        extent,
-        crs=crs.PlateCarree(),
-    )
-    ax.gridlines(
-        draw_labels=True,
-        dms=True,
-        x_inline=False,
-        y_inline=False,
-    )
-    ax.coastlines()
-    ax.add_feature(feature.OCEAN, facecolor=feature.COLORS["water"], zorder=1)
-    ax.add_feature(feature.LAND, facecolor="gray", zorder=2)
-    return ax
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 
 def create_profile_axes(
@@ -173,39 +82,3 @@ def plot_profile(
     )
     cb = plt.colorbar(cf, orientation="vertical", extend="both")
     cb.set_label(plot_args["label"], rotation=270, labelpad=15.0)
-
-
-def create_output(
-    fig: "Figure",
-    show: bool = True,
-    save: bool = False,
-    dirout: str = None,
-) -> None:
-    """Generates the output (save and/or plot) of a figure.
-
-    Parameters
-    ----------
-    fig : Figure
-        Figure to display/save.
-    show : bool, optional
-        Whether to show the figure or not., by default True
-    save : bool, optional
-        Whether to save the figure or not., by default False
-    dirout : str, optional
-        Directory to save the figure in., by default None
-
-    Raises
-    ------
-    ValueError
-        If the outout directory is not an existing directory.
-    """
-    if show:
-        plt.show()
-    if save and dirout is not None:
-        if os.path.isdir(dirout):
-            title = fig._suptitle.get_text().lower().replace(" ", "_")
-            fileout = dirout + "/" + title + ".png"
-            fig.savefig(fileout)
-        else:
-            raise ValueError(f"{dirout} is not a directory")
-    plt.close()

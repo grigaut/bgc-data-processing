@@ -280,3 +280,11 @@ class BaseLoader(ABC):
         for key, correction_func in self._variables.corrections.items():
             to_correct[key] = to_correct[key].apply(correction_func)
         return to_correct
+
+
+class BasePlot(ABC):
+    @abstractmethod
+    def plot(
+        self,
+    ) -> None:
+        ...

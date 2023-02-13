@@ -1,16 +1,17 @@
-import datetime as dt
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
-import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from bgc_data_processing.base import BasePlot
+from bgc_data_processing.data_classes import Storer
+from cartopy import crs, feature
 
 if TYPE_CHECKING:
-    from matplotlib.axes import Axes
-    from matplotlib.collections import PathCollection
+    from bgc_data_processing.variables import VariablesStorer
 
 
-class BaseGeoTracer:
+class GeoMesher(BasePlot):
     """Base class for tracing on earthmaps.
 
     Parameters
@@ -19,267 +20,232 @@ class BaseGeoTracer:
         Data to use when plotting.
     """
 
+    _grouping_functions = {
+        # "all": lambda x: x.apply(np.array),
+        "top": lambda x: x.first(),
+        "bottom": lambda x: x.last(),
+    }
+
     def __init__(
         self,
-        data: pd.DataFrame,
+        storer: "Storer",
     ) -> None:
-        self._data = data
-        self.all_latitude
-        self.aggr_func = {
-            "mean": lambda x: np.nanmean(x, axis=1),
-            "max": lambda x: np.nanmax(x, axis=1),
-            "min": lambda x: np.nanmin(x, axis=1),
-            "top": lambda x: x[:, 0],
-            "bottom": lambda x: x[:, -1],
-            "count": lambda x: (~np.isnan(x)).sum(axis=1),
-        }
+        self._storer = storer
+        self._variables = storer._variables
+        self._data = storer.data.sort_values(
+            self._variables["DEPH"].key, ascending=False
+        )
+        self._grouping_columns = self._get_grouping_columns(self._variables)
 
-    @property
-    def all_longitude(self) -> np.ndarray:
-        return self._data["LONGITUDE"][:]
-
-    @property
-    def all_latitude(self) -> np.ndarray:
-        return self._data["LATITUDE"][:]
-
-    def create_line(
-        self,
-        ax: "Axes",
-        **kwargs,
-    ) -> list:
-        """Creates a line linking all observation points.
+    def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
+        """Returns a list of columns to use when grouping the data.
 
         Parameters
         ----------
-        ax : Axes
-            Axes to plot on.
-        kwargs : dict
-            Additional parmeter to pass to ax.plot.
+        variables : VariablesStorer
+            Dtaa variables.
 
         Returns
         -------
         list
-            ax.plot output.
+            Columns to use for grouping.
         """
-        return ax.plot(
-            self.all_longitude,
-            self.all_latitude,
-            transform=ccrs.PlateCarree(),
-            **kwargs,
-        )
+        columns = []
+        for var_name in [
+            "PROVIDER",
+            "EXPOCODE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "LONGITUDE",
+            "LATITUDE",
+        ]:
+            if var_name in variables.keys():
+                columns.append(variables[var_name].key)
+        return columns
 
-    def get_data(self, variable: str) -> dict:
-        """Returns the data values (and dates and positions) for the given variable.
-        This method must be created for each subclass.
+    def _group(
+        self,
+        var_key: str,
+        lat_key: str,
+        lon_key: str,
+        how: str,
+    ) -> pd.DataFrame:
+        """First grouping, to aggregate data points from the same measuring point.
 
         Parameters
         ----------
-        variable : str
-            Variable to select
+        var_key : str
+            Variable to keep after grouping, it can't be one of the grouping variables.
+        lat_key : str
+            Latitude variable name.
+        lon_key : str
+            Longitude variable name.
+        how : str
+            Grouping function key to use with self._grouping_functions.
 
         Returns
         -------
-        dict
-            Output data
+        pd.DataFrame
+            Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
+            Column names are the same as in self._data.
         """
-        # To be define in each subclass
-        pass
+        group = self._data.groupby(self._grouping_columns)
+        var_series: pd.Series = self._grouping_functions[how](group[var_key])
+        var_series.name = var_key
+        return var_series.reset_index().filter([lat_key, lon_key, var_key])
 
-    def create_colored_scatter(
+    def _geo_linspace(
         self,
-        ax: "Axes",
-        variable: str,
-        aggregation: str = "mean",
-        **kwargs,
-    ) -> "PathCollection":
-        """Colorates scatter points depennding on the value.
+        column: pd.Series,
+        bin_size: float,
+        cut_name: str,
+    ) -> tuple[pd.Series, np.ndarray]:
+        """Generates evenly spaced points to use when creating the meshgrid.
+        Also performs a cut on the dataframe column to bin the values.
 
         Parameters
         ----------
-        ax : Axes
-            Axes to plot on.
-        variable : str
-            Variable to base the mapping on.
-        aggregation :
-            Key name for the aggregation function to use.
-            The dictionnary listing the functions is defined as an attribute of BaseGeoTracer., by default "mean"
-        kwargs: dict
-            Addtitional arguments to pass to ax.scatter.
-        """
-        data = self.get_data(variable)
-        aggr_data = self.aggr_func[aggregation](data["DATA"])
-        ax.scatter(
-            x=data["LONGITUDE"],
-            y=data["LATITUDE"],
-            transform=ccrs.PlateCarree(),
-            c=aggr_data,
-            **kwargs,
-        )
-
-    def create_hexbin(
-        self,
-        ax: "Axes",
-        variable: str,
-        aggregation: str = "mean",
-        **kwargs,
-    ) -> None:
-        """Generates the colormap for a given value.
-
-        Parameters
-        ----------
-        ax : Axes
-            Axes to plot on.
-        variable : str
-            Variable to base the mapping on.
-        aggregation :
-            Key name for the aggregation function to use.
-            The dictionnary listing the functions is defined as an attribute of BaseGeoTracer., by default "mean"
-        kwargs: dict
-            Addtitional arguments to pass to ax.scatter.
-        """
-
-        data = self.get_data(variable)
-        aggr_data = self.aggr_func[aggregation](data["DATA"])
-        default_gridsize = int(np.power(aggr_data.shape[0], 1 / 3)) + 1
-        gridsize = kwargs.pop("gridsize", default_gridsize)
-        cbar = ax.hexbin(
-            x=data["LONGITUDE"],
-            y=data["LATITUDE"],
-            C=aggr_data,
-            transform=ccrs.PlateCarree(),
-            gridsize=gridsize,
-            **kwargs,
-        )
-        ax.get_figure().colorbar(cbar, label=f"{variable} - {aggregation}")
-
-    def create_scatter(
-        self,
-        ax: "Axes",
-        **kwargs,
-    ) -> "PathCollection":
-        """Creates the scatter plot
-
-        Parameters
-        ----------
-        ax : Axes
-            Axes to plot on.
-        kwargs: dict
-            Additional arguments to pass to ax.scatter
-        """
-        ax.scatter(
-            x=self.all_longitude,
-            y=self.all_latitude,
-            transform=ccrs.PlateCarree(),
-            **kwargs,
-        )
-
-
-class GeoTracerDataFrame(BaseGeoTracer):
-    """GeoTracer implementation to handle data stored in dataframe
-
-    Parameters
-    ----------
-    data : pd.dataFrame
-        Data to use when mapping.
-    """
-
-    def __init__(
-        self,
-        data: pd.DataFrame,
-    ) -> None:
-
-        self.all_dates = pd.to_datetime(data[["YEAR", "MONTH", "DAY"]])
-        super().__init__(data)
-
-    def get_data(
-        self,
-        variable: str,
-    ) -> dict:
-        """Collect data for the variable specified.
-        The variable is mapped on a 2D array in order to represent its 2 dimensions :
-        location on the ocean (latitude, longitude and date) and its depth.
-        Therefore, this of representing the data matches the way netCDF data is stored.
-
-        Parameters
-        ----------
-        variable : str
-            Data variable to collect.
+        column : pd.Series
+            Column to base point generation on and to bin.
+        bin_size : float
+            Bin size in degree.
+        cut_name : str
+            Name to give to the cut.
 
         Returns
         -------
-        dict
-            Data (variable, locations, dates) from self._data corresponding to the variable.
+        tuple[pd.Series, np.ndarray]
+            Bins number for the column, value for each bin.
         """
-        slice = self._data.filter(
-            [
-                "YEAR",
-                "MONTH",
-                "DAY",
-                "LONGITUDE",
-                "LATITUDE",
-                "DEPH",
-                variable,
-            ]
-        )
-        # Switching to positive values for the data
-        slice["DEPH"] = slice["DEPH"].map(lambda x: np.abs(x))
-        # Pivoting table to create a 2D variable
-        piv = pd.pivot_table(
-            slice,
-            values=variable,
-            index=["YEAR", "MONTH", "DAY", "LONGITUDE", "LATITUDE"],
-            columns=["DEPH"],
-            fill_value=np.nan,
-        )
-        # Sorting depths
-        piv.sort_index(axis=0, inplace=True)
-        output_data = {}
-        output_data["DATA"] = piv.values
-        output_data["DEPH"] = pd.Series(piv.columns)
-        # Index reset to get latitude, longitude and date of the data samples
-        reset = piv.reset_index()
-        output_data["LATITUDE"] = reset["LATITUDE"]
-        output_data["LONGITUDE"] = reset["LONGITUDE"]
-        output_data["DATE"] = pd.to_datetime(reset[["YEAR", "MONTH", "DAY"]])
-        return output_data
+        min_val, max_val = column.min(), column.max()
+        bin_nb = int((max_val - min_val) / bin_size) + 1
+        bins = np.linspace(min_val, max_val, bin_nb)
+        intervals_mid = (bins[1:] + bins[:-1]) / 2
+        cut: pd.Series = pd.cut(column, bins=bins, include_lowest=True, labels=False)
+        cut.name = cut_name
+        return cut, intervals_mid
 
-
-class GeoTracerNetCDF(BaseGeoTracer):
-    """GeoTracer implementation to handle data stored in NetCDFStorer
-
-    Parameters
-    ----------
-    netcdf_data : NetCDFStorer
-        Data to use when mapping.
-    """
-
-    def __init__(
+    def mesh(
         self,
-        netcdf_data,
-    ) -> None:
-        data_start_date = dt.datetime(1950, 1, 1, 0, 0, 0)
-        data = netcdf_data.get_content().variables
-        timedeltas = pd.to_timedelta(data["TIME"][:], "D")
-        self.all_dates = (timedeltas + data_start_date).values
-        super().__init__(data)
-
-    def get_data(self, variable: str) -> dict:
-        """Collect data for the variable specified.
+        key: str,
+        bins_size: float | tuple[float, float],
+        group_aggr: str,
+        pivot_aggr: Callable,
+    ) -> tuple[np.ndarray]:
+        """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
         ----------
-        variable : str
-            Data variable to collect.
-
+        key : str
+            Name of the column with the variable to mesh.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree
+        group_aggr : str, optional
+            Name of the function to use to aggregate data when group by similar measuring point.
+        pivot_aggr : Callable
+            Function to aggregate when pivotting data.
         Returns
         -------
-        dict
-            Data (variable, locations, dates) from self._data corresponding to the variable.
+        tuple[np.ndarray]
+            Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
         """
-        output_data = {}
-        output_data["DATES"] = self.all_dates
-        output_data["LATITUDE"] = self.all_latitude
-        output_data["LONGITUDE"] = self.all_longitude
-        output_data["DEPH"] = self._data["PRES"][:].filled(np.nan)
-        output_data["DATA"] = self._data[variable][:].filled(np.nan)
-        return output_data
+        lat = self._variables["LATITUDE"].key
+        lon = self._variables["LONGITUDE"].key
+        df = self._group(
+            var_key=key,
+            lat_key=lat,
+            lon_key=lon,
+            how=group_aggr,
+        )
+        if isinstance(bins_size, tuple):
+            lat_bins_size = bins_size[0]
+            lon_bins_size = bins_size[1]
+        else:
+            lat_bins_size = bins_size
+            lon_bins_size = bins_size
+
+        lat_cut, lat_points = self._geo_linspace(
+            column=df[lat],
+            bin_size=lat_bins_size,
+            cut_name="lat_cut",
+        )
+        lon_cut, lon_points = self._geo_linspace(
+            column=df[lon],
+            bin_size=lon_bins_size,
+            cut_name="lon_cut",
+        )
+        # Bining
+        bins_concat = pd.concat([lat_cut, lon_cut, df[key]], axis=1)
+        # Meshing
+        lons, lats = np.meshgrid(lon_points, lat_points)
+        vals = bins_concat.pivot_table(
+            values=key,
+            index="lat_cut",
+            columns="lon_cut",
+            aggfunc=pivot_aggr,
+        )
+        all_indexes = [index for index in range(lons.shape[0])]
+        all_columns = [colum for colum in range(lats.shape[1])]
+        vals: pd.DataFrame = vals.reindex(all_indexes, axis=0)
+        vals: pd.DataFrame = vals.reindex(all_columns, axis=1)
+
+        return lons, lats, vals.values
+
+    def plot(
+        self,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str = "top",
+        pivot_aggr: Callable = np.mean,
+    ) -> None:
+        """Plots the colormesh for the given variable.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str, optional
+            Name of the function to use to aggregate data when group by similar measuring point.
+            , by default "top"
+        pivot_aggr : Callable
+            Function to aggregate when pivotting data., by default np.mean
+        """
+        X1, Y1, Z1 = self.mesh(
+            key=self._variables[variable_name].key,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
+        )
+        fig = plt.figure(figsize=[10, 10])
+        provs = ", ".join(self._storer.providers)
+        title = f"{variable_name} - {provs} ({self._storer.category})"
+        if isinstance(bins_size, tuple):
+            lat, lon = bins_size[0], bins_size[1]
+        else:
+            lat, lon = bins_size, bins_size
+        subtitle = f"{lat}° x {lon}° grid (lat x lon)"
+        fig.suptitle(f"{title}\n{subtitle}")
+        ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
+        fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
+        ax.gridlines()
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
+        cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
+        plt.colorbar(
+            cbar,
+            label=f"{variable_name} levels {self._variables[variable_name].unit}",
+        )
+        plt.show()
+        plt.close()
+
+
+class GeoProfile(BasePlot):
+    pass

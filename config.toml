@@ -27,3 +27,29 @@ LIST_DIR = "./lists"
 
 [SAVING]
 FILES_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
+[MAPPING]
+BINS_SIZE = [0.5,1.5]
+    [MAPPING.EXCLUDE]
+    ARGO = [
+        "GL_PR_PF_1901347.nc",
+        "GL_PR_PF_3900515.nc",
+        "GL_PR_PF_3900516.nc",
+        "GL_PR_PF_3900521.nc",
+        "GL_PR_PF_3900522.nc",
+        "GL_PR_PF_3900523.nc",
+        "GL_PR_PF_3900524.nc",
+        "GL_PR_PF_5904923.nc",
+        "GL_PR_PF_5904924.nc",
+        "GL_PR_PF_5905022.nc",
+        "GL_PR_PF_5905167.nc",
+        "GL_PR_PF_5905199.nc",
+        "GL_PR_PF_5905996.nc",
+        "GL_PR_PF_7900563.nc",
+    ]
+    CLIVAR = []
+    GLODAPv2 = []
+    GLODAP_2019 = []
+    GLODAP_2022 = []
+    ICES = []
+    IMR = []
+    NMDC = []
