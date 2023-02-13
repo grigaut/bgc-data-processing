@@ -95,22 +95,21 @@ class BaseLoader(ABC):
         """
         return self._variables
 
-    def __call__(self) -> "Storer":
-        filepaths = self._select_filepaths()
+    def __call__(self, exclude: list = []) -> "Storer":
+        filepaths = self._select_filepaths(exclude=exclude)
         data_list = []
         for filepath in filepaths:
             data_list.append(self.load(filepath=filepath))
         data = pd.concat(data_list, ignore_index=True, axis=0)
         return Storer(
             data=data,
-            category=self._category,
             providers=[self.provider],
             variables=self.variables,
             verbose=self.verbose,
         )
 
     @abstractmethod
-    def _select_filepaths(self) -> list[str]:
+    def _select_filepaths(self, exclude: list) -> list[str]:
         ...
 
     @abstractmethod
