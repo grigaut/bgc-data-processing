@@ -127,9 +127,9 @@ class GeoTracer:
     def mesh(
         self,
         key: str,
+        bins_size: float | tuple[float, float] = 0.5,
         group_aggr: str = "top",
         pivot_aggr: Callable = np.mean,
-        bins_size: float | tuple[float, float] = 0.5,
     ) -> tuple[np.ndarray]:
         """Return the X,Y and Z 2D array to use with plt.pcolormesh.
 
