@@ -103,6 +103,7 @@ class BaseLoader(ABC):
         data = pd.concat(data_list, ignore_index=True, axis=0)
         return Storer(
             data=data,
+            category=self.category,
             providers=[self.provider],
             variables=self.variables,
             verbose=self.verbose,
