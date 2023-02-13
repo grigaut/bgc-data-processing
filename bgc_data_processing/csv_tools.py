@@ -61,8 +61,11 @@ class CSVLoader(BaseLoader):
         pattern = self._files_pattern.format(years=years_str)
         return pattern
 
-    def _select_filepaths(self) -> list[str]:
+    def _select_filepaths(self, exclude: list) -> list[str]:
         """Selects filepaths to use when loading the data.
+
+        exclude: list
+            List of files to exclude when loading.
 
         Returns
         -------
@@ -71,7 +74,10 @@ class CSVLoader(BaseLoader):
         """
         regex = re.compile(self._pattern())
         files = filter(regex.match, os.listdir(self._dirin))
-        full_paths = [f"{self._dirin}/{filename}" for filename in files]
+        full_paths = []
+        for filename in files:
+            if filename not in exclude:
+                full_paths.append(f"{self._dirin}/{filename}")
         return sorted(full_paths)
 
     def _read(self, filepath: str) -> pd.DataFrame:
