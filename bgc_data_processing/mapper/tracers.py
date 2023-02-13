@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING, Callable
 
-import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from bgc_data_processing.base import Storer
+from cartopy import crs, feature
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
-    from matplotlib.axes import Axes
 
 
-class GeoTracer:
+class GeoMesher:
     """Base class for tracing on earthmaps.
 
     Parameters
@@ -127,35 +127,33 @@ class GeoTracer:
     def mesh(
         self,
         key: str,
-        bins_size: float | tuple[float, float] = 0.5,
-        group_aggr: str = "top",
-        pivot_aggr: Callable = np.mean,
+        bins_size: float | tuple[float, float],
+        group_aggr: str,
+        pivot_aggr: Callable,
     ) -> tuple[np.ndarray]:
-        """Return the X,Y and Z 2D array to use with plt.pcolormesh.
+        """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
         ----------
         key : str
-            Name of the variable to map.
-        group_aggr : str, optional
-            Name of the function to use to aggregate data when group by similar measuring point., by default "top"
-        pivot_aggr : Callable
-            Function to aggregate when pivotting data., by default np.mean
+            Name of the column with the variable to mesh.
         bins_size : float | tuple[float, float], optional
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree., by default 0.5
-
+            Unit is supposed to be degree
+        group_aggr : str, optional
+            Name of the function to use to aggregate data when group by similar measuring point.
+        pivot_aggr : Callable
+            Function to aggregate when pivotting data.
         Returns
         -------
         tuple[np.ndarray]
             Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
         """
-        var = self._variables[key].key
         lat = self._variables["LATITUDE"].key
         lon = self._variables["LONGITUDE"].key
         df = self._group(
-            var_key=var,
+            var_key=key,
             lat_key=lat,
             lon_key=lon,
             how=group_aggr,
@@ -178,11 +176,11 @@ class GeoTracer:
             cut_name="lon_cut",
         )
         # Bining
-        bins_concat = pd.concat([lat_cut, lon_cut, df[var]], axis=1)
+        bins_concat = pd.concat([lat_cut, lon_cut, df[key]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
         vals = bins_concat.pivot_table(
-            values=var,
+            values=key,
             index="lat_cut",
             columns="lon_cut",
             aggfunc=pivot_aggr,
@@ -194,38 +192,43 @@ class GeoTracer:
 
         return lons, lats, vals.values
 
-    def create_hexbin(
+    def plot(
         self,
-        ax: "Axes",
-        variable: str,
-        aggregation: str = "mean",
-        **kwargs,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str = "top",
+        pivot_aggr: Callable = np.mean,
     ) -> None:
-        """Generates the colormap for a given value.
+        """Plots the colormesh for the given variable.
 
         Parameters
         ----------
-        ax : Axes
-            Axes to plot on.
-        variable : str
-            Variable to base the mapping on.
-        aggregation :
-            Key name for the aggregation function to use.
-            The dictionnary listing the functions is defined as an attribute of BaseGeoTracer., by default "mean"
-        kwargs: dict
-            Addtitional arguments to pass to ax.scatter.
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str, optional
+            Name of the function to use to aggregate data when group by similar measuring point.
+            , by default "top"
+        pivot_aggr : Callable
+            Function to aggregate when pivotting data., by default np.mean
         """
-
-        data = self.get_data(variable)
-        aggr_data = self.aggr_func[aggregation](data["DATA"])
-        default_gridsize = int(np.power(aggr_data.shape[0], 1 / 3)) + 1
-        gridsize = kwargs.pop("gridsize", default_gridsize)
-        cbar = ax.hexbin(
-            x=data["LONGITUDE"],
-            y=data["LATITUDE"],
-            C=aggr_data,
-            transform=ccrs.PlateCarree(),
-            gridsize=gridsize,
-            **kwargs,
+        X1, Y1, Z1 = self.mesh(
+            key=self._variables[variable_name].key,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
         )
-        ax.get_figure().colorbar(cbar, label=f"{variable} - {aggregation}")
+        fig = plt.figure(figsize=[10, 10])
+        ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
+        fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
+        ax.gridlines()
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
+        cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
+        plt.colorbar(cbar)
+        plt.show()
+        plt.close()
