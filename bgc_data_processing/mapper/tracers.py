@@ -29,6 +29,7 @@ class GeoMesher:
         self,
         storer: "Storer",
     ) -> None:
+        self._storer = storer
         self._variables = storer._variables
         self._data = storer.data.sort_values(
             self._variables["DEPH"].key, ascending=False
@@ -222,6 +223,14 @@ class GeoMesher:
             pivot_aggr=pivot_aggr,
         )
         fig = plt.figure(figsize=[10, 10])
+        provs = ", ".join(self._storer.providers)
+        title = f"{variable_name} - {provs} ({self._storer.category})"
+        if isinstance(bins_size, tuple):
+            lat, lon = bins_size[0], bins_size[1]
+        else:
+            lat, lon = bins_size, bins_size
+        subtitle = f"{lat}° x {lon}° grid (lat x lon)"
+        fig.suptitle(f"{title}\n{subtitle}")
         ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
         fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
         ax.gridlines()
@@ -229,6 +238,9 @@ class GeoMesher:
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
         cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
-        plt.colorbar(cbar)
+        plt.colorbar(
+            cbar,
+            label=f"{variable_name} levels {self._variables[variable_name].unit}",
+        )
         plt.show()
         plt.close()
