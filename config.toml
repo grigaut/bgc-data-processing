@@ -3,53 +3,50 @@ LIST_DIR = "./lists"
     [LOADING.ARGO]
     PATH = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
     CATEGORY = "float"
+    EXCLUDE = [
+        "GL_PR_PF_6900798.nc",
+        "GL_PR_PF_5903592.nc",
+        "GL_PR_PF_5903887.nc",
+        "GL_PR_PF_6900796.nc",
+        "GL_PR_PF_6900797.nc",
+        "GL_PR_PF_6900799.nc",
+        "GL_PR_PF_6903551.nc",
+        "GL_PR_PF_6903567.nc",
+        "GL_PR_PF_6903574.nc",
+        "GL_PR_PF_6903575.nc",
+        "GL_PR_PF_6903578.nc",
+        "GL_PR_PF_6903579.nc"
+    ]
     [LOADING.CLIVAR]
     PATH = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.GLODAPv2]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.GLODAP_2019]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2019/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.GLODAP_2022]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2022/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.ICES]
     PATH = "/mnt/data02/gaerig/synthesis/ICES/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.IMR]
     PATH = "/mnt/data02/gaerig/synthesis/IMR/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
     [LOADING.NMDC]
     PATH = "/mnt/data02/gaerig/synthesis/NMDC/data"
     CATEGORY = "in_situ"
+    EXCLUDE = []
 
 [SAVING]
 FILES_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
 [MAPPING]
 BINS_SIZE = [0.5,1.5]
-    [MAPPING.EXCLUDE]
-    ARGO = [
-        "GL_PR_PF_1901347.nc",
-        "GL_PR_PF_3900515.nc",
-        "GL_PR_PF_3900516.nc",
-        "GL_PR_PF_3900521.nc",
-        "GL_PR_PF_3900522.nc",
-        "GL_PR_PF_3900523.nc",
-        "GL_PR_PF_3900524.nc",
-        "GL_PR_PF_5904923.nc",
-        "GL_PR_PF_5904924.nc",
-        "GL_PR_PF_5905022.nc",
-        "GL_PR_PF_5905167.nc",
-        "GL_PR_PF_5905199.nc",
-        "GL_PR_PF_5905996.nc",
-        "GL_PR_PF_7900563.nc",
-    ]
-    CLIVAR = []
-    GLODAPv2 = []
-    GLODAP_2019 = []
-    GLODAP_2022 = []
-    ICES = []
-    IMR = []
-    NMDC = []
