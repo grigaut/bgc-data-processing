@@ -285,6 +285,17 @@ class VariablesStorer:
         return {var.name: var for var in self._variables}
 
     @property
+    def mapper_by_key(self) -> dict[str, "Var"]:
+        """Mapper between variables keys and variables Var objects (for __getitem__ mostly).
+
+        Returns
+        -------
+        dict[str, Var]
+            Mapping between keys (str) and variables (Var)
+        """
+        return {var.key: var for var in self._variables}
+
+    @property
     def name_mapping(self) -> dict[str, str]:
         """Mapper between variables alias (name in dataset) and variables real names.
         Mostly used when renaming columns.
