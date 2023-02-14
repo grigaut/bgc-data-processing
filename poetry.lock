@@ -377,6 +377,18 @@ python-dateutil = ">=2.8.1"
 dev = ["flake8", "markdown", "twine", "wheel"]
 
 [[package]]
+name = "gitinfo"
+version = "1.2.0"
+description = "Quickly get information about a Github repository"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "gitinfo-1.2.0-py3-none-any.whl", hash = "sha256:aecf839aa9cd0ebb5e70a9e3feecb1e7f859d4caf0093602b3596f036fee7481"},
+    {file = "gitinfo-1.2.0.tar.gz", hash = "sha256:09aeaddbe037c4ac6523a974374efb6db272c4c600fb3d36b420a680f7dadcb6"},
+]
+
+[[package]]
 name = "griffe"
 version = "0.25.4"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
@@ -1585,4 +1597,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "dc860818c1622deaa9ff6be463227652fe4e872f533b1d8a40b0804bf7e0ca8a"
+content-hash = "a4a0db4942a714548f4bc6ff7693937ade8da87b3b1bef807f99794dcd389a1f"
