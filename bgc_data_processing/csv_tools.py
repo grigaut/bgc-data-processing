@@ -204,7 +204,9 @@ class CSVLoader(BaseLoader):
                 nan_values = df[var.key].isnull()
                 # removing these rows
                 df = df.loc[~(alpha_values & (~nan_values)), :]
-            df[var.key] = df[var.key].astype(var.type)
+                df[var.key] = df[var.key].astype(var.type)
+            else:
+                df[var.key] = df[var.key].astype(var.type).str.strip()
         return df
 
     def load(self, filepath: str) -> pd.DataFrame:
