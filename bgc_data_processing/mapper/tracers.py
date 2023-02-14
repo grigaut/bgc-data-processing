@@ -30,8 +30,7 @@ class GeoMesher(BasePlot):
         self,
         storer: "Storer",
     ) -> None:
-        self._storer = storer
-        self._variables = storer._variables
+        super().__init__(storer=storer)
         self._data = storer.data.sort_values(
             self._variables["DEPH"].key, ascending=False
         )
@@ -245,7 +244,3 @@ class GeoMesher(BasePlot):
         )
         plt.show()
         plt.close()
-
-
-class GeoProfile(BasePlot):
-    pass
