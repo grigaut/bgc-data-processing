@@ -1,7 +1,7 @@
 # pycache
 __pycache__
 # Tests scripts
-sandbox.py
+sandbox
 argo_profile_check.py
 # Data saving folders
 bgc_figs
