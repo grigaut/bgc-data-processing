@@ -29,7 +29,7 @@ mkdocstrings = {extras = ["python"], version = "^0.20.0"}
 black = "^22.12.0"
 flake8 = "^6.0.0"
 isort = "^5.11.4"
-gitinfo = "^1.2.0"
+python-git-info = "^0.8.2"
 
 [build-system]
 requires = ["poetry-core"]

@@ -377,18 +377,6 @@ python-dateutil = ">=2.8.1"
 dev = ["flake8", "markdown", "twine", "wheel"]
 
 [[package]]
-name = "gitinfo"
-version = "1.2.0"
-description = "Quickly get information about a Github repository"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "gitinfo-1.2.0-py3-none-any.whl", hash = "sha256:aecf839aa9cd0ebb5e70a9e3feecb1e7f859d4caf0093602b3596f036fee7481"},
-    {file = "gitinfo-1.2.0.tar.gz", hash = "sha256:09aeaddbe037c4ac6523a974374efb6db272c4c600fb3d36b420a680f7dadcb6"},
-]
-
-[[package]]
 name = "griffe"
 version = "0.25.4"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
@@ -1259,6 +1247,18 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-git-info"
+version = "0.8.2"
+description = "Get git information repository, directly from .git"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-git-info-0.8.2.tar.gz", hash = "sha256:8ea2efa3b62db47443e7264410fde8b0383a05a6025b48fcc5c3df7b51ecae5b"},
+    {file = "python_git_info-0.8.2-py3-none-any.whl", hash = "sha256:6417d2385d4dcbd411b4456b4edfcb97e911e0564e52f68524cef0977845ba35"},
+]
+
+[[package]]
 name = "pytz"
 version = "2022.7.1"
 description = "World timezone definitions, modern and historical"
@@ -1597,4 +1597,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a4a0db4942a714548f4bc6ff7693937ade8da87b3b1bef807f99794dcd389a1f"
+content-hash = "1f13c95db7961a976271d315c75da84e335721d44bfb85b36bcb28c7c03a48a8"
