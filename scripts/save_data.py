@@ -74,7 +74,7 @@ if __name__ == "__main__":
         # -------------------------------
         # LOADING DATA
         # -------------------------------
-        df = dset_loader()
+        df = dset_loader(exclude=CONFIG["LOADING"][data_src]["EXCLUDE"])
         if SAVE_INTERMEDIARY:
             # -------------------------------
             # SLICING DATA
