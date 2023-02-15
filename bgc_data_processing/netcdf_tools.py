@@ -98,7 +98,7 @@ class NetCDFLoader(BaseLoader):
         shapes0 = []
         shapes1 = []
         for var in self.variables.in_dset:
-            var_data = data_dict[var.key]
+            var_data = data_dict[var.label]
             shapes0.append(var_data.shape[0])
             if len(var_data.shape) == 2:
                 shapes1.append(var_data.shape[1])
@@ -151,11 +151,11 @@ class NetCDFLoader(BaseLoader):
             raise NetCDFLoadingError("Empty data for all variables to consider")
         # Get data shape from a non missing variable
         var_ref = [var for var in self.variables.in_dset if var not in missing_vars][0]
-        shape_ref = data_dict[var_ref.key].shape
+        shape_ref = data_dict[var_ref.label].shape
         for var in missing_vars:
             # Create empty frame with nans
-            data_dict[var.key] = np.empty(shape_ref)
-            data_dict[var.key].fill(np.nan)
+            data_dict[var.label] = np.empty(shape_ref)
+            data_dict[var.label].fill(np.nan)
         return data_dict
 
     def _reshape_data(self, data_dict: dict) -> dict:
@@ -175,12 +175,12 @@ class NetCDFLoader(BaseLoader):
         shape0, shape1 = self._get_shapes(data_dict)
         reshaped = {}
         for var in self.variables.in_dset:
-            data = data_dict[var.key]
+            data = data_dict[var.label]
             if len(data.shape) == 1:
                 # Reshape data to 2D
                 data = np.tile(data.reshape((shape0, 1)), (1, shape1))
             # Flatten 2D data
-            reshaped[var.key] = data.flatten()
+            reshaped[var.label] = data.flatten()
         return reshaped
 
     def _format(self, nc_data: nc.Dataset) -> pd.DataFrame:
@@ -206,7 +206,7 @@ class NetCDFLoader(BaseLoader):
                     values = nc_data.variables[alias][:]
                     # Convert masked_array to ndarray
                     values: np.ndarray = values.filled(np.nan)
-                    data_dict[var.key] = values
+                    data_dict[var.label] = values
                     break
             if not found:
                 missing_vars.append(var)
@@ -230,13 +230,13 @@ class NetCDFLoader(BaseLoader):
             Dataframe with date, year, month and day columns.
         """
         # Convert from timedeltas to datetime
-        timedeltas = df.pop(self.variables["DATE"].key)
+        timedeltas = df.pop(self.variables.labels["DATE"])
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
-        df[self.variables["DATE"].key] = dates
+        df[self.variables.labels["DATE"]] = dates
         # Add year, month and day columns
-        df[self.variables["YEAR"].key] = dates.dt.year
-        df[self.variables["MONTH"].key] = dates.dt.month
-        df[self.variables["DAY"].key] = dates.dt.day
+        df[self.variables.labels["YEAR"]] = dates.dt.year
+        df[self.variables.labels["MONTH"]] = dates.dt.month
+        df[self.variables.labels["DAY"]] = dates.dt.day
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -253,7 +253,7 @@ class NetCDFLoader(BaseLoader):
             Dataframe with provider column properly filled.
         """
         if "PROVIDER" in self._variables.keys():
-            df[self._variables["PROVIDER"].key] = self.provider
+            df[self._variables.labels["PROVIDER"]] = self.provider
         return df
 
     def _set_expocode(self, df: pd.DataFrame, file_id: str) -> pd.DataFrame:
@@ -272,7 +272,7 @@ class NetCDFLoader(BaseLoader):
             Dataframe with expocode column properly filled.
         """
         if "EXPOCODE" in self._variables.keys():
-            df[self._variables["EXPOCODE"].key] = file_id
+            df[self._variables.labels["EXPOCODE"]] = file_id
         return df
 
     def _add_empty_cols(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -289,8 +289,8 @@ class NetCDFLoader(BaseLoader):
             Dataframe with all wished columns (one for every variable in self._variable).
         """
         for var in self._variables:
-            if var.key not in df.columns:
-                df[var.key] = np.nan
+            if var.label not in df.columns:
+                df[var.label] = np.nan
         return df
 
     def _convert_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -307,7 +307,7 @@ class NetCDFLoader(BaseLoader):
             Dataframe with wished types.
         """
         for var in self._variables:
-            df[var.key] = df[var.key].astype(var.type)
+            df[var.label] = df[var.label].astype(var.type)
         return df
 
     def load(self, filepath: str) -> pd.DataFrame:

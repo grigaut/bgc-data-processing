@@ -228,7 +228,7 @@ class BaseLoader(ABC):
             return df
         if min is None and max is None:
             return df
-        to_compare = df[self._variables[var_name].key]
+        to_compare = df[self._variables.labels[var_name]]
         if min is None:
             after_date_min = to_compare <= max
             return df.loc[after_date_min, :].copy()
@@ -277,8 +277,8 @@ class BaseLoader(ABC):
             Corrected Dataframe.
         """
         # Modify type :
-        for key, correction_func in self._variables.corrections.items():
-            to_correct[key] = to_correct[key].apply(correction_func)
+        for label, correction_func in self._variables.corrections.items():
+            to_correct[label] = to_correct[label].apply(correction_func)
         return to_correct
 
 

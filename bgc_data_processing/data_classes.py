@@ -138,7 +138,7 @@ class Storer:
         # Parameters
         name_format = self.variables.name_save_format
         value_format = self.variables.value_save_format
-        df = self.data.loc[:, self.variables.save_keys]
+        df = self.data.loc[:, self.variables.save_labels]
         # Get unit rows' values
         units = [self.variables.unit_mapping[col] for col in df.columns]
         dirout = os.path.dirname(filepath)
@@ -175,7 +175,7 @@ class Storer:
         # Params
         start_date = drng["start_date"]
         end_date = drng["end_date"]
-        dates_col = self._data[self._variables["DATE"].key]
+        dates_col = self._data[self._variables.labels["DATE"]]
         # Verbose
         if self._verbose > 1:
             print("\tSlicing data for date range {} {}".format(start_date, end_date))
@@ -209,7 +209,7 @@ class Storer:
         if self._verbose > 1:
             print("\tSlicing data for providers {}".format(", ".join(providers)))
         # Params
-        providers_col = self._data[self._variables["PROVIDER"].key]
+        providers_col = self._data[self._variables.labels["PROVIDER"]]
         # Slice
         is_in_list = providers_col.isin(providers)
         slice_index = providers_col.loc[is_in_list].index.values.tolist()
@@ -500,16 +500,16 @@ class Reader:
         day_in_vars = self._variables.has_name("DAY")
         if not (year_in_vars and month_in_vars and day_in_vars):
             return None, None
-        year_key = self._variables["YEAR"].key
-        month_key = self._variables["MONTH"].key
-        day_key = self._variables["DAY"].key
+        year_key = self._variables.labels["YEAR"]
+        month_key = self._variables.labels["MONTH"]
+        day_key = self._variables.labels["DAY"]
         year_in = year_key in raw_df.columns
         month_in = month_key in raw_df.columns
         day_in = day_key in raw_df.columns
         if year_in and month_in and day_in:
             var = Var("DATE", "[]", "datetime64[ns]", None, None)
             self._variables.add_var(var)
-            return pd.to_datetime(raw_df[[year_key, month_key, day_key]]), var.key
+            return pd.to_datetime(raw_df[[year_key, month_key, day_key]]), var.label
         else:
             return None, None
 
