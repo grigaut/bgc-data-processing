@@ -41,6 +41,8 @@ class Var:
     _has_correction: bool = False
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
+    _flag_alias: str = None
+    _correct_flag: int = None
 
     def __init__(
         self,
@@ -85,6 +87,14 @@ class Var:
             label.
         """
         return self.name
+
+    @property
+    def flag_alias(self) -> str:
+        return self._flag_alias
+
+    @property
+    def correct_flag(self) -> str:
+        return self._correct_flag
 
     @property
     def here(self) -> bool:
@@ -200,6 +210,11 @@ class Var:
             self
         """
         self._remove_if_nan = True
+        return self
+
+    def with_flag(self, flag_alias: str, correct_flag: list) -> Self:
+        self._flag_alias = flag_alias
+        self._correct_flag = correct_flag
         return self
 
 
@@ -329,6 +344,14 @@ class VariablesStorer:
         for var in self._variables:
             mapping = mapping | {alias: var.label for alias in var.alias}
         return mapping
+
+    @property
+    def flag_renaming(self) -> dict[str, str]:
+        return {
+            var.flag_alias: var.label
+            for var in self._variables
+            if var.flag_alias is not None
+        }
 
     @property
     def unit_mapping(self) -> dict[str, str]:
