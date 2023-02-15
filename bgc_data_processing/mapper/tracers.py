@@ -33,7 +33,7 @@ class GeoMesher(BasePlot):
         self._storer = storer
         self._variables = storer._variables
         self._data = storer.data.sort_values(
-            self._variables["DEPH"].key, ascending=False
+            self._variables.labels["DEPH"], ascending=False
         )
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
@@ -61,7 +61,7 @@ class GeoMesher(BasePlot):
             "LATITUDE",
         ]:
             if var_name in variables.keys():
-                columns.append(variables[var_name].key)
+                columns.append(variables.labels[var_name])
         return columns
 
     def _group(
@@ -128,7 +128,7 @@ class GeoMesher(BasePlot):
 
     def mesh(
         self,
-        key: str,
+        label: str,
         bins_size: float | tuple[float, float],
         group_aggr: str,
         pivot_aggr: Callable,
@@ -137,7 +137,7 @@ class GeoMesher(BasePlot):
 
         Parameters
         ----------
-        key : str
+        label : str
             Name of the column with the variable to mesh.
         bins_size : float | tuple[float, float], optional
             Bins size, if tuple, first component if for latitude, second is for longitude.
@@ -152,10 +152,10 @@ class GeoMesher(BasePlot):
         tuple[np.ndarray]
             Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
         """
-        lat = self._variables["LATITUDE"].key
-        lon = self._variables["LONGITUDE"].key
+        lat = self._variables.labels["LATITUDE"]
+        lon = self._variables.labels["LONGITUDE"]
         df = self._group(
-            var_key=key,
+            var_key=label,
             lat_key=lat,
             lon_key=lon,
             how=group_aggr,
@@ -178,11 +178,11 @@ class GeoMesher(BasePlot):
             cut_name="lon_cut",
         )
         # Bining
-        bins_concat = pd.concat([lat_cut, lon_cut, df[key]], axis=1)
+        bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
         vals = bins_concat.pivot_table(
-            values=key,
+            values=label,
             index="lat_cut",
             columns="lon_cut",
             aggfunc=pivot_aggr,
@@ -218,7 +218,7 @@ class GeoMesher(BasePlot):
             Function to aggregate when pivotting data., by default np.mean
         """
         X1, Y1, Z1 = self.mesh(
-            key=self._variables[variable_name].key,
+            label=self._variables.labels[variable_name],
             bins_size=bins_size,
             group_aggr=group_aggr,
             pivot_aggr=pivot_aggr,

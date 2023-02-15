@@ -147,25 +147,25 @@ class CSVLoader(BaseLoader):
         slice = df.drop(columns_drop, axis=1)
         # Rename columns using pre-determined alias
         slice.rename(columns=names_mapping, inplace=True)
-        slice[self._variables["PROVIDER"].key] = self._provider
-        if self._variables["DATE"].key in slice.columns:
+        slice[self._variables.labels["PROVIDER"]] = self._provider
+        if self._variables.labels["DATE"] in slice.columns:
             # Convert Date column to datetime (if existing)
-            raw_date_col = slice.pop(self._variables["DATE"].key).astype(str)
+            raw_date_col = slice.pop(self._variables.labels["DATE"]).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
-            slice.insert(0, self._variables["DAY"].key, dates.dt.day)
-            slice.insert(0, self._variables["MONTH"].key, dates.dt.month)
-            slice.insert(0, self._variables["YEAR"].key, dates.dt.year)
+            slice.insert(0, self._variables.labels["DAY"], dates.dt.day)
+            slice.insert(0, self._variables.labels["MONTH"], dates.dt.month)
+            slice.insert(0, self._variables.labels["YEAR"], dates.dt.year)
         else:
             dates = pd.to_datetime(
                 slice[
                     [
-                        self._variables["YEAR"].key,
-                        self._variables["MONTH"].key,
-                        self._variables["DAY"].key,
+                        self._variables.labels["YEAR"],
+                        self._variables.labels["MONTH"],
+                        self._variables.labels["DAY"],
                     ]
                 ]
             )
-        slice.loc[:, self._variables["DATE"].key] = dates
+        slice.loc[:, self._variables.labels["DATE"]] = dates
         # Check if columns are missing => fill them with np.nan values
         missing_cols = [col for col in units_mapping.keys() if col not in slice.columns]
         if missing_cols:
@@ -199,12 +199,12 @@ class CSVLoader(BaseLoader):
         for var in self._variables:
             if var.type is not str:
                 # if there are letters in the values
-                alpha_values = df[var.key].astype(str).str.isalpha()
+                alpha_values = df[var.label].astype(str).str.isalpha()
                 # if the value is nan (to keep the "nan" values flagged at previous line)
-                nan_values = df[var.key].isnull()
+                nan_values = df[var.label].isnull()
                 # removing these rows
                 df = df.loc[~(alpha_values & (~nan_values)), :]
-            df[var.key] = df[var.key].astype(var.type)
+            df[var.label] = df[var.label].astype(var.type)
         return df
 
     def load(self, filepath: str) -> pd.DataFrame:

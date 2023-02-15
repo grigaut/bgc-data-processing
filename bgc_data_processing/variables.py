@@ -1,5 +1,5 @@
 import copy
-from typing import Any, Callable, Iterator, Self
+from typing import Callable, Iterator, Self
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -76,13 +76,13 @@ class Var:
             return False
 
     @property
-    def key(self) -> str:
-        """Returns the key to use to find the variable data in a dataframe.
+    def label(self) -> str:
+        """Returns the label to use to find the variable data in a dataframe.
 
         Returns
         -------
         str
-            key.
+            label.
         """
         return self.name
 
@@ -271,6 +271,8 @@ class VariablesStorer:
         var : Var
             Variable to add
         """
+        if var.name in self.keys():
+            raise ValueError("A variable already exists with his name")
         self._variables.append(var)
 
     def has_name(self, var_name: str) -> bool:
@@ -299,6 +301,10 @@ class VariablesStorer:
         return self.mapper_by_name.keys()
 
     @property
+    def labels(self) -> dict[str, str]:
+        return {var.name: var.label for var in self._variables}
+
+    @property
     def mapper_by_name(self) -> dict[str, "Var"]:
         """Mapper between variables names and variables Var objects (for __getitem__ mostly).
 
@@ -308,17 +314,6 @@ class VariablesStorer:
             Mapping between names (str) and variables (Var)
         """
         return {var.name: var for var in self._variables}
-
-    @property
-    def mapper_by_key(self) -> dict[str, "Var"]:
-        """Mapper between variables keys and variables Var objects (for __getitem__ mostly).
-
-        Returns
-        -------
-        dict[str, Var]
-            Mapping between keys (str) and variables (Var)
-        """
-        return {var.key: var for var in self._variables}
 
     @property
     def name_mapping(self) -> dict[str, str]:
@@ -332,20 +327,8 @@ class VariablesStorer:
         """
         mapping = {}
         for var in self._variables:
-            mapping = mapping | {alias: var.key for alias in var.alias}
+            mapping = mapping | {alias: var.label for alias in var.alias}
         return mapping
-
-    @property
-    def type_mapping(self) -> dict[str, Any]:
-        """Mapper between variables names and variables python types.
-        Mostly used when converting types of columns.
-
-        Returns
-        -------
-        dict[str, Any]
-            Mapping between names (str) and types (can be int, str, 'datetime64[ns]' ...).
-        """
-        return {var.name: var.type for var in self._variables}
 
     @property
     def unit_mapping(self) -> dict[str, str]:
@@ -360,21 +343,7 @@ class VariablesStorer:
         return {var.name: var.unit for var in self._variables}
 
     @property
-    def load_sort(self) -> list[str | tuple[str]]:
-        """Sorting order to use for loaded data.
-
-        Returns
-        -------
-        list[str | tuple[str]]
-            List of columns keys to pass as df[self.load_sort] to sort data.
-        """
-        tmp = {
-            var.load_nb: var.key for var in self._variables if var.load_nb is not None
-        }
-        return [tmp[key] for key in sorted(tmp.keys())]
-
-    @property
-    def _save_vars(self) -> list[str | tuple[str]]:
+    def _save_vars(self) -> dict[int, Var]:
         """Sorting order to use when saving data.
 
         Returns
@@ -385,7 +354,7 @@ class VariablesStorer:
         return {var.save_nb: var for var in self._variables if var.save_nb is not None}
 
     @property
-    def save_keys(self) -> list[str | tuple[str]]:
+    def save_labels(self) -> list[str | tuple[str]]:
         """Sorting order to use when saving data.
 
         Returns
@@ -393,7 +362,7 @@ class VariablesStorer:
         list[str | tuple[str]]
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
-        return [self._save_vars[key].key for key in sorted(self._save_vars.keys())]
+        return [self._save_vars[key].label for key in sorted(self._save_vars.keys())]
 
     @property
     def name_save_format(self) -> str:
@@ -411,7 +380,7 @@ class VariablesStorer:
         >>> storer = VariablesStorer(var_year, var_provider)
         >>> print(storer.name_save_format)
         "%-4s %-15s"
-        >>> storer.name_save_format % tuple(storer.save_keys)
+        >>> storer.name_save_format % tuple(storer.save_labels)
         "YEAR PROVIDER "
         """
 
@@ -449,17 +418,6 @@ class VariablesStorer:
         return [var for var in self._variables if var.exist_in_dset]
 
     @property
-    def not_in_dset(self) -> list[Var]:
-        """List of Var object supposedly not present in the dataset.
-
-        Returns
-        -------
-        list[Var]
-            Var objects not in the dataset.
-        """
-        return [var for var in self._variables if not var.exist_in_dset]
-
-    @property
     def corrections(self) -> dict[str, Callable]:
         """Mapping between variables keys and correcting functions
 
@@ -469,7 +427,7 @@ class VariablesStorer:
             Mapping.
         """
         return {
-            var.key: var._correction for var in self._variables if var._has_correction
+            var.label: var._correction for var in self._variables if var._has_correction
         }
 
     @property
@@ -481,7 +439,7 @@ class VariablesStorer:
         list[str]
             List of keys to use.
         """
-        return [var.key for var in self._variables if var.remove_if_all_nan]
+        return [var.label for var in self._variables if var.remove_if_all_nan]
 
     @property
     def to_remove_if_any_nan(self) -> list[str]:
@@ -492,4 +450,4 @@ class VariablesStorer:
         list[str]
             List of keys to use.
         """
-        return [var.key for var in self._variables if var.remove_if_nan]
+        return [var.label for var in self._variables if var.remove_if_nan]
