@@ -225,7 +225,7 @@ class VariablesStorer:
                 "To set multiple alias for the same variable, use Var.here_as([alias1, alias2])"
             )
 
-        self._variables = args
+        self._variables = list(args)
 
     def __getitem__(self, __k: str) -> Var:
         return self.mapper_by_name[__k]
@@ -262,6 +262,31 @@ class VariablesStorer:
                 return np.all(repr_eq)
         else:
             return False
+
+    def add_var(self, var: Var) -> None:
+        """Adds a new variable to self._variables.
+
+        Parameters
+        ----------
+        var : Var
+            Variable to add
+        """
+        self._variables.append(var)
+
+    def has_name(self, var_name: str) -> bool:
+        """Checks if a variable name is the nam eof one of the variables.
+
+        Parameters
+        ----------
+        var_name : str
+            Name to test.
+
+        Returns
+        -------
+        bool
+            True if the name is in self.keys(), False otherwise.
+        """
+        return var_name in self.keys()
 
     def keys(self) -> dict_keys:
         """Keys to use when calling self[key].
