@@ -139,8 +139,6 @@ class CSVLoader(BaseLoader):
         """
         names_mapping = self._variables.name_mapping
         units_mapping = self._variables.unit_mapping
-        # Lower columns names for standardization purpose
-        df.columns = df.columns.str.lower()
         # Drop useless columns
         columns_keep = self._find_columns_to_keep(df)
         columns_drop = [col for col in df.columns if col not in columns_keep]
