@@ -2,12 +2,13 @@ import os
 import re
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.variables import Var, VariablesStorer
 
 
 class CSVLoader(BaseLoader):
@@ -123,6 +124,33 @@ class CSVLoader(BaseLoader):
                     break
         return columns_to_keep
 
+    def _find_flag_columns(self, df: pd.DataFrame) -> list["Var"]:
+        """Selects columns to keep in the dataframe.
+
+        Notes
+        -----
+        This methods handles the fact that variables can have multiple aliases
+        (if the column name for the variable is different in different files).
+        For multi-aliases variables, this methods only returns the first specified alias
+        appearing in the data file.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Dataframe to select columns from
+
+        Returns
+        -------
+        list
+            Columns to keep when formatting.
+        """
+        columns_to_keep = []
+        for var in self._variables.in_dset:
+            if var.flag_alias in df.columns:
+                columns_to_keep.append(var)
+                break
+        return columns_to_keep
+
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
         """Formatting function for csv files, modified to drop useless columns,
         rename columns and add missing columns (variables in self._variables but not in csv file).
@@ -141,10 +169,21 @@ class CSVLoader(BaseLoader):
         units_mapping = self._variables.unit_mapping
         # Drop useless columns
         columns_keep = self._find_columns_to_keep(df)
-        columns_drop = [col for col in df.columns if col not in columns_keep]
-        slice = df.drop(columns_drop, axis=1)
+        slice = df.filter(columns_keep, axis=1)
         # Rename columns using pre-determined alias
         slice.rename(columns=names_mapping, inplace=True)
+        # Check flags :
+        flags_vars = self._find_flag_columns(df)
+        slice_flags = df.filter([v.flag_alias for v in flags_vars], axis=1)
+        slice_flags.rename(
+            columns={v.flag_alias: v.label for v in flags_vars}, inplace=True
+        )
+        for var in flags_vars:
+            slice[var.label].where(
+                slice_flags[var.label].isin(var.correct_flag),
+                np.nan,
+                inplace=True,
+            )
         slice[self._variables.labels["PROVIDER"]] = self._provider
         if self._variables.labels["DATE"] in slice.columns:
             # Convert Date column to datetime (if existing)
