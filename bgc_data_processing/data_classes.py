@@ -1,10 +1,9 @@
 import os
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pandas as pd
 
-if TYPE_CHECKING:
-    from bgc_data_processing.variables import VariablesStorer
+from bgc_data_processing.variables import Var, VariablesStorer
 
 
 class Storer:
@@ -219,6 +218,41 @@ class Storer:
             slice_index=slice_index,
         )
 
+    @classmethod
+    def from_file(
+        cls,
+        filepath: str | list,
+        providers: str | list = "PROVIDER",
+        category: str = "in_situ",
+        unit_row_index: int = 1,
+        delim_whitespace: bool = True,
+        verbose: int = 1,
+    ) -> "Storer":
+        if isinstance(filepath, list):
+            storers = []
+            for path in filepath:
+                reader = Reader(
+                    filepath=path,
+                    providers=providers,
+                    category=category,
+                    unit_row_index=unit_row_index,
+                    delim_whitespace=delim_whitespace,
+                    verbose=verbose,
+                )
+
+                storers.append(reader.get_storer())
+            return sum(storers)
+        if isinstance(filepath, str):
+            reader = Reader(
+                filepath=filepath,
+                providers=providers,
+                category=category,
+                unit_row_index=unit_row_index,
+                delim_whitespace=delim_whitespace,
+                verbose=verbose,
+            )
+            return reader.get_storer()
+
 
 class Slice(Storer):
     """Slice storing object, instance of Storer to inherit of the saving method."""
@@ -311,3 +345,205 @@ class Slice(Storer):
         >>> slice = Slicer.slice_on_dates(drng)
         """
         return storer.slice_on_dates(drng)
+
+
+class Reader:
+    """Reading routine to parse csv files.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to the file to read.
+    providers : str | list, optional
+        Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+        , by default "PROVIDER"
+    category : str, optional
+        Category of the loaded file., by default "in_situ"
+    unit_row_index : int, optional
+        Index of the row with the units, None if there's no unit row., by default 1
+    delim_whitespace : bool, optional
+        Whether to use whitespace as delimiters., by default True
+    verbose : int, optional
+        Controls the verbose, by default 1
+    """
+
+    def __init__(
+        self,
+        filepath: str,
+        providers: str | list = "PROVIDER",
+        category: str = "in_situ",
+        unit_row_index: int = 1,
+        delim_whitespace: bool = True,
+        verbose: int = 1,
+    ):
+        self._verbose = verbose
+        raw_df, unit_row = self.read(filepath, unit_row_index, delim_whitespace)
+        self._providers = self.get_providers(raw_df, providers)
+        self._variables = self.get_variables(raw_df, unit_row)
+        self._category = category
+        self._data = self.add_missing_columns(raw_df)
+
+    def read(
+        self, filepath: str, unit_row_index: int, delim_whitespace: bool
+    ) -> tuple[pd.DataFrame, pd.Series]:
+        """Method to read the filepath and extract the unit row
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        unit_row_index : int
+            Index of the row with the units, None if there's no unit row.
+        delim_whitespace : bool
+            Whether to use whitespace as delimiters.
+
+        Returns
+        -------
+        tuple[pd.DataFrame, pd.Series]
+            Dataframe, unit row
+        """
+
+        if unit_row_index is None:
+            skiprows = None
+            unit_row = None
+        else:
+            skiprows = [unit_row_index]
+            unit_row = pd.read_csv(
+                filepath,
+                delim_whitespace=delim_whitespace,
+                skiprows=lambda x: x not in skiprows + [0],
+            )
+        if self._verbose > 0:
+            print(f"Reading data from {filepath}")
+        raw_df = pd.read_csv(
+            filepath, delim_whitespace=delim_whitespace, skiprows=skiprows
+        )
+        return raw_df, unit_row
+
+    def get_providers(self, raw_df: pd.DataFrame, providers: str | list) -> list:
+        """Gets providers for the "provider" argument and the dataframe.
+
+        Parameters
+        ----------
+        raw_df : pd.DataFrame
+            Loaded dataframe.
+        providers : str | list
+            Provider instanciating argument.
+
+        Returns
+        -------
+        list
+            The correct provider value to use as attribute.
+
+        Raises
+        ------
+        InterruptedError
+            If the provider argument is not a string or a list.
+        """
+        if isinstance(providers, str):
+            return list(raw_df[providers].unique())
+        elif isinstance(providers, list):
+            return providers
+        else:
+            raise InterruptedError("Could no parse providers from argument")
+
+    def get_variables(
+        self,
+        raw_df: pd.DataFrame,
+        unit_row: pd.Series,
+    ) -> "VariablesStorer":
+        """Parses variables from the csv data.
+
+        Parameters
+        ----------
+        raw_df : pd.DataFrame
+            Dataframe to parse.
+        unit_row : pd.Series
+            Unit row to use as reference for variables' units.
+
+        Returns
+        -------
+        VariablesStorer
+            Collection of variables.
+        """
+        variables = []
+        for i, column in enumerate(raw_df.columns):
+            if unit_row is None:
+                unit = "[]"
+            else:
+                unit = unit_row[column].values[0]
+            var = Var(
+                name=column.upper(),
+                unit=unit,
+                var_type=raw_df.dtypes[column].name,
+                load_nb=i,
+                save_nb=i,
+            )
+            variables.append(var)
+        return VariablesStorer(*variables)
+
+    def make_date_column(self, raw_df: pd.DataFrame) -> tuple[pd.Series, str]:
+        """Make date column (datetime) from year, month, day columns if existing.
+
+        Parameters
+        ----------
+        raw_df : pd.DataFrame
+            Dataframe
+
+        Returns
+        -------
+        tuple[pd.Series, str]
+            Column to inser, column name to use.
+        """
+        year_in_vars = self._variables.has_name("YEAR")
+        month_in_vars = self._variables.has_name("MONTH")
+        day_in_vars = self._variables.has_name("DAY")
+        if not (year_in_vars and month_in_vars and day_in_vars):
+            return None, None
+        year_key = self._variables["YEAR"].key
+        month_key = self._variables["MONTH"].key
+        day_key = self._variables["DAY"].key
+        year_in = year_key in raw_df.columns
+        month_in = month_key in raw_df.columns
+        day_in = day_key in raw_df.columns
+        if year_in and month_in and day_in:
+            var = Var("DATE", "[]", "datetime64[ns]", None, None)
+            self._variables.add_var(var)
+            return pd.to_datetime(raw_df[[year_key, month_key, day_key]]), var.key
+        else:
+            return None, None
+
+    def add_missing_columns(self, raw_df: pd.DataFrame) -> pd.DataFrame:
+        """Adds missing columns to the dataframe
+
+        Parameters
+        ----------
+        raw_df : pd.DataFrame
+            Dataframe to modify
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with new columns
+        """
+        if not self._variables.has_name("DATE"):
+            missing_col, name = self.make_date_column(raw_df)
+            if (missing_col is not None) and (name is not None):
+                raw_df.insert(0, name, missing_col)
+        return raw_df
+
+    def get_storer(self) -> "Storer":
+        """Returns the Storer storing the data loaded
+
+        Returns
+        -------
+        Storer
+            Contains the data from the csv.
+        """
+        return Storer(
+            data=self._data,
+            category=self._category,
+            providers=self._providers,
+            variables=self._variables,
+            verbose=self._verbose,
+        )
