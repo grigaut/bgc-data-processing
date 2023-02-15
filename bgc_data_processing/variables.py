@@ -124,7 +124,7 @@ class Var:
     def here(self, value: bool):
         self.exist_in_dset = value
 
-    def here_as(self, *args: str) -> "Var":
+    def in_file_as(self, *args: str) -> "Var":
         """Returns a Var object with same properties and the property 'alias' set up as 'name'
         which is the name of the variable in the file.
 
@@ -143,7 +143,7 @@ class Var:
         var.here = True
         return var
 
-    def not_here(self) -> "Var":
+    def not_in_file(self) -> "Var":
         """Returns a Var object with same properties and the property 'alias' set up as None
         as the variable does not exist in the file.
 
@@ -222,7 +222,7 @@ class VariablesStorer:
     def __init__(self, *args: Var) -> None:
         if len(args) != len(set(var.name for var in args)):
             raise ValueError(
-                "To set multiple alias for the same variable, use Var.here_as([alias1, alias2])"
+                "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
             )
 
         self._variables = list(args)
