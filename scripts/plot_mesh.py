@@ -6,7 +6,6 @@ from bgc_data_processing.base import Storer
 from bgc_data_processing.mapper.tracers import GeoMesher
 
 BIN_SIZE = tuple(CONFIG["MAPPING"]["BINS_SIZE"])
-EXCLUDE = CONFIG["MAPPING"]["EXCLUDE"]
 
 
 def get_args(sys_argv: list) -> tuple[list[str], list[str], int]:
@@ -34,10 +33,7 @@ if __name__ == "__main__":
     for data_src in LIST_SRC:
         if VERBOSE > 0:
             print("Loading data : {}".format(data_src))
-        if data_src in EXCLUDE.keys():
-            exclude = EXCLUDE[data_src]
-        else:
-            exclude = []
+        exclude = CONFIG["LOADING"][data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         dset_loader.set_date_boundaries(
             date_min=dt.datetime(YEAR_MIN, 1, 1),
