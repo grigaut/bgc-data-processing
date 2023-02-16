@@ -253,8 +253,8 @@ class Storer:
 
         Raises
         ------
-        ValueError
-            _description_
+        TypeError
+            If filepath argument is not an instance of string or list.
         """
         if isinstance(filepath, list):
             storers = []
@@ -281,7 +281,7 @@ class Storer:
             )
             return reader.get_storer()
         else:
-            raise ValueError(f"Can't read filepaths from {filepath}")
+            raise TypeError(f"Can't read filepaths from {filepath}")
 
 
 class Slice(Storer):
