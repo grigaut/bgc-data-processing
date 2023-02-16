@@ -76,7 +76,7 @@ class Var:
             return False
 
     @property
-    def alias(self) -> list:
+    def aliases(self) -> list:
         return self._aliases
 
     @property
@@ -89,14 +89,6 @@ class Var:
             label.
         """
         return self.name
-
-    @property
-    def flag_alias(self) -> list:
-        return self._flag_alias
-
-    @property
-    def correct_flag(self) -> list:
-        return self._correct_flag
 
     @property
     def here(self) -> bool:
