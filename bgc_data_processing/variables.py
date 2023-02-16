@@ -255,11 +255,6 @@ class VariablesStorer:
             raise ValueError(
                 "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
             )
-        for arg in args:
-            if arg.here is None:
-                raise ValueError(
-                    f"Var {arg} has not been instanciated using Var.in_file_as or Var.not_in_file"
-                )
 
         self._elements = list(args)
 
