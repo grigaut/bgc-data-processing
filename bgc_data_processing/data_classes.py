@@ -219,7 +219,7 @@ class Storer:
         )
 
     @classmethod
-    def from_file(
+    def from_files(
         cls,
         filepath: str | list,
         providers: str | list = "PROVIDER",
