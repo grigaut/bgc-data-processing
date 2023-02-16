@@ -96,7 +96,7 @@ class CSVLoader(BaseLoader):
         """
         return pd.read_csv(filepath, **self._read_params)
 
-    def _filter_with_flags(self, df: pd.DataFrame, var: "Var") -> pd.Series:
+    def _filter_flags(self, df: pd.DataFrame, var: "Var") -> pd.Series:
         """Filters data selecting only some flag values.
 
         Parameters
@@ -140,7 +140,7 @@ class CSVLoader(BaseLoader):
         # Check flags :
         data = {}
         for var in self._variables:
-            values = self._filter_with_flags(df=df, var=var)
+            values = self._filter_flags(df=df, var=var)
             if values is not None:
                 data[var.label] = values
         clean_df = pd.DataFrame(data)
