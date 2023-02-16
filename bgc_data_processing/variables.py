@@ -77,6 +77,13 @@ class Var:
 
     @property
     def aliases(self) -> list[tuple[str, str, list]]:
+        """Getter for aliases
+
+        Returns
+        -------
+        list[tuple[str, str, list]]
+            alias, flag column alias (None if not), values to keep from flag column (None if not)
+        """
         return self._aliases
 
     @property
@@ -127,10 +134,6 @@ class Var:
             True if rows must be removed when this variable is nan.
         """
         return self._remove_if_nan
-
-    @property
-    def alias_to_label(self) -> dict[str, str]:
-        return {alias[0]: self.label for alias in self._aliases}
 
     def in_file_as(self, *args: str) -> "Var":
         """Returns a Var object with same properties and the property 'alias' set up as 'name'
@@ -335,6 +338,13 @@ class VariablesStorer:
 
     @property
     def labels(self) -> dict[str, str]:
+        """Returns a dicitonnary mapping variable names to variables labels
+
+        Returns
+        -------
+        dict[str, str]
+            name : label
+        """
         return {var.name: var.label for var in self._elements}
 
     @property
@@ -347,14 +357,6 @@ class VariablesStorer:
             Mapping between names (str) and variables (Var)
         """
         return {var.name: var for var in self._elements}
-
-    @property
-    def flag_renaming(self) -> dict[str, str]:
-        return {
-            var.flag_alias: var.label
-            for var in self._elements
-            if var.flag_alias is not None
-        }
 
     @property
     def unit_mapping(self) -> dict[str, str]:
@@ -409,7 +411,6 @@ class VariablesStorer:
         >>> storer.name_save_format % tuple(storer.save_labels)
         "YEAR PROVIDER "
         """
-
         format_string = " ".join(
             [self._save_vars[key].name_format for key in sorted(self._save_vars.keys())]
         )
