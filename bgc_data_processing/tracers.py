@@ -3,9 +3,10 @@ from typing import TYPE_CHECKING, Callable
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from cartopy import crs, feature
+
 from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Storer
-from cartopy import crs, feature
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
@@ -244,3 +245,46 @@ class GeoMesher(BasePlot):
         )
         plt.show()
         plt.close()
+
+    @classmethod
+    def from_files(
+        cls,
+        filepath: str | list,
+        providers: str | list = "PROVIDER",
+        category: str = "in_situ",
+        unit_row_index: int = 1,
+        delim_whitespace: bool = True,
+        verbose: int = 1,
+    ) -> "GeoMesher":
+        """Builds GeoMesher reading data from csv or txt files.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        providers : str | list, optional
+            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+            , by default "PROVIDER"
+        category : str, optional
+            Category of the loaded file., by default "in_situ"
+        unit_row_index : int, optional
+            Index of the row with the units, None if there's no unit row., by default 1
+        delim_whitespace : bool, optional
+            Whether to use whitespace as delimiters., by default True
+        verbose : int, optional
+            Controls the verbose, by default 1
+
+        Returns
+        -------
+        GeoMesher
+            _description_
+        """
+        storer = Storer.from_files(
+            filepath=filepath,
+            providers=providers,
+            category=category,
+            unit_row_index=unit_row_index,
+            delim_whitespace=delim_whitespace,
+            verbose=verbose,
+        )
+        return cls(storer=storer)
