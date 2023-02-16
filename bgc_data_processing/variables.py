@@ -349,21 +349,6 @@ class VariablesStorer:
         return {var.name: var for var in self._variables}
 
     @property
-    def name_mapping(self) -> dict[str, str]:
-        """Mapper between variables alias (name in dataset) and variables real names.
-        Mostly used when renaming columns.
-
-        Returns
-        -------
-        dict[str, str]
-            Mapping between alias (str) and names (str).
-        """
-        mapping = {}
-        for var in self._variables:
-            mapping |= var.alias_to_label
-        return mapping
-
-    @property
     def flag_renaming(self) -> dict[str, str]:
         return {
             var.flag_alias: var.label
