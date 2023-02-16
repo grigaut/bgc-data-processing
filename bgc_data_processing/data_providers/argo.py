@@ -28,7 +28,10 @@ loader = netcdf_tools.NetCDFLoader(
         DEFAULT_VARS["nitrate"].not_in_file(),
         DEFAULT_VARS["silicate"].not_in_file(),
         DEFAULT_VARS["chlorophyll"]
-        .in_file_as("CPHL_ADJUSTED", "CPHL")
+        .in_file_as(
+            ("CPHL_ADJUSTED", "CPHL_ADJUSTED_QC", [1]),
+            ("CPHL", "CPHL_QC", [1]),
+        )
         .remove_when_all_nan()
         .correct_with(lambda x: np.nan if x < 0.01 else x),
     ),

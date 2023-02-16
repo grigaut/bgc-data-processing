@@ -19,22 +19,18 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
         DEFAULT_VARS["depth"].in_file_as("DEPTH").correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("THETA"),
-        DEFAULT_VARS["salinity"].in_file_as("SALNTY").with_flag("salinityf", [2]),
+        DEFAULT_VARS["salinity"].in_file_as(("SALNTY", "salinityf", [2])),
         DEFAULT_VARS["oxygen"]
-        .in_file_as("OXYGEN")
-        .with_flag("oxygenf", [2])
+        .in_file_as(("OXYGEN", "oxygenf", [2]))
         .correct_with(lambda x: x / 32),
         DEFAULT_VARS["phosphate"]
-        .in_file_as("PHSPHT")
-        .with_flag("phosphatef", [2])
+        .in_file_as(("PHSPHT", "phosphatef", [2]))
         .remove_when_all_nan(),
         DEFAULT_VARS["nitrate"]
-        .in_file_as("NITRAT")
-        .with_flag("nitratef", [2])
+        .in_file_as(("NITRAT", "nitratef", [2]))
         .remove_when_all_nan(),
         DEFAULT_VARS["silicate"]
-        .in_file_as("SILCAT")
-        .with_flag("silicatef", [2])
+        .in_file_as(("SILCAT", "silicatef", [2]))
         .remove_when_all_nan(),
         DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
     ),

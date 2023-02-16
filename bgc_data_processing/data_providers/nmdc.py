@@ -21,20 +21,17 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["salinity"].not_in_file(),
         DEFAULT_VARS["oxygen"].in_file_as("DOW"),
         DEFAULT_VARS["phosphate"]
-        .in_file_as("Phosphate")
-        .with_flag("Phosphate_SEADATANET_QC", [1])
+        .in_file_as(("Phosphate", "Phosphate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
         DEFAULT_VARS["nitrate"]
-        .in_file_as("Nitrate")
-        .with_flag("Nitrate_SEADATANET_QC", [1])
+        .in_file_as(("Nitrate", "Nitrate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
         DEFAULT_VARS["silicate"]
-        .with_flag("Silicate_SEADATANET_QC", [1])
+        .in_file_as(("Silicate", "Silicate_SEADATANET_QC", [1]))
         .in_file_as("Silicate")
         .remove_when_all_nan(),
         DEFAULT_VARS["chlorophyll"]
-        .in_file_as("ChlA")
-        .with_flag("ChlA_SEADATANET_QC", [1])
+        .in_file_as(("ChlA", "ChlA_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
     ),
     read_params={
