@@ -76,7 +76,7 @@ class Var:
             return False
 
     @property
-    def aliases(self) -> list:
+    def aliases(self) -> list[tuple[str, str, list]]:
         return self._aliases
 
     @property
