@@ -168,7 +168,6 @@ class CSVLoader(BaseLoader):
             var.label for var in self._variables if var.label not in clean_df.columns
         ]
         clean_df = clean_df.reindex(columns=list(clean_df.columns) + missing_cols)
-        print(clean_df)
         return clean_df
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:
