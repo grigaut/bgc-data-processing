@@ -228,6 +228,34 @@ class Storer:
         delim_whitespace: bool = True,
         verbose: int = 1,
     ) -> "Storer":
+        """Builds Storer reading data from csv or txt files.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        providers : str | list, optional
+            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+            , by default "PROVIDER"
+        category : str, optional
+            Category of the loaded file., by default "in_situ"
+        unit_row_index : int, optional
+            Index of the row with the units, None if there's no unit row., by default 1
+        delim_whitespace : bool, optional
+            Whether to use whitespace as delimiters., by default True
+        verbose : int, optional
+            Controls the verbose, by default 1
+
+        Returns
+        -------
+        Storer
+            Storer aggregating the data from all the files
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         if isinstance(filepath, list):
             storers = []
             for path in filepath:
@@ -242,7 +270,7 @@ class Storer:
 
                 storers.append(reader.get_storer())
             return sum(storers)
-        if isinstance(filepath, str):
+        elif isinstance(filepath, str):
             reader = Reader(
                 filepath=filepath,
                 providers=providers,
@@ -252,6 +280,8 @@ class Storer:
                 verbose=verbose,
             )
             return reader.get_storer()
+        else:
+            raise ValueError(f"Can't read filepaths from {filepath}")
 
 
 class Slice(Storer):
