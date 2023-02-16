@@ -19,7 +19,7 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
         DEFAULT_VARS["depth"].in_file_as("CTDPRS").correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("CTDTMP"),
-        DEFAULT_VARS["salinity"].in_file_as(("SALNTY", "SALNTY_FLAG_W", [2])),
+        DEFAULT_VARS["salinity"].in_file_as(("CTDSAL", "CTDSAL_FLAG_W", [2])),
         DEFAULT_VARS["oxygen"]
         .in_file_as(("OXYGEN", "OXYGEN_FLAG_W", [2]))
         .correct_with(lambda x: x / 32),
