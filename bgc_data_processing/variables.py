@@ -272,7 +272,7 @@ class VariablesStorer:
             if var.here is None:
                 here_txt = "not attributed"
             elif var.here:
-                here_txt = var.alias
+                here_txt = var.aliases
             else:
                 here_txt = "not in file"
             txt += str(var) + f": {here_txt}\n"
