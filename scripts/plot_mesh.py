@@ -3,7 +3,7 @@ import sys
 
 from bgc_data_processing import CONFIG, data_providers
 from bgc_data_processing.base import Storer
-from bgc_data_processing.mapper.tracers import GeoMesher
+from bgc_data_processing.tracers import GeoMesher
 
 BIN_SIZE = tuple(CONFIG["MAPPING"]["BINS_SIZE"])
 
