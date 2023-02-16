@@ -1,5 +1,5 @@
 import copy
-from typing import Callable, Iterator, Self
+from typing import Callable, Iterable, Iterator, Self
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -41,8 +41,7 @@ class Var:
     _has_correction: bool = False
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
-    _flag_alias: str = None
-    _correct_flag: int = None
+    _aliases: list[tuple[str, str, list]] = []
 
     def __init__(
         self,
@@ -62,7 +61,6 @@ class Var:
         self.save_nb = save_nb
         self.name_format = name_format
         self.value_format = value_format
-        self.alias = []
 
     def __str__(self) -> str:
         return f"{self.name} - {self.unit} ({self.type})"
@@ -78,6 +76,10 @@ class Var:
             return False
 
     @property
+    def alias(self) -> list:
+        return self._aliases
+
+    @property
     def label(self) -> str:
         """Returns the label to use to find the variable data in a dataframe.
 
@@ -89,11 +91,11 @@ class Var:
         return self.name
 
     @property
-    def flag_alias(self) -> str:
+    def flag_alias(self) -> list:
         return self._flag_alias
 
     @property
-    def correct_flag(self) -> str:
+    def correct_flag(self) -> list:
         return self._correct_flag
 
     @property
@@ -106,6 +108,10 @@ class Var:
             True if the variable is in the dataset, False if not.
         """
         return self.exist_in_dset
+
+    @here.setter
+    def here(self, value: bool):
+        self.exist_in_dset = value
 
     @property
     def remove_if_all_nan(self) -> bool:
@@ -130,9 +136,9 @@ class Var:
         """
         return self._remove_if_nan
 
-    @here.setter
-    def here(self, value: bool):
-        self.exist_in_dset = value
+    @property
+    def alias_to_label(self) -> dict[str, str]:
+        return {alias[0]: self.label for alias in self._aliases}
 
     def in_file_as(self, *args: str) -> "Var":
         """Returns a Var object with same properties and the property 'alias' set up as 'name'
@@ -149,8 +155,28 @@ class Var:
             Updated copy of self.
         """
         var = copy.deepcopy(self)
-        var.alias = args
         var.here = True
+        aliases = []
+        for arg in args:
+            if isinstance(arg, str):
+                alias = arg
+                flag_alias = None
+                flag_value = None
+            elif isinstance(arg, Iterable):
+                if len(arg) == 1:
+                    alias = arg[0]
+                    flag_alias = None
+                    flag_value = None
+                elif len(arg) == 3:
+                    alias = arg[0]
+                    flag_alias = arg[1]
+                    flag_value = arg[2]
+                else:
+                    raise ValueError(f"{arg} can't be of length {len(arg)}")
+            else:
+                raise ValueError(f"{arg} must be str or Iterable")
+            aliases.append((alias, flag_alias, flag_value))
+        var._aliases = aliases
         return var
 
     def not_in_file(self) -> "Var":
@@ -212,11 +238,6 @@ class Var:
         self._remove_if_nan = True
         return self
 
-    def with_flag(self, flag_alias: str, correct_flag: list) -> Self:
-        self._flag_alias = flag_alias
-        self._correct_flag = correct_flag
-        return self
-
 
 class VariablesStorer:
     """General storer for Var object to represent the set of both variables present in the file and
@@ -239,6 +260,11 @@ class VariablesStorer:
             raise ValueError(
                 "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
             )
+        for arg in args:
+            if arg.here is None:
+                raise ValueError(
+                    f"Var {arg} has not been instanciated using Var.in_file_as or Var.not_in_file"
+                )
 
         self._variables = list(args)
 
@@ -342,7 +368,7 @@ class VariablesStorer:
         """
         mapping = {}
         for var in self._variables:
-            mapping = mapping | {alias: var.label for alias in var.alias}
+            mapping |= var.alias_to_label
         return mapping
 
     @property
