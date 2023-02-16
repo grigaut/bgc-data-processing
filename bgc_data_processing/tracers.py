@@ -277,7 +277,7 @@ class GeoMesher(BasePlot):
         Returns
         -------
         GeoMesher
-            _description_
+            geomesher from the aggregation of the data from all the files
         """
         storer = Storer.from_files(
             filepath=filepath,
