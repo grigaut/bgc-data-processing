@@ -1,5 +1,5 @@
 import copy
-from typing import Callable, Iterator, Self
+from typing import Callable, Iterable, Iterator, Self
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -41,6 +41,7 @@ class Var:
     _has_correction: bool = False
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
+    _aliases: list[tuple[str, str, list]] = []
 
     def __init__(
         self,
@@ -60,7 +61,6 @@ class Var:
         self.save_nb = save_nb
         self.name_format = name_format
         self.value_format = value_format
-        self.alias = []
 
     def __str__(self) -> str:
         return f"{self.name} - {self.unit} ({self.type})"
@@ -74,6 +74,17 @@ class Var:
             return repr(self) == repr(__o)
         else:
             return False
+
+    @property
+    def aliases(self) -> list[tuple[str, str, list]]:
+        """Getter for aliases
+
+        Returns
+        -------
+        list[tuple[str, str, list]]
+            alias, flag column alias (None if not), values to keep from flag column (None if not)
+        """
+        return self._aliases
 
     @property
     def label(self) -> str:
@@ -96,6 +107,10 @@ class Var:
             True if the variable is in the dataset, False if not.
         """
         return self.exist_in_dset
+
+    @here.setter
+    def here(self, value: bool):
+        self.exist_in_dset = value
 
     @property
     def remove_if_all_nan(self) -> bool:
@@ -120,10 +135,6 @@ class Var:
         """
         return self._remove_if_nan
 
-    @here.setter
-    def here(self, value: bool):
-        self.exist_in_dset = value
-
     def in_file_as(self, *args: str) -> "Var":
         """Returns a Var object with same properties and the property 'alias' set up as 'name'
         which is the name of the variable in the file.
@@ -139,8 +150,28 @@ class Var:
             Updated copy of self.
         """
         var = copy.deepcopy(self)
-        var.alias = args
         var.here = True
+        aliases = []
+        for arg in args:
+            if isinstance(arg, str):
+                alias = arg
+                flag_alias = None
+                flag_value = None
+            elif isinstance(arg, Iterable):
+                if len(arg) == 1:
+                    alias = arg[0]
+                    flag_alias = None
+                    flag_value = None
+                elif len(arg) == 3:
+                    alias = arg[0]
+                    flag_alias = arg[1]
+                    flag_value = arg[2]
+                else:
+                    raise ValueError(f"{arg} can't be of length {len(arg)}")
+            else:
+                raise ValueError(f"{arg} must be str or Iterable")
+            aliases.append((alias, flag_alias, flag_value))
+        var._aliases = aliases
         return var
 
     def not_in_file(self) -> "Var":
@@ -224,29 +255,34 @@ class VariablesStorer:
             raise ValueError(
                 "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
             )
+        for arg in args:
+            if arg.here is None:
+                raise ValueError(
+                    f"Var {arg} has not been instanciated using Var.in_file_as or Var.not_in_file"
+                )
 
-        self._variables = list(args)
+        self._elements = list(args)
 
     def __getitem__(self, __k: str) -> Var:
         return self.mapper_by_name[__k]
 
     def __iter__(self) -> Iterator[Var]:
-        return iter(self._variables)
+        return iter(self._elements)
 
     def __str__(self) -> str:
         txt = ""
-        for var in self._variables:
+        for var in self._elements:
             if var.here is None:
                 here_txt = "not attributed"
             elif var.here:
-                here_txt = var.alias
+                here_txt = var.aliases
             else:
                 here_txt = "not in file"
             txt += str(var) + f": {here_txt}\n"
         return txt
 
     def __len__(self) -> int:
-        return len(self._variables)
+        return len(self._elements)
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, VariablesStorer):
@@ -264,7 +300,7 @@ class VariablesStorer:
             return False
 
     def add_var(self, var: Var) -> None:
-        """Adds a new variable to self._variables.
+        """Adds a new variable to self._elements.
 
         Parameters
         ----------
@@ -273,7 +309,7 @@ class VariablesStorer:
         """
         if var.name in self.keys():
             raise ValueError("A variable already exists with his name")
-        self._variables.append(var)
+        self._elements.append(var)
 
     def has_name(self, var_name: str) -> bool:
         """Checks if a variable name is the nam eof one of the variables.
@@ -302,7 +338,14 @@ class VariablesStorer:
 
     @property
     def labels(self) -> dict[str, str]:
-        return {var.name: var.label for var in self._variables}
+        """Returns a dicitonnary mapping variable names to variables labels
+
+        Returns
+        -------
+        dict[str, str]
+            name : label
+        """
+        return {var.name: var.label for var in self._elements}
 
     @property
     def mapper_by_name(self) -> dict[str, "Var"]:
@@ -313,22 +356,7 @@ class VariablesStorer:
         dict[str, Var]
             Mapping between names (str) and variables (Var)
         """
-        return {var.name: var for var in self._variables}
-
-    @property
-    def name_mapping(self) -> dict[str, str]:
-        """Mapper between variables alias (name in dataset) and variables real names.
-        Mostly used when renaming columns.
-
-        Returns
-        -------
-        dict[str, str]
-            Mapping between alias (str) and names (str).
-        """
-        mapping = {}
-        for var in self._variables:
-            mapping = mapping | {alias: var.label for alias in var.alias}
-        return mapping
+        return {var.name: var for var in self._elements}
 
     @property
     def unit_mapping(self) -> dict[str, str]:
@@ -340,7 +368,7 @@ class VariablesStorer:
         dict[str, str]
             Mapping between names (str) and units (str).
         """
-        return {var.name: var.unit for var in self._variables}
+        return {var.name: var.unit for var in self._elements}
 
     @property
     def _save_vars(self) -> dict[int, Var]:
@@ -351,7 +379,7 @@ class VariablesStorer:
         list[str | tuple[str]]
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
-        return {var.save_nb: var for var in self._variables if var.save_nb is not None}
+        return {var.save_nb: var for var in self._elements if var.save_nb is not None}
 
     @property
     def save_labels(self) -> list[str | tuple[str]]:
@@ -383,7 +411,6 @@ class VariablesStorer:
         >>> storer.name_save_format % tuple(storer.save_labels)
         "YEAR PROVIDER "
         """
-
         format_string = " ".join(
             [self._save_vars[key].name_format for key in sorted(self._save_vars.keys())]
         )
@@ -415,7 +442,7 @@ class VariablesStorer:
         list[Var]
             Var objects in the dataset.
         """
-        return [var for var in self._variables if var.exist_in_dset]
+        return [var for var in self._elements if var.exist_in_dset]
 
     @property
     def corrections(self) -> dict[str, Callable]:
@@ -427,7 +454,7 @@ class VariablesStorer:
             Mapping.
         """
         return {
-            var.label: var._correction for var in self._variables if var._has_correction
+            var.label: var._correction for var in self._elements if var._has_correction
         }
 
     @property
@@ -439,7 +466,7 @@ class VariablesStorer:
         list[str]
             List of keys to use.
         """
-        return [var.label for var in self._variables if var.remove_if_all_nan]
+        return [var.label for var in self._elements if var.remove_if_all_nan]
 
     @property
     def to_remove_if_any_nan(self) -> list[str]:
@@ -450,4 +477,4 @@ class VariablesStorer:
         list[str]
             List of keys to use.
         """
-        return [var.label for var in self._variables if var.remove_if_nan]
+        return [var.label for var in self._elements if var.remove_if_nan]

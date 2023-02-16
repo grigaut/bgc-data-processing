@@ -183,6 +183,47 @@ class NetCDFLoader(BaseLoader):
             reshaped[var.label] = data.flatten()
         return reshaped
 
+    def _filter_flags(
+        self,
+        nc_data: nc.Dataset,
+        variable: "Var",
+    ) -> np.ndarray:
+        """Filter data selecting only some flag values.
+
+        Parameters
+        ----------
+        nc_data : nc.Dataset
+            nc.Dataset to use to get data.
+        aliases : Var
+            Variable to get the values of
+
+        Returns
+        -------
+        np.ndarray
+            Filtered values from nc_data for the given variable
+        """
+        file_keys = nc_data.variables.keys()
+        for alias, flag, correct_flags in variable.aliases:
+            if alias not in file_keys:
+                continue
+            # Get data from file
+            values = nc_data.variables[alias][:]
+            # Convert masked_array to ndarray
+            values: np.ndarray = values.filled(np.nan)
+            if (flag is not None) and (flag in file_keys):
+                # get flag values from file
+                flag_values = nc_data.variables[flag][:]
+                # Fill with an integer => careful not to use an integer in the flags
+                flag_values: np.ndarray = flag_values.filled(-1)
+                good_flags = np.empty(values.shape, dtype=bool)
+                good_flags.fill(False)
+                for value in correct_flags:
+                    good_flags = good_flags | (flag_values == value)
+                return np.where(good_flags, values, np.nan)
+            else:
+                return values
+        return None
+
     def _format(self, nc_data: nc.Dataset) -> pd.DataFrame:
         """Formats the data from netCDF4.Dataset to pd.DataFrame.
 
@@ -199,17 +240,11 @@ class NetCDFLoader(BaseLoader):
         data_dict = {}
         missing_vars = []
         for var in self._variables.in_dset:
-            found = False
-            for alias in var.alias:
-                if alias in nc_data.variables.keys():
-                    found = True
-                    values = nc_data.variables[alias][:]
-                    # Convert masked_array to ndarray
-                    values: np.ndarray = values.filled(np.nan)
-                    data_dict[var.label] = values
-                    break
-            if not found:
+            values = self._filter_flags(nc_data=nc_data, variable=var)
+            if values is None:
                 missing_vars.append(var)
+            else:
+                data_dict[var.label] = values
         # Add missing columns
         data_dict = self._fill_missing(data_dict, missing_vars)
         # Reshape all variables's data to 1D

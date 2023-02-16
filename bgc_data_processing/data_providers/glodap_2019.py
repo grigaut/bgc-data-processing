@@ -19,11 +19,19 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
         DEFAULT_VARS["depth"].in_file_as("DEPTH").correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("THETA"),
-        DEFAULT_VARS["salinity"].in_file_as("SALNTY"),
-        DEFAULT_VARS["oxygen"].in_file_as("OXYGEN").correct_with(lambda x: x / 32),
-        DEFAULT_VARS["phosphate"].in_file_as("PHSPHT").remove_when_all_nan(),
-        DEFAULT_VARS["nitrate"].in_file_as("NITRAT").remove_when_all_nan(),
-        DEFAULT_VARS["silicate"].in_file_as("SILCAT").remove_when_all_nan(),
+        DEFAULT_VARS["salinity"].in_file_as(("SALNTY", "salinityf", [2])),
+        DEFAULT_VARS["oxygen"]
+        .in_file_as(("OXYGEN", "oxygenf", [2]))
+        .correct_with(lambda x: x / 32),
+        DEFAULT_VARS["phosphate"]
+        .in_file_as(("PHSPHT", "phosphatef", [2]))
+        .remove_when_all_nan(),
+        DEFAULT_VARS["nitrate"]
+        .in_file_as(("NITRAT", "nitratef", [2]))
+        .remove_when_all_nan(),
+        DEFAULT_VARS["silicate"]
+        .in_file_as(("SILCAT", "silicatef", [2]))
+        .remove_when_all_nan(),
         DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
     ),
     read_params={

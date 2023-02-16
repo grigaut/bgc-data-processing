@@ -2,12 +2,13 @@ import os
 import re
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.variables import Var, VariablesStorer
 
 
 class CSVLoader(BaseLoader):
@@ -95,33 +96,31 @@ class CSVLoader(BaseLoader):
         """
         return pd.read_csv(filepath, **self._read_params)
 
-    def _find_columns_to_keep(self, df: pd.DataFrame) -> list:
-        """Selects columns to keep in the dataframe.
-
-        Notes
-        -----
-        This methods handles the fact that variables can have multiple aliases
-        (if the column name for the variable is different in different files).
-        For multi-aliases variables, this methods only returns the first specified alias
-        appearing in the data file.
+    def _filter_flags(self, df: pd.DataFrame, var: "Var") -> pd.Series:
+        """Filters data selecting only some flag values.
 
         Parameters
         ----------
         df : pd.DataFrame
-            Dataframe to select columns from
+            Dataframe to use to get the data.
+        var : Var
+            Variable to get the values of.
 
         Returns
         -------
-        list
-            Columns to keep when formatting.
+        pd.Series
+            Filtered values from the dataframe for the given variable.
         """
-        columns_to_keep = []
-        for var in self._variables.in_dset:
-            for alias in var.alias:
-                if alias in df.columns:
-                    columns_to_keep.append(alias)
-                    break
-        return columns_to_keep
+        for alias, flag_alias, correct_flags in var.aliases:
+            if alias not in df.columns:
+                continue
+            if (flag_alias is not None) and (flag_alias in df.columns):
+                corrects = df[flag_alias].isin(correct_flags)
+                values = df[alias].where(corrects, np.nan)
+                return values
+            else:
+                return df[alias]
+        return None
 
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
         """Formatting function for csv files, modified to drop useless columns,
@@ -137,25 +136,25 @@ class CSVLoader(BaseLoader):
         pd.DataFrame
             Formatted Dataframe.
         """
-        names_mapping = self._variables.name_mapping
-        units_mapping = self._variables.unit_mapping
-        # Drop useless columns
-        columns_keep = self._find_columns_to_keep(df)
-        columns_drop = [col for col in df.columns if col not in columns_keep]
-        slice = df.drop(columns_drop, axis=1)
-        # Rename columns using pre-determined alias
-        slice.rename(columns=names_mapping, inplace=True)
-        slice[self._variables.labels["PROVIDER"]] = self._provider
-        if self._variables.labels["DATE"] in slice.columns:
+        # units_mapping = self._variables.unit_mapping
+        # Check flags :
+        data = {}
+        for var in self._variables:
+            values = self._filter_flags(df=df, var=var)
+            if values is not None:
+                data[var.label] = values
+        clean_df = pd.DataFrame(data)
+        clean_df[self._variables.labels["PROVIDER"]] = self._provider
+        if self._variables.labels["DATE"] in clean_df.columns:
             # Convert Date column to datetime (if existing)
-            raw_date_col = slice.pop(self._variables.labels["DATE"]).astype(str)
+            raw_date_col = clean_df.pop(self._variables.labels["DATE"]).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
-            slice.insert(0, self._variables.labels["DAY"], dates.dt.day)
-            slice.insert(0, self._variables.labels["MONTH"], dates.dt.month)
-            slice.insert(0, self._variables.labels["YEAR"], dates.dt.year)
+            clean_df.insert(0, self._variables.labels["DAY"], dates.dt.day)
+            clean_df.insert(0, self._variables.labels["MONTH"], dates.dt.month)
+            clean_df.insert(0, self._variables.labels["YEAR"], dates.dt.year)
         else:
             dates = pd.to_datetime(
-                slice[
+                clean_df[
                     [
                         self._variables.labels["YEAR"],
                         self._variables.labels["MONTH"],
@@ -163,12 +162,13 @@ class CSVLoader(BaseLoader):
                     ]
                 ]
             )
-        slice.loc[:, self._variables.labels["DATE"]] = dates
+        clean_df.loc[:, self._variables.labels["DATE"]] = dates
         # Check if columns are missing => fill them with np.nan values
-        missing_cols = [col for col in units_mapping.keys() if col not in slice.columns]
-        if missing_cols:
-            slice = slice.reindex(columns=list(slice.columns) + missing_cols)
-        return slice
+        missing_cols = [
+            var.label for var in self._variables if var.label not in clean_df.columns
+        ]
+        clean_df = clean_df.reindex(columns=list(clean_df.columns) + missing_cols)
+        return clean_df
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:
         """Type converting function, modified to behave with csv files.

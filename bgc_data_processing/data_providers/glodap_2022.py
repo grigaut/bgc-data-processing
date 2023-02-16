@@ -19,11 +19,19 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["latitude"].in_file_as("G2latitude"),
         DEFAULT_VARS["depth"].in_file_as("G2depth").correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("G2temperature"),
-        DEFAULT_VARS["salinity"].in_file_as("G2salinity"),
-        DEFAULT_VARS["oxygen"].in_file_as("G2oxygen").correct_with(lambda x: x / 32),
-        DEFAULT_VARS["phosphate"].in_file_as("G2phosphate").remove_when_all_nan(),
-        DEFAULT_VARS["nitrate"].in_file_as("G2nitrate").remove_when_all_nan(),
-        DEFAULT_VARS["silicate"].in_file_as("G2silicate").remove_when_all_nan(),
+        DEFAULT_VARS["salinity"].in_file_as(("G2salinity", "G2salinityf", [2])),
+        DEFAULT_VARS["oxygen"]
+        .in_file_as(("G2oxygen", "G2oxygenf", [2]))
+        .correct_with(lambda x: x / 32),
+        DEFAULT_VARS["phosphate"]
+        .in_file_as(("G2phosphate", "G2phosphatef", [2]))
+        .remove_when_all_nan(),
+        DEFAULT_VARS["nitrate"]
+        .in_file_as(("G2nitrate", "G2nitratef", [2]))
+        .remove_when_all_nan(),
+        DEFAULT_VARS["silicate"]
+        .in_file_as(("G2silicate", "G2silicatef", [2]))
+        .remove_when_all_nan(),
         DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
     ),
     read_params={
