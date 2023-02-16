@@ -230,36 +230,31 @@ class Storer:
     ) -> "Storer":
         """Builds Storer reading data from csv or txt files.
 
-                Parameters
-                ----------
-                filepath : str
-                    Path to the file to read.
-                providers : str | list, optional
-                    Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
-                    , by default "PROVIDER"
-                category : str, optional
-                    Category of the loaded file., by default "in_situ"
-                unit_row_index : int, optional
-                    Index of the row with the units, None if there's no unit row., by default 1
-                delim_whitespace : bool, optional
-                    Whether to use whitespace as delimiters., by default True
-                verbose : int, optional
-                    Controls the verbose, by default 1
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        providers : str | list, optional
+            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+            , by default "PROVIDER"
+        category : str, optional
+            Category of the loaded file., by default "in_situ"
+        unit_row_index : int, optional
+            Index of the row with the units, None if there's no unit row., by default 1
+        delim_whitespace : bool, optional
+            Whether to use whitespace as delimiters., by default True
+        verbose : int, optional
+            Controls the verbose, by default 1
 
-                Returns
-                -------
-                Storer
-                    Storer aggregating the data from all the files
+        Returns
+        -------
+        Storer
+            Storer aggregating the data from all the files
 
-                Raises
-                ------
-        <<<<<<< c07a726a62f3d1e780a79b42a22c61a9304ab67e
-                TypeError
-                    If filepath argument is not an instance of string or list.
-        =======
-                ValueError
-                    _description_
-        >>>>>>> docs: add from_files method
+        Raises
+        ------
+        TypeError
+            If filepath argument is not an instance of string or list.
         """
         if isinstance(filepath, list):
             storers = []
@@ -286,7 +281,7 @@ class Storer:
             )
             return reader.get_storer()
         else:
-            raise ValueError(f"Can't read filepaths from {filepath}")
+            raise TypeError(f"Can't read filepaths from {filepath}")
 
 
 class Slice(Storer):
