@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Callable
+import warnings
+from typing import TYPE_CHECKING, Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -119,9 +120,14 @@ class GeoMesher(BasePlot):
             Bins number for the column, value for each bin.
         """
         min_val, max_val = column.min(), column.max()
-        bin_nb = int((max_val - min_val) / bin_size) + 1
-        bins = np.linspace(min_val, max_val, bin_nb)
-        intervals_mid = (bins[1:] + bins[:-1]) / 2
+        bin_nb = int((max_val - min_val + 2 * bin_size) / bin_size)
+        bins = np.linspace(min_val - 1, max_val + 1, bin_nb)
+        if bin_nb == 1:
+            intervals_mid = bins
+            intervals_mid = (bins[1:] + bins[:-1]) / 2
+        else:
+            intervals_mid = (bins[1:] + bins[:-1]) / 2
+
         cut: pd.Series = pd.cut(column, bins=bins, include_lowest=True, labels=False)
         cut.name = cut_name
         return cut, intervals_mid
@@ -132,7 +138,7 @@ class GeoMesher(BasePlot):
         bins_size: float | tuple[float, float],
         group_aggr: str,
         pivot_aggr: Callable,
-    ) -> tuple[np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
@@ -160,7 +166,7 @@ class GeoMesher(BasePlot):
             lon_key=lon,
             how=group_aggr,
         )
-        if isinstance(bins_size, tuple):
+        if isinstance(bins_size, Iterable):
             lat_bins_size = bins_size[0]
             lon_bins_size = bins_size[1]
         else:
@@ -223,10 +229,14 @@ class GeoMesher(BasePlot):
             group_aggr=group_aggr,
             pivot_aggr=pivot_aggr,
         )
+        if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
+            warnings.warn(
+                "Not enough data to display, try decreasing the bin size or representing more data sources"
+            )
         fig = plt.figure(figsize=[10, 10])
         provs = ", ".join(self._storer.providers)
         title = f"{variable_name} - {provs} ({self._storer.category})"
-        if isinstance(bins_size, tuple):
+        if isinstance(bins_size, Iterable):
             lat, lon = bins_size[0], bins_size[1]
         else:
             lat, lon = bins_size, bins_size
