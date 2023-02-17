@@ -267,7 +267,7 @@ class GeoMesher(BasePlot):
         delim_whitespace: bool = True,
         verbose: int = 1,
     ) -> "GeoMesher":
-        """Builds GeoMesher reading data from csv or txt files.
+        """Builds a GeoMesher reading data from csv or txt files.
 
         Parameters
         ----------
@@ -289,6 +289,20 @@ class GeoMesher(BasePlot):
         -------
         GeoMesher
             geomesher from the aggregation of the data from all the files
+
+        Examples
+        --------
+        Loading from a single file:
+        >>> filepath = "path/to/file"
+        >>> geomesher = GeoMesher.from_files(filepath, providers="providers_column_name")
+
+        Loading from multiple files:
+        >>> filepaths = [
+        ...     "path/to/file1",
+        ...     "path/to/file2",
+        ... ]
+        >>> geomesher = GeoMesher.from_files(filepaths, providers="providers_column_name")
+
         """
         storer = Storer.from_files(
             filepath=filepath,
