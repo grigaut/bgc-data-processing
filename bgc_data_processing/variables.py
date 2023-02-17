@@ -29,6 +29,7 @@ class BaseVar(ABC):
         Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
     value_format: str
         Format to use to save the data value in a csv of txt file., by default "%15s"
+
     Examples
     --------
     >>> var_lat = BaseVar("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
@@ -118,7 +119,6 @@ class TemplateVar(BaseVar):
             flag_values (list) is the list of correct values for the flag.
             If there is no flag columns, flag_alias and flag_values can be set to None,
             or the argument can be reduced to the variable column name only.
-
 
         Returns
         -------
@@ -384,6 +384,18 @@ class VariablesStorer:
     ------
     ValueError:
         If multiplie var object have the same name.
+
+    Examples
+    --------
+    >>> var1 = TemplateVar("LATITUDE", "[deg_N]", float, 0, 0, "%-12s", "%12.6f")
+    >>> var2 = TemplateVar("LONGITUDE", "[deg_E]", float, 1, 1, "%-12s", "%12.6f")
+    >>> var_storer = VariablesStorer(
+    ...     var1.in_file_as("latitude"),
+    ...     var2.not_in_file(),
+    ... )
+    >>> print(var_storer)
+    LATITUDE - [deg_N] (<class 'float'>): [('latitude', None, None)]
+    LONGITUDE - [deg_E] (<class 'float'>): not in file
     """
 
     def __init__(self, *args: ExistingVar | NotExistingVar) -> None:

@@ -255,6 +255,19 @@ class Storer:
         ------
         TypeError
             If filepath argument is not an instance of string or list.
+
+        Examples
+        --------
+        Loading from a single file:
+        >>> filepath = "path/to/file"
+        >>> storer = DStorer.from_files(filepath, providers="providers_column_name")
+
+        Loading from multiple files:
+        >>> filepaths = [
+        ...     "path/to/file1",
+        ...     "path/to/file2",
+        ... ]
+        >>> storer = GeoMesher.from_files(filepaths, providers="providers_column_name")
         """
         if isinstance(filepath, list):
             storers = []
@@ -395,6 +408,15 @@ class Reader:
         Whether to use whitespace as delimiters., by default True
     verbose : int, optional
         Controls the verbose, by default 1
+
+    Examples
+    --------
+    Loading from a file:
+    >>> filepath = "path/to/file"
+    >>> reader = Reader(filepath, providers="providers_column_name")
+
+    Getting the storer:
+    >>> storer = reader.get_storer()
     """
 
     def __init__(
