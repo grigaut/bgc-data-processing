@@ -66,7 +66,7 @@ class Var:
         return f"{self.name} - {self.unit} ({self.type})"
 
     def __repr__(self) -> str:
-        txt = f"{self.name}_{self.unit}_{self.type}"
+        txt = f"{self.name}_{self.unit}"
         return txt
 
     def __eq__(self, __o: object) -> bool:
