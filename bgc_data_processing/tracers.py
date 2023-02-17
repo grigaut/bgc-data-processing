@@ -18,8 +18,8 @@ class GeoMesher(BasePlot):
 
     Parameters
     ----------
-    data : pd.DataFrame
-        Data to use when plotting.
+    storer : Storer
+        Data Storer containing data to plot.
     """
 
     _grouping_functions = {
@@ -153,6 +153,7 @@ class GeoMesher(BasePlot):
             Name of the function to use to aggregate data when group by similar measuring point.
         pivot_aggr : Callable
             Function to aggregate when pivotting data.
+
         Returns
         -------
         tuple[np.ndarray]
