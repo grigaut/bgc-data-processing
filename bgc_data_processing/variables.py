@@ -8,6 +8,32 @@ from bgc_data_processing.exceptions import VariableInstantiationError
 
 
 class BaseVar(ABC):
+    """Class to store Meta data on a variable of interest.
+    Parameters
+    ----------
+    name : str
+        'Official' name for the variable : name to use when displaying the variable.
+    unit : str
+        Variable unit (written using the following format:
+        [deg_C] for Celsius degree of [kg] for kilograms).
+    var_type : str
+        Variable type (str, int, datetime...).
+        It will be used to convert the data using df[variable].astype(type)
+    load_nb : int, optional
+        Number to sort the variable when loading the data.
+        None implies that the varible will be remove from the dataframe, by default None
+    save_nb : int, optional
+        Number to sort the variable when saving the data.
+        None implies that the varible will be remove from the dataframe, by default None
+    name_format: str
+        Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
+    value_format: str
+        Format to use to save the data value in a csv of txt file., by default "%15s"
+    Examples
+    --------
+    >>> var_lat = BaseVar("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
+    """
+
     exist_in_dset: bool = None
 
     def __init__(
@@ -55,7 +81,16 @@ class BaseVar(ABC):
 
 
 class TemplateVar(BaseVar):
+    """Class to define default variable as a template to ease variable instantiation."""
+
     def _building_informations(self) -> dict:
+        """Self's informations to instanciate object with same informations as self.
+
+        Returns
+        -------
+        dict
+            arguments to use when initiating an instance of BaseVar.
+        """
         informations = dict(
             name=self.name,
             unit=self.unit,
@@ -138,6 +173,8 @@ class TemplateVar(BaseVar):
 
 
 class NotExistingVar(BaseVar):
+    """Class to represent variables which don't exist in the dataset."""
+
     exist_in_dset: bool = False
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
@@ -191,6 +228,9 @@ class NotExistingVar(BaseVar):
 
 
 class ExistingVar(NotExistingVar):
+    """Class to represent variables existing in the dataset,
+    to be able to specify flag columns, corecction functions..."""
+
     exist_in_dset: bool = True
     _correction: callable = None
     _aliases: list = []
@@ -323,6 +363,8 @@ class ExistingVar(NotExistingVar):
 
 
 class ParsedVar(BaseVar):
+    """Variables parsed from a csv file"""
+
     def __repr__(self) -> str:
         txt = f"{self.name}_{self.unit}"
         return txt
