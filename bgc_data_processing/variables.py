@@ -43,17 +43,6 @@ class BaseVar(ABC):
             return False
 
     @property
-    def here(self) -> bool:
-        """Returns a boolean which indicates if the variable exists in the dataset.
-
-        Returns
-        -------
-        bool
-            True if the variable is in the dataset, False if not.
-        """
-        return self.exist_in_dset
-
-    @property
     def label(self) -> str:
         """Returns the label to use to find the variable data in a dataframe.
 
@@ -274,9 +263,9 @@ class VariablesStorer:
     def __str__(self) -> str:
         txt = ""
         for var in self._elements:
-            if var.here is None:
+            if var.exist_in_dset is None:
                 here_txt = "not attributed"
-            elif var.here:
+            elif var.exist_in_dset:
                 here_txt = var.aliases
             else:
                 here_txt = "not in file"
