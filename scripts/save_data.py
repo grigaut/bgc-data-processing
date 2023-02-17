@@ -2,7 +2,7 @@ import sys
 from time import time
 
 import pandas as pd
-from bgc_data_processing import CONFIG, data_providers, lists_reader
+from bgc_data_processing import CONFIG, data_providers, parsers
 from bgc_data_processing.data_classes import Storer
 
 
@@ -34,12 +34,9 @@ if __name__ == "__main__":
     for year in YEARS:
         # Collect cycle dates
         cycle_file = f"{CONFIG['LOADING']['LIST_DIR']}/ran_cycle_{year}.txt"
-        drng = lists_reader.parse_cycle_file(
-            filepath=cycle_file,
-            start=4,
-            end=3,
-        )
-        aggr_date_names.append(lists_reader.get_first_date(filepath=cycle_file))
+        parser = parsers.RanCycleParser(filepath=cycle_file)
+        drng = parser.get_daterange(start=4, end=3)
+        aggr_date_names.append(parser.first_dates)
         drngs.append(drng)
     DRNG = pd.concat(drngs, ignore_index=True)
     str_start = pd.to_datetime(DRNG["start_date"]).dt.strftime("%Y%m%d")
