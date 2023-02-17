@@ -4,10 +4,8 @@ from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
-from bgc_data_processing.data_classes import Storer
-
 if TYPE_CHECKING:
-
+    from bgc_data_processing.data_classes import Storer
     from bgc_data_processing.variables import VariablesStorer
 
 
@@ -97,19 +95,9 @@ class BaseLoader(ABC):
         """
         return self._variables
 
+    @abstractmethod
     def __call__(self, exclude: list = []) -> "Storer":
-        filepaths = self._select_filepaths(exclude=exclude)
-        data_list = []
-        for filepath in filepaths:
-            data_list.append(self.load(filepath=filepath))
-        data = pd.concat(data_list, ignore_index=True, axis=0)
-        return Storer(
-            data=data,
-            category=self.category,
-            providers=[self.provider],
-            variables=self.variables,
-            verbose=self.verbose,
-        )
+        ...
 
     @abstractmethod
     def _select_filepaths(self, exclude: list) -> list[str]:

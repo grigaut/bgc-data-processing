@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
+from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import Var, VariablesStorer
@@ -44,6 +45,20 @@ class CSVLoader(BaseLoader):
 
         self._read_params = read_params
         super().__init__(provider_name, dirin, category, files_pattern, variables)
+
+    def __call__(self, exclude: list = []) -> "Storer":
+        filepaths = self._select_filepaths(exclude=exclude)
+        data_list = []
+        for filepath in filepaths:
+            data_list.append(self.load(filepath=filepath))
+        data = pd.concat(data_list, ignore_index=True, axis=0)
+        return Storer(
+            data=data,
+            category=self.category,
+            providers=[self.provider],
+            variables=self.variables,
+            verbose=self.verbose,
+        )
 
     def _pattern(self) -> str:
         """Returns files pattern for given years for this provider.

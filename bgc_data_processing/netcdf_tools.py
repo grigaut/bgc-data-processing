@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
+from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
@@ -18,6 +19,20 @@ class NetCDFLoader(BaseLoader):
     """Class to load netCDF files"""
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
+
+    def __call__(self, exclude: list = []) -> "Storer":
+        filepaths = self._select_filepaths(exclude=exclude)
+        data_list = []
+        for filepath in filepaths:
+            data_list.append(self.load(filepath=filepath))
+        data = pd.concat(data_list, ignore_index=True, axis=0)
+        return Storer(
+            data=data,
+            category=self.category,
+            providers=[self.provider],
+            variables=self.variables,
+            verbose=self.verbose,
+        )
 
     def _select_filepaths(self, exclude: list) -> list[str]:
         """Selects filepaths referring to the files to load.
