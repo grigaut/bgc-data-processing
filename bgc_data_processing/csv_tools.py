@@ -9,7 +9,7 @@ from bgc_data_processing.base import BaseLoader
 from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import Var, VariablesStorer
+    from bgc_data_processing.variables import ExistingVar, VariablesStorer
 
 
 class CSVLoader(BaseLoader):
@@ -111,14 +111,14 @@ class CSVLoader(BaseLoader):
         """
         return pd.read_csv(filepath, **self._read_params)
 
-    def _filter_flags(self, df: pd.DataFrame, var: "Var") -> pd.Series:
+    def _filter_flags(self, df: pd.DataFrame, var: "ExistingVar") -> pd.Series:
         """Filters data selecting only some flag values.
 
         Parameters
         ----------
         df : pd.DataFrame
             Dataframe to use to get the data.
-        var : Var
+        var : ExistingVar
             Variable to get the values of.
 
         Returns
@@ -154,7 +154,7 @@ class CSVLoader(BaseLoader):
         # units_mapping = self._variables.unit_mapping
         # Check flags :
         data = {}
-        for var in self._variables:
+        for var in self._variables.in_dset:
             values = self._filter_flags(df=df, var=var)
             if values is not None:
                 data[var.label] = values
