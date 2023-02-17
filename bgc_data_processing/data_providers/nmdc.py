@@ -28,7 +28,6 @@ loader = csv_tools.CSVLoader(
         .remove_when_all_nan(),
         DEFAULT_VARS["silicate"]
         .in_file_as(("Silicate", "Silicate_SEADATANET_QC", [1]))
-        .in_file_as("Silicate")
         .remove_when_all_nan(),
         DEFAULT_VARS["chlorophyll"]
         .in_file_as(("ChlA", "ChlA_SEADATANET_QC", [1]))

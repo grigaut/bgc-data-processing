@@ -1,4 +1,4 @@
-import copy
+from abc import ABC
 from typing import Callable, Iterable, Iterator, Self
 
 import numpy as np
@@ -7,15 +7,14 @@ from _collections_abc import dict_keys
 from bgc_data_processing.exceptions import VariableInstantiationError
 
 
-class Var:
+class BaseVar(ABC):
     """Class to store Meta data on a variable of interest.
-
     Parameters
     ----------
     name : str
         'Official' name for the variable : name to use when displaying the variable.
     unit : str
-        Variable unit (written using the following format :
+        Variable unit (written using the following format:
         [deg_C] for Celsius degree of [kg] for kilograms).
     var_type : str
         Variable type (str, int, datetime...).
@@ -30,18 +29,12 @@ class Var:
         Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
     value_format: str
         Format to use to save the data value in a csv of txt file., by default "%15s"
-
     Examples
     --------
-    >>> var_lat = Var("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
+    >>> var_lat = BaseVar("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
     """
 
     exist_in_dset: bool = None
-    _correction: callable = None
-    _has_correction: bool = False
-    _remove_if_nan: bool = False
-    _remove_if_all_nan: bool = False
-    _aliases: list[tuple[str, str, list]] = []
 
     def __init__(
         self,
@@ -66,25 +59,14 @@ class Var:
         return f"{self.name} - {self.unit} ({self.type})"
 
     def __repr__(self) -> str:
-        txt = f"{self.name}_{self.unit}"
+        txt = f"{self.name}_{self.unit}_{self.type}"
         return txt
 
     def __eq__(self, __o: object) -> bool:
-        if isinstance(__o, Var):
+        if isinstance(__o, BaseVar):
             return repr(self) == repr(__o)
         else:
             return False
-
-    @property
-    def aliases(self) -> list[tuple[str, str, list]]:
-        """Getter for aliases
-
-        Returns
-        -------
-        list[tuple[str, str, list]]
-            alias, flag column alias (None if not), values to keep from flag column (None if not)
-        """
-        return self._aliases
 
     @property
     def label(self) -> str:
@@ -97,20 +79,172 @@ class Var:
         """
         return self.name
 
-    @property
-    def here(self) -> bool:
-        """Returns a boolean which indicates if the variable exists in the dataset.
+
+class TemplateVar(BaseVar):
+    """Class to define default variable as a template to ease variable instantiation."""
+
+    def _building_informations(self) -> dict:
+        """Self's informations to instanciate object with same informations as self.
 
         Returns
         -------
-        bool
-            True if the variable is in the dataset, False if not.
+        dict
+            arguments to use when initiating an instance of BaseVar.
         """
-        return self.exist_in_dset
+        informations = dict(
+            name=self.name,
+            unit=self.unit,
+            var_type=self.type,
+            load_nb=self.load_nb,
+            save_nb=self.save_nb,
+            name_format=self.name_format,
+            value_format=self.value_format,
+        )
+        return informations
 
-    @here.setter
-    def here(self, value: bool):
-        self.exist_in_dset = value
+    def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
+        """Returns an ExistingVar object with same attributes as self and the property 'aliases'
+        correctly set up using ExistingVar._set_aliases method.
+
+        Parameters
+        ----------
+        args : str | tuple[str, str, list]
+            Name(s) of the variable in the dataset and the corresponding flags.
+            Aliases are ranked: first alias will be the only one considered if present in dataset.
+            If not second will be checked, and so on..
+            Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
+            where alias (str) is the name of the column storing the variable in the dataset,
+            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
+            flag_values (list) is the list of correct values for the flag.
+            If there is no flag columns, flag_alias and flag_values can be set to None,
+            or the argument can be reduced to the variable column name only.
+
+
+        Returns
+        -------
+        ExistingVar
+            Variable with correct loading informations.
+
+        Examples
+        --------
+        To instantiate a variable specifying a flag column to use:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(("CTDSAL", "CTDSAL_FLAG_W", [2]))
+
+        To instantiate a variable without flag columns to use:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(("CTDSAL",None,None))
+        # or equivalently:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as("CTDSAL")
+
+        To instantiate a variable with multiple possible aliases and flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     ("CTDSAL2", "CTDSAL2_FLAG_W", [2]),
+        >>> )
+
+        To instantiate a variable with multiple possible aliases and some flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     ("CTDSAL2", None, None),
+        >>> )
+        # or equivalently:
+        To instantiate a variable with multiple possible aliases and some flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     "CTDSAL2",
+        >>> )
+        """
+        return ExistingVar.from_template(self)._set_aliases(*args)
+
+    def not_in_file(self) -> "NotExistingVar":
+        """Returns a NotExistingVar object with same attributes as self.
+
+        Returns
+        -------
+        NotExistingVar
+            Instanciated variable.
+        """
+        return NotExistingVar.from_template(self)
+
+
+class NotExistingVar(BaseVar):
+    """Class to represent variables which don't exist in the dataset."""
+
+    exist_in_dset: bool = False
+    _remove_if_nan: bool = False
+    _remove_if_all_nan: bool = False
+
+    @property
+    def remove_if_nan(self) -> bool:
+        return self._remove_if_nan
+
+    @property
+    def remove_if_all_nan(self) -> bool:
+        return self._remove_if_all_nan
+
+    @classmethod
+    def from_template(cls, template: "TemplateVar") -> "NotExistingVar":
+        """Instantiates a NotExistingVar from a TemplateVar.
+
+        Parameters
+        ----------
+        template : TemplateVar
+            Template variable to build from.
+
+        Returns
+        -------
+        NotExistingVar
+            NotExistingVar from template.
+        """
+        var = cls(**template._building_informations())
+        return var
+
+    def remove_when_all_nan(self) -> Self:
+        """Sets self._remove_if_all_nan to True.
+
+        Returns
+        -------
+        Self
+            self
+        """
+        self._remove_if_all_nan = True
+        return self
+
+    def remove_when_nan(self) -> Self:
+        """Sets self._remove_if_nan to True.
+
+        Returns
+        -------
+        Self
+            self
+        """
+        self._remove_if_nan = True
+        return self
+
+
+class ExistingVar(NotExistingVar):
+    """Class to represent variables existing in the dataset,
+    to be able to specify flag columns, corecction functions..."""
+
+    exist_in_dset: bool = True
+    _correction: callable = None
+    _aliases: list = []
+
+    @property
+    def aliases(self) -> list[tuple[str, str, list]]:
+        """Getter for aliases
+
+        Returns
+        -------
+        list[tuple[str, str, list]]
+            alias, flag column alias (None if not), values to keep from flag column (None if not)
+        """
+        return self._aliases
 
     @property
     def remove_if_all_nan(self) -> bool:
@@ -135,22 +269,51 @@ class Var:
         """
         return self._remove_if_nan
 
-    def in_file_as(self, *args: str) -> "Var":
-        """Returns a Var object with same properties and the property 'alias' set up as 'name'
-        which is the name of the variable in the file.
+    @classmethod
+    def from_template(cls, template: "TemplateVar") -> "ExistingVar":
+        """Instantiates a ExistingVar from a TemplateVar.
 
         Parameters
         ----------
-        args : str
-            Name(s) of the variable in the dataset.
+        template : TemplateVar
+            Template variable to build from.
 
         Returns
         -------
-        Var
-            Updated copy of self.
+        ExistingVar
+            ExistingVar from template.
         """
-        var = copy.deepcopy(self)
-        var.here = True
+        return super().from_template(template)
+
+    def _set_aliases(self, *args: str | tuple[str, str, list]) -> Self:
+        """_summary_
+
+        Parameters
+        ----------
+        args : str | tuple[str, str, list]
+            Name(s) of the variable in the dataset and the corresponding flags.
+            Aliases are ranked: first alias will be the only one considered if present in dataset.
+            If not second will be checked, and so on..
+            Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
+            where alias (str) is the name of the column storing the variable in the dataset,
+            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
+            flag_values (list) is the list of correct values for the flag.
+            If there is no flag columns, flag_alias and flag_values can be set to None,
+            or the argument can be reduced to the variable column name only.
+
+        Returns
+        -------
+        Self
+            Updated version of self
+
+        Raises
+        ------
+        ValueError
+            If one of the arguments length is different than 1 and 3.
+        ValueError
+            If one of the arguments is not an instance of string or Iterable.
+        """
+
         aliases = []
         for arg in args:
             if isinstance(arg, str):
@@ -171,21 +334,8 @@ class Var:
             else:
                 raise ValueError(f"{arg} must be str or Iterable")
             aliases.append((alias, flag_alias, flag_value))
-        var._aliases = aliases
-        return var
-
-    def not_in_file(self) -> "Var":
-        """Returns a Var object with same properties and the property 'alias' set up as None
-        as the variable does not exist in the file.
-
-        Returns
-        -------
-        Var
-            Updated copy of self.
-        """
-        var = copy.deepcopy(self)
-        var.here = False
-        return var
+        self._aliases = aliases
+        return self
 
     def correct_with(self, function: Callable) -> Self:
         """Correction function definition.
@@ -211,27 +361,13 @@ class Var:
         self._has_correction = True
         return self
 
-    def remove_when_all_nan(self) -> Self:
-        """Sets self._remove_if_all_nan to True.
 
-        Returns
-        -------
-        Self
-            self
-        """
-        self._remove_if_all_nan = True
-        return self
+class ParsedVar(BaseVar):
+    """Variables parsed from a csv file"""
 
-    def remove_when_nan(self) -> Self:
-        """Sets self._remove_if_nan to True.
-
-        Returns
-        -------
-        Self
-            self
-        """
-        self._remove_if_nan = True
-        return self
+    def __repr__(self) -> str:
+        txt = f"{self.name}_{self.unit}"
+        return txt
 
 
 class VariablesStorer:
@@ -250,26 +386,28 @@ class VariablesStorer:
         If multiplie var object have the same name.
     """
 
-    def __init__(self, *args: Var) -> None:
+    def __init__(self, *args: ExistingVar | NotExistingVar) -> None:
         if len(args) != len(set(var.name for var in args)):
             raise ValueError(
                 "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
             )
 
         self._elements = list(args)
+        self._in_dset = [var for var in self._elements if var.exist_in_dset]
+        self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
-    def __getitem__(self, __k: str) -> Var:
-        return self.mapper_by_name[__k]
+    def __getitem__(self, __k: str) -> ExistingVar | NotExistingVar:
+        return self._mapper_by_name[__k]
 
-    def __iter__(self) -> Iterator[Var]:
+    def __iter__(self) -> Iterator[ExistingVar | NotExistingVar]:
         return iter(self._elements)
 
     def __str__(self) -> str:
         txt = ""
         for var in self._elements:
-            if var.here is None:
+            if var.exist_in_dset is None:
                 here_txt = "not attributed"
-            elif var.here:
+            elif var.exist_in_dset:
                 here_txt = var.aliases
             else:
                 here_txt = "not in file"
@@ -283,18 +421,18 @@ class VariablesStorer:
         if isinstance(__o, VariablesStorer):
             if len(self) != len(__o):
                 return False
-            elif set(self.mapper_by_name.keys()) != set(__o.mapper_by_name.keys()):
+            elif set(self._mapper_by_name.keys()) != set(__o._mapper_by_name.keys()):
                 return False
             else:
                 repr_eq = [
                     repr(self[key]) == repr(__o[key])
-                    for key in self.mapper_by_name.keys()
+                    for key in self._mapper_by_name.keys()
                 ]
                 return np.all(repr_eq)
         else:
             return False
 
-    def add_var(self, var: Var) -> None:
+    def add_var(self, var: ExistingVar | NotExistingVar) -> None:
         """Adds a new variable to self._elements.
 
         Parameters
@@ -327,9 +465,9 @@ class VariablesStorer:
         Returns
         -------
         dict_keys
-            View of self.mapper_by_name keys.
+            View of self._mapper_by_name keys.
         """
-        return self.mapper_by_name.keys()
+        return self._mapper_by_name.keys()
 
     @property
     def labels(self) -> dict[str, str]:
@@ -343,7 +481,7 @@ class VariablesStorer:
         return {var.name: var.label for var in self._elements}
 
     @property
-    def mapper_by_name(self) -> dict[str, "Var"]:
+    def _mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
         """Mapper between variables names and variables Var objects (for __getitem__ mostly).
 
         Returns
@@ -366,7 +504,7 @@ class VariablesStorer:
         return {var.name: var.unit for var in self._elements}
 
     @property
-    def _save_vars(self) -> dict[int, Var]:
+    def _save_vars(self) -> dict[int, ExistingVar | NotExistingVar]:
         """Sorting order to use when saving data.
 
         Returns
@@ -429,7 +567,7 @@ class VariablesStorer:
         return format_string
 
     @property
-    def in_dset(self) -> list[Var]:
+    def in_dset(self) -> list[ExistingVar]:
         """List of Var object supposedly present in the dataset.
 
         Returns
@@ -437,7 +575,7 @@ class VariablesStorer:
         list[Var]
             Var objects in the dataset.
         """
-        return [var for var in self._elements if var.exist_in_dset]
+        return self._in_dset
 
     @property
     def corrections(self) -> dict[str, Callable]:
@@ -449,7 +587,9 @@ class VariablesStorer:
             Mapping.
         """
         return {
-            var.label: var._correction for var in self._elements if var._has_correction
+            var.label: var._correction
+            for var in self._in_dset
+            if var._correction is not None
         }
 
     @property

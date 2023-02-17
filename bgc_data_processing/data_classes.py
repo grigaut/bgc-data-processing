@@ -3,7 +3,7 @@ from typing import Any
 
 import pandas as pd
 
-from bgc_data_processing.variables import Var, VariablesStorer
+from bgc_data_processing.variables import ParsedVar, VariablesStorer
 
 
 class Storer:
@@ -472,7 +472,7 @@ class Reader:
                 unit = "[]"
             else:
                 unit = unit_row[column].values[0]
-            var = Var(
+            var = ParsedVar(
                 name=column.upper(),
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
@@ -507,7 +507,7 @@ class Reader:
         month_in = month_key in raw_df.columns
         day_in = day_key in raw_df.columns
         if year_in and month_in and day_in:
-            var = Var("DATE", "[]", "datetime64[ns]", None, None)
+            var = ParsedVar("DATE", "[]", "datetime64[ns]", None, None)
             self._variables.add_var(var)
             return pd.to_datetime(raw_df[[year_key, month_key, day_key]]), var.label
         else:

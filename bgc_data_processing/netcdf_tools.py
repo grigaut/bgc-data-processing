@@ -8,16 +8,31 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
+from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import Var
+    from bgc_data_processing.variables import ExistingVar, NotExistingVar
 
 
 class NetCDFLoader(BaseLoader):
     """Class to load netCDF files"""
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
+
+    def __call__(self, exclude: list = []) -> "Storer":
+        filepaths = self._select_filepaths(exclude=exclude)
+        data_list = []
+        for filepath in filepaths:
+            data_list.append(self.load(filepath=filepath))
+        data = pd.concat(data_list, ignore_index=True, axis=0)
+        return Storer(
+            data=data,
+            category=self.category,
+            providers=[self.provider],
+            variables=self.variables,
+            verbose=self.verbose,
+        )
 
     def _select_filepaths(self, exclude: list) -> list[str]:
         """Selects filepaths referring to the files to load.
@@ -119,7 +134,9 @@ class NetCDFLoader(BaseLoader):
             shape1 = 1
         return shape0, shape1
 
-    def _fill_missing(self, data_dict: dict, missing_vars: list["Var"]) -> dict:
+    def _fill_missing(
+        self, data_dict: dict, missing_vars: list["ExistingVar|NotExistingVar"]
+    ) -> dict:
         """Adds empty values with correct shapes for variables
         which aren't in the original data file but which were supposed to be.
 
@@ -132,7 +149,7 @@ class NetCDFLoader(BaseLoader):
         ----------
         data_dict : dict
             Dictionnary on which to add entries for missing variables.
-        missing_vars : list["Var"]
+        missing_vars : list["ExistingVar|NotExistingVar"]
             Missing variables.
 
         Returns
@@ -186,7 +203,7 @@ class NetCDFLoader(BaseLoader):
     def _filter_flags(
         self,
         nc_data: nc.Dataset,
-        variable: "Var",
+        variable: "ExistingVar",
     ) -> np.ndarray:
         """Filter data selecting only some flag values.
 
@@ -194,7 +211,7 @@ class NetCDFLoader(BaseLoader):
         ----------
         nc_data : nc.Dataset
             nc.Dataset to use to get data.
-        aliases : Var
+        aliases : ExistingVar
             Variable to get the values of
 
         Returns
