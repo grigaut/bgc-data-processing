@@ -33,7 +33,7 @@ class BaseVar(ABC):
         return f"{self.name} - {self.unit} ({self.type})"
 
     def __repr__(self) -> str:
-        txt = f"{self.name}_{self.unit}"
+        txt = f"{self.name}_{self.unit}_{self.type}"
         return txt
 
     def __eq__(self, __o: object) -> bool:
@@ -320,6 +320,12 @@ class ExistingVar(NotExistingVar):
         self._correction = function
         self._has_correction = True
         return self
+
+
+class ParsedVar(BaseVar):
+    def __repr__(self) -> str:
+        txt = f"{self.name}_{self.unit}"
+        return txt
 
 
 class VariablesStorer:
