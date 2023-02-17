@@ -21,10 +21,10 @@ class BaseVar(ABC):
         It will be used to convert the data using df[variable].astype(type)
     load_nb : int, optional
         Number to sort the variable when loading the data.
-        None implies that the varible will be remove from the dataframe, by default None
+        None implies that the variable will be remove from the dataframe, by default None
     save_nb : int, optional
         Number to sort the variable when saving the data.
-        None implies that the varible will be remove from the dataframe, by default None
+        None implies that the variable will be remove from the dataframe, by default None
     name_format: str
         Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
     value_format: str

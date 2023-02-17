@@ -1,11 +1,13 @@
-from typing import TYPE_CHECKING, Callable
+import warnings
+from typing import TYPE_CHECKING, Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from cartopy import crs, feature
+
 from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Storer
-from cartopy import crs, feature
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
@@ -30,8 +32,7 @@ class GeoMesher(BasePlot):
         self,
         storer: "Storer",
     ) -> None:
-        self._storer = storer
-        self._variables = storer._variables
+        super().__init__(storer=storer)
         self._data = storer.data.sort_values(
             self._variables.labels["DEPH"], ascending=False
         )
@@ -119,9 +120,14 @@ class GeoMesher(BasePlot):
             Bins number for the column, value for each bin.
         """
         min_val, max_val = column.min(), column.max()
-        bin_nb = int((max_val - min_val) / bin_size) + 1
-        bins = np.linspace(min_val, max_val, bin_nb)
-        intervals_mid = (bins[1:] + bins[:-1]) / 2
+        bin_nb = int((max_val - min_val + 2 * bin_size) / bin_size)
+        bins = np.linspace(min_val - 1, max_val + 1, bin_nb)
+        if bin_nb == 1:
+            intervals_mid = bins
+            intervals_mid = (bins[1:] + bins[:-1]) / 2
+        else:
+            intervals_mid = (bins[1:] + bins[:-1]) / 2
+
         cut: pd.Series = pd.cut(column, bins=bins, include_lowest=True, labels=False)
         cut.name = cut_name
         return cut, intervals_mid
@@ -132,7 +138,7 @@ class GeoMesher(BasePlot):
         bins_size: float | tuple[float, float],
         group_aggr: str,
         pivot_aggr: Callable,
-    ) -> tuple[np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
@@ -160,7 +166,7 @@ class GeoMesher(BasePlot):
             lon_key=lon,
             how=group_aggr,
         )
-        if isinstance(bins_size, tuple):
+        if isinstance(bins_size, Iterable):
             lat_bins_size = bins_size[0]
             lon_bins_size = bins_size[1]
         else:
@@ -223,10 +229,14 @@ class GeoMesher(BasePlot):
             group_aggr=group_aggr,
             pivot_aggr=pivot_aggr,
         )
+        if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
+            warnings.warn(
+                "Not enough data to display, try decreasing the bin size or representing more data sources"
+            )
         fig = plt.figure(figsize=[10, 10])
         provs = ", ".join(self._storer.providers)
         title = f"{variable_name} - {provs} ({self._storer.category})"
-        if isinstance(bins_size, tuple):
+        if isinstance(bins_size, Iterable):
             lat, lon = bins_size[0], bins_size[1]
         else:
             lat, lon = bins_size, bins_size
@@ -246,6 +256,45 @@ class GeoMesher(BasePlot):
         plt.show()
         plt.close()
 
+    @classmethod
+    def from_files(
+        cls,
+        filepath: str | list,
+        providers: str | list = "PROVIDER",
+        category: str = "in_situ",
+        unit_row_index: int = 1,
+        delim_whitespace: bool = True,
+        verbose: int = 1,
+    ) -> "GeoMesher":
+        """Builds GeoMesher reading data from csv or txt files.
 
-class GeoProfile(BasePlot):
-    pass
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        providers : str | list, optional
+            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+            , by default "PROVIDER"
+        category : str, optional
+            Category of the loaded file., by default "in_situ"
+        unit_row_index : int, optional
+            Index of the row with the units, None if there's no unit row., by default 1
+        delim_whitespace : bool, optional
+            Whether to use whitespace as delimiters., by default True
+        verbose : int, optional
+            Controls the verbose, by default 1
+
+        Returns
+        -------
+        GeoMesher
+            geomesher from the aggregation of the data from all the files
+        """
+        storer = Storer.from_files(
+            filepath=filepath,
+            providers=providers,
+            category=category,
+            unit_row_index=unit_row_index,
+            delim_whitespace=delim_whitespace,
+            verbose=verbose,
+        )
+        return cls(storer=storer)
