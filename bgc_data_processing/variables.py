@@ -55,8 +55,7 @@ class BaseVar(ABC):
 
 
 class TemplateVar(BaseVar):
-    @property
-    def building_informations(self) -> dict:
+    def _building_informations(self) -> dict:
         informations = dict(
             name=self.name,
             unit=self.unit,
@@ -68,35 +67,74 @@ class TemplateVar(BaseVar):
         )
         return informations
 
-    def in_file_as(self, *args: str) -> "ExistingVar":
-        """Returns a Var object with same properties and the property 'alias' set up as 'name'
-        which is the name of the variable in the file.
+    def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
+        """Returns an ExistingVar object with same attributes as self and the property 'aliases'
+        correctly set up using ExistingVar._set_aliases method.
 
         Parameters
         ----------
-        args : str
-            Name(s) of the variable in the dataset.
+        args : str | tuple[str, str, list]
+            Name(s) of the variable in the dataset and the corresponding flags.
+            Aliases are ranked: first alias will be the only one considered if present in dataset.
+            If not second will be checked, and so on..
+            Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
+            where alias (str) is the name of the column storing the variable in the dataset,
+            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
+            flag_values (list) is the list of correct values for the flag.
+            If there is no flag columns, flag_alias and flag_values can be set to None,
+            or the argument can be reduced to the variable column name only.
+
 
         Returns
         -------
         ExistingVar
-            Updated copy of self.
+            Variable with correct loading informations.
+
+        Examples
+        --------
+        To instantiate a variable specifying a flag column to use:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(("CTDSAL", "CTDSAL_FLAG_W", [2]))
+
+        To instantiate a variable without flag columns to use:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(("CTDSAL",None,None))
+        # or equivalently:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as("CTDSAL")
+
+        To instantiate a variable with multiple possible aliases and flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     ("CTDSAL2", "CTDSAL2_FLAG_W", [2]),
+        >>> )
+
+        To instantiate a variable with multiple possible aliases and some flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     ("CTDSAL2", None, None),
+        >>> )
+        # or equivalently:
+        To instantiate a variable with multiple possible aliases and some flags:
+        >>> default_var = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
+        >>> instanciated_var = default_var.in_file_as(
+        >>>     ("CTDSAL1", "CTDSAL1_FLAG_W", [2]),
+        >>>     "CTDSAL2",
+        >>> )
         """
-        var = ExistingVar.from_template(self)
-        var.set_aliases(*args)
-        return var
+        return ExistingVar.from_template(self)._set_aliases(*args)
 
     def not_in_file(self) -> "NotExistingVar":
-        """Returns a Var object with same properties and the property 'alias' set up as None
-        as the variable does not exist in the file.
+        """Returns a NotExistingVar object with same attributes as self.
 
         Returns
         -------
         NotExistingVar
-            Updated copy of self.
+            Instanciated variable.
         """
-        var = NotExistingVar.from_template(self)
-        return var
+        return NotExistingVar.from_template(self)
 
 
 class NotExistingVar(BaseVar):
@@ -113,8 +151,20 @@ class NotExistingVar(BaseVar):
         return self._remove_if_all_nan
 
     @classmethod
-    def from_template(cls, template: "TemplateVar"):
-        var = cls(**template.building_informations)
+    def from_template(cls, template: "TemplateVar") -> "NotExistingVar":
+        """Instantiates a NotExistingVar from a TemplateVar.
+
+        Parameters
+        ----------
+        template : TemplateVar
+            Template variable to build from.
+
+        Returns
+        -------
+        NotExistingVar
+            NotExistingVar from template.
+        """
+        var = cls(**template._building_informations())
         return var
 
     def remove_when_all_nan(self) -> Self:
@@ -179,7 +229,51 @@ class ExistingVar(NotExistingVar):
         """
         return self._remove_if_nan
 
-    def set_aliases(self, *args) -> Self:
+    @classmethod
+    def from_template(cls, template: "TemplateVar") -> "ExistingVar":
+        """Instantiates a ExistingVar from a TemplateVar.
+
+        Parameters
+        ----------
+        template : TemplateVar
+            Template variable to build from.
+
+        Returns
+        -------
+        ExistingVar
+            ExistingVar from template.
+        """
+        return super().from_template(template)
+
+    def _set_aliases(self, *args: str | tuple[str, str, list]) -> Self:
+        """_summary_
+
+        Parameters
+        ----------
+        args : str | tuple[str, str, list]
+            Name(s) of the variable in the dataset and the corresponding flags.
+            Aliases are ranked: first alias will be the only one considered if present in dataset.
+            If not second will be checked, and so on..
+            Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
+            where alias (str) is the name of the column storing the variable in the dataset,
+            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
+            flag_values (list) is the list of correct values for the flag.
+            If there is no flag columns, flag_alias and flag_values can be set to None,
+            or the argument can be reduced to the variable column name only.
+
+        Returns
+        -------
+        Self
+            Updated version of self
+
+        Raises
+        ------
+        ValueError
+            If one of the arguments length is different than 1 and 3.
+        ValueError
+            If one of the arguments is not an instance of string or Iterable.
+        """
+
         aliases = []
         for arg in args:
             if isinstance(arg, str):
@@ -255,7 +349,7 @@ class VariablesStorer:
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
     def __getitem__(self, __k: str) -> ExistingVar | NotExistingVar:
-        return self.mapper_by_name[__k]
+        return self._mapper_by_name[__k]
 
     def __iter__(self) -> Iterator[ExistingVar | NotExistingVar]:
         return iter(self._elements)
@@ -279,12 +373,12 @@ class VariablesStorer:
         if isinstance(__o, VariablesStorer):
             if len(self) != len(__o):
                 return False
-            elif set(self.mapper_by_name.keys()) != set(__o.mapper_by_name.keys()):
+            elif set(self._mapper_by_name.keys()) != set(__o._mapper_by_name.keys()):
                 return False
             else:
                 repr_eq = [
                     repr(self[key]) == repr(__o[key])
-                    for key in self.mapper_by_name.keys()
+                    for key in self._mapper_by_name.keys()
                 ]
                 return np.all(repr_eq)
         else:
@@ -323,9 +417,9 @@ class VariablesStorer:
         Returns
         -------
         dict_keys
-            View of self.mapper_by_name keys.
+            View of self._mapper_by_name keys.
         """
-        return self.mapper_by_name.keys()
+        return self._mapper_by_name.keys()
 
     @property
     def labels(self) -> dict[str, str]:
@@ -339,7 +433,7 @@ class VariablesStorer:
         return {var.name: var.label for var in self._elements}
 
     @property
-    def mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
+    def _mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
         """Mapper between variables names and variables Var objects (for __getitem__ mostly).
 
         Returns
