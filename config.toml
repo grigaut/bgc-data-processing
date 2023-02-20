@@ -47,7 +47,7 @@ LIST_DIR = "./lists"
     EXCLUDE = []
     [LOADING.CMEMS]
     PATH = "/mnt/data02/gaerig/synthesis/CMEMS/history/nutrients/BO"
-    CATEGORY = "in_situ"
+    CATEGORY = "float"
     EXCLUDE = []
 
 [SAVING]

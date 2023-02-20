@@ -54,5 +54,7 @@ if __name__ == "__main__":
             data_dict[category] = []
         data_dict[category].append(storer)
     for category, data in data_dict.items():
+        if VERBOSE > 0:
+            print(f"Plotting {category} data")
         df: Storer = sum(data)
-        GeoMesher(df).plot(VAR_NAME, BIN_SIZE)
+        GeoMesher(df).plot(VAR_NAME, BIN_SIZE, pivot_aggr="count")

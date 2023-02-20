@@ -10,6 +10,8 @@ from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure
+
     from bgc_data_processing.variables import VariablesStorer
 
 
@@ -22,10 +24,13 @@ class GeoMesher(BasePlot):
         Data Storer containing data to plot.
     """
 
-    _grouping_functions = {
-        # "all": lambda x: x.apply(np.array),
+    _group_aggr = {
         "top": lambda x: x.first(),
         "bottom": lambda x: x.last(),
+    }
+    _pivot_aggr = {
+        "mean": np.mean,
+        "count": np.count_nonzero,
     }
 
     def __init__(
@@ -70,7 +75,7 @@ class GeoMesher(BasePlot):
         var_key: str,
         lat_key: str,
         lon_key: str,
-        how: str,
+        how: str | Callable,
     ) -> pd.DataFrame:
         """First grouping, to aggregate data points from the same measuring point.
 
@@ -82,8 +87,8 @@ class GeoMesher(BasePlot):
             Latitude variable name.
         lon_key : str
             Longitude variable name.
-        how : str
-            Grouping function key to use with self._grouping_functions.
+        how : str | Callable
+            Grouping function key to use with self._group_aggr or Callable function to use to group.
 
         Returns
         -------
@@ -92,7 +97,11 @@ class GeoMesher(BasePlot):
             Column names are the same as in self._data.
         """
         group = self._data.groupby(self._grouping_columns)
-        var_series: pd.Series = self._grouping_functions[how](group[var_key])
+        if isinstance(how, str):
+            group_fn = self._group_aggr[how]
+        else:
+            group_fn = how
+        var_series: pd.Series = group_fn(group[var_key])
         var_series.name = var_key
         return var_series.reset_index().filter([lat_key, lon_key, var_key])
 
@@ -136,8 +145,8 @@ class GeoMesher(BasePlot):
         self,
         label: str,
         bins_size: float | tuple[float, float],
-        group_aggr: str,
-        pivot_aggr: Callable,
+        group_aggr: str | Callable,
+        pivot_aggr: str | Callable,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
@@ -149,10 +158,11 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree
-        group_aggr : str, optional
-            Name of the function to use to aggregate data when group by similar measuring point.
-        pivot_aggr : Callable
-            Function to aggregate when pivotting data.
+        group_aggr : str | Callable
+            Name of the function to use to aggregate data when group by similar measuring point
+            or callable function to use to aggregate.
+        pivot_aggr : str | Callable
+            Name of the function to aggregate when pivotting data or callable function to use to aggregate.
 
         Returns
         -------
@@ -173,12 +183,15 @@ class GeoMesher(BasePlot):
         else:
             lat_bins_size = bins_size
             lon_bins_size = bins_size
-
+        if self._verbose > 2:
+            print("\t\tCreating latitude array")
         lat_cut, lat_points = self._geo_linspace(
             column=df[lat],
             bin_size=lat_bins_size,
             cut_name="lat_cut",
         )
+        if self._verbose > 2:
+            print("\t\tCreating longitude array")
         lon_cut, lon_points = self._geo_linspace(
             column=df[lon],
             bin_size=lon_bins_size,
@@ -188,11 +201,17 @@ class GeoMesher(BasePlot):
         bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
+        if isinstance(pivot_aggr, str):
+            aggfunc = self._pivot_aggr[pivot_aggr]
+        else:
+            aggfunc = pivot_aggr
+        if self._verbose > 2:
+            print("\t\tPivotting data to 2D table")
         vals = bins_concat.pivot_table(
             values=label,
             index="lat_cut",
             columns="lon_cut",
-            aggfunc=pivot_aggr,
+            aggfunc=aggfunc,
         )
         all_indexes = [index for index in range(lons.shape[0])]
         all_columns = [colum for colum in range(lats.shape[1])]
@@ -201,13 +220,13 @@ class GeoMesher(BasePlot):
 
         return lons, lats, vals.values
 
-    def plot(
+    def _build_plot(
         self,
         variable_name: str,
         bins_size: float | tuple[float, float] = 0.5,
-        group_aggr: str = "top",
-        pivot_aggr: Callable = np.mean,
-    ) -> None:
+        group_aggr: str | Callable = "top",
+        pivot_aggr: Callable | Callable = "count",
+    ) -> "Figure":
         """Plots the colormesh for the given variable.
 
         Parameters
@@ -218,12 +237,15 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
-        group_aggr : str, optional
-            Name of the function to use to aggregate data when group by similar measuring point.
-            , by default "top"
-        pivot_aggr : Callable
-            Function to aggregate when pivotting data., by default np.mean
+        group_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+             or callable function to use to aggregate., by default "top"
+        pivot_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+            or callable function to use to aggregate., by default "count"
         """
+        if self._verbose > 1:
+            print(f"\tMeshing {variable_name} data")
         X1, Y1, Z1 = self.mesh(
             label=self._variables.labels[variable_name],
             bins_size=bins_size,
@@ -234,6 +256,8 @@ class GeoMesher(BasePlot):
             warnings.warn(
                 "Not enough data to display, try decreasing the bin size or representing more data sources"
             )
+        if self._verbose > 1:
+            print("\tCreating figure")
         fig = plt.figure(figsize=[10, 10])
         provs = ", ".join(self._storer.providers)
         title = f"{variable_name} - {provs} ({self._storer.category})"
@@ -250,9 +274,80 @@ class GeoMesher(BasePlot):
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
         cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
-        plt.colorbar(
+        if pivot_aggr == "count":
+            label = f"{variable_name} data points count"
+        else:
+            label = f"{pivot_aggr} {variable_name} levels {self._variables[variable_name].unit}"
+        fig.colorbar(
             cbar,
-            label=f"{variable_name} levels {self._variables[variable_name].unit}",
+            label=label,
+        )
+        return fig
+
+    def save_fig(
+        self,
+        save_path: str,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str | Callable = "top",
+        pivot_aggr: Callable | Callable = "count",
+    ) -> None:
+        """Plots the colormesh for the given variable.
+
+        Parameters
+        ----------
+        save_path: str
+            Path to save the figure at.
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+             or callable function to use to aggregate., by default "top"
+        pivot_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+            or callable function to use to aggregate., by default "count"
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
+        )
+        plt.savefig(save_path)
+
+    def plot(
+        self,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str | Callable = "top",
+        pivot_aggr: Callable | Callable = "count",
+    ) -> None:
+        """Plots the colormesh for the given variable.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+             or callable function to use to aggregate., by default "top"
+        pivot_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+            or callable function to use to aggregate., by default "count"
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
         )
         plt.show()
         plt.close()
