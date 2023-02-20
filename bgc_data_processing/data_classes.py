@@ -121,6 +121,7 @@ class Storer:
             category=self.category,
             providers=concat_providers,
             variables=self.variables,
+            verbose=min(self._verbose, object.verbose),
         )
         return concat_storer
 
