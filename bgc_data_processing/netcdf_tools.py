@@ -70,10 +70,7 @@ class NetCDFLoader(BaseLoader):
         str
             Station id.
         """
-        if filename[0:2] == "GL":
-            return filename[9:16]
-        else:
-            return filename[0:7]
+        return filename.split("_")[3].split(".")[0]
 
     def _read(self, filepath: str) -> nc.Dataset:
         """Reads the file loacted at filepath.
@@ -114,15 +111,20 @@ class NetCDFLoader(BaseLoader):
         shapes1 = []
         for var in self.variables.in_dset:
             var_data = data_dict[var.label]
-            shapes0.append(var_data.shape[0])
+            if var_data.shape[0] > 1:
+                shapes0.append(var_data.shape[0])
             if len(var_data.shape) == 2:
                 shapes1.append(var_data.shape[1])
         # Assert all shape (1st dimension) are the same
-        if len(set(shapes0)) != 1:
+        if len(set(shapes0)) > 1:
             raise NetCDFLoadingError(
                 "Some variables have different size (first dimension)"
             )
-        shape0 = shapes0[0]
+        elif len(set(shapes0)) == 1:
+            shape0 = shapes0[0]
+        else:
+            # if the shape list is empty => all variables have a 1st dimension of 1
+            shape0 = 1
         if shapes1:
             # Assert all shape (2nd dimension) are the same
             if len(set(shapes1)) != 1:
@@ -193,6 +195,9 @@ class NetCDFLoader(BaseLoader):
         reshaped = {}
         for var in self.variables.in_dset:
             data = data_dict[var.label]
+            if data.shape == (1,):
+                # if the data contains a single value => some data from CMEMS: latitude or longitude
+                data = np.tile(data, (shape0,))
             if len(data.shape) == 1:
                 # Reshape data to 2D
                 data = np.tile(data.reshape((shape0, 1)), (1, shape1))
