@@ -277,7 +277,9 @@ class BasePlot(ABC):
         self._verbose = storer.verbose
 
     @abstractmethod
-    def plot(
-        self,
-    ) -> None:
+    def plot(self) -> None:
+        ...
+
+    @abstractmethod
+    def save_fig(self) -> None:
         ...

@@ -10,6 +10,8 @@ from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure
+
     from bgc_data_processing.variables import VariablesStorer
 
 
@@ -218,13 +220,13 @@ class GeoMesher(BasePlot):
 
         return lons, lats, vals.values
 
-    def plot(
+    def _build_plot(
         self,
         variable_name: str,
         bins_size: float | tuple[float, float] = 0.5,
         group_aggr: str | Callable = "top",
         pivot_aggr: Callable | Callable = "count",
-    ) -> None:
+    ) -> "Figure":
         """Plots the colormesh for the given variable.
 
         Parameters
@@ -276,9 +278,76 @@ class GeoMesher(BasePlot):
             label = f"{variable_name} data points count"
         else:
             label = f"{pivot_aggr} {variable_name} levels {self._variables[variable_name].unit}"
-        plt.colorbar(
+        fig.colorbar(
             cbar,
             label=label,
+        )
+        return fig
+
+    def save_fig(
+        self,
+        save_path: str,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str | Callable = "top",
+        pivot_aggr: Callable | Callable = "count",
+    ) -> None:
+        """Plots the colormesh for the given variable.
+
+        Parameters
+        ----------
+        save_path: str
+            Path to save the figure at.
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+             or callable function to use to aggregate., by default "top"
+        pivot_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+            or callable function to use to aggregate., by default "count"
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
+        )
+        plt.savefig(save_path)
+
+    def plot(
+        self,
+        variable_name: str,
+        bins_size: float | tuple[float, float] = 0.5,
+        group_aggr: str | Callable = "top",
+        pivot_aggr: Callable | Callable = "count",
+    ) -> None:
+        """Plots the colormesh for the given variable.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        bins_size : float | tuple[float, float], optional
+            Bins size, if tuple, first component if for latitude, second is for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree., by default 0.5
+        group_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+             or callable function to use to aggregate., by default "top"
+        pivot_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+            or callable function to use to aggregate., by default "count"
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            bins_size=bins_size,
+            group_aggr=group_aggr,
+            pivot_aggr=pivot_aggr,
         )
         plt.show()
         plt.close()
