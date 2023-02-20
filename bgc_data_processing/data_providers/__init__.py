@@ -1,30 +1,15 @@
+import os
+from importlib import import_module
 from typing import TYPE_CHECKING
-
-from bgc_data_processing.data_providers import (
-    argo,
-    clivar,
-    glodap,
-    glodap_2019,
-    glodap_2022,
-    ices,
-    imr,
-    nmdc,
-)
 
 if TYPE_CHECKING:
     from bgc_data_processing.base import BaseLoader
-
-LOADERS: dict[str, "BaseLoader"] = {
-    argo.loader.provider: argo.loader,
-    clivar.loader.provider: clivar.loader,
-    glodap.loader.provider: glodap.loader,
-    glodap_2019.loader.provider: glodap_2019.loader,
-    glodap_2022.loader.provider: glodap_2022.loader,
-    ices.loader.provider: ices.loader,
-    imr.loader.provider: imr.loader,
-    nmdc.loader.provider: nmdc.loader,
-}
-
 __all__ = [
-    LOADERS,
+    "LOADERS",
 ]
+
+LOADERS: dict[str, "BaseLoader"] = {}
+for file in os.listdir("bgc_data_processing/data_providers"):
+    if file[-3:] == ".py" and file != "__init__.py":
+        mod = import_module(f"bgc_data_processing.data_providers.{file[:-3]}")
+        LOADERS[mod.loader.provider] = mod.loader
