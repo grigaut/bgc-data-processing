@@ -45,6 +45,10 @@ LIST_DIR = "./lists"
     PATH = "/mnt/data02/gaerig/synthesis/NMDC/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
+    [LOADING.CMEMS]
+    PATH = "/mnt/data02/gaerig/synthesis/CMEMS/history/nutrients/BO"
+    CATEGORY = "in_situ"
+    EXCLUDE = []
 
 [SAVING]
 FILES_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
