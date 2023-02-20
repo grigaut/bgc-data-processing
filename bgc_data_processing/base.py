@@ -273,7 +273,8 @@ class BaseLoader(ABC):
 class BasePlot(ABC):
     def __init__(self, storer: "Storer") -> None:
         self._storer = storer
-        self._variables = storer._variables
+        self._variables = storer.variables
+        self._verbose = storer.verbose
 
     @abstractmethod
     def plot(
