@@ -189,36 +189,6 @@ class Storer:
             slice_index=slice_index,
         )
 
-    def slice_on_providers(
-        self,
-        providers: list[str],
-    ) -> "Slice":
-        """Slices the Dataframe using the provider column. Returns indexes to use for slicing.
-
-        Parameters
-        ----------
-        providers : list[str]
-            Providers to conserve after slicing.
-
-        Returns
-        -------
-        list
-            Indexes to use for slicing.
-        """
-
-        # Verbose
-        if self._verbose > 1:
-            print("\tSlicing data for providers {}".format(", ".join(providers)))
-        # Params
-        providers_col = self._data[self._variables.labels["PROVIDER"]]
-        # Slice
-        is_in_list = providers_col.isin(providers)
-        slice_index = providers_col.loc[is_in_list].index.values.tolist()
-        return Slice(
-            data=self,
-            slice_index=slice_index,
-        )
-
     @classmethod
     def from_files(
         cls,
