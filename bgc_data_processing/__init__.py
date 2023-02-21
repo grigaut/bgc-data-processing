@@ -1,10 +1,10 @@
-from bgc_data_processing.parsers import TOMLParser
+from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.variables import TemplateVar
 
 __all__ = [
     "CONFIG",
 ]
-CONFIG = TOMLParser("config.toml")
+CONFIG = ConfigParser("config.toml")
 
 # Default variables setup using the format :
 # TemplateVar(name, unit, type, loading_sort_nb, saving_sort_nb, name_str_format, value_str_format)
