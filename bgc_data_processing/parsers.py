@@ -246,7 +246,7 @@ class ConfigParser:
         mapping = self.get(["MAPPING"])
         self.raise_if_wrong_type(["MAPPING", "DATE_MIN"], str)
         self.raise_if_wrong_type(["MAPPING", "DATE_MAX"], str)
-        self.raise_if_wrong_type(["MAPPING", "BINS_SIZE"], (list, float), (list, int))
+        self.raise_if_wrong_type(["MAPPING", "BIN_SIZE"], (list, float), (list, int))
         self.raise_if_wrong_type(["MAPPING", "PROVIDERS"], str, (list, str))
         self.raise_if_wrong_type(["MAPPING", "DEPTH_AGGREGATION"], str)
         self.raise_if_wrong_type(["MAPPING", "BIN_AGGREGATION"], str)
