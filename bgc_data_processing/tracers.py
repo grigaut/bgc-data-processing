@@ -260,13 +260,12 @@ class GeoMesher(BasePlot):
             print("\tCreating figure")
         fig = plt.figure(figsize=[10, 10])
         provs = ", ".join(self._storer.providers)
-        title = f"{variable_name} - {provs} ({self._storer.category})"
+        suptitle = f"{variable_name} - {provs} ({self._storer.category})"
+        plt.suptitle(suptitle)
         if isinstance(bins_size, Iterable):
             lat, lon = bins_size[0], bins_size[1]
         else:
             lat, lon = bins_size, bins_size
-        subtitle = f"{lat}° x {lon}° grid (lat x lon)"
-        fig.suptitle(f"{title}\n{subtitle}")
         ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
         fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
         ax.gridlines()
@@ -281,7 +280,10 @@ class GeoMesher(BasePlot):
         fig.colorbar(
             cbar,
             label=label,
+            shrink=0.75,
         )
+        title = f"{lat}° x {lon}° grid (lat x lon)"
+        plt.title(title)
         return fig
 
     def save_fig(
@@ -291,6 +293,8 @@ class GeoMesher(BasePlot):
         bins_size: float | tuple[float, float] = 0.5,
         group_aggr: str | Callable = "top",
         pivot_aggr: Callable | Callable = "count",
+        title: str = None,
+        suptitle: str = None,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -310,6 +314,10 @@ class GeoMesher(BasePlot):
         pivot_aggr : str | Callable, optional
             Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
             or callable function to use to aggregate., by default "count"
+        title: str, optional
+            Title for the figure, if set to None, automatically created., by default None.
+        suptitle: str, optional
+            Suptitle for the figure, if set to None, automatically created., by default None.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -317,6 +325,10 @@ class GeoMesher(BasePlot):
             group_aggr=group_aggr,
             pivot_aggr=pivot_aggr,
         )
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
         plt.savefig(save_path)
 
     def plot(
@@ -325,6 +337,8 @@ class GeoMesher(BasePlot):
         bins_size: float | tuple[float, float] = 0.5,
         group_aggr: str | Callable = "top",
         pivot_aggr: Callable | Callable = "count",
+        title: str = None,
+        suptitle: str = None,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -342,6 +356,10 @@ class GeoMesher(BasePlot):
         pivot_aggr : str | Callable, optional
             Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
             or callable function to use to aggregate., by default "count"
+        title: str, optional
+            Title for the figure, if set to None, automatically created., by default None.
+        suptitle: str, optional
+            Suptitle for the figure, if set to None, automatically created., by default None.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -349,6 +367,11 @@ class GeoMesher(BasePlot):
             group_aggr=group_aggr,
             pivot_aggr=pivot_aggr,
         )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
         plt.show()
         plt.close()
 
