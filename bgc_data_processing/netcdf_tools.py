@@ -16,7 +16,23 @@ if TYPE_CHECKING:
 
 
 class NetCDFLoader(BaseLoader):
-    """Class to load netCDF files"""
+    """Loader class to use with csv files.
+
+    Parameters
+    ----------
+    provider_name : str
+        Data provider name.
+    dirin : str
+        Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
+    files_pattern : str
+        Pattern to use to parse files.
+        It must contain a '{years}' in order to be completed using the .format method.
+    variables : VariablesStorer
+        Storer object containing all variables to consider for this data,
+        both the one in the data file but and the one not represented in the file.
+    """
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
 

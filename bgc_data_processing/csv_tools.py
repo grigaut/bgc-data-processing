@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class CSVLoader(BaseLoader):
-    """BaseLoader subclass to use with csv files.
+    """Loader class to use with csv files.
 
     Parameters
     ----------

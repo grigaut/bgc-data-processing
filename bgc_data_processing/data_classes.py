@@ -299,7 +299,15 @@ class Storer:
 
 
 class Slice(Storer):
-    """Slice storing object, instance of Storer to inherit of the saving method."""
+    """Slice storing object, instance of Storer to inherit of the saving method.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to slice.
+    slice_index : list
+        Indexes to keep from the Storer dataframe.
+    """
 
     def __init__(
         self,
@@ -430,13 +438,13 @@ class Reader:
         verbose: int = 1,
     ):
         self._verbose = verbose
-        raw_df, unit_row = self.read(filepath, unit_row_index, delim_whitespace)
-        self._providers = self.get_providers(raw_df, providers)
-        self._variables = self.get_variables(raw_df, unit_row)
+        raw_df, unit_row = self._read(filepath, unit_row_index, delim_whitespace)
+        self._providers = self._get_providers(raw_df, providers)
+        self._variables = self._get_variables(raw_df, unit_row)
         self._category = category
-        self._data = self.add_missing_columns(raw_df)
+        self._data = self._add_missing_columns(raw_df)
 
-    def read(
+    def _read(
         self, filepath: str, unit_row_index: int, delim_whitespace: bool
     ) -> tuple[pd.DataFrame, pd.Series]:
         """Method to read the filepath and extract the unit row
@@ -473,7 +481,7 @@ class Reader:
         )
         return raw_df, unit_row
 
-    def get_providers(self, raw_df: pd.DataFrame, providers: str | list) -> list:
+    def _get_providers(self, raw_df: pd.DataFrame, providers: str | list) -> list:
         """Gets providers for the "provider" argument and the dataframe.
 
         Parameters
@@ -500,7 +508,7 @@ class Reader:
         else:
             raise InterruptedError("Could no parse providers from argument")
 
-    def get_variables(
+    def _get_variables(
         self,
         raw_df: pd.DataFrame,
         unit_row: pd.Series,
@@ -535,7 +543,7 @@ class Reader:
             variables.append(var)
         return VariablesStorer(*variables)
 
-    def make_date_column(self, raw_df: pd.DataFrame) -> tuple[pd.Series, str]:
+    def _make_date_column(self, raw_df: pd.DataFrame) -> tuple[pd.Series, str]:
         """Make date column (datetime) from year, month, day columns if existing.
 
         Parameters
@@ -566,7 +574,7 @@ class Reader:
         else:
             return None, None
 
-    def add_missing_columns(self, raw_df: pd.DataFrame) -> pd.DataFrame:
+    def _add_missing_columns(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """Adds missing columns to the dataframe
 
         Parameters
@@ -580,7 +588,7 @@ class Reader:
             Dataframe with new columns
         """
         if not self._variables.has_name("DATE"):
-            missing_col, name = self.make_date_column(raw_df)
+            missing_col, name = self._make_date_column(raw_df)
             if (missing_col is not None) and (name is not None):
                 raw_df.insert(0, name, missing_col)
         return raw_df
