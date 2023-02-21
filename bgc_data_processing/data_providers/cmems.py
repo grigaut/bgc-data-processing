@@ -4,8 +4,8 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="CMEMS",
-    dirin=CONFIG["LOADING"]["CMEMS"]["PATH"],
-    category=CONFIG["LOADING"]["CMEMS"]["CATEGORY"],
+    dirin=CONFIG.providers["CMEMS"]["PATH"],
+    category=CONFIG.providers["CMEMS"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
         # DEFAULT_VARS["provider"].not_in_file(),
