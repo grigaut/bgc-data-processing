@@ -1,7 +1,7 @@
 
 [AGGREGATION]
 YEARS = [2007]
-PROVIDERS = ["IMR"]
+PROVIDERS = ["NMDC"]
 LIST_DIR = "./lists"
 
 [MAPPING]
