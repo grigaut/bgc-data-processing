@@ -12,7 +12,11 @@ from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import ExistingVar, NotExistingVar
+    from bgc_data_processing.variables import (
+        ExistingVar,
+        NotExistingVar,
+        VariablesStorer,
+    )
 
 
 class NetCDFLoader(BaseLoader):
@@ -35,6 +39,16 @@ class NetCDFLoader(BaseLoader):
     """
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
+
+    def __init__(
+        self,
+        provider_name: str,
+        dirin: str,
+        category: str,
+        files_pattern: str,
+        variables: "VariablesStorer",
+    ) -> None:
+        super().__init__(provider_name, dirin, category, files_pattern, variables)
 
     def __call__(self, exclude: list = []) -> "Storer":
         filepaths = self._select_filepaths(exclude=exclude)
