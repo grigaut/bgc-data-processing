@@ -1,39 +1,26 @@
 import datetime as dt
-import sys
 
 from bgc_data_processing import CONFIG, data_providers
 from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.tracers import GeoMesher
 
-BIN_SIZE = tuple(CONFIG["MAPPING"]["BINS_SIZE"])
-
-
-def get_args(sys_argv: list) -> tuple[dt.datetime, dt.datetime, str, list[str], int]:
-    date_start = dt.datetime.strptime(sys_argv[1], "%Y%m%d").date()
-    date_end = dt.datetime.strptime(sys_argv[2], "%Y%m%d").date()
-    var_name = sys_argv[3]
-    if len(sys_argv) > 4:
-        list_src = sys_argv[4].split(",")
-    else:
-        list_src = sorted(list(data_providers.LOADERS.keys()))
-    if len(sys_argv) > 5:
-        try:
-            verbose = int(sys_argv[5])
-        except ValueError:
-            verbose = 0
-    else:
-        verbose = 1
-    return date_start, date_end, var_name, list_src, verbose
-
-
 if __name__ == "__main__":
     # Script arguments
-    DATE_MIN, DATE_MAX, VAR_NAME, LIST_SRC, VERBOSE = get_args(sys.argv)
+    config_mapping = CONFIG.mapping
+    DATE_MIN: dt.datetime = config_mapping["DATE_MIN"]
+    DATE_MAX: dt.datetime = config_mapping["DATE_MAX"]
+    BIN_SIZE: list | int | float = config_mapping["BIN_SIZE"]
+    VARIABLE: str = config_mapping["VARIABLE"]
+    PROVIDERS: list[str] = config_mapping["PROVIDERS"]
+    DEPTH_AGGREGATION: str = config_mapping["DEPTH_AGGREGATION"]
+    BIN_AGGREGATION: str = config_mapping["BIN_AGGREGATION"]
+    VERBOSE: int = CONFIG.utils["VERBOSE"]
+
     data_dict = {}
-    for data_src in LIST_SRC:
+    for data_src in PROVIDERS:
         if VERBOSE > 0:
             print("Loading data : {}".format(data_src))
-        exclude = CONFIG["LOADING"][data_src]["EXCLUDE"]
+        exclude = CONFIG.providers[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         dset_loader.set_date_boundaries(
             date_min=DATE_MIN,
@@ -60,8 +47,9 @@ if __name__ == "__main__":
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
         GeoMesher(df).plot(
-            VAR_NAME,
+            VARIABLE,
             BIN_SIZE,
-            pivot_aggr="count",
-            suptitle=f"{VAR_NAME} - {', '.join(LIST_SRC)} ({category})\n{date_min}-{date_max}",
+            group_aggr=DEPTH_AGGREGATION,
+            pivot_aggr=BIN_AGGREGATION,
+            suptitle=f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n{date_min}-{date_max}",
         )

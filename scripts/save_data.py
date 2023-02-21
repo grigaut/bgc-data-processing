@@ -6,9 +6,10 @@ from bgc_data_processing.data_classes import Storer
 
 if __name__ == "__main__":
     # Script arguments
-    YEARS = CONFIG.aggregation["YEARS"]
-    PROVIDERS = CONFIG.aggregation["PROVIDERS"]
-    LIST_DIR = CONFIG.aggregation["LIST_DIR"]
+    config_aggregation = CONFIG.aggregation
+    YEARS = config_aggregation["YEARS"]
+    PROVIDERS = config_aggregation["PROVIDERS"]
+    LIST_DIR = config_aggregation["LIST_DIR"]
     VERBOSE = CONFIG.utils["VERBOSE"]
     SAVING_DIR = CONFIG.utils["SAVING_DIR"]
 
