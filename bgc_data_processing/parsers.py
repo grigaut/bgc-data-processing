@@ -105,7 +105,7 @@ class ConfigParser:
     def __init__(self, filepath: str) -> None:
         self.filepath = filepath
         with open(filepath, "rb") as f:
-            self.config = tomllib.load(f)
+            self._config = tomllib.load(f)
 
     def _check_type(self, var: Any, var_type: Type | tuple[Type, Type]) -> bool:
         """Checks if the type of the variable correspond to the required type.
@@ -174,11 +174,11 @@ class ConfigParser:
         KeyError
             If the path doesn't match the file's architecture
         """
-        if keys[0] not in self.config.keys():
+        if keys[0] not in self._config.keys():
             raise KeyError(
                 f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
             )
-        var = self.config[keys[0]]
+        var = self._config[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var, dict)) or (key not in var.keys()):
@@ -227,7 +227,7 @@ class ConfigParser:
         Returns
         -------
         dict
-            self.config["AGGREGATION"]
+            self._config["AGGREGATION"]
         """
         self.raise_if_wrong_type(["AGGREGATION", "YEARS"], (list, int))
         self.raise_if_wrong_type(["AGGREGATION", "PROVIDERS"], str, (list, str))
@@ -241,7 +241,7 @@ class ConfigParser:
         Returns
         -------
         dict
-            self.config["MAPPING"] with converted date times
+            self._config["MAPPING"] with converted date times
         """
         mapping = self.get(["MAPPING"])
         self.raise_if_wrong_type(["MAPPING", "DATE_MIN"], str)
@@ -261,9 +261,9 @@ class ConfigParser:
         Returns
         -------
         dict
-            self.config["PROVIDERS"]
+            self._config["PROVIDERS"]
         """
-        for provider in self.config["PROVIDERS"]:
+        for provider in self._config["PROVIDERS"]:
             self.raise_if_wrong_type(["PROVIDERS", provider, "PATH"], str)
             self.raise_if_wrong_type(["PROVIDERS", provider, "CATEGORY"], str)
             self.raise_if_wrong_type(["PROVIDERS", provider, "EXCLUDE"], (list, str))
@@ -276,7 +276,7 @@ class ConfigParser:
         Returns
         -------
         dict
-            self.config["UTILS"]
+            self._config["UTILS"]
         """
         self.raise_if_wrong_type(["UTILS", "VERBOSE"], int)
         self.raise_if_wrong_type(["UTILS", "SAVING_DIR"], str)
