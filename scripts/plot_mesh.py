@@ -8,7 +8,7 @@ from bgc_data_processing.tracers import GeoMesher
 BIN_SIZE = tuple(CONFIG["MAPPING"]["BINS_SIZE"])
 
 
-def get_args(sys_argv: list) -> tuple[list[str], list[str], int]:
+def get_args(sys_argv: list) -> tuple[dt.datetime, dt.datetime, str, list[str], int]:
     date_start = dt.datetime.strptime(sys_argv[1], "%Y%m%d").date()
     date_end = dt.datetime.strptime(sys_argv[2], "%Y%m%d").date()
     var_name = sys_argv[3]
@@ -57,4 +57,11 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print(f"Plotting {category} data")
         df: Storer = sum(data)
-        GeoMesher(df).plot(VAR_NAME, BIN_SIZE, pivot_aggr="count")
+        date_min = DATE_MIN.strftime("%Y%m%d")
+        date_max = DATE_MAX.strftime("%Y%m%d")
+        GeoMesher(df).plot(
+            VAR_NAME,
+            BIN_SIZE,
+            pivot_aggr="count",
+            suptitle=f"{VAR_NAME} - {', '.join(LIST_SRC)} ({category})\n{date_min}-{date_max}",
+        )
