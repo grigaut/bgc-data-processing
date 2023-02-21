@@ -8,7 +8,7 @@ loader = netcdf_tools.NetCDFLoader(
     category=CONFIG.providers["CMEMS"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
-        # DEFAULT_VARS["provider"].not_in_file(),
+        DEFAULT_VARS["provider"].not_in_file(),
         DEFAULT_VARS["expocode"].not_in_file(),
         DEFAULT_VARS["date"].in_file_as("TIME"),
         DEFAULT_VARS["year"].not_in_file(),
