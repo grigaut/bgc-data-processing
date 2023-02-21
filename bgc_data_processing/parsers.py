@@ -2,6 +2,7 @@
 import datetime as dt
 import os
 import tomllib
+from copy import deepcopy
 from typing import Any, Type
 
 import pandas as pd
@@ -186,7 +187,7 @@ class ConfigParser:
                     f"Variable {'.'.join(keys[:i+2])} does not exist in {self.filepath}"
                 )
             var = var[key]
-        return var
+        return deepcopy(var)
 
     def raise_if_wrong_type(
         self,
