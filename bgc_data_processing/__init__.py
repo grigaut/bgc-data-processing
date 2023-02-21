@@ -1,13 +1,14 @@
-import os
-import tomllib
-
+from bgc_data_processing.parsers import TOMLParser
 from bgc_data_processing.variables import TemplateVar
 
 __all__ = [
     "CONFIG",
 ]
+CONFIG = TOMLParser("config.toml")
+
 # Default variables setup using the format :
 # TemplateVar(name, unit, type, loading_sort_nb, saving_sort_nb, name_str_format, value_str_format)
+
 
 DEFAULT_VARS: dict[str, TemplateVar] = {}
 DEFAULT_VARS["provider"] = TemplateVar("PROVIDER", "[]", str, 0, 0, "%-15s", "%15s")
@@ -40,8 +41,3 @@ DEFAULT_VARS["silicate"] = TemplateVar(
 DEFAULT_VARS["chlorophyll"] = TemplateVar(
     "CPHL", "[mg/m3]", float, 15, 14, "%-10s", "%10.3f"
 )
-
-with open("config.toml", "rb") as f:
-    CONFIG = tomllib.load(f)
-if not os.path.isdir(CONFIG["SAVING"]["FILES_DIR"]):
-    os.mkdir(CONFIG["SAVING"]["FILES_DIR"])
