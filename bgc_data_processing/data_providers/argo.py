@@ -5,8 +5,8 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="ARGO",
-    dirin=CONFIG["LOADING"]["ARGO"]["PATH"],
-    category=CONFIG["LOADING"]["ARGO"]["CATEGORY"],
+    dirin=CONFIG.providers["ARGO"]["PATH"],
+    category=CONFIG.providers["ARGO"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
         # DEFAULT_VARS["provider"].not_in_file(),

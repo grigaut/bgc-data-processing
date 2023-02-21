@@ -5,8 +5,8 @@ from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="GLODAP_2019",
-    dirin=CONFIG["LOADING"]["GLODAP_2019"]["PATH"],
-    category=CONFIG["LOADING"]["GLODAP_2019"]["CATEGORY"],
+    dirin=CONFIG.providers["GLODAP_2019"]["PATH"],
+    category=CONFIG.providers["GLODAP_2019"]["CATEGORY"],
     files_pattern="glodapv2_({years}).csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

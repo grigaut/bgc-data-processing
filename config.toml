@@ -1,6 +1,24 @@
-[LOADING]
+
+[AGGREGATION]
+YEARS = [2007]
+PROVIDERS = ["NMDC"]
 LIST_DIR = "./lists"
-    [LOADING.ARGO]
+
+[MAPPING]
+DATE_MIN = "20070101"
+DATE_MAX = "20071231"
+BIN_SIZE = [0.5,1.5]
+VARIABLE="CPHL"
+PROVIDERS=["IMR"]
+DEPTH_AGGREGATION="top"
+BIN_AGGREGATION="count"
+
+[UTILS]
+VERBOSE = 2
+SAVING_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
+
+[PROVIDERS]
+    [PROVIDERS.ARGO]
     PATH = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
     CATEGORY = "float"
     EXCLUDE = [
@@ -17,40 +35,35 @@ LIST_DIR = "./lists"
         "GL_PR_PF_6903578.nc",
         "GL_PR_PF_6903579.nc"
     ]
-    [LOADING.CLIVAR]
+    [PROVIDERS.CLIVAR]
     PATH = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.GLODAPv2]
+    [PROVIDERS.GLODAPv2]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.GLODAP_2019]
+    [PROVIDERS.GLODAP_2019]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2019/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.GLODAP_2022]
+    [PROVIDERS.GLODAP_2022]
     PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2022/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.ICES]
+    [PROVIDERS.ICES]
     PATH = "/mnt/data02/gaerig/synthesis/ICES/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.IMR]
+    [PROVIDERS.IMR]
     PATH = "/mnt/data02/gaerig/synthesis/IMR/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.NMDC]
+    [PROVIDERS.NMDC]
     PATH = "/mnt/data02/gaerig/synthesis/NMDC/data"
     CATEGORY = "in_situ"
     EXCLUDE = []
-    [LOADING.CMEMS]
+    [PROVIDERS.CMEMS]
     PATH = "/mnt/data02/gaerig/synthesis/CMEMS/history/nutrients/BO"
-    CATEGORY = "float"
+    CATEGORY = "in_situ"
     EXCLUDE = []
-
-[SAVING]
-FILES_DIR = "/home/gaerig/Projects/bgc-data-processing/bgc_data"
-[MAPPING]
-BINS_SIZE = [0.5,1.5]
