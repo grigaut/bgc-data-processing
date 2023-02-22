@@ -7,7 +7,8 @@ from bgc_data_processing.data_classes import Storer
 if __name__ == "__main__":
     # Script arguments
     config_aggregation = CONFIG.aggregation
-    YEARS = config_aggregation["YEARS"]
+    YEARS: list[int] = config_aggregation["YEARS"]
+    VARIABLES: list[str] = config_aggregation["VARIABLES"]
     LATITUDE_MIN: int | float = config_aggregation["LATITUDE_MIN"]
     LATITUDE_MAX: int | float = config_aggregation["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = config_aggregation["LONGITUDE_MIN"]
@@ -46,6 +47,9 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print("Loading data : {}".format(data_src))
         dset_loader = data_providers.LOADERS[data_src]
+        dset_loader.set_saving_order(
+            var_names=VARIABLES,
+        )
         dset_loader.set_date_boundaries(
             date_min=DRNG.values.min(),
             date_max=DRNG.values.max(),
