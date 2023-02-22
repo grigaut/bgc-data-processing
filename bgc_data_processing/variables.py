@@ -481,13 +481,13 @@ class VariablesStorer:
         """
         return self._mapper_by_name.keys()
 
-    def set_saving_order(self, var_names: list[str]) -> None:
+    def set_saving_order(self, var_names: list[str] = []) -> None:
         """Set the saving order for the variables.
 
         Parameters
         ----------
-        var_names : list[str]
-            List of variable names => saving variables sorted.
+        var_names : list[str], optional
+            List of variable names => saving variables sorted., by default []
 
         Raises
         ------
