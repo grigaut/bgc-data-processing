@@ -6,6 +6,14 @@
 [AGGREGATION]
 ## AGGREGATION.YEARS: list[int]: years to consider to aggregate data
 YEARS = [2007]
+## AGGREGATION.LATITUDE_MIN: int | float
+LATITUDE_MIN = 50
+## AGGREGATION.LATITUDE_MAX: int | float
+LATITUDE_MAX = 89
+## AGGREGATION.LONGITUDE_MIN: int | float
+LONGITUDE_MIN = -40
+## AGGREGATION.LONGITUDE_MAX: int | float
+LONGITUDE_MAX = 40
 ## AGGREGATION.PROVIDERS: list[str]: providers to use data from 
 PROVIDERS = ["NMDC"]
 ## AGGREGATION.LIST_DIR: str: directory with cycle informations
@@ -16,12 +24,20 @@ LIST_DIR = "./lists"
 DATE_MIN = "20070101"
 ## MAPPING.DATE_MAX: str: last date to map
 DATE_MAX = "20071231"
+## MAPPING.LATITUDE_MIN: int | float
+LATITUDE_MIN = 50
+## MAPPING.LATITUDE_MAX: int | float
+LATITUDE_MAX = 89
+## MAPPING.LONGITUDE_MIN: int | float
+LONGITUDE_MIN = -40
+## MAPPING.LONGITUDE_MAX: int | float
+LONGITUDE_MAX = 40
 ## MAPPING.BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
 BIN_SIZE = [0.5,1.5]
 ## MAPPING.VARIABLE: str: variable to map
 VARIABLE = "CPHL"
 ## MAPPING.PROVIDERS: list[str]: providers to use data from
-PROVIDERS = ["IMR"]
+PROVIDERS = ["CMEMS"]
 ## MAPPING.DEPTH_AGGREGATION: str: function to use to aggregate data over depth
 DEPTH_AGGREGATION = "top"
 ## MAPPING.BIN_AGGREGATION: str: function to use to aggregate data into bins

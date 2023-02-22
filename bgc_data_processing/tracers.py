@@ -225,9 +225,10 @@ class GeoMesher(BasePlot):
     def _build_plot(
         self,
         variable_name: str,
-        bins_size: float | tuple[float, float] = 0.5,
-        depth_aggr: str | Callable = "top",
-        bin_aggr: Callable | Callable = "count",
+        bins_size: float | tuple[float, float],
+        depth_aggr: str | Callable,
+        bin_aggr: Callable | Callable,
+        extent: tuple | list,
     ) -> "Figure":
         """Plots the colormesh for the given variable.
 
@@ -235,16 +236,18 @@ class GeoMesher(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        bins_size : float | tuple[float, float], optional
+        bins_size : float | tuple[float, float]
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree., by default 0.5
-        depth_aggr : str | Callable, optional
+            Unit is supposed to be degree.
+        depth_aggr : str | Callable
             Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
-             or callable function to use to aggregate., by default "top"
-        bin_aggr : str | Callable, optional
+             or callable function to use to aggregate.
+        bin_aggr : str | Callable
             Name of the aggregation function to use when pivotting data (from self._bin_aggr),
-            or callable function to use to aggregate., by default "count"
+            or callable function to use to aggregate.
+        extent : tuple | list
+            Boundaries of the map.
         """
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
@@ -273,7 +276,7 @@ class GeoMesher(BasePlot):
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
-        ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
+        ax.set_extent(extent, crs.PlateCarree())
         cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
         if bin_aggr == "count":
             label = f"{variable_name} data points count"
@@ -295,6 +298,7 @@ class GeoMesher(BasePlot):
         bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
+        extent: tuple | list = (-40, 40, 50, 89),
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -318,12 +322,15 @@ class GeoMesher(BasePlot):
             Title for the figure, if set to None, automatically created., by default None.
         suptitle: str, optional
             Suptitle for the figure, if set to None, automatically created., by default None.
+        extent : tuple | list, optional
+            Boundaries of the map., by default (-40, 40, 50, 89).
         """
         _ = self._build_plot(
             variable_name=variable_name,
             bins_size=bins_size,
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
+            extent=extent,
         )
         if title is not None:
             plt.title(title)
@@ -339,6 +346,7 @@ class GeoMesher(BasePlot):
         bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
+        extent: tuple | list = (-40, 40, 50, 89),
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -360,12 +368,15 @@ class GeoMesher(BasePlot):
             Title for the figure, if set to None, automatically created., by default None.
         suptitle: str, optional
             Suptitle for the figure, if set to None, automatically created., by default None.
+        extent : tuple | list, optional
+            Boundaries of the map., by default (-40, 40, 50, 89)
         """
         _ = self._build_plot(
             variable_name=variable_name,
             bins_size=bins_size,
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
+            extent=extent,
         )
 
         if title is not None:
