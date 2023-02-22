@@ -27,10 +27,12 @@ class GeoMesher(BasePlot):
     _depth_aggr = {
         "top": lambda x: x.first(),
         "bottom": lambda x: x.last(),
+        "count": lambda x: x.count(),
     }
     _bin_aggr = {
         "mean": np.mean,
-        "count": np.count_nonzero,
+        "count": lambda x: x.count(),
+        "sum": np.sum,
     }
 
     def __init__(
@@ -275,6 +277,8 @@ class GeoMesher(BasePlot):
         cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
         if bin_aggr == "count":
             label = f"{variable_name} data points count"
+        elif depth_aggr == "count" and bin_aggr == "sum":
+            label = f"{variable_name} total data points count"
         else:
             label = f"{bin_aggr} {variable_name} levels {self._variables[variable_name].unit}"
         fig.colorbar(cbar, label=label, shrink=0.75)
