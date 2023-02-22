@@ -268,7 +268,7 @@ class GeoMesher(BasePlot):
             lat, lon = bins_size, bins_size
         ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
         fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
-        ax.gridlines()
+        ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
@@ -277,11 +277,7 @@ class GeoMesher(BasePlot):
             label = f"{variable_name} data points count"
         else:
             label = f"{pivot_aggr} {variable_name} levels {self._variables[variable_name].unit}"
-        fig.colorbar(
-            cbar,
-            label=label,
-            shrink=0.75,
-        )
+        fig.colorbar(cbar, label=label, shrink=0.75)
         title = f"{lat}° x {lon}° grid (lat x lon)"
         plt.title(title)
         return fig
