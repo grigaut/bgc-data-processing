@@ -494,6 +494,8 @@ class VariablesStorer:
         ValueError
             If a variable name is not one of the variables'.
         """
+        if not var_names:
+            return
         for name in var_names:
             if name not in self.keys():
                 raise ValueError(f"{name} is not a valid name for the variables")
