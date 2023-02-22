@@ -32,7 +32,7 @@ if __name__ == "__main__":
     str_start = pd.to_datetime(DRNG["start_date"]).dt.strftime("%Y%m%d")
     str_end = pd.to_datetime(DRNG["end_date"]).dt.strftime("%Y%m%d")
     dates_str = str_start + "-" + str_end
-    aggr_date_names = pd.concat(aggr_date_names).astype(str)
+    aggr_date_names = pd.concat(aggr_date_names, ignore_index=True).astype(str)
     if VERBOSE > 0:
         years_txt = ", ".join([str(x) for x in YEARS])
         txt = f"Processing BGC data from {years_txt} provided by {', '.join(PROVIDERS)}"

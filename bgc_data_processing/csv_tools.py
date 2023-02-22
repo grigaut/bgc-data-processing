@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 from bgc_data_processing.base import BaseLoader
 from bgc_data_processing.data_classes import Storer
@@ -109,7 +110,11 @@ class CSVLoader(BaseLoader):
         pd.DataFrame
             Raw data from the csv file.
         """
-        return pd.read_csv(filepath, **self._read_params)
+        try:
+            file = pd.read_csv(filepath, **self._read_params)
+        except EmptyDataError:
+            file = pd.DataFrame(columns=[x.label for x in self._variables.in_dset])
+        return file
 
     def _filter_flags(self, df: pd.DataFrame, var: "ExistingVar") -> pd.Series:
         """Filters data selecting only some flag values.
