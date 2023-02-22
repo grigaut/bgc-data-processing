@@ -9,6 +9,10 @@ if __name__ == "__main__":
     config_mapping = CONFIG.mapping
     DATE_MIN: dt.datetime = config_mapping["DATE_MIN"]
     DATE_MAX: dt.datetime = config_mapping["DATE_MAX"]
+    LATITUDE_MIN: int | float = config_mapping["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = config_mapping["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = config_mapping["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = config_mapping["LONGITUDE_MAX"]
     BIN_SIZE: list | int | float = config_mapping["BIN_SIZE"]
     VARIABLE: str = config_mapping["VARIABLE"]
     PROVIDERS: list[str] = config_mapping["PROVIDERS"]
@@ -27,12 +31,12 @@ if __name__ == "__main__":
             date_max=DATE_MAX,
         )
         dset_loader.set_latitude_boundaries(
-            latitude_min=50,
-            latitude_max=89,
+            latitude_min=LATITUDE_MIN,
+            latitude_max=LATITUDE_MAX,
         )
         dset_loader.set_longitude_boundaries(
-            longitude_min=-40,
-            longitude_max=40,
+            longitude_min=LONGITUDE_MIN,
+            longitude_max=LONGITUDE_MAX,
         )
         dset_loader.set_verbose(VERBOSE)
         storer = dset_loader(exclude=exclude)
@@ -52,4 +56,10 @@ if __name__ == "__main__":
             depth_aggr=DEPTH_AGGREGATION,
             bin_aggr=BIN_AGGREGATION,
             suptitle=f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n{date_min}-{date_max}",
+            extent=(
+                LONGITUDE_MIN,
+                LONGITUDE_MAX,
+                LATITUDE_MIN,
+                LATITUDE_MAX,
+            ),
         )

@@ -8,6 +8,10 @@ if __name__ == "__main__":
     # Script arguments
     config_aggregation = CONFIG.aggregation
     YEARS = config_aggregation["YEARS"]
+    LATITUDE_MIN: int | float = config_aggregation["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = config_aggregation["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = config_aggregation["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = config_aggregation["LONGITUDE_MAX"]
     PROVIDERS = config_aggregation["PROVIDERS"]
     LIST_DIR = config_aggregation["LIST_DIR"]
     VERBOSE = CONFIG.utils["VERBOSE"]
@@ -47,12 +51,12 @@ if __name__ == "__main__":
             date_max=DRNG.values.max(),
         )
         dset_loader.set_latitude_boundaries(
-            latitude_min=50,
-            latitude_max=89,
+            latitude_min=LATITUDE_MIN,
+            latitude_max=LATITUDE_MAX,
         )
         dset_loader.set_longitude_boundaries(
-            longitude_min=-40,
-            longitude_max=40,
+            longitude_min=LONGITUDE_MIN,
+            longitude_max=LONGITUDE_MAX,
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
