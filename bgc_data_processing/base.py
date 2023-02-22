@@ -125,6 +125,16 @@ class BaseLoader(ABC):
         assert isinstance(verbose, int), "self.verbose must be an instance of int"
         self._verbose = verbose
 
+    def set_saving_order(self, var_names: str) -> None:
+        """Set the saving order for the variables.
+
+        Parameters
+        ----------
+        var_names : list[str]
+            List of variable names => saving variables sorted.
+        """
+        self._variables.set_saving_order(var_names=var_names)
+
     def set_longitude_boundaries(
         self,
         longitude_min: int | float,

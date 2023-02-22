@@ -481,6 +481,28 @@ class VariablesStorer:
         """
         return self._mapper_by_name.keys()
 
+    def set_saving_order(self, var_names: list[str]) -> None:
+        """Set the saving order for the variables.
+
+        Parameters
+        ----------
+        var_names : list[str]
+            List of variable names => saving variables sorted.
+
+        Raises
+        ------
+        ValueError
+            If a variable name is not one of the variables'.
+        """
+        for name in var_names:
+            if name not in self.keys():
+                raise ValueError(f"{name} is not a valid name for the variables")
+        for var in self._elements:
+            if var.name in var_names:
+                var.save_nb = var_names.index(var.name)
+            else:
+                var.save_nb = None
+
     @property
     def labels(self) -> dict[str, str]:
         """Returns a dicitonnary mapping variable names to variables labels
