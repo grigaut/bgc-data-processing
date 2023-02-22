@@ -103,10 +103,71 @@ class ConfigParser:
         Path to the config file.
     """
 
-    def __init__(self, filepath: str) -> None:
+    _str_to_type = {
+        "str": str,
+        "int": int,
+        "list": list,
+        "tuple": tuple,
+        "float": float,
+    }
+
+    def __init__(self, filepath: str, check_types: bool = True) -> None:
         self.filepath = filepath
+        self._check = check_types
         with open(filepath, "rb") as f:
             self._config = tomllib.load(f)
+        if check_types:
+            self._parsed_types = self._parse_types(filepath=filepath)
+
+    def _get_keys_types(
+        self,
+        line: str,
+    ) -> tuple[list[str], list[Type | tuple[Type, Type]]]:
+        """Parses a type hinting line.
+
+        Parameters
+        ----------
+        line : str
+            Line from config file to parse.
+
+        Returns
+        -------
+        tuple[list[str], list[Type | tuple[Type, Type]]]
+            List of keys: path to the variable, list of types/tuples: possible type for the variable.
+        """
+        # Remove comment part on the line
+        str_keys, str_types = line.split(": ")[:2]
+        str_types = str_types.replace(":", "")
+        keys = str_keys.split(".")
+        types_list = str_types.split(" | ")
+        types = []
+        for str_type in types_list:
+            # Iterable type
+            if "[" in str_type:
+                str_type = str_type[:-1].split("[")
+                str_type = tuple([self._str_to_type[x] for x in str_type])
+            else:
+                str_type = self._str_to_type[str_type]
+            types.append(str_type)
+        return keys, types
+
+    def _parse_types(self, filepath: str) -> dict:
+        # reads config file
+        with open(filepath, "r") as file:
+            lines = [line.strip() for line in file.readlines()]
+        # Select only type hinting lines
+        type_hints = [line[3:].replace("\n", "") for line in lines if line[:3] == "## "]
+        types_dict = {}
+        for line in type_hints:
+            keys, types = self._get_keys_types(line=line)
+            dict_level = types_dict
+            # Save type in a dictionnary with similar structure as config
+            for key in keys[:-1]:
+                if key not in dict_level.keys():
+                    dict_level[key] = {}
+                dict_level = dict_level[key]
+            dict_level[keys[-1]] = tuple(types)
+        return types_dict
 
     def _check_type(self, var: Any, var_type: Type | tuple[Type, Type]) -> bool:
         """Checks if the type of the variable correspond to the required type.
@@ -126,8 +187,7 @@ class ConfigParser:
         """
         if isinstance(var_type, tuple):
             is_correct_iterator = isinstance(var, var_type[0])
-            is_all_correct = all(isinstance(x, var_type[1]) for x in var)
-            return is_correct_iterator and is_all_correct
+            return is_correct_iterator and all(isinstance(x, var_type[1]) for x in var)
         else:
             return isinstance(var, var_type)
 
@@ -189,11 +249,42 @@ class ConfigParser:
             var = var[key]
         return deepcopy(var)
 
+    def get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
+        """Return a variable from the toml using its path.
+
+        Parameters
+        ----------
+        keys : list[str]
+            List path to the variable: ["VAR1", "VAR2", "VAR3"]
+            is the path to the variable VAR1.VAR2.VAR3 in the toml.
+
+        Returns
+        -------
+        list[Type | tuple[Type, Type]]
+            Possible types for the variable.
+
+        Raises
+        ------
+        KeyError
+            If the type can't be found in the config file.
+        """
+        if keys[0] not in self._parsed_types.keys():
+            raise KeyError(
+                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}"
+            )
+        var_type = self._parsed_types[keys[0]]
+        for i in range(len(keys[1:])):
+            key = keys[1:][i]
+            if (not isinstance(var_type, dict)) or (key not in var_type.keys()):
+                raise KeyError(
+                    f"Type of {'.'.join(keys[:i+2])} can't be parsed from {self.filepath}"
+                )
+            var_type = var_type[key]
+        return var_type
+
     def raise_if_wrong_type(
         self,
         keys: list[str],
-        var_type: Type | tuple[Type, Type],
-        *args: Type | tuple[Type, Type],
     ) -> None:
         """Raises a TypeError if the variable type is none of the specified types.
 
@@ -202,12 +293,6 @@ class ConfigParser:
         keys : list[str]
             List path to the variable: ["VAR1", "VAR2", "VAR3"]
             is the path to the variable VAR1.VAR2.VAR3 in the toml.
-        var_type : Type | tuple[Type, Type]
-            Type for the variable, if tuple, means that the first value is an ierable
-            and the second one the type of the values in the iterable.
-        args : Type | tuple[Type, Type]
-            Additional possible types for the variable, if tuple, means that the first value is an ierable
-            and the second one the type of the values in the iterable.
 
         Raises
         ------
@@ -215,11 +300,31 @@ class ConfigParser:
             If the variable doesn't match any of the required types.
         """
         var = self.get(keys)
-        types = [var_type] + list(args)
+        types = self.get_type(keys)
         # Check type:
         is_any_type = any(self._check_type(var, var_type) for var_type in types)
         if not is_any_type:
             raise TypeError(self._make_error_msg(keys=keys, types=types))
+
+    def raise_if_wrong_type_below(
+        self,
+        keys: list[str],
+    ) -> None:
+        """Verifies types for all variables 'below' keys level.
+
+        Parameters
+        ----------
+        keys : list[str]
+            'Root' level which to start checking types after
+        """
+        var = self.get(keys)
+        if not self._check:
+            return
+        if not isinstance(var, dict):
+            self.raise_if_wrong_type(keys)
+        else:
+            for key in var.keys():
+                self.raise_if_wrong_type_below(keys=keys + [key])
 
     @property
     def aggregation(self) -> dict:
@@ -230,9 +335,7 @@ class ConfigParser:
         dict
             self._config["AGGREGATION"]
         """
-        self.raise_if_wrong_type(["AGGREGATION", "YEARS"], (list, int))
-        self.raise_if_wrong_type(["AGGREGATION", "PROVIDERS"], str, (list, str))
-        self.raise_if_wrong_type(["AGGREGATION", "LIST_DIR"], str)
+        self.raise_if_wrong_type_below(["AGGREGATION"])
         return self.get(["AGGREGATION"])
 
     @property
@@ -245,12 +348,7 @@ class ConfigParser:
             self._config["MAPPING"] with converted date times
         """
         mapping = self.get(["MAPPING"])
-        self.raise_if_wrong_type(["MAPPING", "DATE_MIN"], str)
-        self.raise_if_wrong_type(["MAPPING", "DATE_MAX"], str)
-        self.raise_if_wrong_type(["MAPPING", "BIN_SIZE"], (list, float), (list, int))
-        self.raise_if_wrong_type(["MAPPING", "PROVIDERS"], str, (list, str))
-        self.raise_if_wrong_type(["MAPPING", "DEPTH_AGGREGATION"], str)
-        self.raise_if_wrong_type(["MAPPING", "BIN_AGGREGATION"], str)
+        self.raise_if_wrong_type_below(["MAPPING"])
         mapping["DATE_MIN"] = dt.datetime.strptime(mapping["DATE_MIN"], "%Y%m%d")
         mapping["DATE_MAX"] = dt.datetime.strptime(mapping["DATE_MAX"], "%Y%m%d")
         return mapping
@@ -264,10 +362,7 @@ class ConfigParser:
         dict
             self._config["PROVIDERS"]
         """
-        for provider in self._config["PROVIDERS"]:
-            self.raise_if_wrong_type(["PROVIDERS", provider, "PATH"], str)
-            self.raise_if_wrong_type(["PROVIDERS", provider, "CATEGORY"], str)
-            self.raise_if_wrong_type(["PROVIDERS", provider, "EXCLUDE"], (list, str))
+        self.raise_if_wrong_type_below(["PROVIDERS"])
         return self.get(["PROVIDERS"])
 
     @property
@@ -279,8 +374,7 @@ class ConfigParser:
         dict
             self._config["UTILS"]
         """
-        self.raise_if_wrong_type(["UTILS", "VERBOSE"], int)
-        self.raise_if_wrong_type(["UTILS", "SAVING_DIR"], str)
+        self.raise_if_wrong_type_below(["UTILS"])
         saving_dir = self.get(["UTILS", "SAVING_DIR"])
         if not os.path.isdir(saving_dir):
             os.mkdir(saving_dir)
