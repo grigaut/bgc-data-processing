@@ -49,7 +49,7 @@ if __name__ == "__main__":
         GeoMesher(df).plot(
             VARIABLE,
             BIN_SIZE,
-            group_aggr=DEPTH_AGGREGATION,
-            pivot_aggr=BIN_AGGREGATION,
+            depth_aggr=DEPTH_AGGREGATION,
+            bin_aggr=BIN_AGGREGATION,
             suptitle=f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n{date_min}-{date_max}",
         )

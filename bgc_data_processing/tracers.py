@@ -24,11 +24,11 @@ class GeoMesher(BasePlot):
         Data Storer containing data to plot.
     """
 
-    _group_aggr = {
+    _depth_aggr = {
         "top": lambda x: x.first(),
         "bottom": lambda x: x.last(),
     }
-    _pivot_aggr = {
+    _bin_aggr = {
         "mean": np.mean,
         "count": np.count_nonzero,
     }
@@ -88,7 +88,7 @@ class GeoMesher(BasePlot):
         lon_key : str
             Longitude variable name.
         how : str | Callable
-            Grouping function key to use with self._group_aggr or Callable function to use to group.
+            Grouping function key to use with self._depth_aggr or Callable function to use to group.
 
         Returns
         -------
@@ -98,7 +98,7 @@ class GeoMesher(BasePlot):
         """
         group = self._data.groupby(self._grouping_columns)
         if isinstance(how, str):
-            group_fn = self._group_aggr[how]
+            group_fn = self._depth_aggr[how]
         else:
             group_fn = how
         var_series: pd.Series = group_fn(group[var_key])
@@ -145,8 +145,8 @@ class GeoMesher(BasePlot):
         self,
         label: str,
         bins_size: float | tuple[float, float],
-        group_aggr: str | Callable,
-        pivot_aggr: str | Callable,
+        depth_aggr: str | Callable,
+        bin_aggr: str | Callable,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
@@ -158,10 +158,10 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree
-        group_aggr : str | Callable
+        depth_aggr : str | Callable
             Name of the function to use to aggregate data when group by similar measuring point
             or callable function to use to aggregate.
-        pivot_aggr : str | Callable
+        bin_aggr : str | Callable
             Name of the function to aggregate when pivotting data or callable function to use to aggregate.
 
         Returns
@@ -175,7 +175,7 @@ class GeoMesher(BasePlot):
             var_key=label,
             lat_key=lat,
             lon_key=lon,
-            how=group_aggr,
+            how=depth_aggr,
         )
         if isinstance(bins_size, Iterable):
             lat_bins_size = bins_size[0]
@@ -201,10 +201,10 @@ class GeoMesher(BasePlot):
         bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
-        if isinstance(pivot_aggr, str):
-            aggfunc = self._pivot_aggr[pivot_aggr]
+        if isinstance(bin_aggr, str):
+            aggfunc = self._bin_aggr[bin_aggr]
         else:
-            aggfunc = pivot_aggr
+            aggfunc = bin_aggr
         if self._verbose > 2:
             print("\t\tPivotting data to 2D table")
         vals = bins_concat.pivot_table(
@@ -224,8 +224,8 @@ class GeoMesher(BasePlot):
         self,
         variable_name: str,
         bins_size: float | tuple[float, float] = 0.5,
-        group_aggr: str | Callable = "top",
-        pivot_aggr: Callable | Callable = "count",
+        depth_aggr: str | Callable = "top",
+        bin_aggr: Callable | Callable = "count",
     ) -> "Figure":
         """Plots the colormesh for the given variable.
 
@@ -237,11 +237,11 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
-        group_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+        depth_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
              or callable function to use to aggregate., by default "top"
-        pivot_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+        bin_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
             or callable function to use to aggregate., by default "count"
         """
         if self._verbose > 1:
@@ -249,8 +249,8 @@ class GeoMesher(BasePlot):
         X1, Y1, Z1 = self.mesh(
             label=self._variables.labels[variable_name],
             bins_size=bins_size,
-            group_aggr=group_aggr,
-            pivot_aggr=pivot_aggr,
+            depth_aggr=depth_aggr,
+            bin_aggr=bin_aggr,
         )
         if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
             warnings.warn(
@@ -273,10 +273,10 @@ class GeoMesher(BasePlot):
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent([-40, 40, 50, 89], crs.PlateCarree())
         cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
-        if pivot_aggr == "count":
+        if bin_aggr == "count":
             label = f"{variable_name} data points count"
         else:
-            label = f"{pivot_aggr} {variable_name} levels {self._variables[variable_name].unit}"
+            label = f"{bin_aggr} {variable_name} levels {self._variables[variable_name].unit}"
         fig.colorbar(cbar, label=label, shrink=0.75)
         title = f"{lat}° x {lon}° grid (lat x lon)"
         plt.title(title)
@@ -287,8 +287,8 @@ class GeoMesher(BasePlot):
         save_path: str,
         variable_name: str,
         bins_size: float | tuple[float, float] = 0.5,
-        group_aggr: str | Callable = "top",
-        pivot_aggr: Callable | Callable = "count",
+        depth_aggr: str | Callable = "top",
+        bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
     ) -> None:
@@ -304,11 +304,11 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
-        group_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+        depth_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
              or callable function to use to aggregate., by default "top"
-        pivot_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+        bin_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created., by default None.
@@ -318,8 +318,8 @@ class GeoMesher(BasePlot):
         _ = self._build_plot(
             variable_name=variable_name,
             bins_size=bins_size,
-            group_aggr=group_aggr,
-            pivot_aggr=pivot_aggr,
+            depth_aggr=depth_aggr,
+            bin_aggr=bin_aggr,
         )
         if title is not None:
             plt.title(title)
@@ -331,8 +331,8 @@ class GeoMesher(BasePlot):
         self,
         variable_name: str,
         bins_size: float | tuple[float, float] = 0.5,
-        group_aggr: str | Callable = "top",
-        pivot_aggr: Callable | Callable = "count",
+        depth_aggr: str | Callable = "top",
+        bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
     ) -> None:
@@ -346,11 +346,11 @@ class GeoMesher(BasePlot):
             Bins size, if tuple, first component if for latitude, second is for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
-        group_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self._group_aggr),
+        depth_aggr : str | Callable, optional
+            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
              or callable function to use to aggregate., by default "top"
-        pivot_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self._pivot_aggr),
+        bin_aggr : str | Callable, optional
+            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created., by default None.
@@ -360,8 +360,8 @@ class GeoMesher(BasePlot):
         _ = self._build_plot(
             variable_name=variable_name,
             bins_size=bins_size,
-            group_aggr=group_aggr,
-            pivot_aggr=pivot_aggr,
+            depth_aggr=depth_aggr,
+            bin_aggr=bin_aggr,
         )
 
         if title is not None:
