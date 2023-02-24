@@ -36,6 +36,8 @@ VARIABLES = [
 ]
 ## AGGREGATION.LIST_DIR: str: directory with cycle informations
 LIST_DIR = "./lists"
+## AGGREGATION.SAVING_DIR: str: directory in which to save data
+SAVING_DIR = "bgc_data"
 
 [MAPPING]
 ## MAPPING.DATE_MIN: str: first date to map
@@ -60,12 +62,12 @@ PROVIDERS = ["CMEMS"]
 DEPTH_AGGREGATION = "top"
 ## MAPPING.BIN_AGGREGATION: str: function to use to aggregate data into bins
 BIN_AGGREGATION = "count"
+## MAPPING.SAVING_DIR: str: directory in which to save data
+SAVING_DIR = "bgc_figs"
 
 [UTILS]
 ## UTILS.VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2
-## UTILS.SAVING_DIR: str: directory in which to save data
-SAVING_DIR = "bgc_data"
 
 [PROVIDERS]
     [PROVIDERS.ARGO]
