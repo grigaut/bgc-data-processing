@@ -336,6 +336,9 @@ class ConfigParser:
             self._config["AGGREGATION"]
         """
         self.raise_if_wrong_type_below(["AGGREGATION"])
+        saving_dir = self.get(["AGGREGATION", "SAVING_DIR"])
+        if not os.path.isdir(saving_dir):
+            os.mkdir(saving_dir)
         return self.get(["AGGREGATION"])
 
     @property
@@ -351,6 +354,9 @@ class ConfigParser:
         self.raise_if_wrong_type_below(["MAPPING"])
         mapping["DATE_MIN"] = dt.datetime.strptime(mapping["DATE_MIN"], "%Y%m%d")
         mapping["DATE_MAX"] = dt.datetime.strptime(mapping["DATE_MAX"], "%Y%m%d")
+        saving_dir = self.get(["MAPPING", "SAVING_DIR"])
+        if not os.path.isdir(saving_dir):
+            os.mkdir(saving_dir)
         return mapping
 
     @property
@@ -375,7 +381,4 @@ class ConfigParser:
             self._config["UTILS"]
         """
         self.raise_if_wrong_type_below(["UTILS"])
-        saving_dir = self.get(["UTILS", "SAVING_DIR"])
-        if not os.path.isdir(saving_dir):
-            os.mkdir(saving_dir)
         return self.get(["UTILS"])

@@ -15,8 +15,8 @@ if __name__ == "__main__":
     LONGITUDE_MAX: int | float = config_aggregation["LONGITUDE_MAX"]
     PROVIDERS = config_aggregation["PROVIDERS"]
     LIST_DIR = config_aggregation["LIST_DIR"]
+    SAVING_DIR = config_aggregation["SAVING_DIR"]
     VERBOSE = CONFIG.utils["VERBOSE"]
-    SAVING_DIR = CONFIG.utils["SAVING_DIR"]
 
     drngs = []
     aggr_date_names = []
