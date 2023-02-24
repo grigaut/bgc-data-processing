@@ -8,3 +8,4 @@ bgc_figs
 bgc_data
 # virtual environemnt
 .venv
+.vscode
