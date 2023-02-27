@@ -1,6 +1,7 @@
 import os
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
@@ -124,6 +125,117 @@ class Storer:
             verbose=min(self._verbose, object.verbose),
         )
         return concat_storer
+
+    def remove_duplicates(self, priority_list: list = None) -> None:
+        """Updates self._data to remove duplicates in data.
+
+        Parameters
+        ----------
+        priority_list : list, optional
+            Providers priority order, first has priority over others and so on., by default None
+        """
+        df = self._data
+        df = self._remove_duplicates_among_providers(df)
+        df = self._remove_duplicates_between_providers(df, priority_list=priority_list)
+        self._data = df
+
+    def _remove_duplicates_among_providers(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Removes duplicates among a common providers.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to remove duplicated data from.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame without duplicates.
+        """
+        provider_label = self._variables.labels["PROVIDER"]
+        expocode_label = self._variables.labels["EXPOCODE"]
+        # date related fields
+        year_label = self._variables.labels["YEAR"]
+        month_label = self._variables.labels["MONTH"]
+        day_label = self._variables.labels["DAY"]
+        # position related fields
+        latitude_label = self._variables.labels["LATITUDE"]
+        longitude_label = self._variables.labels["LONGITUDE"]
+        depth_label = self._variables.labels["DEPH"]
+        subset = [
+            provider_label,
+            expocode_label,
+            year_label,
+            month_label,
+            day_label,
+            latitude_label,
+            longitude_label,
+            depth_label,
+        ]
+        # Arbitrarily keep first value
+        dropped = df.drop_duplicates(
+            subset=subset,
+            keep="first",
+        )
+        return dropped
+
+    def _remove_duplicates_between_providers(
+        self,
+        df: pd.DataFrame,
+        priority_list: list,
+    ) -> pd.DataFrame:
+        """Removes duplicates among a common providers.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to remove duplicated data from.
+        priority_list : list, optional
+            Providers priority order, first has priority over others and so on., by default None
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame without duplicates.
+        """
+        provider_label = self._variables.labels["PROVIDER"]
+        providers = df[provider_label].unique()
+        if len(providers) == 1:
+            return df
+        expocode_label = self._variables.labels["EXPOCODE"]
+        # date related fields
+        year_label = self._variables.labels["YEAR"]
+        month_label = self._variables.labels["MONTH"]
+        day_label = self._variables.labels["DAY"]
+        # position related fields
+        latitude_label = self._variables.labels["LATITUDE"]
+        longitude_label = self._variables.labels["LONGITUDE"]
+        depth_label = self._variables.labels["DEPH"]
+        subset = [
+            expocode_label,
+            year_label,
+            month_label,
+            day_label,
+            latitude_label,
+            longitude_label,
+            depth_label,
+        ]
+        # every row concerned by duplication of the variables in subset
+        is_duplicated = df.duplicated(
+            subset=subset,
+            keep=False,
+        )
+        if priority_list is not None:
+            sort_func = np.vectorize(lambda x: priority_list.index(x))
+        else:
+            sort_func = np.vectorize(lambda x: x)
+        duplicates = df.filter(df.loc[is_duplicated, :].index, axis=0)
+        duplicates.sort_values(provider_label, key=sort_func, inplace=True)
+        to_dump = duplicates.duplicated(subset=subset, keep="first")
+        dump_index = to_dump[to_dump].index
+        tmp = pd.concat([df, to_dump], axis=1)
+        print(tmp[~tmp[0].isna()])
+        return df.drop(dump_index)
 
     def save(self, filepath: str) -> None:
         """Saving method to save the Dataframe.
