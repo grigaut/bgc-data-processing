@@ -10,7 +10,9 @@ loader = csv_tools.CSVLoader(
     files_pattern="GLODAPv2.2022_all.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),
-        DEFAULT_VARS["expocode"].in_file_as("G2expocode"),
+        DEFAULT_VARS["expocode"]
+        .in_file_as("G2expocode")
+        .correct_with(lambda x: x[:-8]),
         DEFAULT_VARS["date"].not_in_file(),
         DEFAULT_VARS["year"].in_file_as("G2year"),
         DEFAULT_VARS["month"].in_file_as("G2month"),
