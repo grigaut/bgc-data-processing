@@ -6,58 +6,65 @@ ENVIRONMENT_FILEPATH = environment.yml
 SAVE_SCRIPT_PATH = scripts/save_data.py
 PLOT_SCRIPT_PATH = scripts/plot_mesh.py
 OUTPUT_DIRS = bgc_data bgc_figs
-ENV_PREFIX = ./.venv
-RUN_IN_ENV = $(CONDA_EXE) run --no-capture-output -p $(ENV_PREFIX)
+VENV := ./.venv
+POETRY := $(VENV)/bin/poetry
+PYTHON := $(VENV)/bin/python3.11
+MKDOCS := $(VENV)/bin/mkdocs
 
 default:
 	@echo "Call a specific subcommand: create-env,install,update,documentation"
 
 all:
 	@$(MAKE) -s install
-	
-.venv: $(ENVIRONMENT_FILEPATH) poetry.lock
-	@$(MAKE) -s clean
-	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(ENV_PREFIX)
 
 clean:
-	rm -r -f $(ENV_PREFIX)
+	rm -r -f $(VENV)
+	
+$(VENV): $(ENVIRONMENT_FILEPATH) poetry.lock
+	@$(MAKE) -s clean
+	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(VENV)
 
+.PHONY: clean-dirs
 clean-dirs:
 	$(foreach dir, $(OUTPUT_DIRS), rm -r -f $(dir))
 
+.PHONY: create-env
 create-env: 
-	@$(MAKE) -s .venv
+	@$(MAKE) -s $(VENV)
 
+.PHONY: install
 install: 
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry install
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install
 
-
+.PHONY: update
 update: 
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry update
-	$(RUN_IN_ENV) poetry lock
-	@$(MAKE) -s .venv
+	@$(MAKE) -s $(VENV)
+	$(POETRY) update
 
+.PHONY: run-save
 run-save: 
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry install --without dev,docs
-	$(RUN_IN_ENV) python $(SAVE_SCRIPT_PATH)
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install --without dev,docs
+	$(PYTHON) $(SAVE_SCRIPT_PATH)
 
+.PHONY: run-plot
 run-plot:
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry install --without dev,docs
-	$(RUN_IN_ENV) python $(PLOT_SCRIPT_PATH)
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install --without dev,docs
+	$(PYTHON) $(PLOT_SCRIPT_PATH)
 
+.PHONY: documentation
 documentation: 
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry install --only docs
-	$(RUN_IN_ENV) mkdocs serve
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install --only docs
+	$(MKDOCS) serve
 
 ./site: 
-	@$(MAKE) -s .venv
-	$(RUN_IN_ENV) poetry install --only docs
-	$(RUN_IN_ENV) mkdocs build
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install --only docs
+	$(MKDOCS) build
 
+.PHONY: docs-build
 docs-build:
 	@$(MAKE) -s ./site
