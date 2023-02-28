@@ -1,10 +1,3 @@
-<a href="https://bundlephobia.com/result?p=@sherby/sherby-metadata@3.0.1">
-  <img 
-     alt="BundlePhobia"
-     src="https://img.shields.io/bundlephobia/min/@sherby/sherby-metadata"
-  />
-</a>
-
 # bgc-data-processing
 
 bgc_data_processing is a set of scripts to prepare csv files with BGC variables for EnKF prepobs.
