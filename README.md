@@ -1,4 +1,9 @@
-[![BundlePhobia](@sherby/sherby-metadata)">https://img.shields.io/bundlephobia/minzip/@sherby/sherby-metadata)](https://bundlephobia.com/result?p=@sherby/sherby-metadata)
+<a href="https://bundlephobia.com/result?p=@sherby/sherby-metadata@3.0.1">
+  <img 
+     alt="BundlePhobia"
+     src="https://img.shields.io/bundlephobia/min/@sherby/sherby-metadata"
+  />
+</a>
 
 # bgc-data-processing
 
