@@ -54,7 +54,7 @@ plugins:
 
 markdown_extensions:
   - admonition
-  - pymdownx.superfences
-  - pymdownx.details
+  - pymdownx.superfences      # code blocks
+  - pymdownx.details          
   - pymdownx.tabbed:
-      alternate_style: true
+      alternate_style: true   # Tabs
