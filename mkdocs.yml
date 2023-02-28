@@ -41,7 +41,7 @@ plugins:
       nav_file: SUMMARY.md          # To auto-generate paths
   - gen-files:
       scripts:
-        - docs/pages_generator.py   # To auto generate 'Code Reference' Section
+        - docs/scripts/pages_generator.py   # To auto generate 'Code Reference' Section
   - mkdocstrings:
       handlers:
         python:
