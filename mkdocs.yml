@@ -19,10 +19,8 @@ theme:
         - "bgc_data_processing"
 
 nav: 
-  - index.md 
-  - Projects:
-    - projects/data_aggregator.md
-    - projects/mapper.md
+  - Getting Started:
+    - index.md 
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variable_set_up.md
