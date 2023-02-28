@@ -19,8 +19,8 @@ all:
 
 clean:
 	rm -r -f $(VENV)
-	
-$(VENV): $(ENVIRONMENT_FILEPATH) poetry.lock
+
+$(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 	@$(MAKE) -s clean
 	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(VENV)
 
@@ -29,21 +29,21 @@ clean-dirs:
 	$(foreach dir, $(OUTPUT_DIRS), rm -r -f $(dir))
 
 .PHONY: create-env
-create-env: 
+create-env:
 	@$(MAKE) -s $(VENV)
 
 .PHONY: install
-install: 
+install: poetry.lock
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install
 
 .PHONY: update
-update: 
+update:
 	@$(MAKE) -s $(VENV)
 	$(POETRY) update
 
 .PHONY: run-save
-run-save: 
+run-save:
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install --without dev,docs
 	$(PYTHON) $(SAVE_SCRIPT_PATH)
@@ -55,12 +55,12 @@ run-plot:
 	$(PYTHON) $(PLOT_SCRIPT_PATH)
 
 .PHONY: view-docs
-view-docs: 
+view-docs:
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install --only docs
 	$(MKDOCS) serve
 
-./site: 
+./site:
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install --only docs
 	$(MKDOCS) build
