@@ -10,15 +10,19 @@ VENV := ./.venv
 POETRY := $(VENV)/bin/poetry
 PYTHON := $(VENV)/bin/python3.11
 MKDOCS := $(VENV)/bin/mkdocs
+PRECOMMIT := $(VENV)/bin/pre-commit
+HOOKS := ./.git/hooks
 
 default:
 	@echo "Call a specific subcommand: create-env,install,update,documentation"
 
 all:
 	@$(MAKE) -s install
+	@$(MAKE) -s pre-commit
 
 clean:
 	rm -r -f $(VENV)
+	rm -r -f $(HOOKS)
 
 $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 	@$(MAKE) -s clean
@@ -68,3 +72,6 @@ view-docs:
 .PHONY: build-docs
 build-docs:
 	@$(MAKE) -s ./site
+
+pre-commit: $(PRECOMMIT)
+	$(PRECOMMIT) install
