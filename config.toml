@@ -14,24 +14,24 @@ LATITUDE_MAX = 89
 LONGITUDE_MIN = -40
 ## AGGREGATION.LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 40
-## AGGREGATION.PROVIDERS: list[str]: providers to use data from 
+## AGGREGATION.PROVIDERS: list[str]: providers to use data from
 PROVIDERS = ["NMDC"]
 ## AGGREGATION.VARIABLES: list[str]: variables to keep in the output file
 VARIABLES = [
     "PROVIDER",
     "EXPOCODE",
-    "YEAR", 
-    "MONTH", 
-    "DAY", 
-    "LONGITUDE", 
-    "LATITUDE", 
-    "DEPH", 
-    "TEMP", 
-    "PSAL", 
-    "DOXY", 
-    "PHOS", 
-    "NTRA", 
-    "SLCA", 
+    "YEAR",
+    "MONTH",
+    "DAY",
+    "LONGITUDE",
+    "LATITUDE",
+    "DEPH",
+    "TEMP",
+    "PSAL",
+    "DOXY",
+    "PHOS",
+    "NTRA",
+    "SLCA",
     "CPHL",
 ]
 ## AGGREGATION.LIST_DIR: str: directory with cycle informations
