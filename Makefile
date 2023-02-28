@@ -54,8 +54,8 @@ run-plot:
 	$(POETRY) install --without dev,docs
 	$(PYTHON) $(PLOT_SCRIPT_PATH)
 
-.PHONY: documentation
-documentation: 
+.PHONY: view-docs
+view-docs: 
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install --only docs
 	$(MKDOCS) serve
@@ -65,6 +65,6 @@ documentation:
 	$(POETRY) install --only docs
 	$(MKDOCS) build
 
-.PHONY: docs-build
-docs-build:
+.PHONY: build-docs
+build-docs:
 	@$(MAKE) -s ./site
