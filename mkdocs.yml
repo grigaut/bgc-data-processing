@@ -1,4 +1,8 @@
 site_name: BGC-DATA-PROCESSING
+# Add repository metadate for more integration and ease-of-use
+repo_name: bgc-data-processing
+repo_url: https://github.com/grigaut/bgc-data-processing 
+
 theme:
   name: "material"
   logo: assets/logo/NERSC.png
@@ -19,7 +23,15 @@ nav:
   - Projects:
     - projects/data_aggregator.md
     - projects/mapper.md
-  - Virtual Environment: virtual_env.md
+  - How does it work ?:
+    - how_it_works/index.md
+    - how_it_works/variable_set_up.md
+    - how_it_works/provider_set_up.md
+    - how_it_works/data_loading.md
+    - how_it_works/data_aggregation.md
+    - how_it_works/plotting.md
+  - Virtual Environment: 
+    - virtual_env/index.md
   - Code Reference: reference/
 
 plugins:
