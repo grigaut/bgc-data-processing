@@ -1,3 +1,5 @@
+[![Docstrings](./docs/assets/badges/interrogate_badge.svg)](https://github.com/grigaut/bgc-data-processing)
+
 # bgc-data-processing
 
 bgc_data_processing is a set of scripts to prepare csv files with BGC variables for EnKF prepobs.
@@ -36,14 +38,14 @@ Where :
 
 * `<var2>` is a string containing the data provider (`,` separed, no space) to consider (`IMR,ICES` for example)
 
-* `<var13>` is an -optional- integer to specify the type of verbose to display in the terminal while executing : 
+* `<var13>` is an -optional- integer to specify the type of verbose to display in the terminal while executing :
 
     * `0` and below => no display
     * `1` : light display => major steps only
     * `2` : medium display =>  major steps + daterange progression
     * `3` and above : heavy display => all steps
 
-Therefore, to compute outputs for 2007 and 2009, using data priovided by IMR and CLIVAR and with a light display, run 
+Therefore, to compute outputs for 2007 and 2009, using data priovided by IMR and CLIVAR and with a light display, run
 
 ``` bash
 bash ./scripts/execute_in_conda_env ./scripts/aggregator/save_aggregated_data.py "2007,2009" "IMR,CLIVAR" 1

@@ -1,6 +1,7 @@
 """Specific parameters to load Argo-provided data"""
 
 import numpy as np
+
 from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(

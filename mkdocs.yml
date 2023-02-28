@@ -6,7 +6,7 @@ theme:
   palette:
     primary: blue
   features:
-    - navigation.tabs               # Tabs 
+    - navigation.tabs               # Tabs
     - navigation.tabs.sticky        # Above tabs stay displayed
     - navigation.indexes            # Attach documents to sections
     - navigation.instant
@@ -14,8 +14,8 @@ theme:
     - watch:
         - "bgc_data_processing"
 
-nav: 
-  - index.md 
+nav:
+  - index.md
   - Projects:
     - projects/data_aggregator.md
     - projects/mapper.md
@@ -23,7 +23,7 @@ nav:
   - Code Reference: reference/
 
 plugins:
-  - autorefs                  
+  - autorefs
   - search                          # Search bar
   - literate-nav:
       nav_file: SUMMARY.md          # To auto-generate paths
@@ -47,5 +47,4 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.details
   - pymdownx.tabbed:
-      alternate_style: true 
-
+      alternate_style: true
