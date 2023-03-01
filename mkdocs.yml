@@ -16,6 +16,7 @@ theme:
     - navigation.instant
     - navigation.footer
     - navigation.top                # Scroll back to top button
+    - content.code.annotate         # Admonitions
     - watch:
         - "bgc_data_processing"
 
