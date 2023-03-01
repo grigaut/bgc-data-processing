@@ -25,7 +25,6 @@ nav:
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
-    - how_it_works/providers.md
     - how_it_works/loading.md
     - how_it_works/aggregation.md
     - how_it_works/plotting.md
