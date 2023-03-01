@@ -17,12 +17,13 @@ theme:
     - navigation.footer
     - navigation.top                # Scroll back to top button
     - content.code.annotate         # Admonitions
+    - content.code.copy             # copy code block
     - watch:
         - "bgc_data_processing"
 
-nav: 
+nav:
   - Getting Started:
-    - index.md 
+    - index.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
@@ -56,7 +57,7 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.superfences      # code blocks
-  - pymdownx.details          
+  - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true   # Tabs
   - footnotes
