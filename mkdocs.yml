@@ -14,6 +14,7 @@ theme:
     - navigation.tabs.sticky        # Above tabs stay displayed
     - navigation.indexes            # Attach documents to sections
     - navigation.instant
+    - navigation.footer
     - navigation.top                # Scroll back to top button
     - watch:
         - "bgc_data_processing"
@@ -23,10 +24,10 @@ nav:
     - index.md 
   - How does it work ?:
     - how_it_works/index.md
-    - how_it_works/variable_set_up.md
-    - how_it_works/provider_set_up.md
-    - how_it_works/data_loading.md
-    - how_it_works/data_aggregation.md
+    - how_it_works/variables.md
+    - how_it_works/providers.md
+    - how_it_works/loading.md
+    - how_it_works/aggregation.md
     - how_it_works/plotting.md
   - Virtual Environment:
     - virtual_env/index.md
@@ -58,3 +59,4 @@ markdown_extensions:
   - pymdownx.details          
   - pymdownx.tabbed:
       alternate_style: true   # Tabs
+  - footnotes

@@ -1,18 +1,45 @@
 # Getting Started
 
-BGC-DATA-PROCESSING provides a set of modules to process amd map biogeochemical data.
+BGC-DATA-PROCESSING provides a set of modules to process and map biogeochemical data.
 
-## Execution
+## Requirements
 
 In order to execute the scripts of this project, **It is necessary to have conda installed** to be able to create and use the virtual environements needed.
 
-??? question "Installing conda"
+??? question "How to install conda ?"
 
-    <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>
+    [Conda installing guide](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
-??? question "Setting up the virtual environment to run the scripts inside it"
-    More informations here : [Virtual Environment](/virtual_env/)
+Having **GNU Make** installed can also simplify the project's setup.
 
-    *Not necessary*
+??? question "How to install GNU Make ?"
 
-All the scripts are located in the `/scripts/` folder.
+    === "Ubuntu"
+        [More informations on installing GNU make for ubuntu systems.](https://linuxhint.com/install-make-ubuntu/)
+
+    === "Windows"
+        [More informations on installing GNU make for windows systems.](https://linuxhint.com/install-use-make-windows/)
+
+    === "macOS"
+        [More informations on installing GNU make for macOS systems using Homebrew.](https://docs.brew.sh/Installation)
+
+## Building the virtual environment
+
+=== "With make"
+    ``` bash
+    make all
+    ```
+=== "Without make"
+    ``` bash
+    conda env create --file environment.yml --prefix ./.venv
+    ```
+    ``` bash
+    conda activate ./.venv
+    ```
+    ``` bash
+    poetry install
+    ```
+
+
+!!! info ""
+    [More details on the virtual environment](/virtual_env/)
