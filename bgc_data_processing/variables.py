@@ -229,11 +229,56 @@ class NotExistingVar(BaseVar):
 
 class ExistingVar(NotExistingVar):
     """Class to represent variables existing in the dataset,
-    to be able to specify flag columns, corecction functions..."""
+    to be able to specify flag columns, corecction functions...
+
+    Parameters
+    ----------
+    name : str
+        'Official' name for the variable : name to use when displaying the variable.
+    aliases : list
+        Variable name in the source data.
+    unit : str
+        Variable unit (written using the following format:
+        [deg_C] for Celsius degree of [kg] for kilograms).
+    var_type : str
+        Variable type (str, int, datetime...).
+        It will be used to convert the data using df[variable].astype(type)
+    load_nb : int, optional
+        Number to sort the variable when loading the data.
+        None implies that the variable will be remove from the dataframe, by default None
+    save_nb : int, optional
+        Number to sort the variable when saving the data.
+        None implies that the variable will be remove from the dataframe, by default None
+    name_format: str
+        Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
+    value_format: str
+        Format to use to save the data value in a csv of txt file., by default "%15s"
+    """
 
     exist_in_dset: bool = True
     _correction: callable = None
-    _aliases: list = []
+
+    def __init__(
+        self,
+        name: str,
+        aliases: list,
+        unit: str,
+        var_type: str,
+        load_nb: int = None,
+        save_nb: int = None,
+        name_format: str = "%-15s",
+        value_format: str = "%15s",
+    ):
+        self._aliases = aliases
+        super().__init__(
+            name,
+            unit,
+            var_type,
+            load_nb,
+            save_nb,
+            name_format,
+            value_format,
+        )
 
     @property
     def aliases(self) -> list[tuple[str, str, list]]:
