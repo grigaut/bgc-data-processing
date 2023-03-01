@@ -1,7 +1,7 @@
 site_name: BGC-DATA-PROCESSING
 # Add repository metadate for more integration and ease-of-use
 repo_name: bgc-data-processing
-repo_url: https://github.com/grigaut/bgc-data-processing 
+repo_url: https://github.com/grigaut/bgc-data-processing
 
 theme:
   name: "material"
@@ -18,9 +18,9 @@ theme:
     - watch:
         - "bgc_data_processing"
 
-nav: 
+nav:
   - Getting Started:
-    - index.md 
+    - index.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variable_set_up.md
@@ -28,7 +28,7 @@ nav:
     - how_it_works/data_loading.md
     - how_it_works/data_aggregation.md
     - how_it_works/plotting.md
-  - Virtual Environment: 
+  - Virtual Environment:
     - virtual_env/index.md
   - Code Reference: reference/
 
@@ -55,6 +55,6 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.superfences      # code blocks
-  - pymdownx.details          
+  - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true   # Tabs
