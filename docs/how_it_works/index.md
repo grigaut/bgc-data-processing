@@ -123,7 +123,7 @@ mesher.plot(
     bins_size=(0.1, 0.2),           # (3)
     depth_aggr="top",               # (4)
     bin_aggr="count",               # (5)
-    title="some title",             # (8)
+    title="some title",             # (6)
     suptitle="some suptitle",       # (7)
     extent=(-40, 40, 50, 89),       # (8)
 )
@@ -142,16 +142,16 @@ mesher.save(
 1. Storer object to map the data of.
 2. Name of the variable to plot on the map.
 3. Size of the binning square (latitude, longitude)
-4. String reference (see /reference/tracers/#bgc_data_processing.tracers.GeoMesher._depth_aggr) or function to use to aggregate data points with same location and different depth.
-5. String reference (see /reference/tracers/#bgc_data_processing.tracers.GeoMesher._bin_aggr) or function to use to aggregate data points within the same bining area.
+4. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.depth_aggr) or function to use to aggregate data points with same location and different depth.
+5. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.bin_aggr) or function to use to aggregate data points within the same bining area.
 6. Title for the plot.
 7. Suptitle for the plot.
 8. Area extent to restrains the mapping to.
 9. Path to the saving location.
 10. Name of the variable to plot on the map.
 11. Size of the binning square (latitude, longitude)
-12. String reference (see /reference/tracers/#bgc_data_processing.tracers.GeoMesher._depth_aggr) or function to use to aggregate data points with same location and different depth.
-13. String reference (see /reference/tracers/#bgc_data_processing.tracers.GeoMesher._bin_aggr) or function to use to aggregate data points within the same bining area.
+12. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.depth_aggr) or function to use to aggregate data points with same location and different depth.
+13. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.bin_aggr) or function to use to aggregate data points within the same bining area.
 14. Title for the plot.
 15. Suptitle for the plot.
 16. Area extent to restrains the mapping to.
