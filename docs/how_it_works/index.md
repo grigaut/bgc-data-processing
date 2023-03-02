@@ -104,8 +104,6 @@ aggregated_storer.save("path/to/save/file")     # (4)
 2. Loader for IMR.
 3. Summing both storer returns the aggregation of them.
 4. Calling the .save methods to save the file.
-!!! note ""
-    [More informations on aggregation](/how_it_works/aggregation)
 
 ## Plotting the data
 
@@ -155,5 +153,3 @@ mesher.save(
 14. Title for the plot.
 15. Suptitle for the plot.
 16. Area extent to restrains the mapping to.
-!!! note ""
-    [More informations on plotting](/how_it_works/plotting)

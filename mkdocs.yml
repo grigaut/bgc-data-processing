@@ -28,8 +28,6 @@ nav:
     - how_it_works/index.md
     - how_it_works/variables.md
     - how_it_works/loading.md
-    - how_it_works/aggregation.md
-    - how_it_works/plotting.md
   - Virtual Environment:
     - virtual_env/index.md
   - Code Reference: reference/
@@ -58,6 +56,7 @@ markdown_extensions:
   - admonition
   - pymdownx.superfences      # code blocks
   - pymdownx.details
+  - pymdownx.snippets
   - pymdownx.tabbed:
       alternate_style: true   # Tabs
   - footnotes

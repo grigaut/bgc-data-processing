@@ -1,3 +1,0 @@
-# Aggregation
-
-## Combining data
