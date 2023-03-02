@@ -21,11 +21,11 @@ The dependencies versions are defined in the pyproject.toml file. This file cont
 
     === "From a Bash terminal"
         ``` bash
-        conda env create --file environment.yml
+        conda env create --file environment.yml --prefix ./.venv
         ```
     === "From a Bash script"
         ``` bash
-        $CONDA_EXE env create --file environment.yml
+        $CONDA_EXE env create --file environment.yml --prefix ./.venv
         ```
         ??? info "$CONDA_EXE"
             Variable referring to the conda executable path. It should be already existing.
@@ -38,7 +38,7 @@ TODO : add line about where to find the environment's name
 
     === "From a Bash terminal"
         ``` bash
-        conda activate $(head -n 1 environment.yml | cut -f2 -d ' ')
+        conda activate ./.venv
         ```
     === "From a Bash script"
         <sup>*Not needed.*
@@ -46,19 +46,15 @@ TODO : add line about where to find the environment's name
 3. Build the environment:
 
     === "From a Bash terminal"
+        *In the virtual environment:*
         ``` bash
         poetry install
         ```
 
     === "From a Bash script"
         ``` bash
-        $CONDA_EXE run --no-capture-output -n conda_venv poetry install
+        .venv/bin/poetry install
         ```
-        ??? info "$CONDA_EXE"
-            Variable referring to the conda executable path. It should be already existing.
-
-        ??? info "conda run"
-            <https://docs.conda.io/projects/conda/en/latest/commands/run.html>
 
     ??? info "poetry install"
         <https://python-poetry.org/docs/cli/#install>
@@ -73,43 +69,36 @@ TODO : add line about where to find the environment's name
 4. Run the python script `hello_world.py`:
 
     === "From a Bash terminal"
+        *In the virtual environment:*
         ``` bash
         python hello_world.py
         ```
 
     === "From a Bash script"
         ``` bash
-        $CONDA_EXE run --no-capture-output -n conda_venv python hello_world.py
+        .venv/bin/python hello_world.py
         ```
-        ??? info "$CONDA_EXE"
-            Variable referring to the conda executable path. It should be already existing.
-
-        ??? info "conda run"
-            <https://docs.conda.io/projects/conda/en/latest/commands/run.html>
 
 5. Updating the environment:
 
     === "From a Bash terminal"
+        *In the virtual environment:*
         ``` bash
         poetry update
         ```
 
     === "From a Bash script"
         ``` bash
-        $CONDA_EXE run --no-capture-output -n conda_venv poetry update
+        .venv/bin/poetry update
         ```
-        ??? info "$CONDA_EXE"
-            Variable referring to the conda executable path. It should be already existing.
-
-        ??? info "conda run"
-            <https://docs.conda.io/projects/conda/en/latest/commands/run.html>
 
     ??? info "poetry update"
         <https://python-poetry.org/docs/cli/#update>
 
-6. Deactivate the environment named `conda_venv`:
+6. Deactivate the environment:
 
     === "From a Bash terminal"
+        *In the virtual environment:*
         ``` bash
         conda deactivate
         ```
