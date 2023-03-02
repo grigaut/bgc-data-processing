@@ -1,3 +1,4 @@
+[![Docstrings](https://img.shields.io/badge/powered%20by-NERSC-blue)](https://www.nersc.no/)
 [![Docstrings](./docs/assets/badges/interrogate_badge.svg)](https://github.com/grigaut/bgc-data-processing)
 
 # bgc-data-processing
