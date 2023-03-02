@@ -1,4 +1,8 @@
 site_name: BGC-DATA-PROCESSING
+# Add repository metadate for more integration and ease-of-use
+repo_name: bgc-data-processing
+repo_url: https://github.com/grigaut/bgc-data-processing
+
 theme:
   name: "material"
   logo: assets/logo/NERSC.png
@@ -10,16 +14,22 @@ theme:
     - navigation.tabs.sticky        # Above tabs stay displayed
     - navigation.indexes            # Attach documents to sections
     - navigation.instant
+    - navigation.footer
     - navigation.top                # Scroll back to top button
+    - content.code.annotate         # Admonitions
+    - content.code.copy             # copy code block
     - watch:
         - "bgc_data_processing"
 
 nav:
-  - index.md
-  - Projects:
-    - projects/data_aggregator.md
-    - projects/mapper.md
-  - Virtual Environment: virtual_env.md
+  - Getting Started:
+    - index.md
+  - How does it work ?:
+    - how_it_works/index.md
+    - how_it_works/variables.md
+    - how_it_works/loading.md
+  - Virtual Environment:
+    - virtual_env/index.md
   - Code Reference: reference/
 
 plugins:
@@ -29,7 +39,7 @@ plugins:
       nav_file: SUMMARY.md          # To auto-generate paths
   - gen-files:
       scripts:
-        - docs/pages_generator.py   # To auto generate 'Code Reference' Section
+        - docs/scripts/pages_generator.py   # To auto generate 'Code Reference' Section
   - mkdocstrings:
       handlers:
         python:
@@ -44,7 +54,9 @@ plugins:
 
 markdown_extensions:
   - admonition
-  - pymdownx.superfences
+  - pymdownx.superfences      # code blocks
   - pymdownx.details
+  - pymdownx.snippets
   - pymdownx.tabbed:
-      alternate_style: true
+      alternate_style: true   # Tabs
+  - footnotes
