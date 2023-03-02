@@ -24,12 +24,12 @@ class GeoMesher(BasePlot):
         Data Storer containing data to plot.
     """
 
-    _depth_aggr = {
+    depth_aggr = {
         "top": lambda x: x.first(),
         "bottom": lambda x: x.last(),
         "count": lambda x: x.count(),
     }
-    _bin_aggr = {
+    bin_aggr = {
         "mean": np.mean,
         "count": lambda x: x.count(),
         "sum": np.sum,
@@ -90,7 +90,7 @@ class GeoMesher(BasePlot):
         lon_key : str
             Longitude variable name.
         how : str | Callable
-            Grouping function key to use with self._depth_aggr or Callable function to use to group.
+            Grouping function key to use with self.depth_aggr or Callable function to use to group.
 
         Returns
         -------
@@ -100,7 +100,7 @@ class GeoMesher(BasePlot):
         """
         group = self._data.groupby(self._grouping_columns)
         if isinstance(how, str):
-            group_fn = self._depth_aggr[how]
+            group_fn = self.depth_aggr[how]
         else:
             group_fn = how
         var_series: pd.Series = group_fn(group[var_key])
@@ -204,7 +204,7 @@ class GeoMesher(BasePlot):
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
         if isinstance(bin_aggr, str):
-            aggfunc = self._bin_aggr[bin_aggr]
+            aggfunc = self.bin_aggr[bin_aggr]
         else:
             aggfunc = bin_aggr
         if self._verbose > 2:
@@ -241,10 +241,10 @@ class GeoMesher(BasePlot):
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree.
         depth_aggr : str | Callable
-            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
+            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
              or callable function to use to aggregate.
         bin_aggr : str | Callable
-            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
+            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
             or callable function to use to aggregate.
         extent : tuple | list
             Boundaries of the map.
@@ -313,10 +313,10 @@ class GeoMesher(BasePlot):
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
         depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
+            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
              or callable function to use to aggregate., by default "top"
         bin_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
+            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created., by default None.
@@ -359,10 +359,10 @@ class GeoMesher(BasePlot):
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
         depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self._depth_aggr),
+            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
              or callable function to use to aggregate., by default "top"
         bin_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self._bin_aggr),
+            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created., by default None.
