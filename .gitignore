@@ -9,3 +9,5 @@ bgc_data
 # virtual environemnt
 .venv
 .vscode
+# config file: issue #78
+config.toml
