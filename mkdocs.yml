@@ -28,6 +28,9 @@ nav:
     - how_it_works/index.md
     - how_it_works/variables.md
     - how_it_works/loading.md
+  - Examples:
+    - examples/index.md
+    - examples/boundaries.md
   - Virtual Environment:
     - virtual_env/index.md
   - Code Reference: reference/
