@@ -233,8 +233,6 @@ class Storer:
         duplicates.sort_values(provider_label, key=sort_func, inplace=True)
         to_dump = duplicates.duplicated(subset=subset, keep="first")
         dump_index = to_dump[to_dump].index
-        tmp = pd.concat([df, to_dump], axis=1)
-        print(tmp[~tmp[0].isna()])
         return df.drop(dump_index)
 
     def save(self, filepath: str) -> None:
