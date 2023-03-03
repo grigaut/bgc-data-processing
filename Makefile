@@ -73,5 +73,11 @@ view-docs:
 build-docs:
 	@$(MAKE) -s ./site
 
+.PHONY: deploy-docs
+deploy-docs:
+	$(POETRY) install --only docs
+	$(MKDOCS) gh-deploy
+	rm -r -f ./site
+
 pre-commit: $(PRECOMMIT)
 	$(PRECOMMIT) install
