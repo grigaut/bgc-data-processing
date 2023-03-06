@@ -339,7 +339,7 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with provider column properly filled.
         """
-        if "PROVIDER" in self._variables.keys():
+        if self.variables.has_name("PROVIDER"):
             df[self._variables.labels["PROVIDER"]] = self.provider
         return df
 
@@ -358,7 +358,7 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with expocode column properly filled.
         """
-        if "EXPOCODE" in self._variables.keys():
+        if self.variables.has_name("EXPOCODE"):
             df[self._variables.labels["EXPOCODE"]] = file_id
         return df
 
