@@ -2,7 +2,7 @@ import datetime as dt
 
 from bgc_data_processing import CONFIG, data_providers
 from bgc_data_processing.data_classes import Storer
-from bgc_data_processing.tracers import GeoMesher
+from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":
     # Script arguments
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         df: Storer = sum(data)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
-        GeoMesher(df).plot(
+        MeshPlotter(df).plot(
             VARIABLE,
             BIN_SIZE,
             depth_aggr=DEPTH_AGGREGATION,

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
 
 
-class GeoMesher(BasePlot):
+class MeshPlotter(BasePlot):
     """Base class for tracing on earthmaps.
 
     Parameters
@@ -395,8 +395,8 @@ class GeoMesher(BasePlot):
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
         verbose: int = 1,
-    ) -> "GeoMesher":
-        """Builds a GeoMesher reading data from csv or txt files.
+    ) -> "MeshPlotter":
+        """Builds a MeshPlotter reading data from csv or txt files.
 
         Parameters
         ----------
@@ -416,21 +416,21 @@ class GeoMesher(BasePlot):
 
         Returns
         -------
-        GeoMesher
-            geomesher from the aggregation of the data from all the files
+        MeshPlotter
+            mesh from the aggregation of the data from all the files
 
         Examples
         --------
         Loading from a single file:
         >>> filepath = "path/to/file"
-        >>> geomesher = GeoMesher.from_files(filepath, providers="providers_column_name")
+        >>> mesh = MeshPlotter.from_files(filepath, providers="providers_column_name")
 
         Loading from multiple files:
         >>> filepaths = [
         ...     "path/to/file1",
         ...     "path/to/file2",
         ... ]
-        >>> geomesher = GeoMesher.from_files(filepaths, providers="providers_column_name")
+        >>> mesh = MeshPlotter.from_files(filepaths, providers="providers_column_name")
 
         """
         storer = Storer.from_files(

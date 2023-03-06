@@ -4,7 +4,7 @@ Example script to create a density map of the data. The data has previously been
 
 ``` py
 from bgc_data_processing.data_classes import Storer
-from bgc_data_processing.tracers import GeoMesher
+from bgc_data_processing.tracers import MeshPlotter
 
 files = [
     "path/to/data1.csv",
@@ -22,7 +22,7 @@ storer = Storer.from_files(
     delim_whitespace=False,
 )
 # Mapping
-mesh = GeoMesher(storer)
+mesh = MeshPlotter(storer)
 mesh.plot(
     variable_name="PHOS",
     bins_size=[0.5,1.5],

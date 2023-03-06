@@ -238,7 +238,7 @@ class Storer:
         ...     "path/to/file1",
         ...     "path/to/file2",
         ... ]
-        >>> storer = GeoMesher.from_files(filepaths, providers="providers_column_name")
+        >>> storer = MeshPlotter.from_files(filepaths, providers="providers_column_name")
         """
         if isinstance(filepath, list):
             storers = []
