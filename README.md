@@ -43,6 +43,7 @@ The documentation should then be available at the following url: `localhost:8000
     make run-save
     ```
 - **Mapping**
+
     The following command (executed at root level) will run the main script [plot_mesh.py](/scripts/plot_mesh.py):
 
     ``` bash
@@ -59,7 +60,7 @@ conda activate ./.venv
 poetry install
 ```
 
-*If the environment has already been created to display the documentation, one only has to install the libraries required for the execution in the environment: *
+*If the environment has already been created to display the documentation, one only has to install the libraries required for the execution in the environment:*
 
 ``` bash
 conda activate ./.venv
@@ -76,13 +77,12 @@ Then, it is possible to execute the scripts inside the environment (use `conda a
     ```
 
 - **Mapping**
+
     The following command (executed at root level in the virtual environment) will run the main script [plot_mesh.py](/scripts/plot_mesh.py):
 
     ``` bash
     python scripts/plot_mesh.py
     ```
-```
-
 ## License :
 
 [MIT](https://choosealicense.com/licenses/mit/)
