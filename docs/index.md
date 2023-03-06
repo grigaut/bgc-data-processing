@@ -40,6 +40,53 @@ Having **GNU Make** installed can also simplify the project's setup.
     poetry install
     ```
 
-
 !!! info ""
     [More details on the virtual environment](/virtual_env/)
+
+## Running the Scripts
+
+### Data Aggregation and Saving Script
+
+=== "With make"
+    ``` bash
+    make run-save # (1)!
+    ```
+
+    1. make will install the correct environment and run the scripts
+
+=== "Without make"
+    *Virtual environment must have been installed*
+    ``` bash
+    conda activate ./.venv  # (1)!
+    ```
+
+    1. Activate virtual environemnt
+
+    ``` bash
+    python scripts/save_data.py # (1)!
+    ```
+
+    1. Run script.
+
+### Data Plotting Script
+
+=== "With make"
+    ``` bash
+    make run-plot # (1)!
+    ```
+
+    1. make will install the correct environment and run the scripts
+
+=== "Without make"
+    *Virtual environment must have been installed*
+    ``` bash
+    conda activate ./.venv  # (1)!
+    ```
+
+    1. Activate virtual environemnt
+
+    ``` bash
+    python scripts/plot_mesh.py # (1)!
+    ```
+
+    1. Run script.
