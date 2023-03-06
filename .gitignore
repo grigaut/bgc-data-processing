@@ -9,9 +9,5 @@ bgc_data
 # virtual environemnt
 .venv
 .vscode
-<<<<<<< HEAD
 # config file: issue #78
-=======
-# config file
->>>>>>> c7de95e8d63c3358d73e108baa30e4622cf3d022
 config.toml
