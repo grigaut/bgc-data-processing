@@ -176,7 +176,7 @@ class Storer:
         # Params
         start_date = drng["start_date"]
         end_date = drng["end_date"]
-        dates_col = self._data[self._variables.labels["DATE"]]
+        dates_col = self._data[self._variables.get("DATE").label]
         # Verbose
         if self._verbose > 1:
             print("\tSlicing data for date range {} {}".format(start_date, end_date))
