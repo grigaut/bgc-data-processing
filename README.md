@@ -1,64 +1,78 @@
 [![Docstrings](./docs/assets/badges/interrogate_badge.svg)](https://github.com/grigaut/bgc-data-processing)
-
 # bgc-data-processing
-
 bgc_data_processing is a set of scripts to prepare csv files with BGC variables for EnKF prepobs.
-
 ## Getting started
-
 ### Requirements
-
-Having conda installed is necessary to use this projects.
+Having conda installed is necessary to use this project.
 More informations on how to download conda can be found [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
-
 ### Documentation
-
 This project has a more exhaustive documentation which has been created using [mkdocs](https://www.mkdocs.org/).
 
 The following command (executed at root level) will load the documentation:
 
 ``` bash
-bash ./scripts/build_docs_local.sh
+make view-docs
 ```
 
-When asked about whether building or displaying the docs, enter `B` in order to build the html documentation website in the local repository or `D` to display the documentation in a web browser, available at the adress shown in the terminal (localhost:8000 by default).
+If `make` is not installed, one must manually create the environment with the following commands before displaying the documentation:
 
+``` bash
+conda env create --file environment.yml --prefix ./.venv
+conda activate ./.venv
+poetry install --group docs
+mkdocs serve
+```
+
+The documentation should then be available at the following url: `localhost:8000`
 ## Executing
+### Using make
+- **Aggregation and Saving**
 
-### Aggregator
+    The following command (executed at root level) will run the [aggregation and saving script](/scripts/save_data.py):
 
-The following command (executed at root level) will run the main script [save_aggregated_data.py](/scripts/aggregator/save_aggregated_data.py):
+    ``` bash
+    make run-save
+    ```
+- **Mapping**
 
-``` bash
-bash ./scripts/execute_in_conda_env ./scripts/aggregator/save_aggregated_data.py <var1> <var2> <var3>
-```
+    The following command (executed at root level) will run the main script [plot_mesh.py](/scripts/plot_mesh.py):
 
-Where :
-* `<var1>` is a string containing the years (`,` separed, no space) to process (`2007,2008` for example)
-
-* `<var2>` is a string containing the data provider (`,` separed, no space) to consider (`IMR,ICES` for example)
-
-* `<var13>` is an -optional- integer to specify the type of verbose to display in the terminal while executing :
-
-    * `0` and below => no display
-    * `1` : light display => major steps only
-    * `2` : medium display =>  major steps + daterange progression
-    * `3` and above : heavy display => all steps
-
-Therefore, to compute outputs for 2007 and 2009, using data priovided by IMR and CLIVAR and with a light display, run
+    ``` bash
+    make run-plot
+    ```
+### Without make
+One must manually create the environment with the following commands before runnning any script:
 
 ``` bash
-bash ./scripts/execute_in_conda_env ./scripts/aggregator/save_aggregated_data.py "2007,2009" "IMR,CLIVAR" 1
+conda env create --file environment.yml --prefix ./.venv
+conda activate ./.venv
+poetry install
 ```
 
-### Mapper
-
-The following command (executed at root level) will run the main script [plot_argo.py](/scripts/mapper/plot_argo.py):
+*If the environment has already been created to display the documentation, one only has to install the libraries required for the execution in the environment:*
 
 ``` bash
-bash ./scripts/execute_in_conda_env ./scripts/mapper/plot_argo.py
+conda activate ./.venv
+poetry install
 ```
 
+Then, it is possible to execute the scripts inside the environment (use `conda activate ./.venv` to activate the environment):
+- **Aggregation and Saving**
+
+    The following command (executed at root level in the virtual environment) will run [aggregation and saving script](/scripts/save_data.py):
+
+    ``` bash
+    python scripts/save_data.py
+    ```
+
+- **Mapping**
+
+    The following command (executed at root level in the virtual environment) will run the main script [plot_mesh.py](/scripts/plot_mesh.py):
+
+    ``` bash
+    python scripts/plot_mesh.py
+    ```
+## Configuration
+[Aggregation](/scripts/save_data.py) and [Mapping](/scripts/plot_mesh.py) scripts can both be configured using the configuration file, [config.toml](/config.toml)
 ## License :
-
 [MIT](https://choosealicense.com/licenses/mit/)
