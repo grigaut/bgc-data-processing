@@ -31,6 +31,7 @@ nav:
   - Examples:
     - examples/index.md
     - examples/boundaries.md
+    - examples/plot.md
   - Virtual Environment:
     - virtual_env/index.md
   - Code Reference: reference/
