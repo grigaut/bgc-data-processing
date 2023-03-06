@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bgc-data-processing"
 version = "0.1.0"
-description = ""
+description = "Set of scripts to prepare csv files with BGC variables for EnKF prepobs"
 authors = ["Gaétan Rigaut <gaetanrigaut.s@gmail.com>"]
 readme = "README.md"
 packages = [{include = "bgc_data_processing"}]
