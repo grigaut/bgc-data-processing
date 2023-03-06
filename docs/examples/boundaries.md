@@ -1,4 +1,4 @@
-# Defining boundaries before
+# Defining Boundaries
 
 Loading script to load year, latitude, longitude, phosphate and nitrate variables from 2 providers, 'provider1' and 'provider2'. Phosphate variable is not measured by provider1 and nitrate is not measured by provider2. <br />
 Therefore, template are created to store basic informations on variables and are then instanciated in order to create relevant ExistingVar or NotExistingVar depending on provider. <br />
