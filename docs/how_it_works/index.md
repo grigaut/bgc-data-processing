@@ -107,13 +107,13 @@ aggregated_storer.save("path/to/save/file")     # (4)
 
 ## Plotting the data
 
-To plot the data, one has to create a [GeoMesher](/reference/tracers/#bgc_data_processing.tracers.GeoMesher) (to create 2D Mesh) and then call its [.plot](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.plot) method.
-To save the data, one has to use the [.save_fig](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.save_fig) method.
+To plot the data, one has to create a [MeshPlotter](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter) (to create 2D Mesh) and then call its [.plot](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.plot) method.
+To save the data, one has to use the [.save_fig](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.save_fig) method.
 
 ``` py
-from bgc_data_processing.tracers import GeoMesher
+from bgc_data_processing.tracers import MeshPlotter
 
-mesher = GeoMesher(
+mesher = MeshPlotter(
     storer,                         # (1)
 )
 mesher.plot(
@@ -140,16 +140,16 @@ mesher.save(
 1. Storer object to map the data of.
 2. Name of the variable to plot on the map.
 3. Size of the binning square (latitude, longitude)
-4. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.depth_aggr) or function to use to aggregate data points with same location and different depth.
-5. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.bin_aggr) or function to use to aggregate data points within the same bining area.
+4. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.depth_aggr) or function to use to aggregate data points with same location and different depth.
+5. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.bin_aggr) or function to use to aggregate data points within the same bining area.
 6. Title for the plot.
 7. Suptitle for the plot.
 8. Area extent to restrains the mapping to.
 9. Path to the saving location.
 10. Name of the variable to plot on the map.
 11. Size of the binning square (latitude, longitude)
-12. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.depth_aggr) or function to use to aggregate data points with same location and different depth.
-13. [String reference](/reference/tracers/#bgc_data_processing.tracers.GeoMesher.bin_aggr) or function to use to aggregate data points within the same bining area.
+12. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.depth_aggr) or function to use to aggregate data points with same location and different depth.
+13. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.bin_aggr) or function to use to aggregate data points within the same bining area.
 14. Title for the plot.
 15. Suptitle for the plot.
 16. Area extent to restrains the mapping to.
