@@ -41,7 +41,7 @@ class MeshPlotter(BasePlot):
     ) -> None:
         super().__init__(storer=storer)
         self._data = storer.data.sort_values(
-            self._variables.labels["DEPH"], ascending=False
+            self._variables.get("DEPH").label, ascending=False
         )
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
@@ -171,8 +171,8 @@ class MeshPlotter(BasePlot):
         tuple[np.ndarray]
             Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
         """
-        lat = self._variables.labels["LATITUDE"]
-        lon = self._variables.labels["LONGITUDE"]
+        lat = self._variables.get("LATITUDE").label
+        lon = self._variables.get("LONGITUDE").label
         df = self._group(
             var_key=label,
             lat_key=lat,
@@ -252,7 +252,7 @@ class MeshPlotter(BasePlot):
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
         X1, Y1, Z1 = self.mesh(
-            label=self._variables.labels[variable_name],
+            label=self._variables.get(variable_name).label,
             bins_size=bins_size,
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,

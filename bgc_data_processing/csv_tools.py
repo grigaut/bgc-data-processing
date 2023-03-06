@@ -164,25 +164,25 @@ class CSVLoader(BaseLoader):
             if values is not None:
                 data[var.label] = values
         clean_df = pd.DataFrame(data)
-        clean_df[self._variables.labels["PROVIDER"]] = self._provider
-        if self._variables.labels["DATE"] in clean_df.columns:
+        clean_df[self._variables.get("PROVIDER").label] = self._provider
+        if self._variables.get("DATE").label in clean_df.columns:
             # Convert Date column to datetime (if existing)
-            raw_date_col = clean_df.pop(self._variables.labels["DATE"]).astype(str)
+            raw_date_col = clean_df.pop(self._variables.get("DATE").label).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
-            clean_df.insert(0, self._variables.labels["DAY"], dates.dt.day)
-            clean_df.insert(0, self._variables.labels["MONTH"], dates.dt.month)
-            clean_df.insert(0, self._variables.labels["YEAR"], dates.dt.year)
+            clean_df.insert(0, self._variables.get("DAY").label, dates.dt.day)
+            clean_df.insert(0, self._variables.get("MONTH").label, dates.dt.month)
+            clean_df.insert(0, self._variables.get("YEAR").label, dates.dt.year)
         else:
             dates = pd.to_datetime(
                 clean_df[
                     [
-                        self._variables.labels["YEAR"],
-                        self._variables.labels["MONTH"],
-                        self._variables.labels["DAY"],
+                        self._variables.get("YEAR").label,
+                        self._variables.get("MONTH").label,
+                        self._variables.get("DAY").label,
                     ]
                 ]
             )
-        clean_df.loc[:, self._variables.labels["DATE"]] = dates
+        clean_df.loc[:, self._variables.get("DATE").label] = dates
         # Check if columns are missing => fill them with np.nan values
         missing_cols = [
             var.label for var in self._variables if var.label not in clean_df.columns

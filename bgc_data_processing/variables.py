@@ -409,7 +409,7 @@ class VariablesStorer:
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
     def __getitem__(self, __k: str) -> ExistingVar | NotExistingVar:
-        return self._mapper_by_name[__k]
+        return self.get(__k)
 
     def __iter__(self) -> Iterator[ExistingVar | NotExistingVar]:
         return iter(self._elements)
@@ -443,6 +443,31 @@ class VariablesStorer:
                 return np.all(repr_eq)
         else:
             return False
+
+    def get(self, var_name: str) -> ExistingVar | NotExistingVar:
+        """Return the variable which name corresponds to var_name
+
+        Parameters
+        ----------
+        var_name : str
+            Name of the variable to get.
+
+        Returns
+        -------
+        ExistingVar | NotExistingVar
+            Variable with corresponding name in self._elements.
+
+        Raises
+        ------
+        KeyError
+            If var_name doesn't correspond to any name.
+        """
+        if self.has_name(var_name=var_name):
+            return self._mapper_by_name[var_name]
+        else:
+            valid_keys = self._mapper_by_name.keys()
+            error_msg = f"{var_name} is not a valid variable name. Valid names are: {list(valid_keys)}"
+            raise KeyError(error_msg)
 
     def add_var(self, var: ExistingVar | NotExistingVar) -> None:
         """Adds a new variable to self._elements.

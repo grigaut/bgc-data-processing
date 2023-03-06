@@ -317,13 +317,13 @@ class NetCDFLoader(BaseLoader):
             Dataframe with date, year, month and day columns.
         """
         # Convert from timedeltas to datetime
-        timedeltas = df.pop(self.variables.labels["DATE"])
+        timedeltas = df.pop(self.variables.get("DATE").label)
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
-        df[self.variables.labels["DATE"]] = dates
+        df[self.variables.get("DATE").label] = dates
         # Add year, month and day columns
-        df[self.variables.labels["YEAR"]] = dates.dt.year
-        df[self.variables.labels["MONTH"]] = dates.dt.month
-        df[self.variables.labels["DAY"]] = dates.dt.day
+        df[self.variables.get("YEAR").label] = dates.dt.year
+        df[self.variables.get("MONTH").label] = dates.dt.month
+        df[self.variables.get("DAY").label] = dates.dt.day
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -339,7 +339,7 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with provider column properly filled.
         """
-        if "PROVIDER" in self._variables.keys():
+        if self.variables.has_name("PROVIDER"):
             df[self._variables.labels["PROVIDER"]] = self.provider
         return df
 
@@ -358,7 +358,7 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with expocode column properly filled.
         """
-        if "EXPOCODE" in self._variables.keys():
+        if self.variables.has_name("EXPOCODE"):
             df[self._variables.labels["EXPOCODE"]] = file_id
         return df
 
