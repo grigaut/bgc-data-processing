@@ -6,6 +6,8 @@ ENVIRONMENT_FILEPATH = environment.yml
 SAVE_SCRIPT_PATH = scripts/save_data.py
 PLOT_SCRIPT_PATH = scripts/plot_mesh.py
 OUTPUT_DIRS = bgc_data bgc_figs
+CONFIG := config.toml
+CONFIG_TEMPLATE := config.template.toml
 VENV := ./.venv
 POETRY := $(VENV)/bin/poetry
 PYTHON := $(VENV)/bin/python3.11
@@ -17,15 +19,20 @@ default:
 	@echo "Call a specific subcommand: create-env,install,update,documentation"
 
 all:
+	@$(MAKE) -s $(CONFIG)
 	@$(MAKE) -s install
 
 install-with-hooks:
+	@$(MAKE) -s $(CONFIG)
 	@$(MAKE) -s install
 	@$(MAKE) -s pre-commit
 
 clean:
 	rm -r -f $(VENV)
 	rm -r -f $(HOOKS)
+
+$(CONFIG): $(CONFIG_TEMPLATE)
+	cp $(CONFIG_TEMPLATE) $(CONFIG)
 
 $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 	@$(MAKE) -s clean

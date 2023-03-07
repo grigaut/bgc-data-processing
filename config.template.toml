@@ -72,7 +72,7 @@ VERBOSE = 2
 [PROVIDERS]
     [PROVIDERS.ARGO]
     ## PROVIDERS.ARGO.PATH: str: path to data
-    PATH = "/var/sat/S23Eddy/Data/Argo/INSITU_GLO_BGC_REP"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.ARGO.CATEGORY: str: data category
     CATEGORY = "float"
     ## PROVIDERS.ARGO.EXCLUDE: list[str]: file to exclude from loading
@@ -92,56 +92,56 @@ VERBOSE = 2
     ]
     [PROVIDERS.CLIVAR]
     ## PROVIDERS.CLIVAR.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/CLIVAR/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.CLIVAR.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.CLIVAR.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAPv2]
     ## PROVIDERS.GLODAPv2.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.GLODAPv2.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAP_2019]
     ## PROVIDERS.GLODAP_2019.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2019/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.GLODAP_2019.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAP_2022]
     ## PROVIDERS.GLODAP_2022.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/GLODAPv2.2022/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.GLODAP_2022.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.ICES]
     ## PROVIDERS.ICES.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/ICES/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.ICES.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.ICES.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.IMR]
     ## PROVIDERS.IMR.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/IMR/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.IMR.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.IMR.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.NMDC]
     ## PROVIDERS.NMDC.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/NMDC/data"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.NMDC.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.NMDC.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.CMEMS]
     ## PROVIDERS.CMEMS.PATH: str: path to data
-    PATH = "/mnt/data02/gaerig/synthesis/CMEMS/history/nutrients/BO"
+    PATH = "path/to/file/directory"
     ## PROVIDERS.CMEMS.CATEGORY: str: data category
     CATEGORY = "in_situ"
     ## PROVIDERS.CMEMS.EXCLUDE: list[str]: file to exclude from loading
