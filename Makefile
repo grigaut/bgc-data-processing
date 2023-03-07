@@ -18,6 +18,9 @@ default:
 
 all:
 	@$(MAKE) -s install
+
+install-with-hooks:
+	@$(MAKE) -s install
 	@$(MAKE) -s pre-commit
 
 clean:
