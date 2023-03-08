@@ -1,4 +1,4 @@
-"""Specific parameters to load ICES-provided data"""
+"""Specific parameters to load ICES-provided data."""
 
 
 from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables

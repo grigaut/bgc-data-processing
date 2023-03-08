@@ -1,3 +1,6 @@
+"""Plotting objects."""
+
+
 import warnings
 from typing import TYPE_CHECKING, Callable, Iterable
 
@@ -114,7 +117,7 @@ class MeshPlotter(BasePlot):
         bin_size: float,
         cut_name: str,
     ) -> tuple[pd.Series, np.ndarray]:
-        """Generates evenly spaced points to use when creating the meshgrid.
+        """Generates evenly spaced points to use when creating the meshgrid. \
         Also performs a cut on the dataframe column to bin the values.
 
         Parameters

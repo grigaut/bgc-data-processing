@@ -1,3 +1,6 @@
+"""Date range generating objects."""
+
+
 import datetime as dt
 
 import pandas as pd
@@ -39,6 +42,14 @@ class DateRangeGenerator:
         self.interval_length = interval_length
 
     def __call__(self) -> pd.DataFrame:
+        """Loads the date ranges.
+
+        Returns
+        -------
+        pd.DataFrame
+            Range DataFrame with "start_date" and "end_date" columns.
+            Both start and end dates are supposed to be included in the final range.
+        """
         if self.interval == "custom":
             return self._make_custom_range()
         else:
@@ -76,7 +87,7 @@ class DateRangeGenerator:
         return pd.concat([starts.dt.date, ends.dt.date], axis=1)
 
     def _make_range(self) -> pd.DataFrame:
-        """Create the range DataFrame for 'usual' date intervals:
+        """Create the range DataFrame for 'usual' date intervals: \
         day, week, month or year.
 
         Returns

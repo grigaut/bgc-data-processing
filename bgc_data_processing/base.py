@@ -1,3 +1,6 @@
+"""Base objects."""
+
+
 import datetime as dt
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
@@ -75,7 +78,7 @@ class BaseLoader(ABC):
 
     @property
     def verbose(self) -> int:
-        """_verbose attribute getter
+        """_verbose attribute getter.
 
         Returns
         -------
@@ -97,6 +100,18 @@ class BaseLoader(ABC):
 
     @abstractmethod
     def __call__(self, exclude: list = []) -> "Storer":
+        """Loads all files for the loader.
+
+        Parameters
+        ----------
+        exclude : list, optional
+            Files not to load., by default []
+
+        Returns
+        -------
+        Storer
+            Storer for the loaded data.
+        """
         ...
 
     @abstractmethod
@@ -255,7 +270,7 @@ class BaseLoader(ABC):
             return df.loc[after_date_min & before_date_max, :].copy()
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Removes rows
+        """Removes rows.
 
         Parameters
         ----------

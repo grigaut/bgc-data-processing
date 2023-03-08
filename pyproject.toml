@@ -68,4 +68,5 @@ generate-badge = "docs/assets/badges"
 badge-format = "svg"
 
 [tool.pydocstyle]
-convention = "numpy"
+ignore = ["D104", "D105", "D107", "D203", "D204", "D213", "D215", "D400", "D401", "D404", "D406", "D407", "D408", "D409", "D413"]
+match-dir = "bgc_data_processing/*"

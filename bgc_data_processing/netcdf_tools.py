@@ -1,3 +1,6 @@
+"""NetCDF-related objects."""
+
+
 import datetime as dt
 import os
 import re
@@ -51,6 +54,18 @@ class NetCDFLoader(BaseLoader):
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
     def __call__(self, exclude: list = []) -> "Storer":
+        """Loads all files for the loader.
+
+        Parameters
+        ----------
+        exclude : list, optional
+            Files not to load., by default []
+
+        Returns
+        -------
+        Storer
+            Storer for the loaded data.
+        """
         filepaths = self._select_filepaths(exclude=exclude)
         data_list = []
         for filepath in filepaths:
@@ -169,7 +184,7 @@ class NetCDFLoader(BaseLoader):
     def _fill_missing(
         self, data_dict: dict, missing_vars: list["ExistingVar|NotExistingVar"]
     ) -> dict:
-        """Adds empty values with correct shapes for variables
+        """Adds empty values with correct shapes for variables \
         which aren't in the original data file but which were supposed to be.
 
         Notes
@@ -208,7 +223,7 @@ class NetCDFLoader(BaseLoader):
         return data_dict
 
     def _reshape_data(self, data_dict: dict) -> dict:
-        """Reshapes the data arrays into 1 dimensionnal arrays
+        """Reshapes the data arrays into 1 dimensionnal arrays \
         in order to create a Dataframe.
 
         Parameters
@@ -246,8 +261,8 @@ class NetCDFLoader(BaseLoader):
         ----------
         nc_data : nc.Dataset
             nc.Dataset to use to get data.
-        aliases : ExistingVar
-            Variable to get the values of
+        variable : ExistingVar
+            Variable to get the values of.
 
         Returns
         -------

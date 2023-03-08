@@ -1,3 +1,5 @@
+"""CSV-related objects."""
+
 import os
 import re
 from typing import TYPE_CHECKING
@@ -48,6 +50,18 @@ class CSVLoader(BaseLoader):
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
     def __call__(self, exclude: list = []) -> "Storer":
+        """Loads all files for the loader.
+
+        Parameters
+        ----------
+        exclude : list, optional
+            Files not to load., by default []
+
+        Returns
+        -------
+        Storer
+            Storer for the loaded data.
+        """
         filepaths = self._select_filepaths(exclude=exclude)
         data_list = []
         for filepath in filepaths:
@@ -143,8 +157,8 @@ class CSVLoader(BaseLoader):
         return None
 
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Formatting function for csv files, modified to drop useless columns,
-        rename columns and add missing columns (variables in self._variables
+        """Formatting function for csv files, modified to drop useless columns, \
+        rename columns and add missing columns (variables in self._variables \
         but not in csv file).
 
         Parameters

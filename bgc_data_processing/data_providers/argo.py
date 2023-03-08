@@ -1,4 +1,4 @@
-"""Specific parameters to load Argo-provided data"""
+"""Specific parameters to load Argo-provided data."""
 
 import numpy as np
 

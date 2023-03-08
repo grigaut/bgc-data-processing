@@ -1,3 +1,6 @@
+"""Data storing objects."""
+
+
 import os
 from typing import Any
 
@@ -38,7 +41,7 @@ class Storer:
 
     @property
     def data(self) -> pd.DataFrame:
-        """Getter for self._data
+        """Getter for self._data.
 
         Returns
         -------
@@ -60,7 +63,7 @@ class Storer:
 
     @property
     def providers(self) -> list:
-        """Getter for self._providers
+        """Getter for self._providers.
 
         Returns
         -------
@@ -82,7 +85,7 @@ class Storer:
 
     @property
     def verbose(self) -> int:
-        """_verbose attribute getter
+        """_verbose attribute getter.
 
         Returns
         -------
@@ -161,7 +164,7 @@ class Storer:
         self,
         drng: pd.Series,
     ) -> "Slice":
-        """Slices the Dataframe using the date column.
+        """Slices the Dataframe using the date column. \
         Returns indexes to use for slicing.
 
         Parameters
@@ -300,7 +303,7 @@ class Slice(Storer):
 
     @property
     def providers(self) -> list:
-        """Getter for self._storer._providers
+        """Getter for self._storer._providers.
 
         Returns
         -------
@@ -311,7 +314,7 @@ class Slice(Storer):
 
     @property
     def variables(self) -> list:
-        """Getter for self._storer._variables
+        """Getter for self._storer._variables.
 
         Returns
         -------
@@ -421,7 +424,7 @@ class Reader:
     def _read(
         self, filepath: str, unit_row_index: int, delim_whitespace: bool
     ) -> tuple[pd.DataFrame, pd.Series]:
-        """Method to read the filepath and extract the unit row
+        """Method to read the filepath and extract the unit row.
 
         Parameters
         ----------
@@ -437,7 +440,6 @@ class Reader:
         tuple[pd.DataFrame, pd.Series]
             Dataframe, unit row
         """
-
         if unit_row_index is None:
             skiprows = None
             unit_row = None
@@ -549,7 +551,7 @@ class Reader:
             return None, None
 
     def _add_missing_columns(self, raw_df: pd.DataFrame) -> pd.DataFrame:
-        """Adds missing columns to the dataframe
+        """Adds missing columns to the dataframe.
 
         Parameters
         ----------
@@ -568,7 +570,7 @@ class Reader:
         return raw_df
 
     def get_storer(self) -> "Storer":
-        """Returns the Storer storing the data loaded
+        """Returns the Storer storing the data loaded.
 
         Returns
         -------

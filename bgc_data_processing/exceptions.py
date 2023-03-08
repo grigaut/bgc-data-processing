@@ -1,3 +1,6 @@
+"""Specific exceptions."""
+
+
 class VariableInstantiationError(Exception):
     """Exception class to raise when instantiating variables."""
 
