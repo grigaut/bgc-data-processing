@@ -98,7 +98,7 @@ class CSVLoader(BaseLoader):
         return sorted(full_paths)
 
     def _read(self, filepath: str) -> pd.DataFrame:
-        """Reading function for csv files, modified to use self._read_params when loading the file.
+        """Reading function for csv files, using self._read_params when loading files.
 
         Parameters
         ----------
@@ -144,7 +144,8 @@ class CSVLoader(BaseLoader):
 
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
         """Formatting function for csv files, modified to drop useless columns,
-        rename columns and add missing columns (variables in self._variables but not in csv file).
+        rename columns and add missing columns (variables in self._variables
+        but not in csv file).
 
         Parameters
         ----------
@@ -218,7 +219,7 @@ class CSVLoader(BaseLoader):
             if var.type is not str:
                 # if there are letters in the values
                 alpha_values = df[var.label].astype(str).str.isalpha()
-                # if the value is nan (to keep the "nan" values flagged at previous line)
+                # if the value is nan (keep the "nan" values flagged at previous line)
                 nan_values = df[var.label].isnull()
                 # removing these rows
                 df = df.loc[~(alpha_values & (~nan_values)), :]

@@ -192,7 +192,7 @@ class NetCDFLoader(BaseLoader):
         Raises
         ------
         NetCDFLoadingError
-            If all the variables are missing => impossible to find the shape of the data.
+            If all variables are missing => impossible to find the shape of the data.
         """
         if not missing_vars:
             return data_dict
@@ -226,7 +226,7 @@ class NetCDFLoader(BaseLoader):
         for var in self.variables.in_dset:
             data = data_dict[var.label]
             if data.shape == (1,):
-                # if the data contains a single value => some data from CMEMS: latitude or longitude
+                # data contains a single value => from CMEMS: latitude or longitude
                 data = np.tile(data, (shape0,))
             if len(data.shape) == 1:
                 # Reshape data to 2D
@@ -373,7 +373,7 @@ class NetCDFLoader(BaseLoader):
         Returns
         -------
         pd.DataFrame
-            Dataframe with all wished columns (one for every variable in self._variable).
+            Dataframe with all wished columns (for every variable in self._variable).
         """
         for var in self._variables:
             if var.label not in df.columns:

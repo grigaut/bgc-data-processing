@@ -55,7 +55,10 @@ if __name__ == "__main__":
             BIN_SIZE,
             depth_aggr=DEPTH_AGGREGATION,
             bin_aggr=BIN_AGGREGATION,
-            suptitle=f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n{date_min}-{date_max}",
+            suptitle=(
+                f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
+                f"{date_min}-{date_max}"
+            ),
             extent=(
                 LONGITUDE_MIN,
                 LONGITUDE_MAX,

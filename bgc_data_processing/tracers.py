@@ -90,7 +90,8 @@ class MeshPlotter(BasePlot):
         lon_key : str
             Longitude variable name.
         how : str | Callable
-            Grouping function key to use with self.depth_aggr or Callable function to use to group.
+            Grouping function key to use with self.depth_aggr or
+            Callable function to use to group.
 
         Returns
         -------
@@ -157,19 +158,21 @@ class MeshPlotter(BasePlot):
         label : str
             Name of the column with the variable to mesh.
         bins_size : float | tuple[float, float], optional
-            Bins size, if tuple, first component if for latitude, second is for longitude.
+            Bins size, if tuple: first for latitude, second for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree
         depth_aggr : str | Callable
-            Name of the function to use to aggregate data when group by similar measuring point
-            or callable function to use to aggregate.
+            Name of the function to use to aggregate data when group by
+            similar measuring point or callable function to use to aggregate.
         bin_aggr : str | Callable
-            Name of the function to aggregate when pivotting data or callable function to use to aggregate.
+            Name of the function to aggregate when pivotting data or
+            callable function to use to aggregate.
 
         Returns
         -------
         tuple[np.ndarray]
-            Longitude values, Latitude values and variable values. Each one is 2 dimensionnal.
+            Longitude values, Latitude values and variable values.
+            Each one is 2 dimensionnal.
         """
         lat = self._variables.get("LATITUDE").label
         lon = self._variables.get("LONGITUDE").label
@@ -237,14 +240,16 @@ class MeshPlotter(BasePlot):
         variable_name : str
             Name of the variable to plot.
         bins_size : float | tuple[float, float]
-            Bins size, if tuple, first component if for latitude, second is for longitude.
+            Bins size, if tuple, first is latitude, second is longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree.
         depth_aggr : str | Callable
-            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
+            Name of the function to use to aggregate data when group
+            by similar measuring point (from self.depth_aggr),
              or callable function to use to aggregate.
         bin_aggr : str | Callable
-            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
+            Name of the aggregation function to use when pivotting data
+            (from self.bin_aggr),
             or callable function to use to aggregate.
         extent : tuple | list
             Boundaries of the map.
@@ -259,7 +264,8 @@ class MeshPlotter(BasePlot):
         )
         if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
             warnings.warn(
-                "Not enough data to display, try decreasing the bin size or representing more data sources"
+                "Not enough data to display, try decreasing the bin size"
+                " or representing more data sources"
             )
         if self._verbose > 1:
             print("\tCreating figure")
@@ -283,7 +289,8 @@ class MeshPlotter(BasePlot):
         elif depth_aggr == "count" and bin_aggr == "sum":
             label = f"{variable_name} total data points count"
         else:
-            label = f"{bin_aggr} {variable_name} levels {self._variables[variable_name].unit}"
+            unit = self._variables[variable_name].unit
+            label = f"{bin_aggr} {variable_name} levels {unit}"
         fig.colorbar(cbar, label=label, shrink=0.75)
         title = f"{lat}° x {lon}° grid (lat x lon)"
         plt.title(title)
@@ -309,19 +316,22 @@ class MeshPlotter(BasePlot):
         variable_name : str
             Name of the variable to plot.
         bins_size : float | tuple[float, float], optional
-            Bins size, if tuple, first component if for latitude, second is for longitude.
+            Bins size, if tuple, first for latitude, second for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
         depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
-             or callable function to use to aggregate., by default "top"
+            Name of the function to use to aggregate data when group
+            by similar measuring point (from self.depth_aggr),
+            or callable function to use to aggregate., by default "top"
         bin_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
+            Name of the aggregation function to use to pivot data (from self.bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
-            Title for the figure, if set to None, automatically created., by default None.
+            Title for the figure, if set to None, automatically created.
+            , by default None.
         suptitle: str, optional
-            Suptitle for the figure, if set to None, automatically created., by default None.
+            Suptitle for the figure, if set to None, automatically created.
+            , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89).
         """
@@ -355,19 +365,22 @@ class MeshPlotter(BasePlot):
         variable_name : str
             Name of the variable to plot.
         bins_size : float | tuple[float, float], optional
-            Bins size, if tuple, first component if for latitude, second is for longitude.
+            Bins size, if tuple, first component if for latitude, second for longitude.
             If float or int, size is applied for both latitude and longitude.
             Unit is supposed to be degree., by default 0.5
         depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group by similar measuring point (from self.depth_aggr),
-             or callable function to use to aggregate., by default "top"
+            Name of the function to use to aggregate data when group
+            by similar measuring point (from self.depth_aggr),
+            or callable function to use to aggregate., by default "top"
         bin_aggr : str | Callable, optional
-            Name of the aggregation function to use when pivotting data (from self.bin_aggr),
+            Name of the aggregation function to use to pivot data (from self.bin_aggr),
             or callable function to use to aggregate., by default "count"
         title: str, optional
-            Title for the figure, if set to None, automatically created., by default None.
+            Title for the figure, if set to None, automatically created.
+            , by default None.
         suptitle: str, optional
-            Suptitle for the figure, if set to None, automatically created., by default None.
+            Suptitle for the figure, if set to None, automatically created.
+            , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89)
         """
@@ -403,7 +416,8 @@ class MeshPlotter(BasePlot):
         filepath : str
             Path to the file to read.
         providers : str | list, optional
-            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
+            Provider column in the dataframe (if str) or
+            value to attribute to self._providers (if list).
             , by default "PROVIDER"
         category : str, optional
             Category of the loaded file., by default "in_situ"

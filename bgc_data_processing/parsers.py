@@ -1,11 +1,11 @@
 """Parsing tools to determine date ranges"""
 import datetime as dt
 import os
-import tomllib
 from copy import deepcopy
 from typing import Any, Type
 
 import pandas as pd
+import tomllib
 
 
 class RanCycleParser:
@@ -61,7 +61,7 @@ class RanCycleParser:
         Returns
         -------
         pd.DataFrame
-            Dataframe with starting (start_dates) and ending (end_dates) dates of dateranges
+            Dataframe with starting (start_dates) and ending (end_dates) dates.
         """
         dates_start = dates_col - pd.DateOffset(start)
         dates_start.name = "start_date"
@@ -82,7 +82,7 @@ class RanCycleParser:
         Returns
         -------
         pd.DataFrame
-            Dataframe with starting (start_dates) and ending (end_dates) dates of dateranges
+            Dataframe with starting (start_dates) and ending (end_dates) dates.
         """
         initial_dates = pd.to_datetime(
             self.first_dates,
@@ -133,7 +133,8 @@ class ConfigParser:
         Returns
         -------
         tuple[list[str], list[Type | tuple[Type, Type]]]
-            List of keys: path to the variable, list of types/tuples: possible type for the variable.
+            List of keys: path to the variable,
+            list of types/tuples: possible type for the variable.
         """
         # Remove comment part on the line
         str_keys, str_types = line.split(": ")[:2]
@@ -207,14 +208,14 @@ class ConfigParser:
         str
             Error message to pass to TypeError.
         """
-        wrong_type_msg = f"Variable {'.'.join(keys)} from {self.filepath} does not have the correct type."
+        type_msg = f"Variable {'.'.join(keys)} from {self.filepath} has incorrect type."
         crop = lambda x: str(str(x).split("'")[1])
         iterables = [t for t in types if isinstance(t, tuple)]
         str_iter = [crop(t[0]) + "[" + crop(t[1]) + "]" for t in iterables]
         str_other = [crop(t) for t in types if not isinstance(t, tuple)]
         str_types = ", ".join(str_other + str_iter)
         correct_type_msg = f"Must be of one of these types: {str_types}."
-        return f"{wrong_type_msg} {correct_type_msg}"
+        return f"{type_msg} {correct_type_msg}"
 
     def get(self, keys: list[str]) -> Any:
         """Return a variable from the toml using its path.
@@ -276,8 +277,9 @@ class ConfigParser:
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var_type, dict)) or (key not in var_type.keys()):
+                keys_str = ".".join(keys[: i + 2])
                 raise KeyError(
-                    f"Type of {'.'.join(keys[:i+2])} can't be parsed from {self.filepath}"
+                    f"Type of {keys_str} can't be parsed from {self.filepath}"
                 )
             var_type = var_type[key]
         return var_type

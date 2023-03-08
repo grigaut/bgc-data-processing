@@ -219,7 +219,11 @@ class BaseLoader(ABC):
 
         Examples
         --------
-        >>> df = self._apply_boundaries(not_bounded_df, "DATE", self._date_min, self._date_max)
+        >>> df = self._apply_boundaries(not_bounded_df,
+        ...     "DATE",
+        ...     self._date_min,
+        ...     self._date_max,
+        ... )
 
         """
         if var_name not in self._variables.keys():
