@@ -1,3 +1,4 @@
+"""Functions, classes or decorator useful for development."""
 import warnings
 
 

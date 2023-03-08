@@ -1,4 +1,4 @@
-"""Specific parameters to load Argo-provided data"""
+"""Specific parameters to load Argo-provided data."""
 
 from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
 

@@ -1,4 +1,4 @@
-"""Specific parameters to load GLODAPv2-provided data"""
+"""Specific parameters to load GLODAPv2-provided data."""
 
 
 from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables

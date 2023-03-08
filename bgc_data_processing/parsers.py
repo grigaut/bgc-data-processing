@@ -1,14 +1,14 @@
-"""Parsing tools to determine date ranges"""
+"""Parsing tools to determine date ranges."""
+
 import datetime as dt
 import os
+import tomllib
 from copy import deepcopy
 from typing import Any, Type
 
-import tomllib
-
 
 class ConfigParser:
-    """Parsing class for config.toml
+    """Parsing class for config.toml.
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ class ConfigParser:
             return isinstance(var, var_type)
 
     def _make_error_msg(self, keys: list[str], types: list[Type]) -> str:
-        """Creates error message for TypeErrors
+        """Creates error message for TypeErrors.
 
         Parameters
         ----------
@@ -308,8 +308,8 @@ class ConfigParser:
         return self.get(["PROVIDERS"])
 
     @property
-    def utils(self):
-        """'Utils'' part of the toml.
+    def utils(self) -> dict:
+        """'utils'' part of the toml.
 
         Returns
         -------

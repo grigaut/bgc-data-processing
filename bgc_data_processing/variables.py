@@ -1,3 +1,5 @@
+"""Variable related objects."""
+
 from abc import ABC
 from typing import Callable, Iterable, Iterator, Self
 
@@ -9,6 +11,7 @@ from bgc_data_processing.exceptions import VariableInstantiationError
 
 class BaseVar(ABC):
     """Class to store Meta data on a variable of interest.
+
     Parameters
     ----------
     name : str
@@ -107,7 +110,7 @@ class TemplateVar(BaseVar):
         return informations
 
     def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
-        """Returns an ExistingVar object with same attributes as self and
+        """Returns an ExistingVar object with same attributes as self and \
         the property 'aliases' correctly set up using ExistingVar._set_aliases method.
 
         Parameters
@@ -196,7 +199,7 @@ class NotExistingVar(BaseVar):
 
     @property
     def remove_if_all_nan(self) -> bool:
-        """True if the variable must be removed when this variable and
+        """True if the variable must be removed when this variable and \
         other 'remove if all nan' variables are NaN.
 
         Returns
@@ -248,7 +251,7 @@ class NotExistingVar(BaseVar):
 
 
 class ExistingVar(NotExistingVar):
-    """Class to represent variables existing in the dataset,
+    """Class to represent variables existing in the dataset, \
     to be able to specify flag columns, corecction functions..."""
 
     exist_in_dset: bool = True
@@ -257,7 +260,7 @@ class ExistingVar(NotExistingVar):
 
     @property
     def aliases(self) -> list[tuple[str, str, list]]:
-        """Getter for aliases
+        """Getter for aliases.
 
         Returns
         -------
@@ -269,7 +272,7 @@ class ExistingVar(NotExistingVar):
 
     @property
     def remove_if_all_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when multiple
+        """Get the boolean indicating whether or not to suppress the row when multiple \
         variables (this one included if True) are np.nan.
 
         Returns
@@ -282,8 +285,8 @@ class ExistingVar(NotExistingVar):
 
     @property
     def remove_if_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when
-        the variable is np.nan
+        """Get the boolean indicating whether or not to suppress the row when \
+        the variable is np.nan.
 
         Returns
         -------
@@ -309,7 +312,7 @@ class ExistingVar(NotExistingVar):
         return super().from_template(template)
 
     def set_aliases(self, *args: str | tuple[str, str, list]) -> Self:
-        """_summary_
+        """Sets aliases for the variable.
 
         Parameters
         ----------
@@ -337,7 +340,6 @@ class ExistingVar(NotExistingVar):
         ValueError
             If one of the arguments is not an instance of string or Iterable.
         """
-
         aliases = []
         for arg in args:
             if isinstance(arg, str):
@@ -387,7 +389,7 @@ class ExistingVar(NotExistingVar):
 
 
 class ParsedVar(BaseVar):
-    """Variables parsed from a csv file"""
+    """Variables parsed from a csv file."""
 
     def __repr__(self) -> str:
         txt = f"{self.name}_{self.unit}"
@@ -395,9 +397,9 @@ class ParsedVar(BaseVar):
 
 
 class VariablesStorer:
-    """General storer for Var object to represent the set of both variables present
-    in the file and variables to take in consideration (therefore to add even if empty)
-    when loading the data.
+    """General storer for Var object to represent the set of both variables present \
+    in the file and variables to take in consideration \
+    (therefore to add even if empty) when loading the data.
 
     Parameters
     ----------
@@ -472,7 +474,7 @@ class VariablesStorer:
             return False
 
     def get(self, var_name: str) -> ExistingVar | NotExistingVar:
-        """Return the variable which name corresponds to var_name
+        """Return the variable which name corresponds to var_name.
 
         Parameters
         ----------
@@ -562,7 +564,7 @@ class VariablesStorer:
 
     @property
     def labels(self) -> dict[str, str]:
-        """Returns a dicitonnary mapping variable names to variables labels
+        """Returns a dicitonnary mapping variable names to variables labels.
 
         Returns
         -------
@@ -584,7 +586,7 @@ class VariablesStorer:
 
     @property
     def unit_mapping(self) -> dict[str, str]:
-        """Mapper between variables names and variables units.
+        """Mapper between variables names and variables units. \
         Mostly used to create unit row.
 
         Returns
@@ -670,7 +672,7 @@ class VariablesStorer:
 
     @property
     def corrections(self) -> dict[str, Callable]:
-        """Mapping between variables keys and correcting functions
+        """Mapping between variables keys and correcting functions.
 
         Returns
         -------
@@ -685,7 +687,7 @@ class VariablesStorer:
 
     @property
     def to_remove_if_all_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where
+        """Returns the list of keys to inspect when removing rows where \
         all variables are np.nan.
 
         Returns
@@ -697,7 +699,7 @@ class VariablesStorer:
 
     @property
     def to_remove_if_any_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where
+        """Returns the list of keys to inspect when removing rows where \
         any variable is np.nan.
 
         Returns
