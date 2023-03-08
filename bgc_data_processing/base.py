@@ -101,6 +101,18 @@ class BaseLoader(ABC):
 
     @abstractmethod
     def _select_filepaths(self, exclude: list) -> list[str]:
+        """Select filepaths matching the file pattern.
+
+        Parameters
+        ----------
+        exclude : list
+            Files to exclude even if their name matches the pattern.
+
+        Returns
+        -------
+        list[str]
+            List of the filepaths to use for loading.
+        """
         ...
 
     @abstractmethod
@@ -285,6 +297,14 @@ class BaseLoader(ABC):
 
 
 class BasePlot(ABC):
+    """Base class to plot data from a storer.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to plot data of.
+    """
+
     def __init__(self, storer: "Storer") -> None:
         self._storer = storer
         self._variables = storer.variables
@@ -292,8 +312,10 @@ class BasePlot(ABC):
 
     @abstractmethod
     def plot(self) -> None:
+        """Plot method."""
         ...
 
     @abstractmethod
     def save_fig(self) -> None:
+        """Figure saving method."""
         ...

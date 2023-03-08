@@ -66,6 +66,18 @@ class ConfigParser:
         return keys, types
 
     def _parse_types(self, filepath: str) -> dict:
+        """Parse the variables types from the type-hinting rows in config.toml.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the config.toml file.
+
+        Returns
+        -------
+        dict
+            Dictionnary with same structure as config dictionnary referring to types.
+        """
         # reads config file
         with open(filepath, "r") as file:
             lines = [line.strip() for line in file.readlines()]
