@@ -135,7 +135,8 @@ class Storer:
         Parameters
         ----------
         priority_list : list, optional
-            Providers priority order, first has priority over others and so on., by default None
+            Providers priority order, first has priority over others and so on.
+            , by default None
         """
         df = self._data
         df = self._remove_duplicates_among_providers(df)
@@ -194,7 +195,8 @@ class Storer:
         df : pd.DataFrame
             DataFrame to remove duplicated data from.
         priority_list : list, optional
-            Providers priority order, first has priority over others and so on., by default None
+            Providers priority order, first has priority over others and so on.
+            , by default None
 
         Returns
         -------
