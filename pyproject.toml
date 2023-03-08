@@ -28,6 +28,7 @@ black = "^22.12.0"
 python-git-info = "^0.8.2"
 pre-commit = "^3.1.1"
 ruff = "^0.0.254"
+interrogate = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -52,11 +53,11 @@ ignore-semiprivate = false
 ignore-private = false
 ignore-property-decorators = false
 ignore-module = true
-ignore-nested-functions = false
+ignore-nested-functions = true
 ignore-nested-classes = true
 ignore-setters = false
-fail-under = 80
-exclude = ["setup.py", "docs", "build", "tests"]
+fail-under = 100
+exclude = ["setup.py", "docs", "build", "tests", "sandbox"]
 verbose = 1
 quiet = false
 whitelist-regex = []

@@ -185,10 +185,26 @@ class NotExistingVar(BaseVar):
 
     @property
     def remove_if_nan(self) -> bool:
+        """True if the variable must be removed if NaN.
+
+        Returns
+        -------
+        bool
+            True if the variable must be removed if NaN.
+        """
         return self._remove_if_nan
 
     @property
     def remove_if_all_nan(self) -> bool:
+        """True if the variable must be removed when this variable and
+        other 'remove if all nan' variables are NaN.
+
+        Returns
+        -------
+        bool
+            True if the variable must be removed when this variable and
+            other 'remove if all nan' variables are NaN.
+        """
         return self._remove_if_all_nan
 
     @classmethod
