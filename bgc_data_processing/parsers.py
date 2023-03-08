@@ -1,9 +1,10 @@
 """Parsing tools to determine date ranges"""
 import datetime as dt
 import os
-import tomllib
 from copy import deepcopy
 from typing import Any, Type
+
+import tomllib
 
 
 class ConfigParser:
@@ -249,11 +250,20 @@ class ConfigParser:
         dict
             self._config["AGGREGATION"]
         """
+        aggregation = self.get(["AGGREGATION"])
         self.raise_if_wrong_type_below(["AGGREGATION"])
+        aggregation["DATE_MIN"] = dt.datetime.strptime(
+            aggregation["DATE_MIN"],
+            "%Y%m%d",
+        )
+        aggregation["DATE_MAX"] = dt.datetime.strptime(
+            aggregation["DATE_MAX"],
+            "%Y%m%d",
+        )
         saving_dir = self.get(["AGGREGATION", "SAVING_DIR"])
         if not os.path.isdir(saving_dir):
             os.mkdir(saving_dir)
-        return self.get(["AGGREGATION"])
+        return aggregation
 
     @property
     def mapping(self) -> dict:
