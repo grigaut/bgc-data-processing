@@ -1,15 +1,19 @@
+import datetime as dt
 from time import time
 
 import pandas as pd
 
-from bgc_data_processing import CONFIG, data_providers, parsers
+from bgc_data_processing import CONFIG, data_providers, dateranges
 from bgc_data_processing.data_classes import Storer
 
 if __name__ == "__main__":
     # Script arguments
     config_aggregation = CONFIG.aggregation
-    YEARS: list[int] = config_aggregation["YEARS"]
     VARIABLES: list[str] = config_aggregation["VARIABLES"]
+    DATE_MIN: dt.datetime = config_aggregation["DATE_MIN"]
+    DATE_MAX: dt.datetime = config_aggregation["DATE_MAX"]
+    INTERVAL: str = config_aggregation["INTERVAL"]
+    CUSTOM_INTERVAL: int = config_aggregation["CUSTOM_INTERVAL"]
     LATITUDE_MIN: int | float = config_aggregation["LATITUDE_MIN"]
     LATITUDE_MAX: int | float = config_aggregation["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = config_aggregation["LONGITUDE_MIN"]
@@ -19,25 +23,23 @@ if __name__ == "__main__":
     SAVING_DIR = config_aggregation["SAVING_DIR"]
     VERBOSE = CONFIG.utils["VERBOSE"]
 
-    drngs = []
-    aggr_date_names = []
-    full_year_rows = []
-    # cycle dates parsing
-    for year in YEARS:
-        # Collect cycle dates
-        cycle_file = f"{LIST_DIR}/ran_cycle_{year}.txt"
-        parser = parsers.RanCycleParser(filepath=cycle_file)
-        drng = parser.get_daterange(start=4, end=3)
-        aggr_date_names.append(parser.first_dates)
-        drngs.append(drng)
-    DRNG = pd.concat(drngs, ignore_index=True)
+    # Dates parsing
+    dates_generator = dateranges.DateRangeGenerator(
+        start=DATE_MIN,
+        end=DATE_MAX,
+        interval=INTERVAL,
+        interval_length=CUSTOM_INTERVAL,
+    )
+    DRNG = dates_generator()
     str_start = pd.to_datetime(DRNG["start_date"]).dt.strftime("%Y%m%d")
     str_end = pd.to_datetime(DRNG["end_date"]).dt.strftime("%Y%m%d")
     dates_str = str_start + "-" + str_end
-    aggr_date_names = pd.concat(aggr_date_names, ignore_index=True).astype(str)
+    aggr_date_names = DRNG["start_date"].astype(str)
     if VERBOSE > 0:
-        years_txt = ", ".join([str(x) for x in YEARS])
-        txt = f"Processing BGC data from {years_txt} provided by {', '.join(PROVIDERS)}"
+        txt = (
+            f"Processing BGC data from {DATE_MIN.strftime('%Y%M%d')} to "
+            f"{DATE_MAX.strftime('%Y%M%d')} provided by {', '.join(PROVIDERS)}"
+        )
         print("\n\t" + "-" * len(txt))
         print("\t" + txt)
         print("\t" + "-" * len(txt) + "\n")
