@@ -219,7 +219,7 @@ class NetCDFLoader(BaseLoader):
         for var in missing_vars:
             # Create empty frame with nans
             data_dict[var.label] = np.empty(shape_ref)
-            data_dict[var.label].fill(np.nan)
+            data_dict[var.label].fill(var.default)
         return data_dict
 
     def _reshape_data(self, data_dict: dict) -> dict:
