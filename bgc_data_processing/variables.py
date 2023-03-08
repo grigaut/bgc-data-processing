@@ -21,12 +21,15 @@ class BaseVar(ABC):
         It will be used to convert the data using df[variable].astype(type)
     load_nb : int, optional
         Number to sort the variable when loading the data.
-        None implies that the variable will be remove from the dataframe, by default None
+        None implies that the variable will be remove from the dataframe.
+        , by default None
     save_nb : int, optional
         Number to sort the variable when saving the data.
-        None implies that the variable will be remove from the dataframe, by default None
+        None implies that the variable will be remove from the dataframe.
+        , by default None
     name_format: str
-        Format to use to save the data name and unit in a csv of txt file., by default "%-15s"
+        Format to use to save the data name and unit in a csv of txt file.
+        , by default "%-15s"
     value_format: str
         Format to use to save the data value in a csv of txt file., by default "%15s"
 
@@ -104,19 +107,20 @@ class TemplateVar(BaseVar):
         return informations
 
     def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
-        """Returns an ExistingVar object with same attributes as self and the property 'aliases'
-        correctly set up using ExistingVar._set_aliases method.
+        """Returns an ExistingVar object with same attributes as self and
+        the property 'aliases' correctly set up using ExistingVar._set_aliases method.
 
         Parameters
         ----------
         args : str | tuple[str, str, list]
             Name(s) of the variable in the dataset and the corresponding flags.
-            Aliases are ranked: first alias will be the only one considered if present in dataset.
+            Aliases are ranked: first will be the only one used if present in dataset.
             If not second will be checked, and so on..
             Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
-            where alias (str) is the name of the column storing the variable in the dataset,
-            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
-            flag_values (list) is the list of correct values for the flag.
+            where alias (str) is the name of the column storing the variable
+            in the dataset, flag_alias (str) is the name of the column storing
+            the variable's flag in the dataset and flag_values (list) is
+            the list of correct values for the flag.
             If there is no flag columns, flag_alias and flag_values can be set to None,
             or the argument can be reduced to the variable column name only.
 
@@ -242,25 +246,28 @@ class ExistingVar(NotExistingVar):
         Returns
         -------
         list[tuple[str, str, list]]
-            alias, flag column alias (None if not), values to keep from flag column (None if not)
+            alias, flag column alias (None if not),
+            values to keep from flag column (None if not)
         """
         return self._aliases
 
     @property
     def remove_if_all_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when multiple variables
-        (this one included if True) are np.nan.
+        """Get the boolean indicating whether or not to suppress the row when multiple
+        variables (this one included if True) are np.nan.
 
         Returns
         -------
         bool
-            True if this variable must be included when removing where some variables are all nan.
+            True if this variable must be included when removing where
+            some variables are all nan.
         """
         return self._remove_if_all_nan
 
     @property
     def remove_if_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when the variable is np.nan
+        """Get the boolean indicating whether or not to suppress the row when
+        the variable is np.nan
 
         Returns
         -------
@@ -292,12 +299,13 @@ class ExistingVar(NotExistingVar):
         ----------
         args : str | tuple[str, str, list]
             Name(s) of the variable in the dataset and the corresponding flags.
-            Aliases are ranked: first alias will be the only one considered if present in dataset.
-            If not second will be checked, and so on..
+            Aliases are ranked: first alias will be the only one considered if present
+            in dataset. If not second will be checked, and so on..
             Aliases are supposed to be formatted as : (alias, flag_alias, flag_values),
-            where alias (str) is the name of the column storing the variable in the dataset,
-            flag_alias (str) is the name of the column storing the variable's flag in the dataset and
-            flag_values (list) is the list of correct values for the flag.
+            where alias (str) is the name of the column storing the variable
+            in the dataset, flag_alias (str) is the name of the column storing
+            the variable's flag in the dataset and flag_values (list) is the list
+            of correct values for the flag.
             If there is no flag columns, flag_alias and flag_values can be set to None,
             or the argument can be reduced to the variable column name only.
 
@@ -371,14 +379,16 @@ class ParsedVar(BaseVar):
 
 
 class VariablesStorer:
-    """General storer for Var object to represent the set of both variables present in the file and
-    variables to take in consideration (therefore to add even if empty) when loading the data.
+    """General storer for Var object to represent the set of both variables present
+    in the file and variables to take in consideration (therefore to add even if empty)
+    when loading the data.
 
     Parameters
     ----------
     *args: list
         Var objects to represent the variables stored by the object.
-        It is better if these Var object have been instanciated using .not_here or .here_as methods.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods.
 
     Raises
     ------
@@ -401,7 +411,8 @@ class VariablesStorer:
     def __init__(self, *args: ExistingVar | NotExistingVar) -> None:
         if len(args) != len(set(var.name for var in args)):
             raise ValueError(
-                "To set multiple alias for the same variable, use Var.in_file_as([alias1, alias2])"
+                "To set multiple alias for the same variable, "
+                "use Var.in_file_as([alias1, alias2])"
             )
 
         self._elements = list(args)
@@ -466,7 +477,10 @@ class VariablesStorer:
             return self._mapper_by_name[var_name]
         else:
             valid_keys = self._mapper_by_name.keys()
-            error_msg = f"{var_name} is not a valid variable name. Valid names are: {list(valid_keys)}"
+            error_msg = (
+                f"{var_name} is not a valid variable name."
+                f"Valid names are: {list(valid_keys)}"
+            )
             raise KeyError(error_msg)
 
     def add_var(self, var: ExistingVar | NotExistingVar) -> None:
@@ -543,7 +557,7 @@ class VariablesStorer:
 
     @property
     def _mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
-        """Mapper between variables names and variables Var objects (for __getitem__ mostly).
+        """Mapper between variables names and variables Var objects (for __getitem__).
 
         Returns
         -------
@@ -655,7 +669,8 @@ class VariablesStorer:
 
     @property
     def to_remove_if_all_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where all variables are np.nan.
+        """Returns the list of keys to inspect when removing rows where
+        all variables are np.nan.
 
         Returns
         -------
@@ -666,7 +681,8 @@ class VariablesStorer:
 
     @property
     def to_remove_if_any_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where any variable is np.nan.
+        """Returns the list of keys to inspect when removing rows where
+        any variable is np.nan.
 
         Returns
         -------

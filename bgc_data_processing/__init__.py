@@ -7,7 +7,15 @@ __all__ = [
 CONFIG = ConfigParser(filepath="config.toml", check_types=True)
 
 # Default variables setup using the format :
-# TemplateVar(name, unit, type, loading_sort_nb, saving_sort_nb, name_str_format, value_str_format)
+# TemplateVar(
+#   name,
+#   unit,
+#   type,
+#   loading_sort_nb,
+#   saving_sort_nb,
+#   name_str_format,
+#   value_str_format,
+# )
 
 
 DEFAULT_VARS: dict[str, TemplateVar] = {}

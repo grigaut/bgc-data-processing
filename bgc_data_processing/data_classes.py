@@ -161,12 +161,13 @@ class Storer:
         self,
         drng: pd.Series,
     ) -> "Slice":
-        """Slices the Dataframe using the date column. Returns indexes to use for slicing.
+        """Slices the Dataframe using the date column.
+        Returns indexes to use for slicing.
 
         Parameters
         ----------
         drng : pd.Series
-            Two values Series, "start_date" for starting dates and "end_date" for ending date.
+            Two values Series, "start_date" and "end_date".
 
         Returns
         -------
@@ -206,8 +207,8 @@ class Storer:
         filepath : str
             Path to the file to read.
         providers : str | list, optional
-            Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
-            , by default "PROVIDER"
+            Provider column in the dataframe (if str) or value to attribute
+            to self._providers (if list)., by default "PROVIDER"
         category : str, optional
             Category of the loaded file., by default "in_situ"
         unit_row_index : int, optional
@@ -238,7 +239,10 @@ class Storer:
         ...     "path/to/file1",
         ...     "path/to/file2",
         ... ]
-        >>> storer = MeshPlotter.from_files(filepaths, providers="providers_column_name")
+        >>> storer = MeshPlotter.from_files(
+        ...     filepaths,
+        ...     providers="providers_column_name",
+        ... )
         """
         if isinstance(filepath, list):
             storers = []
@@ -377,8 +381,8 @@ class Reader:
     filepath : str
         Path to the file to read.
     providers : str | list, optional
-        Provider column in the dataframe (if str) or value to attribute to self._providers (if list).
-        , by default "PROVIDER"
+        Provider column in the dataframe (if str) or value
+        to attribute to self._providers (if list)., by default "PROVIDER"
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
