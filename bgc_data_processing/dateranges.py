@@ -73,7 +73,7 @@ class DateRangeGenerator:
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
-        return pd.concat([starts, ends], axis=1)
+        return pd.concat([starts.dt.date, ends.dt.date], axis=1)
 
     def _make_range(self) -> pd.DataFrame:
         """Create the range DataFrame for 'usual' date intervals:
@@ -112,4 +112,4 @@ class DateRangeGenerator:
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
-        return pd.concat([starts, ends], axis=1)
+        return pd.concat([starts.dt.date, ends.dt.date], axis=1)
