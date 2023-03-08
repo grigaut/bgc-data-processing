@@ -4,8 +4,14 @@
 # Variable keys: possible types: additionnal comment
 
 [AGGREGATION]
-## AGGREGATION.YEARS: list[int]: years to consider to aggregate data
-YEARS = [2007]
+## AGGREGATION.DATE_MIN: str: first date to load
+DATE_MIN = "20070101"
+## AGGREGATION.DATE_MAX: str: last date to load
+DATE_MAX = "20071231"
+## AGGREGATION.INTERVAL: str: which interval to use, among ['day','week','month','year','custom']
+INTERVAL = "month"
+## AGGREGATION.CUSTOM_INTERVAL: int: custom interval length
+CUSTOM_INTERVAL = 8
 ## AGGREGATION.LATITUDE_MIN: int | float
 LATITUDE_MIN = 50
 ## AGGREGATION.LATITUDE_MAX: int | float
