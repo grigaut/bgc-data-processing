@@ -1,7 +1,7 @@
 """Variable related objects."""
 
 from abc import ABC
-from typing import Callable, Iterable, Iterator, Self
+from typing import Any, Callable, Iterable, Iterator, Self
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -168,23 +168,40 @@ class TemplateVar(BaseVar):
         """
         return ExistingVar.from_template(self).set_aliases(*args)
 
-    def not_in_file(self) -> "NotExistingVar":
+    def not_in_file(self, default: Any = np.nan) -> "NotExistingVar":
         """Returns a NotExistingVar object with same attributes as self.
+
+        Parameters
+        ----------
+        default: Any
+            Default value for the empty column., by default np.nan.
 
         Returns
         -------
         NotExistingVar
             Instanciated variable.
         """
-        return NotExistingVar.from_template(self)
+        return NotExistingVar.from_template(self).set_default(default=default)
 
 
 class NotExistingVar(BaseVar):
     """Class to represent variables which don't exist in the dataset."""
 
     exist_in_dset: bool = False
+    _default: Any = np.nan
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
+
+    @property
+    def default(self) -> Any:
+        """Default value for the variable.
+
+        Returns
+        -------
+        Any
+            Value to use as default.
+        """
+        return self._default
 
     @property
     def remove_if_nan(self) -> bool:
@@ -226,6 +243,22 @@ class NotExistingVar(BaseVar):
         """
         var = cls(**template._building_informations())
         return var
+
+    def set_default(self, default: Any) -> Self:
+        """Set the default value for the variable column.
+
+        Parameters
+        ----------
+        default : Any
+            Value to use as default
+
+        Returns
+        -------
+        Self
+            Self.
+        """
+        self._default = default
+        return self
 
     def remove_when_all_nan(self) -> Self:
         """Sets self._remove_if_all_nan to True.
