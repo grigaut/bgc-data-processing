@@ -76,6 +76,19 @@ DEFAULT = nan
 NAME_FORMAT = "%-3s"
 #? day.VALUE_FORMAT: str: format to use to save the values of the variable
 VALUE_FORMAT = "%3d"
+[hour]
+#? hour.NAME: str: variable name
+NAME = "HOUR"
+#? hour.UNIT: str: variable unit
+UNIT = "[]"
+#? hour.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE = "int"
+#? hour.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT = 12
+#? hour.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT = "%-4s"
+#? hour.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT = "%3d"
 [longitude]
 #? longitude.NAME: str: variable name
 NAME = "LONGITUDE"
