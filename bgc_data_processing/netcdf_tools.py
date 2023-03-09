@@ -311,7 +311,9 @@ class NetCDFLoader(BaseLoader):
             if values is None:
                 missing_vars.append(var)
             else:
+                values[np.isnan(values)] = var.default
                 data_dict[var.label] = values
+                # data_dict[var.label].fill(var.default)
         # Add missing columns
         data_dict = self._fill_missing(data_dict, missing_vars)
         # Reshape all variables's data to 1D
