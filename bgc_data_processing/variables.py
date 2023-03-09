@@ -22,6 +22,8 @@ class BaseVar(ABC):
     var_type : str
         Variable type (str, int, datetime...).
         It will be used to convert the data using df[variable].astype(type)
+    default: Any
+        Default value to set instead of nan., by default np.nan
     name_format: str
         Format to use to save the data name and unit in a csv of txt file.
         , by default "%-15s"
@@ -159,11 +161,6 @@ class TemplateVar(BaseVar):
 
     def not_in_file(self) -> "NotExistingVar":
         """Returns a NotExistingVar object with same attributes as self.
-
-        Parameters
-        ----------
-        default: Any
-            Default value for the empty column., by default np.nan.
 
         Returns
         -------
