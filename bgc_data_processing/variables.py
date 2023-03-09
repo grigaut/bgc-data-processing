@@ -22,14 +22,6 @@ class BaseVar(ABC):
     var_type : str
         Variable type (str, int, datetime...).
         It will be used to convert the data using df[variable].astype(type)
-    load_nb : int, optional
-        Number to sort the variable when loading the data.
-        None implies that the variable will be remove from the dataframe.
-        , by default None
-    save_nb : int, optional
-        Number to sort the variable when saving the data.
-        None implies that the variable will be remove from the dataframe.
-        , by default None
     name_format: str
         Format to use to save the data name and unit in a csv of txt file.
         , by default "%-15s"
@@ -49,8 +41,6 @@ class BaseVar(ABC):
         unit: str,
         var_type: str,
         default: Any = np.nan,
-        load_nb: int = None,
-        save_nb: int = None,
         name_format: str = "%-15s",
         value_format: str = "%15s",
     ):
@@ -59,8 +49,6 @@ class BaseVar(ABC):
         self.unit = unit
         self.type = var_type
         self.default = default
-        self.load_nb = load_nb
-        self.save_nb = save_nb
         self.name_format = name_format
         self.value_format = value_format
 
@@ -105,8 +93,6 @@ class TemplateVar(BaseVar):
             unit=self.unit,
             var_type=self.type,
             default=self.default,
-            load_nb=self.load_nb,
-            save_nb=self.save_nb,
             name_format=self.name_format,
             value_format=self.value_format,
         )
@@ -458,6 +444,7 @@ class VariablesStorer:
             )
 
         self._elements = list(args)
+        self._save = list(args)
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
@@ -577,14 +564,8 @@ class VariablesStorer:
         """
         if not var_names:
             return
-        for name in var_names:
-            if name not in self.keys():
-                raise ValueError(f"{name} is not a valid name for the variables")
-        for var in self._elements:
-            if var.name in var_names:
-                var.save_nb = var_names.index(var.name)
-            else:
-                var.save_nb = None
+        new_save = [self.get(name) for name in var_names]
+        self._save = new_save
 
     @property
     def labels(self) -> dict[str, str]:
@@ -621,17 +602,6 @@ class VariablesStorer:
         return {var.name: var.unit for var in self._elements}
 
     @property
-    def _save_vars(self) -> dict[int, ExistingVar | NotExistingVar]:
-        """Sorting order to use when saving data.
-
-        Returns
-        -------
-        list[str | tuple[str]]
-            List of columns keys to pass as df[self.save_sort] to sort data.
-        """
-        return {var.save_nb: var for var in self._elements if var.save_nb is not None}
-
-    @property
     def save_labels(self) -> list[str | tuple[str]]:
         """Sorting order to use when saving data.
 
@@ -640,7 +610,7 @@ class VariablesStorer:
         list[str | tuple[str]]
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
-        return [self._save_vars[key].label for key in sorted(self._save_vars.keys())]
+        return [var.label for var in self._save]
 
     @property
     def name_save_format(self) -> str:
@@ -661,9 +631,7 @@ class VariablesStorer:
         >>> storer.name_save_format % tuple(storer.save_labels)
         "YEAR PROVIDER "
         """
-        format_string = " ".join(
-            [self._save_vars[key].name_format for key in sorted(self._save_vars.keys())]
-        )
+        format_string = " ".join([var.name_format for var in self._save])
         return format_string
 
     @property
@@ -675,12 +643,7 @@ class VariablesStorer:
         str
             Format string"
         """
-        format_string = " ".join(
-            [
-                self._save_vars[key].value_format
-                for key in sorted(self._save_vars.keys())
-            ]
-        )
+        format_string = " ".join([var.value_format for var in self._save])
         return format_string
 
     @property

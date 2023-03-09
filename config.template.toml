@@ -1,28 +1,28 @@
 # Configuration file
-# Double commented lines (starting with '## ') are use to verify variables' types
+# Double commented lines (starting with '#? ') are use to verify variables' types
 # Type hints lines are structured the following way:
 # Variable keys: possible types: additionnal comment
 
 [AGGREGATION]
-## AGGREGATION.DATE_MIN: str: first date to load
+#? AGGREGATION.DATE_MIN: str: first date to load
 DATE_MIN = "20070101"
-## AGGREGATION.DATE_MAX: str: last date to load
+#? AGGREGATION.DATE_MAX: str: last date to load
 DATE_MAX = "20071231"
-## AGGREGATION.INTERVAL: str: which interval to use, among ['day','week','month','year','custom']
+#? AGGREGATION.INTERVAL: str: which interval to use, among ['day','week','month','year','custom']
 INTERVAL = "month"
-## AGGREGATION.CUSTOM_INTERVAL: int: custom interval length
+#? AGGREGATION.CUSTOM_INTERVAL: int: custom interval length
 CUSTOM_INTERVAL = 8
-## AGGREGATION.LATITUDE_MIN: int | float
+#? AGGREGATION.LATITUDE_MIN: int | float
 LATITUDE_MIN = 50
-## AGGREGATION.LATITUDE_MAX: int | float
+#? AGGREGATION.LATITUDE_MAX: int | float
 LATITUDE_MAX = 89
-## AGGREGATION.LONGITUDE_MIN: int | float
+#? AGGREGATION.LONGITUDE_MIN: int | float
 LONGITUDE_MIN = -40
-## AGGREGATION.LONGITUDE_MAX: int | float
+#? AGGREGATION.LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 40
-## AGGREGATION.PROVIDERS: list[str]: providers to use data from
+#? AGGREGATION.PROVIDERS: list[str]: providers to use data from
 PROVIDERS = ["NMDC"]
-## AGGREGATION.VARIABLES: list[str]: variables to keep in the output file
+#? AGGREGATION.VARIABLES: list[str]: variables to keep in the output file
 VARIABLES = [
     "PROVIDER",
     "EXPOCODE",
@@ -40,48 +40,48 @@ VARIABLES = [
     "SLCA",
     "CPHL",
 ]
-## AGGREGATION.LIST_DIR: str: directory with cycle informations
+#? AGGREGATION.LIST_DIR: str: directory with cycle informations
 LIST_DIR = "./lists"
-## AGGREGATION.SAVING_DIR: str: directory in which to save data
+#? AGGREGATION.SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_data"
 
 [MAPPING]
-## MAPPING.DATE_MIN: str: first date to map
+#? MAPPING.DATE_MIN: str: first date to map
 DATE_MIN = "20070101"
-## MAPPING.DATE_MAX: str: last date to map
+#? MAPPING.DATE_MAX: str: last date to map
 DATE_MAX = "20071231"
-## MAPPING.LATITUDE_MIN: int | float
+#? MAPPING.LATITUDE_MIN: int | float
 LATITUDE_MIN = 50
-## MAPPING.LATITUDE_MAX: int | float
+#? MAPPING.LATITUDE_MAX: int | float
 LATITUDE_MAX = 89
-## MAPPING.LONGITUDE_MIN: int | float
+#? MAPPING.LONGITUDE_MIN: int | float
 LONGITUDE_MIN = -40
-## MAPPING.LONGITUDE_MAX: int | float
+#? MAPPING.LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 40
-## MAPPING.BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
+#? MAPPING.BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
 BIN_SIZE = [0.5,1.5]
-## MAPPING.VARIABLE: str: variable to map
+#? MAPPING.VARIABLE: str: variable to map
 VARIABLE = "CPHL"
-## MAPPING.PROVIDERS: list[str]: providers to use data from
+#? MAPPING.PROVIDERS: list[str]: providers to use data from
 PROVIDERS = ["CMEMS"]
-## MAPPING.DEPTH_AGGREGATION: str: function to use to aggregate data over depth
+#? MAPPING.DEPTH_AGGREGATION: str: function to use to aggregate data over depth
 DEPTH_AGGREGATION = "top"
-## MAPPING.BIN_AGGREGATION: str: function to use to aggregate data into bins
+#? MAPPING.BIN_AGGREGATION: str: function to use to aggregate data into bins
 BIN_AGGREGATION = "count"
-## MAPPING.SAVING_DIR: str: directory in which to save data
+#? MAPPING.SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_figs"
 
 [UTILS]
-## UTILS.VERBOSE: int: verbose value, the higher, the more informations
+#? UTILS.VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2
 
 [PROVIDERS]
     [PROVIDERS.ARGO]
-    ## PROVIDERS.ARGO.PATH: str: path to data
+    #? PROVIDERS.ARGO.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.ARGO.CATEGORY: str: data category
+    #? PROVIDERS.ARGO.CATEGORY: str: data category
     CATEGORY = "float"
-    ## PROVIDERS.ARGO.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.ARGO.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = [
         "GL_PR_PF_6900798.nc",
         "GL_PR_PF_5903592.nc",
@@ -97,58 +97,58 @@ VERBOSE = 2
         "GL_PR_PF_6903579.nc"
     ]
     [PROVIDERS.CLIVAR]
-    ## PROVIDERS.CLIVAR.PATH: str: path to data
+    #? PROVIDERS.CLIVAR.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.CLIVAR.CATEGORY: str: data category
+    #? PROVIDERS.CLIVAR.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.CLIVAR.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.CLIVAR.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAPv2]
-    ## PROVIDERS.GLODAPv2.PATH: str: path to data
+    #? PROVIDERS.GLODAPv2.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.GLODAPv2.CATEGORY: str: data category
+    #? PROVIDERS.GLODAPv2.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAP_2019]
-    ## PROVIDERS.GLODAP_2019.PATH: str: path to data
+    #? PROVIDERS.GLODAP_2019.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.GLODAP_2019.CATEGORY: str: data category
+    #? PROVIDERS.GLODAP_2019.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.GLODAP_2022]
-    ## PROVIDERS.GLODAP_2022.PATH: str: path to data
+    #? PROVIDERS.GLODAP_2022.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.GLODAP_2022.CATEGORY: str: data category
+    #? PROVIDERS.GLODAP_2022.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.ICES]
-    ## PROVIDERS.ICES.PATH: str: path to data
+    #? PROVIDERS.ICES.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.ICES.CATEGORY: str: data category
+    #? PROVIDERS.ICES.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.ICES.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.ICES.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.IMR]
-    ## PROVIDERS.IMR.PATH: str: path to data
+    #? PROVIDERS.IMR.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.IMR.CATEGORY: str: data category
+    #? PROVIDERS.IMR.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.IMR.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.IMR.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.NMDC]
-    ## PROVIDERS.NMDC.PATH: str: path to data
+    #? PROVIDERS.NMDC.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.NMDC.CATEGORY: str: data category
+    #? PROVIDERS.NMDC.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.NMDC.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.NMDC.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
     [PROVIDERS.CMEMS]
-    ## PROVIDERS.CMEMS.PATH: str: path to data
+    #? PROVIDERS.CMEMS.PATH: str: path to data
     PATH = "path/to/file/directory"
-    ## PROVIDERS.CMEMS.CATEGORY: str: data category
+    #? PROVIDERS.CMEMS.CATEGORY: str: data category
     CATEGORY = "in_situ"
-    ## PROVIDERS.CMEMS.EXCLUDE: list[str]: file to exclude from loading
+    #? PROVIDERS.CMEMS.EXCLUDE: list[str]: file to exclude from loading
     EXCLUDE = []
