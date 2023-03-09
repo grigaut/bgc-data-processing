@@ -231,7 +231,28 @@ variables_storer = VariablesStorer(
 ```
 
 ## Default variables
-By default, some variables are alreadey defined in [bgc_data_processing/\__init__.py](/reference) as TemplateVar. These variables are the most common ones for this project and the templates can be used to instanciate the ExistingVar or notExistingvar depending on the source dataset.
-``` py
---8<-- "bgc_data_processing/__init__.py:13:44"
+By default, some variables are alreadey defined in `variables.toml` as TemplateVar. These variables are the most common ones for this project and the templates can be used to instanciate the ExistingVar or notExistingvar depending on the source dataset.
+
+One variable definition example can be found here:
+``` toml
+--8<-- "variables.toml::13"
 ```
+
+To add a new variable, one simply has to create and edit a new set of rows, following the pattern of the already defined variables, creating for example the variable `var`:
+``` toml
+[var1]
+#? var1.NAME: str: variable name
+NAME="VAR1"
+#? var1.UNIT: str: variable unit
+UNIT="[]"
+#? var1.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="str"
+#? var1.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? var1.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-15s"
+#? var1.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%15s"
+```
+
+The lines starting with `#? ` are not mandatory, but they allow type hinting for the variables to ensure that the correct value type is inputed.
