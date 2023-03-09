@@ -14,6 +14,7 @@ loader = netcdf_tools.NetCDFLoader(
         DEFAULT_VARS["year"].not_in_file(),
         DEFAULT_VARS["month"].not_in_file(),
         DEFAULT_VARS["day"].not_in_file(),
+        DEFAULT_VARS["hour"].not_in_file(),
         DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
         DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
         DEFAULT_VARS["depth"]

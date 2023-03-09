@@ -17,6 +17,7 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["year"].in_file_as("G2year"),
         DEFAULT_VARS["month"].in_file_as("G2month"),
         DEFAULT_VARS["day"].in_file_as("G2day"),
+        DEFAULT_VARS["hour"].in_file_as("G2hour"),
         DEFAULT_VARS["longitude"].in_file_as("G2longitude"),
         DEFAULT_VARS["latitude"].in_file_as("G2latitude"),
         DEFAULT_VARS["depth"].in_file_as("G2depth").correct_with(lambda x: -x),

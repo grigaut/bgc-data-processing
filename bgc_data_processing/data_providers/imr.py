@@ -15,6 +15,7 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["year"].in_file_as("Year"),
         DEFAULT_VARS["month"].in_file_as("Month"),
         DEFAULT_VARS["day"].in_file_as("Day"),
+        DEFAULT_VARS["hour"].not_in_file(),
         DEFAULT_VARS["longitude"].in_file_as("Long"),
         DEFAULT_VARS["latitude"].in_file_as("Lati"),
         DEFAULT_VARS["depth"].in_file_as("Depth"),
