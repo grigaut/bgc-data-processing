@@ -48,6 +48,7 @@ class BaseVar(ABC):
         name: str,
         unit: str,
         var_type: str,
+        default: Any = np.nan,
         load_nb: int = None,
         save_nb: int = None,
         name_format: str = "%-15s",
@@ -57,6 +58,7 @@ class BaseVar(ABC):
         self.name = name
         self.unit = unit
         self.type = var_type
+        self.default = default
         self.load_nb = load_nb
         self.save_nb = save_nb
         self.name_format = name_format
@@ -102,6 +104,7 @@ class TemplateVar(BaseVar):
             name=self.name,
             unit=self.unit,
             var_type=self.type,
+            default=self.default,
             load_nb=self.load_nb,
             save_nb=self.save_nb,
             name_format=self.name_format,
@@ -168,7 +171,7 @@ class TemplateVar(BaseVar):
         """
         return ExistingVar.from_template(self).set_aliases(*args)
 
-    def not_in_file(self, default: Any = np.nan) -> "NotExistingVar":
+    def not_in_file(self) -> "NotExistingVar":
         """Returns a NotExistingVar object with same attributes as self.
 
         Parameters
@@ -181,27 +184,15 @@ class TemplateVar(BaseVar):
         NotExistingVar
             Instanciated variable.
         """
-        return NotExistingVar.from_template(self).set_default(default=default)
+        return NotExistingVar.from_template(self)
 
 
 class NotExistingVar(BaseVar):
     """Class to represent variables which don't exist in the dataset."""
 
     exist_in_dset: bool = False
-    _default: Any = np.nan
     _remove_if_nan: bool = False
     _remove_if_all_nan: bool = False
-
-    @property
-    def default(self) -> Any:
-        """Default value for the variable.
-
-        Returns
-        -------
-        Any
-            Value to use as default.
-        """
-        return self._default
 
     @property
     def remove_if_nan(self) -> bool:
