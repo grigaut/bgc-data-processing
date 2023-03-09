@@ -26,8 +26,6 @@ Different types of variables exist :
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -48,8 +46,6 @@ Different types of variables exist :
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -65,8 +61,6 @@ Different types of variables exist :
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -84,8 +78,6 @@ Different types of variables exist :
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -107,8 +99,6 @@ Different types of variables exist :
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     ).in_file_as(
@@ -138,8 +128,6 @@ template = TemplateVar(
     name = "LATITUDE",
     unit = "[deg_N]",
     var_type = float,
-    load_nb = 0,
-    save_nb = 0,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
@@ -167,8 +155,6 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -190,8 +176,6 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
-        load_nb = 0,
-        save_nb = 0,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -199,8 +183,6 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
         name = "LONGITUDE",
         unit = "[deg_E]",
         var_type = float,
-        load_nb = 1,
-        save_nb = 1,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
@@ -226,8 +208,6 @@ template_lat = TemplateVar(
     name = "LATITUDE",
     unit = "[deg_N]",
     var_type = float,
-    load_nb = 0,
-    save_nb = 0,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
@@ -235,8 +215,6 @@ template_lon = TemplateVar(
     name = "LONGITUDE",
     unit = "[deg_E]",
     var_type = float,
-    load_nb = 1,
-    save_nb = 1,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
