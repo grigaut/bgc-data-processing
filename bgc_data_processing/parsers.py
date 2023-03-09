@@ -363,6 +363,7 @@ class DefaultTemplatesParser(TomlParser):
             name=var_args["NAME"],
             unit=var_args["UNIT"],
             var_type=self._str_to_type[var_args["TYPE"]],
+            default=var_args["DEFAULT"],
             name_format=var_args["NAME_FORMAT"],
             value_format=var_args["VALUE_FORMAT"],
         )
