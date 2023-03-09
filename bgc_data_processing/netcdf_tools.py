@@ -338,9 +338,14 @@ class NetCDFLoader(BaseLoader):
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
         df[self.variables.get("DATE").label] = dates
         # Add year, month and day columns
-        df[self.variables.get("YEAR").label] = dates.dt.year
-        df[self.variables.get("MONTH").label] = dates.dt.month
-        df[self.variables.get("DAY").label] = dates.dt.day
+        if self._variables.has_name("YEAR"):
+            df[self.variables.get("YEAR").label] = dates.dt.year
+        if self._variables.has_name("MONTH"):
+            df[self.variables.get("MONTH").label] = dates.dt.month
+        if self._variables.has_name("DAY"):
+            df[self.variables.get("DAY").label] = dates.dt.day
+        if self._variables.has_name("HOUR"):
+            df[self.variables.get("HOUR").label] = dates.dt.hour
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:
