@@ -1,0 +1,208 @@
+[provider]
+#? provider.NAME: str: variable name
+NAME="PROVIDER"
+#? provider.UNIT: str: variable unit
+UNIT="[]"
+#? provider.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="str"
+#? provider.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? provider.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-15s"
+#? provider.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%15s"
+[expocode]
+#? expocode.NAME: str: variable name
+NAME="EXPOCODE"
+#? expocode.UNIT: str: variable unit
+UNIT="[]"
+#? expocode.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="str"
+#? expocode.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? expocode.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-15s"
+#? expocode.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%15s"
+[date]
+#? date.NAME: str: variable name
+NAME="DATE"
+#? date.UNIT: str: variable unit
+UNIT="[]"
+#? date.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="datetime64[ns]"
+#? date.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? date.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT=nan
+#? date.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT=nan
+[year]
+#? year.NAME: str: variable name
+NAME="YEAR"
+#? year.UNIT: str: variable unit
+UNIT="[]"
+#? year.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="int"
+#? year.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? year.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-4s"
+#? year.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%4d"
+[month]
+#? month.NAME: str: variable name
+NAME="MONTH"
+#? month.UNIT: str: variable unit
+UNIT="[]"
+#? month.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="int"
+#? month.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? month.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-5s"
+#? month.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%5d"
+[day]
+#? day.NAME: str: variable name
+NAME="DAY"
+#? day.UNIT: str: variable unit
+UNIT="[]"
+#? day.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="int"
+#? day.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? day.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-3s"
+#? day.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%3d"
+[longitude]
+#? longitude.NAME: str: variable name
+NAME="LONGITUDE"
+#? longitude.UNIT: str: variable unit
+UNIT="[deg_E]"
+#? longitude.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? longitude.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? longitude.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-12s"
+#? longitude.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%12.6f"
+[latitude]
+#? latitude.NAME: str: variable name
+NAME="LATITUDE"
+#? latitude.UNIT: str: variable unit
+UNIT="[deg_N]"
+#? latitude.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? latitude.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? latitude.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-12s"
+#? latitude.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%12.6f"
+[depth]
+#? depth.NAME: str: variable name
+NAME="DEPH"
+#? depth.UNIT: str: variable unit
+UNIT="[meter]"
+#? depth.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? depth.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? depth.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? depth.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.2s"
+[temperature]
+#? temperature.NAME: str: variable name
+NAME="TEMP"
+#? temperature.UNIT: str: variable unit
+UNIT="[deg_C]"
+#? temperature.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? temperature.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? temperature.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? temperature.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[salinity]
+#? salinity.NAME: str: variable name
+NAME="PSAL"
+#? salinity.UNIT: str: variable unit
+UNIT="[psu]"
+#? salinity.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? salinity.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? salinity.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? salinity.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[oxygen]
+#? oxygen.NAME: str: variable name
+NAME="DOXY"
+#? oxygen.UNIT: str: variable unit
+UNIT="[ml/l]"
+#? oxygen.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? oxygen.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? oxygen.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? oxygen.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[phosphate]
+#? phosphate.NAME: str: variable name
+NAME="PHOS"
+#? phosphate.UNIT: str: variable unit
+UNIT="[umol/l]"
+#? phosphate.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? phosphate.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? phosphate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? phosphate.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[nitrate]
+#? nitrate.NAME: str: variable name
+NAME="NTRA"
+#? nitrate.UNIT: str: variable unit
+UNIT="[umol/l]"
+#? nitrate.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? nitrate.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? nitrate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? nitrate.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[silicate]
+#? silicate.NAME: str: variable name
+NAME="SLCA"
+#? silicate.UNIT: str: variable unit
+UNIT="[umol/l]"
+#? silicate.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? silicate.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? silicate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? silicate.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
+[chlorophyll]
+#? chlorophyll.NAME: str: variable name
+NAME="CPHL"
+#? chlorophyll.UNIT: str: variable unit
+UNIT="[mg/m3]"
+#? chlorophyll.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE="float"
+#? chlorophyll.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT=nan
+#? chlorophyll.NAME_FORMAT: str: format to use to save the name and unit of the variable
+NAME_FORMAT="%-10s"
+#? chlorophyll.VALUE_FORMAT: str: format to use to save the values of the variable
+VALUE_FORMAT="%10.3f"
