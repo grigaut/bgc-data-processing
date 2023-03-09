@@ -1,3 +1,5 @@
+import numpy as np
+
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.variables import TemplateVar
 
@@ -19,33 +21,163 @@ CONFIG = ConfigParser(filepath="config.toml", check_types=True)
 
 
 DEFAULT_VARS: dict[str, TemplateVar] = {}
-DEFAULT_VARS["provider"] = TemplateVar("PROVIDER", "[]", str, 0, 0, "%-15s", "%15s")
-DEFAULT_VARS["expocode"] = TemplateVar("EXPOCODE", "[]", str, 1, 1, "%-15s", "%15s")
-DEFAULT_VARS["date"] = TemplateVar("DATE", "[]", "datetime64[ns]", 2, None, None)
-DEFAULT_VARS["year"] = TemplateVar("YEAR", "[]", int, 3, 2, "%-4s", "%4d")
-DEFAULT_VARS["month"] = TemplateVar("MONTH", "[]", int, 4, 3, "%-5s", "%5d")
-DEFAULT_VARS["day"] = TemplateVar("DAY", "[]", int, 5, 4, "%-3s", "%3d")
+DEFAULT_VARS["provider"] = TemplateVar(
+    name="PROVIDER",
+    unit="[]",
+    var_type=str,
+    default=np.nan,
+    load_nb=0,
+    save_nb=0,
+    name_format="%-15s",
+    value_format="%15s",
+)
+DEFAULT_VARS["expocode"] = TemplateVar(
+    name="EXPOCODE",
+    unit="[]",
+    var_type=str,
+    default=np.nan,
+    load_nb=1,
+    save_nb=1,
+    name_format="%-15s",
+    value_format="%15s",
+)
+DEFAULT_VARS["date"] = TemplateVar(
+    name="DATE",
+    unit="[]",
+    var_type="datetime64[ns]",
+    default=np.nan,
+    load_nb=2,
+    save_nb=None,
+    name_format=None,
+    value_format=None,
+)
+DEFAULT_VARS["year"] = TemplateVar(
+    name="YEAR",
+    unit="[]",
+    var_type=int,
+    default=np.nan,
+    load_nb=3,
+    save_nb=2,
+    name_format="%-4s",
+    value_format="%4d",
+)
+DEFAULT_VARS["month"] = TemplateVar(
+    name="MONTH",
+    unit="[]",
+    var_type=int,
+    default=np.nan,
+    load_nb=4,
+    save_nb=3,
+    name_format="%-5s",
+    value_format="%5d",
+)
+DEFAULT_VARS["day"] = TemplateVar(
+    name="DAY",
+    unit="[]",
+    var_type=int,
+    default=np.nan,
+    load_nb=5,
+    save_nb=4,
+    name_format="%-3s",
+    value_format="%3d",
+)
 DEFAULT_VARS["longitude"] = TemplateVar(
-    "LONGITUDE", "[deg_E]", float, 6, 5, "%-12s", "%12.6f"
+    name="LONGITUDE",
+    unit="[deg_E]",
+    var_type=float,
+    default=np.nan,
+    load_nb=6,
+    save_nb=5,
+    name_format="%-12s",
+    value_format="%12.6f",
 )
 DEFAULT_VARS["latitude"] = TemplateVar(
-    "LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f"
+    name="LATITUDE",
+    unit="[deg_N]",
+    var_type=float,
+    default=np.nan,
+    load_nb=7,
+    save_nb=6,
+    name_format="%-12s",
+    value_format="%12.6f",
 )
-DEFAULT_VARS["depth"] = TemplateVar("DEPH", "[meter]", float, 8, 7, "%-10s", "%10.2f")
+DEFAULT_VARS["depth"] = TemplateVar(
+    name="DEPH",
+    unit="[meter]",
+    var_type=float,
+    default=np.nan,
+    load_nb=8,
+    save_nb=7,
+    name_format="%-10s",
+    value_format="%10.2f",
+)
 DEFAULT_VARS["temperature"] = TemplateVar(
-    "TEMP", "[deg_C]", float, 9, 8, "%-10s", "%10.3f"
+    name="TEMP",
+    unit="[deg_C]",
+    var_type=float,
+    default=np.nan,
+    load_nb=9,
+    save_nb=8,
+    name_format="%-10s",
+    value_format="%10.3f",
 )
-DEFAULT_VARS["salinity"] = TemplateVar("PSAL", "[psu]", float, 10, 9, "%-10s", "%10.3f")
-DEFAULT_VARS["oxygen"] = TemplateVar("DOXY", "[ml/l]", float, 11, 10, "%-10s", "%10.3f")
+DEFAULT_VARS["salinity"] = TemplateVar(
+    name="PSAL",
+    unit="[psu]",
+    var_type=float,
+    default=np.nan,
+    load_nb=10,
+    save_nb=9,
+    name_format="%-10s",
+    value_format="%10.3f",
+)
+DEFAULT_VARS["oxygen"] = TemplateVar(
+    name="DOXY",
+    unit="[ml/l]",
+    var_type=float,
+    default=np.nan,
+    load_nb=11,
+    save_nb=10,
+    name_format="%-10s",
+    value_format="%10.3f",
+)
 DEFAULT_VARS["phosphate"] = TemplateVar(
-    "PHOS", "[umol/l]", float, 12, 11, "%-10s", "%10.3f"
+    name="PHOS",
+    unit="[umol/l]",
+    var_type=float,
+    default=np.nan,
+    load_nb=12,
+    save_nb=11,
+    name_format="%-10s",
+    value_format="%10.3f",
 )
 DEFAULT_VARS["nitrate"] = TemplateVar(
-    "NTRA", "[umol/l]", float, 13, 12, "%-10s", "%10.3f"
+    name="NTRA",
+    unit="[umol/l]",
+    var_type=float,
+    default=np.nan,
+    load_nb=13,
+    save_nb=12,
+    name_format="%-10s",
+    value_format="%10.3f",
 )
 DEFAULT_VARS["silicate"] = TemplateVar(
-    "SLCA", "[umol/l]", float, 14, 13, "%-10s", "%10.3f"
+    name="SLCA",
+    unit="[umol/l]",
+    var_type=float,
+    default=np.nan,
+    load_nb=14,
+    save_nb=13,
+    name_format="%-10s",
+    value_format="%10.3f",
 )
 DEFAULT_VARS["chlorophyll"] = TemplateVar(
-    "CPHL", "[mg/m3]", float, 15, 14, "%-10s", "%10.3f"
+    name="CPHL",
+    unit="[mg/m3]",
+    var_type=float,
+    default=np.nan,
+    load_nb=15,
+    save_nb=14,
+    name_format="%-10s",
+    value_format="%10.3f",
 )
