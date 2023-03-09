@@ -198,11 +198,11 @@ class CSVLoader(BaseLoader):
                 ]
             )
         clean_df.loc[:, self._variables.get("DATE").label] = dates
-        # Check if columns are missing => fill them with np.nan values
-        missing_cols = [
-            var.label for var in self._variables if var.label not in clean_df.columns
-        ]
-        clean_df = clean_df.reindex(columns=list(clean_df.columns) + missing_cols)
+        for var in self._variables:
+            if var.label in clean_df.columns:
+                clean_df.loc[pd.isna(clean_df[var.label]), var.label] = var.default
+            else:
+                clean_df[var.label] = var.default
         return clean_df
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:

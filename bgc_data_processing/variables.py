@@ -1,7 +1,7 @@
 """Variable related objects."""
 
 from abc import ABC
-from typing import Callable, Iterable, Iterator, Self
+from typing import Any, Callable, Iterable, Iterator, Self
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -40,6 +40,7 @@ class BaseVar(ABC):
         name: str,
         unit: str,
         var_type: str,
+        default: Any = np.nan,
         name_format: str = "%-15s",
         value_format: str = "%15s",
     ):
@@ -47,6 +48,7 @@ class BaseVar(ABC):
         self.name = name
         self.unit = unit
         self.type = var_type
+        self.default = default
         self.name_format = name_format
         self.value_format = value_format
 
@@ -90,6 +92,7 @@ class TemplateVar(BaseVar):
             name=self.name,
             unit=self.unit,
             var_type=self.type,
+            default=self.default,
             name_format=self.name_format,
             value_format=self.value_format,
         )
@@ -157,6 +160,11 @@ class TemplateVar(BaseVar):
     def not_in_file(self) -> "NotExistingVar":
         """Returns a NotExistingVar object with same attributes as self.
 
+        Parameters
+        ----------
+        default: Any
+            Default value for the empty column., by default np.nan.
+
         Returns
         -------
         NotExistingVar
@@ -212,6 +220,22 @@ class NotExistingVar(BaseVar):
         """
         var = cls(**template._building_informations())
         return var
+
+    def set_default(self, default: Any) -> Self:
+        """Set the default value for the variable column.
+
+        Parameters
+        ----------
+        default : Any
+            Value to use as default
+
+        Returns
+        -------
+        Self
+            Self.
+        """
+        self._default = default
+        return self
 
     def remove_when_all_nan(self) -> Self:
         """Sets self._remove_if_all_nan to True.
