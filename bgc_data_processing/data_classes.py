@@ -625,8 +625,6 @@ class Reader:
                 name=column.upper(),
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
-                load_nb=i,
-                save_nb=i,
             )
             variables.append(var)
         return VariablesStorer(*variables)
