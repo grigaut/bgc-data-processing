@@ -20,7 +20,10 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["hour"].in_file_as("G2hour"),
         DEFAULT_VARS["longitude"].in_file_as("G2longitude"),
         DEFAULT_VARS["latitude"].in_file_as("G2latitude"),
-        DEFAULT_VARS["depth"].in_file_as("G2depth").correct_with(lambda x: -x),
+        DEFAULT_VARS["depth"]
+        .in_file_as("G2depth")
+        .remove_when_nan()
+        .correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("G2temperature"),
         DEFAULT_VARS["salinity"].in_file_as(("G2salinity", "G2salinityf", [2])),
         DEFAULT_VARS["oxygen"]

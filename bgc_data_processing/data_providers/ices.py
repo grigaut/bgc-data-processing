@@ -18,7 +18,10 @@ loader = csv_tools.CSVLoader(
         DEFAULT_VARS["hour"].not_in_file(),
         DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
         DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
-        DEFAULT_VARS["depth"].in_file_as("DEPTH").correct_with(lambda x: -x),
+        DEFAULT_VARS["depth"]
+        .in_file_as("DEPTH")
+        .remove_when_nan()
+        .correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("CTDTMP"),
         DEFAULT_VARS["salinity"].in_file_as("CTDSAL"),
         DEFAULT_VARS["oxygen"].in_file_as("DOXY"),
