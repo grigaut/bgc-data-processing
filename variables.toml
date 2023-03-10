@@ -127,7 +127,7 @@ DEFAULT = nan
 #? depth.NAME_FORMAT: str: format to use to save the name and unit of the variable
 NAME_FORMAT = "%-10s"
 #? depth.VALUE_FORMAT: str: format to use to save the values of the variable
-VALUE_FORMAT = "%10.2s"
+VALUE_FORMAT = "%10.2f"
 [temperature]
 #? temperature.NAME: str: variable name
 NAME = "TEMP"
