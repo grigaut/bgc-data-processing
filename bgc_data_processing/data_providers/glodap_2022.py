@@ -10,14 +10,20 @@ loader = csv_tools.CSVLoader(
     files_pattern="GLODAPv2.2022_all.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),
-        DEFAULT_VARS["expocode"].in_file_as("G2expocode"),
+        DEFAULT_VARS["expocode"]
+        .in_file_as("G2expocode")
+        .correct_with(lambda x: x[:-8]),
         DEFAULT_VARS["date"].not_in_file(),
         DEFAULT_VARS["year"].in_file_as("G2year"),
         DEFAULT_VARS["month"].in_file_as("G2month"),
         DEFAULT_VARS["day"].in_file_as("G2day"),
+        DEFAULT_VARS["hour"].in_file_as("G2hour"),
         DEFAULT_VARS["longitude"].in_file_as("G2longitude"),
         DEFAULT_VARS["latitude"].in_file_as("G2latitude"),
-        DEFAULT_VARS["depth"].in_file_as("G2depth").correct_with(lambda x: -x),
+        DEFAULT_VARS["depth"]
+        .in_file_as("G2depth")
+        .remove_when_nan()
+        .correct_with(lambda x: -x),
         DEFAULT_VARS["temperature"].in_file_as("G2temperature"),
         DEFAULT_VARS["salinity"].in_file_as(("G2salinity", "G2salinityf", [2])),
         DEFAULT_VARS["oxygen"]

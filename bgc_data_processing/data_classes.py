@@ -4,6 +4,7 @@
 import os
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
@@ -127,6 +128,116 @@ class Storer:
             verbose=min(self._verbose, object.verbose),
         )
         return concat_storer
+
+    def remove_duplicates(self, priority_list: list = None) -> None:
+        """Updates self._data to remove duplicates in data.
+
+        Parameters
+        ----------
+        priority_list : list, optional
+            Providers priority order, first has priority over others and so on.
+            , by default None
+        """
+        df = self._data
+        df = self._remove_duplicates_among_providers(df)
+        df = self._remove_duplicates_between_providers(df, priority_list=priority_list)
+        self._data = df
+
+    def _remove_duplicates_among_providers(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Removes duplicates among a common providers.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to remove duplicated data from.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame without duplicates.
+        """
+        grouping_vars = [
+            "PROVIDER",
+            "EXPOCODE",
+            "DATE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "HOUR",
+            "LATITUDE",
+            "LONGITUDE",
+            "DEPH",
+        ]
+        subset_group = []
+        for name in grouping_vars:
+            if self._variables.has_name(name):
+                subset_group.append(self._variables.labels[name])
+        # Select dupliacted rows
+        is_duplicated = df.duplicated(subset=subset_group, keep=False)
+        duplicates = df.filter(items=df[is_duplicated].index, axis=0)
+        # Drop dupliacted rows from dataframe
+        dropped = df.drop(df[is_duplicated].index, axis=0)
+        # Group duplicates and average them
+        grouped = duplicates.groupby(subset_group).mean().reset_index()
+        # Concatenate dataframe with droppped duplicates and duplicates averaged
+        concat = pd.concat([dropped, grouped], ignore_index=True, axis=0)
+        return concat
+
+    def _remove_duplicates_between_providers(
+        self,
+        df: pd.DataFrame,
+        priority_list: list,
+    ) -> pd.DataFrame:
+        """Removes duplicates among a common providers.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to remove duplicated data from.
+        priority_list : list, optional
+            Providers priority order, first has priority over others and so on.
+            , by default None
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame without duplicates.
+        """
+        provider_label = self._variables.labels["PROVIDER"]
+        providers = df[provider_label].unique()
+        if len(providers) == 1:
+            return df
+        grouping_vars = [
+            "EXPOCODE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "HOUR",
+            "LATITUDE",
+            "LONGITUDE",
+            "DEPH",
+        ]
+        subset = []
+        for name in grouping_vars:
+            if self._variables.has_name(name):
+                subset.append(self._variables.labels[name])
+        # every row concerned by duplication of the variables in subset
+        is_duplicated = df.duplicated(
+            subset=subset,
+            keep=False,
+        )
+        if not is_duplicated.any():
+            return df
+        # Sorting key function
+        if priority_list is not None:
+            sort_func = np.vectorize(lambda x: priority_list.index(x))
+        else:
+            sort_func = np.vectorize(lambda x: x)
+        duplicates = df.filter(df.loc[is_duplicated, :].index, axis=0)
+        duplicates.sort_values(provider_label, key=sort_func, inplace=True)
+        to_dump = duplicates.duplicated(subset=subset, keep="first")
+        dump_index = duplicates[to_dump].index
+        return df.drop(dump_index, axis=0)
 
     def save(self, filepath: str) -> None:
         """Saving method to save the Dataframe.
@@ -513,8 +624,6 @@ class Reader:
                 name=column.upper(),
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
-                load_nb=i,
-                save_nb=i,
             )
             variables.append(var)
         return VariablesStorer(*variables)

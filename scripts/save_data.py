@@ -1,3 +1,5 @@
+"""Data aggregation and saving script."""
+
 import datetime as dt
 from time import time
 
@@ -21,6 +23,7 @@ if __name__ == "__main__":
     PROVIDERS = config_aggregation["PROVIDERS"]
     LIST_DIR = config_aggregation["LIST_DIR"]
     SAVING_DIR = config_aggregation["SAVING_DIR"]
+    PRIORITY = config_aggregation["PRIORITY"]
     VERBOSE = CONFIG.utils["VERBOSE"]
 
     # Dates parsing
@@ -37,8 +40,8 @@ if __name__ == "__main__":
     aggr_date_names = DRNG["start_date"].astype(str)
     if VERBOSE > 0:
         txt = (
-            f"Processing BGC data from {DATE_MIN.strftime('%Y%M%d')} to "
-            f"{DATE_MAX.strftime('%Y%M%d')} provided by {', '.join(PROVIDERS)}"
+            f"Processing BGC data from {DATE_MIN.strftime('%Y%m%d')} to "
+            f"{DATE_MAX.strftime('%Y%m%d')} provided by {', '.join(PROVIDERS)}"
         )
         print("\n\t" + "-" * len(txt))
         print("\t" + txt)
@@ -96,6 +99,7 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print("Aggregating data")
         df: Storer = sum(data)
+        df.remove_duplicates(priority_list=PRIORITY)
         # Slicing aggregated data
         slices_index = DRNG.apply(
             df.slice_on_dates,

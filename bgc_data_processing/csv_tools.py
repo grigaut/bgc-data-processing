@@ -184,9 +184,14 @@ class CSVLoader(BaseLoader):
             # Convert Date column to datetime (if existing)
             raw_date_col = clean_df.pop(self._variables.get("DATE").label).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
-            clean_df.insert(0, self._variables.get("DAY").label, dates.dt.day)
-            clean_df.insert(0, self._variables.get("MONTH").label, dates.dt.month)
-            clean_df.insert(0, self._variables.get("YEAR").label, dates.dt.year)
+            if self._variables.has_name("HOUR"):
+                clean_df.insert(0, self._variables.get("HOUR").label, dates.dt.hour)
+            if self._variables.has_name("DAY"):
+                clean_df.insert(0, self._variables.get("DAY").label, dates.dt.day)
+            if self._variables.has_name("MONTH"):
+                clean_df.insert(0, self._variables.get("MONTH").label, dates.dt.month)
+            if self._variables.has_name("YEAR"):
+                clean_df.insert(0, self._variables.get("YEAR").label, dates.dt.year)
         else:
             dates = pd.to_datetime(
                 clean_df[
@@ -198,11 +203,11 @@ class CSVLoader(BaseLoader):
                 ]
             )
         clean_df.loc[:, self._variables.get("DATE").label] = dates
-        # Check if columns are missing => fill them with np.nan values
-        missing_cols = [
-            var.label for var in self._variables if var.label not in clean_df.columns
-        ]
-        clean_df = clean_df.reindex(columns=list(clean_df.columns) + missing_cols)
+        for var in self._variables:
+            if var.label in clean_df.columns:
+                clean_df.loc[pd.isna(clean_df[var.label]), var.label] = var.default
+            else:
+                clean_df[var.label] = var.default
         return clean_df
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:

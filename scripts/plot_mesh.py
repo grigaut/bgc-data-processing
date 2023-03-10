@@ -1,3 +1,5 @@
+"""Data 2D mesh plotting script."""
+
 import datetime as dt
 
 from bgc_data_processing import CONFIG, data_providers
@@ -18,6 +20,7 @@ if __name__ == "__main__":
     PROVIDERS: list[str] = config_mapping["PROVIDERS"]
     DEPTH_AGGREGATION: str = config_mapping["DEPTH_AGGREGATION"]
     BIN_AGGREGATION: str = config_mapping["BIN_AGGREGATION"]
+    PRIORITY: list[str] = config_mapping["PRIORITY"]
     VERBOSE: int = CONFIG.utils["VERBOSE"]
 
     data_dict = {}
@@ -48,6 +51,7 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print(f"Plotting {category} data")
         df: Storer = sum(data)
+        df.remove_duplicates(priority_list=PRIORITY)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
         MeshPlotter(df).plot(

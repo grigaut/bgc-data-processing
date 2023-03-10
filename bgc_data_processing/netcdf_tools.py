@@ -219,7 +219,7 @@ class NetCDFLoader(BaseLoader):
         for var in missing_vars:
             # Create empty frame with nans
             data_dict[var.label] = np.empty(shape_ref)
-            data_dict[var.label].fill(np.nan)
+            data_dict[var.label].fill(var.default)
         return data_dict
 
     def _reshape_data(self, data_dict: dict) -> dict:
@@ -311,7 +311,9 @@ class NetCDFLoader(BaseLoader):
             if values is None:
                 missing_vars.append(var)
             else:
+                values[np.isnan(values)] = var.default
                 data_dict[var.label] = values
+                # data_dict[var.label].fill(var.default)
         # Add missing columns
         data_dict = self._fill_missing(data_dict, missing_vars)
         # Reshape all variables's data to 1D
@@ -336,9 +338,14 @@ class NetCDFLoader(BaseLoader):
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
         df[self.variables.get("DATE").label] = dates
         # Add year, month and day columns
-        df[self.variables.get("YEAR").label] = dates.dt.year
-        df[self.variables.get("MONTH").label] = dates.dt.month
-        df[self.variables.get("DAY").label] = dates.dt.day
+        if self._variables.has_name("YEAR"):
+            df[self.variables.get("YEAR").label] = dates.dt.year
+        if self._variables.has_name("MONTH"):
+            df[self.variables.get("MONTH").label] = dates.dt.month
+        if self._variables.has_name("DAY"):
+            df[self.variables.get("DAY").label] = dates.dt.day
+        if self._variables.has_name("HOUR"):
+            df[self.variables.get("HOUR").label] = dates.dt.hour
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:

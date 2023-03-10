@@ -20,21 +20,17 @@ variable = ExistingVar(
     name="LONGITUDE",                           # (1)
     unit="[deg_E]",                             # (2)
     var_type=float,                             # (3)
-    load_nb=6,                                  # (4)
-    save_nb=5,                                  # (5)
-    name_format="%-12s",                        # (6)
-    value_format="%12.6f",                      # (7)
-).set_aliases(("Longitude", "longitudef", [1])) # (8)
+    name_format="%-12s",                        # (4)
+    value_format="%12.6f",                      # (5)
+).set_aliases(("Longitude", "longitudef", [1])) # (6)
 ```
 
 1. Name of the variable (can be different from its name in the dataset).
 2. Unit of the variable, as one wants it to appear when saving.
 3. Data type, used to convert types in the dataframe.
-4. Relative order to use to sort the variable, the smaller the more to the left.
-5. Relative order to use to save the variable, the smaller the more to the left.
-6. Format string to use to format the label and the unit of the variable when saving.
-7. Format string to use to format the values of the variable when saving.
-8. Sets the Aliases list to the given args where each element is a tuple containing:
+4. Format string to use to format the label and the unit of the variable when saving.
+5. Format string to use to format the values of the variable when saving.
+6. Sets the Aliases list to the given args where each element is a tuple containing:
     - alias: variable name in the source data
     - flag alias: variable flag name in the source data
     - flag correct value: list of values to keep from the flag column

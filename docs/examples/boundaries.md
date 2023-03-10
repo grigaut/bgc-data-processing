@@ -19,8 +19,6 @@ year_var = variables.TemplateVar(
     name = "YEAR",
     unit = "[]",
     var_type = int,
-    load_nb = 0,
-    save_nb = 0,
     name_format = "%-4s",
     value_format = "%4f",
 )
@@ -28,8 +26,6 @@ latitude_var = variables.TemplateVar(
     name = "LATITUDE",
     unit = "[deg_N]",
     var_type = float,
-    load_nb = 1,
-    save_nb = 1,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
@@ -37,8 +33,6 @@ longitude_var = variables.TemplateVar(
     name = "LONGITUDE",
     unit = "[deg_E]",
     var_type = float,
-    load_nb = 2,
-    save_nb = 2,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
@@ -46,8 +40,6 @@ phos_var = TemplateVar(
     name="PHOS",
     unit="[umol/l]",
     var_type=float,
-    load_nb=3,
-    save_nb=3,
     name_format="%-10s",
     value_format="%10.3f",
 )
@@ -55,8 +47,6 @@ ntra_var = TemplateVar(
     name="NTRA",
     unit="[umol/l]",
     var_type=float,
-    load_nb=4,
-    save_nb=4,
     name_format="%-10s",
     value_format="%10.3f",
 )
