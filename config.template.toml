@@ -29,6 +29,7 @@ VARIABLES = [
     "YEAR",
     "MONTH",
     "DAY",
+    "HOUR",
     "LONGITUDE",
     "LATITUDE",
     "DEPH",
