@@ -156,32 +156,32 @@ class Storer:
         pd.DataFrame
             DataFrame without duplicates.
         """
-        provider_label = self._variables.labels["PROVIDER"]
-        expocode_label = self._variables.labels["EXPOCODE"]
-        # date related fields
-        year_label = self._variables.labels["YEAR"]
-        month_label = self._variables.labels["MONTH"]
-        day_label = self._variables.labels["DAY"]
-        # position related fields
-        latitude_label = self._variables.labels["LATITUDE"]
-        longitude_label = self._variables.labels["LONGITUDE"]
-        depth_label = self._variables.labels["DEPH"]
-        subset = [
-            provider_label,
-            expocode_label,
-            year_label,
-            month_label,
-            day_label,
-            latitude_label,
-            longitude_label,
-            depth_label,
+        grouping_vars = [
+            "PROVIDER",
+            "EXPOCODE",
+            "DATE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "HOUR",
+            "LATITUDE",
+            "LONGITUDE",
+            "DEPH",
         ]
-        # Arbitrarily keep first value
-        dropped = df.drop_duplicates(
-            subset=subset,
-            keep="first",
-        )
-        return dropped
+        subset_group = []
+        for name in grouping_vars:
+            if self._variables.has_name(name):
+                subset_group.append(self._variables.labels[name])
+        # Select dupliacted rows
+        is_duplicated = df.duplicated(subset=subset_group, keep=False)
+        duplicates = df.filter(items=df[is_duplicated].index, axis=0)
+        # Drop dupliacted rows from dataframe
+        dropped = df.drop(df[is_duplicated].index, axis=0)
+        # Group duplicates and average them
+        grouped = duplicates.groupby(subset_group).mean().reset_index()
+        # Concatenate dataframe with droppped duplicates and duplicates averaged
+        concat = pd.concat([dropped, grouped], ignore_index=True, axis=0)
+        return concat
 
     def _remove_duplicates_between_providers(
         self,
@@ -207,29 +207,28 @@ class Storer:
         providers = df[provider_label].unique()
         if len(providers) == 1:
             return df
-        expocode_label = self._variables.labels["EXPOCODE"]
-        # date related fields
-        year_label = self._variables.labels["YEAR"]
-        month_label = self._variables.labels["MONTH"]
-        day_label = self._variables.labels["DAY"]
-        # position related fields
-        latitude_label = self._variables.labels["LATITUDE"]
-        longitude_label = self._variables.labels["LONGITUDE"]
-        depth_label = self._variables.labels["DEPH"]
-        subset = [
-            expocode_label,
-            year_label,
-            month_label,
-            day_label,
-            latitude_label,
-            longitude_label,
-            depth_label,
+        grouping_vars = [
+            "EXPOCODE",
+            "YEAR",
+            "MONTH",
+            "DAY",
+            "HOUR",
+            "LATITUDE",
+            "LONGITUDE",
+            "DEPH",
         ]
+        subset = []
+        for name in grouping_vars:
+            if self._variables.has_name(name):
+                subset.append(self._variables.labels[name])
         # every row concerned by duplication of the variables in subset
         is_duplicated = df.duplicated(
             subset=subset,
             keep=False,
         )
+        if not is_duplicated.any():
+            return df
+        # Sorting key function
         if priority_list is not None:
             sort_func = np.vectorize(lambda x: priority_list.index(x))
         else:
@@ -237,8 +236,8 @@ class Storer:
         duplicates = df.filter(df.loc[is_duplicated, :].index, axis=0)
         duplicates.sort_values(provider_label, key=sort_func, inplace=True)
         to_dump = duplicates.duplicated(subset=subset, keep="first")
-        dump_index = to_dump[to_dump].index
-        return df.drop(dump_index)
+        dump_index = duplicates[to_dump].index
+        return df.drop(dump_index, axis=0)
 
     def save(self, filepath: str) -> None:
         """Saving method to save the Dataframe.
