@@ -45,6 +45,8 @@ VARIABLES = [
 LIST_DIR = "./lists"
 #? AGGREGATION.SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_data"
+#? AGGREGATION.PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = ["GLODAP_2022", "CMEMS", "NMDC", "CLIVAR", "IMR", "ICES"]
 
 [MAPPING]
 #? MAPPING.DATE_MIN: str: first date to map
@@ -60,7 +62,7 @@ LONGITUDE_MIN = -40
 #? MAPPING.LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 40
 #? MAPPING.BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
-BIN_SIZE = [0.5,1.5]
+BIN_SIZE = [0.5, 1.5]
 #? MAPPING.VARIABLE: str: variable to map
 VARIABLE = "CPHL"
 #? MAPPING.PROVIDERS: list[str]: providers to use data from
@@ -71,85 +73,87 @@ DEPTH_AGGREGATION = "top"
 BIN_AGGREGATION = "count"
 #? MAPPING.SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_figs"
+#? MAPPING.PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = ["GLODAP_2022", "CMEMS", "NMDC", "CLIVAR", "IMR", "ICES"]
 
 [UTILS]
 #? UTILS.VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2
 
 [PROVIDERS]
-    [PROVIDERS.ARGO]
-    #? PROVIDERS.ARGO.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.ARGO.CATEGORY: str: data category
-    CATEGORY = "float"
-    #? PROVIDERS.ARGO.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = [
-        "GL_PR_PF_6900798.nc",
-        "GL_PR_PF_5903592.nc",
-        "GL_PR_PF_5903887.nc",
-        "GL_PR_PF_6900796.nc",
-        "GL_PR_PF_6900797.nc",
-        "GL_PR_PF_6900799.nc",
-        "GL_PR_PF_6903551.nc",
-        "GL_PR_PF_6903567.nc",
-        "GL_PR_PF_6903574.nc",
-        "GL_PR_PF_6903575.nc",
-        "GL_PR_PF_6903578.nc",
-        "GL_PR_PF_6903579.nc"
-    ]
-    [PROVIDERS.CLIVAR]
-    #? PROVIDERS.CLIVAR.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.CLIVAR.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.CLIVAR.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.GLODAPv2]
-    #? PROVIDERS.GLODAPv2.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.GLODAPv2.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.GLODAP_2019]
-    #? PROVIDERS.GLODAP_2019.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.GLODAP_2019.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.GLODAP_2022]
-    #? PROVIDERS.GLODAP_2022.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.GLODAP_2022.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.ICES]
-    #? PROVIDERS.ICES.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.ICES.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.ICES.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.IMR]
-    #? PROVIDERS.IMR.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.IMR.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.IMR.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.NMDC]
-    #? PROVIDERS.NMDC.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.NMDC.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.NMDC.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
-    [PROVIDERS.CMEMS]
-    #? PROVIDERS.CMEMS.PATH: str: path to data
-    PATH = "path/to/file/directory"
-    #? PROVIDERS.CMEMS.CATEGORY: str: data category
-    CATEGORY = "in_situ"
-    #? PROVIDERS.CMEMS.EXCLUDE: list[str]: file to exclude from loading
-    EXCLUDE = []
+[PROVIDERS.ARGO]
+#? PROVIDERS.ARGO.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.ARGO.CATEGORY: str: data category
+CATEGORY = "float"
+#? PROVIDERS.ARGO.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = [
+    "GL_PR_PF_6900798.nc",
+    "GL_PR_PF_5903592.nc",
+    "GL_PR_PF_5903887.nc",
+    "GL_PR_PF_6900796.nc",
+    "GL_PR_PF_6900797.nc",
+    "GL_PR_PF_6900799.nc",
+    "GL_PR_PF_6903551.nc",
+    "GL_PR_PF_6903567.nc",
+    "GL_PR_PF_6903574.nc",
+    "GL_PR_PF_6903575.nc",
+    "GL_PR_PF_6903578.nc",
+    "GL_PR_PF_6903579.nc",
+]
+[PROVIDERS.CLIVAR]
+#? PROVIDERS.CLIVAR.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.CLIVAR.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.CLIVAR.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.GLODAPv2]
+#? PROVIDERS.GLODAPv2.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.GLODAPv2.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.GLODAP_2019]
+#? PROVIDERS.GLODAP_2019.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.GLODAP_2019.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.GLODAP_2022]
+#? PROVIDERS.GLODAP_2022.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.GLODAP_2022.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.ICES]
+#? PROVIDERS.ICES.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.ICES.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.ICES.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.IMR]
+#? PROVIDERS.IMR.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.IMR.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.IMR.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.NMDC]
+#? PROVIDERS.NMDC.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.NMDC.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.NMDC.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
+[PROVIDERS.CMEMS]
+#? PROVIDERS.CMEMS.PATH: str: path to data
+PATH = "path/to/file/directory"
+#? PROVIDERS.CMEMS.CATEGORY: str: data category
+CATEGORY = "in_situ"
+#? PROVIDERS.CMEMS.EXCLUDE: list[str]: file to exclude from loading
+EXCLUDE = []
