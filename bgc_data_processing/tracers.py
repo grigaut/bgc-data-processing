@@ -235,6 +235,7 @@ class MeshPlotter(BasePlot):
         depth_aggr: str | Callable,
         bin_aggr: Callable | Callable,
         extent: tuple | list,
+        **kwargs,
     ) -> "Figure":
         """Plots the colormesh for the given variable.
 
@@ -256,6 +257,8 @@ class MeshPlotter(BasePlot):
             or callable function to use to aggregate.
         extent : tuple | list
             Boundaries of the map.
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
@@ -286,7 +289,13 @@ class MeshPlotter(BasePlot):
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent(extent, crs.PlateCarree())
-        cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
+        cbar = ax.pcolor(
+            X1,
+            Y1,
+            Z1,
+            transform=crs.PlateCarree(),
+            **kwargs,
+        )
         if bin_aggr == "count":
             label = f"{variable_name} data points count"
         elif depth_aggr == "count" and bin_aggr == "sum":
@@ -309,6 +318,7 @@ class MeshPlotter(BasePlot):
         title: str = None,
         suptitle: str = None,
         extent: tuple | list = (-40, 40, 50, 89),
+        **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -337,6 +347,8 @@ class MeshPlotter(BasePlot):
             , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89).
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -344,6 +356,7 @@ class MeshPlotter(BasePlot):
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
             extent=extent,
+            **kwargs,
         )
         if title is not None:
             plt.title(title)
@@ -360,6 +373,7 @@ class MeshPlotter(BasePlot):
         title: str = None,
         suptitle: str = None,
         extent: tuple | list = (-40, 40, 50, 89),
+        **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -386,6 +400,8 @@ class MeshPlotter(BasePlot):
             , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89)
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -393,6 +409,7 @@ class MeshPlotter(BasePlot):
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
             extent=extent,
+            **kwargs,
         )
 
         if title is not None:
@@ -479,6 +496,7 @@ class BinEvolutionPlotter(BasePlot):
         latitude_ref: int | float,
         longitude_ref: int | float,
         bins_size: int | float | Iterable[int | float],
+        **kwargs,
     ) -> "Figure":
         """Build the plot to display or save.
 
@@ -492,6 +510,8 @@ class BinEvolutionPlotter(BasePlot):
             Longitude to use for the center of the area.
         bins_size : int | float | Iterable[int  |  float]
             Area dimension, first component is latitude and second is longitude.
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
 
         Returns
         -------
@@ -540,7 +560,7 @@ class BinEvolutionPlotter(BasePlot):
         plt.suptitle(suptitle)
         X, Y = np.meshgrid(pivotted.columns, pivotted.index)
         # Color mesh
-        cbar = ax.pcolor(X, Y, pivotted.values)
+        cbar = ax.pcolor(X, Y, pivotted.values, **kwargs)
         fig.colorbar(cbar, label="Number of data points", shrink=0.75)
         title = f"{lat_bin}° x {lon_bin}° bin"
         plt.title(title)
@@ -554,6 +574,7 @@ class BinEvolutionPlotter(BasePlot):
         bins_size: int | float | Iterable[int | float],
         title: str = None,
         suptitle: str = None,
+        **kwargs,
     ) -> None:
         """Plot the figure of data density evolution in a givemn area.
 
@@ -571,12 +592,15 @@ class BinEvolutionPlotter(BasePlot):
             Specify a title to change from default., by default None
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
             latitude_ref=latitude_ref,
             longitude_ref=longitude_ref,
             bins_size=bins_size,
+            **kwargs,
         )
 
         if title is not None:
@@ -595,6 +619,7 @@ class BinEvolutionPlotter(BasePlot):
         bins_size: int | float | Iterable[int | float],
         title: str = None,
         suptitle: str = None,
+        **kwargs,
     ) -> None:
         """Save the figure of data density evolution in a givemn area.
 
@@ -614,12 +639,15 @@ class BinEvolutionPlotter(BasePlot):
             Specify a title to change from default., by default None
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
             latitude_ref=latitude_ref,
             longitude_ref=longitude_ref,
             bins_size=bins_size,
+            **kwargs,
         )
 
         if title is not None:
