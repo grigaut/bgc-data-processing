@@ -37,7 +37,6 @@ if __name__ == "__main__":
     str_start = pd.to_datetime(DRNG["start_date"]).dt.strftime("%Y%m%d")
     str_end = pd.to_datetime(DRNG["end_date"]).dt.strftime("%Y%m%d")
     dates_str = str_start + "-" + str_end
-    aggr_date_names = DRNG["start_date"].astype(str)
     if VERBOSE > 0:
         txt = (
             f"Processing BGC data from {DATE_MIN.strftime('%Y%m%d')} to "
@@ -108,9 +107,8 @@ if __name__ == "__main__":
         # Saving aggregated data's slices
         if VERBOSE > 0:
             print("Saving aggregated data")
-        to_save = pd.concat(
-            [aggr_date_names, slices_index], keys=["dates", "slice"], axis=1
-        )
+        print(DRNG.head())
+        to_save = pd.concat([str_start, slices_index], keys=["dates", "slice"], axis=1)
         make_name = lambda x: f"{SAVING_DIR}/bgc_{category}_{x['dates']}.txt"
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
     if VERBOSE > 0:
