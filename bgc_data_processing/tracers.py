@@ -459,3 +459,171 @@ class MeshPlotter(BasePlot):
             verbose=verbose,
         )
         return cls(storer=storer)
+
+
+class BinEvolutionPlotter(BasePlot):
+    """Class to plot the evolution of data on a given area.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map data of.
+    """
+
+    def __init__(self, storer: "Storer") -> None:
+        super().__init__(storer)
+
+    def _build_plot(
+        self,
+        variable_name: str,
+        latitude_ref: int | float,
+        longitude_ref: int | float,
+        bins_size: int | float | Iterable[int | float],
+    ) -> "Figure":
+        """Build the plot to display or save.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        latitude_ref : int | float
+            Latitude to use for the center of the area.
+        longitude_ref : int | float
+            Longitude to use for the center of the area.
+        bins_size : int | float | Iterable[int  |  float]
+            Area dimension, first component is latitude and second is longitude.
+
+        Returns
+        -------
+        Figure
+            Data evolution figure on the given area.
+
+        Raises
+        ------
+        ValueError
+            If there is not enough data to create a figure.
+        """
+        depth_col = self._variables.get("DEPH").label
+        lat_col = self._variables.get("LATITUDE").label
+        lon_col = self._variables.get("LONGITUDE").label
+        date_col = self._variables.get("DATE").label
+        var_col = self._variables.get(variable_name).label
+        if isinstance(bins_size, Iterable):
+            lat_bin, lon_bin = bins_size[0], bins_size[1]
+        else:
+            lat_bin, lon_bin = bins_size, bins_size
+        # Bin boundaries
+        lat_min = latitude_ref - lat_bin / 2
+        lat_max = latitude_ref + lat_bin / 2
+        lon_min = longitude_ref - lon_bin / 2
+        lon_max = longitude_ref + lon_bin / 2
+        # Slice data
+        df = self._storer.data[[lat_col, lon_col, depth_col, date_col, var_col]]
+        lat_cond = (df[lat_col] >= lat_min) & (df[lat_col] <= lat_max)
+        lon_cond = (df[lon_col] >= lon_min) & (df[lon_col] <= lon_max)
+        df_slice = df.loc[lat_cond & lon_cond, :].copy(True)
+        if df_slice.empty:
+            raise ValueError("Not enough data at this location to build a figure.")
+        df_slice[var_col] = 1
+        df_slice[depth_col] = (df_slice[depth_col] / 100).round() * 100
+        # Pivot
+        pivotted = df_slice.pivot_table(
+            values=var_col,
+            index=depth_col,
+            columns=date_col,
+            aggfunc="count",
+        )
+        # Figure
+        fig = plt.figure(figsize=[10, 5])
+        ax = plt.subplot(1, 1, 1)
+        suptitle = f"Evolution of data around {(latitude_ref, longitude_ref)}"
+        plt.suptitle(suptitle)
+        X, Y = np.meshgrid(pivotted.columns, pivotted.index)
+        # Color mesh
+        cbar = ax.pcolor(X, Y, pivotted.values)
+        fig.colorbar(cbar, label="Number of data points", shrink=0.75)
+        title = f"{lat_bin}° x {lon_bin}° bin"
+        plt.title(title)
+        return fig
+
+    def plot(
+        self,
+        variable_name: str,
+        latitude_ref: int | float,
+        longitude_ref: int | float,
+        bins_size: int | float | Iterable[int | float],
+        title: str = None,
+        suptitle: str = None,
+    ) -> None:
+        """Plot the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        latitude_ref : int | float
+            Latitude to use for the center of the area.
+        longitude_ref : int | float
+            Longitude to use for the center of the area.
+        bins_size : int | float | Iterable[int  |  float]
+            Area dimension, first component is latitude and second is longitude.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            latitude_ref=latitude_ref,
+            longitude_ref=longitude_ref,
+            bins_size=bins_size,
+        )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.show()
+        plt.close()
+
+    def save_fig(
+        self,
+        save_path: str,
+        variable_name: str,
+        latitude_ref: int | float,
+        longitude_ref: int | float,
+        bins_size: int | float | Iterable[int | float],
+        title: str = None,
+        suptitle: str = None,
+    ) -> None:
+        """Save the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        variable_name : str
+            Name of the variable to plot.
+        latitude_ref : int | float
+            Latitude to use for the center of the area.
+        longitude_ref : int | float
+            Longitude to use for the center of the area.
+        bins_size : int | float | Iterable[int  |  float]
+            Area dimension, first component is latitude and second is longitude.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            latitude_ref=latitude_ref,
+            longitude_ref=longitude_ref,
+            bins_size=bins_size,
+        )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.savefig(save_path)
