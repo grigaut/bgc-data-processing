@@ -17,6 +17,8 @@ class TomlParser:
     ----------
     filepath : str
         Path to the config file.
+    check_types : bool, optional
+        Whether to check types or not., by default True
     """
 
     _str_to_type = {
@@ -68,6 +70,40 @@ class TomlParser:
                 )
             var = var[key]
         return deepcopy(var)
+
+    def set(self, keys: list[str], value: Any) -> None:
+        """Set the value of an element of the dictionnary.
+
+        Parameters
+        ----------
+        keys : list[str]
+            List path to the variable: ["VAR1", "VAR2", "VAR3"]
+            is the path to the variable VAR1.VAR2.VAR3 in the toml.
+        value : Any
+            Value to set.
+
+        Raises
+        ------
+        KeyError
+            If the path doesn't match the file's architecture
+        """
+        if keys[0] not in self._elements.keys():
+            raise KeyError(
+                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
+            )
+        if len(keys) > 1:
+            var = self._elements[keys[0]]
+            for i in range(len(keys[1:-1])):
+                key = keys[1:][i]
+                if (not isinstance(var, dict)) or (key not in var.keys()):
+                    keys_str = ".".join(keys[: i + 2])
+                    raise KeyError(
+                        f"Variable {keys_str} does not exist in {self.filepath}"
+                    )
+                var = var[key]
+            var[keys[-1]] = value
+        elif len(keys) == 1:
+            self._elements[keys[0]] = value
 
     def _get_keys_types(
         self,
@@ -190,14 +226,21 @@ class TomlParser:
         keys : list[str]
             'Root' level which to start checking types after
         """
-        var = self.get(keys)
         if not self._check:
             return
-        if not isinstance(var, dict):
-            self.raise_if_wrong_type(keys)
+        if keys:
+            var = self.get(keys)
+            if not isinstance(var, dict):
+                self.raise_if_wrong_type(keys)
+            else:
+                for key in var.keys():
+                    self.raise_if_wrong_type_below(keys=keys + [key])
         else:
-            for key in var.keys():
-                self.raise_if_wrong_type_below(keys=keys + [key])
+            if not isinstance(self._elements, dict):
+                raise TypeError("Wrong type for toml object, should be a dictionnary")
+            else:
+                for key in self._elements.keys():
+                    self.raise_if_wrong_type_below(keys=keys + [key])
 
     def get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
         """Return a variable from the toml using its path.
@@ -259,73 +302,95 @@ class TomlParser:
 
 
 class ConfigParser(TomlParser):
-    """Parser for config.toml to read config parameters."""
+    """Class to parse toml config scripts.
 
-    @property
-    def aggregation(self) -> dict:
-        """Data-aggregation related part of the toml.
+    Parameters
+    ----------
+    filepath : str
+        Path to the file.
+    check_types : bool, optional
+        Whether to check types or not., by default True
+    dates_vars_keys : list[str | list[str]], optional
+        Keys to variable defining dates., by default []
+    dirs_vars_keys : list[str | list[str]], optional
+        Keys to variable defining directories., by default []
+    """
 
-        Returns
-        -------
-        dict
-            self._elements["AGGREGATION"]
-        """
-        aggregation = self.get(["AGGREGATION"])
-        self.raise_if_wrong_type_below(["AGGREGATION"])
-        aggregation["DATE_MIN"] = dt.datetime.strptime(
-            aggregation["DATE_MIN"],
-            "%Y%m%d",
-        )
-        aggregation["DATE_MAX"] = dt.datetime.strptime(
-            aggregation["DATE_MAX"],
-            "%Y%m%d",
-        )
-        saving_dir = self.get(["AGGREGATION", "SAVING_DIR"])
-        if not os.path.isdir(saving_dir):
-            os.mkdir(saving_dir)
-        return aggregation
+    _parsed = False
 
-    @property
-    def mapping(self) -> dict:
-        """Data-mapping related part of the toml.
+    def __init__(
+        self,
+        filepath: str,
+        check_types: bool = True,
+        dates_vars_keys: list[str | list[str]] = [],
+        dirs_vars_keys: list[str | list[str]] = [],
+    ) -> None:
+        super().__init__(filepath, check_types)
+        self.dates_vars_keys = dates_vars_keys
+        self.dirs_vars_keys = dirs_vars_keys
 
-        Returns
-        -------
-        dict
-            self._elements["MAPPING"] with converted date times
-        """
-        mapping = self.get(["MAPPING"])
-        self.raise_if_wrong_type_below(["MAPPING"])
-        mapping["DATE_MIN"] = dt.datetime.strptime(mapping["DATE_MIN"], "%Y%m%d")
-        mapping["DATE_MAX"] = dt.datetime.strptime(mapping["DATE_MAX"], "%Y%m%d")
-        saving_dir = self.get(["MAPPING", "SAVING_DIR"])
-        if not os.path.isdir(saving_dir):
-            os.mkdir(saving_dir)
-        return mapping
+    def parse(
+        self,
+    ) -> dict:
+        """Parse the elements to verify types, convert dates and create directries.
 
-    @property
-    def providers(self) -> dict:
-        """Providers related part of the toml.
+        Parameters
+        ----------
+        dates_vars_keys : list[str | list[str]], optional
+            Keys to variable defining dates.
+        dirs_vars_keys : list[str | list[str]], optional
+            Keys to variable defining directories.
 
         Returns
         -------
         dict
-            self._elements["PROVIDERS"]
-        """
-        self.raise_if_wrong_type_below(["PROVIDERS"])
-        return self.get(["PROVIDERS"])
+            Transformed dictionnary
 
-    @property
-    def utils(self) -> dict:
-        """'utils'' part of the toml.
+        Raises
+        ------
+        IsADirectoryError
+            If one the directories to create exists.
+        """
+        if self._parsed:
+            return
+        else:
+            self._parsed = True
+        self.raise_if_wrong_type_below([])
+        for keys in self.dates_vars_keys:
+            if isinstance(keys, str):
+                keys = [keys]
+            date = dt.datetime.strptime(self.get(keys), "%Y%m%d")
+            self.set(keys, date)
+        for keys in self.dirs_vars_keys:
+            if isinstance(keys, str):
+                keys = [keys]
+            dir = self.get(keys)
+            if os.path.isdir(dir):
+                if os.listdir(dir):
+                    raise IsADirectoryError(
+                        f"The directory {dir} already exists and is not empty."
+                    )
+            else:
+                os.mkdir(dir)
+
+    def __getitem__(self, __k: str) -> Any:
+        """Return self._elements[__k].
+
+        Parameters
+        ----------
+        __k : str
+            Key
 
         Returns
         -------
-        dict
-            self._elements["UTILS"]
+        Any
+            Value associated to __k.
         """
-        self.raise_if_wrong_type_below(["UTILS"])
-        return self.get(["UTILS"])
+        self.parse()
+        return self._elements[__k]
+
+    def __repr__(self) -> str:
+        return self._elements.__repr__()
 
 
 class DefaultTemplatesParser(TomlParser):

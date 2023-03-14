@@ -1,0 +1,44 @@
+#? DATE_MIN: str: first date to load
+DATE_MIN = "20070101"
+#? DATE_MAX: str: last date to load
+DATE_MAX = "20071231"
+#? INTERVAL: str: which interval to use, among ['day','week','month','year','custom']
+INTERVAL = "custom"
+#? CUSTOM_INTERVAL: int: custom interval length
+CUSTOM_INTERVAL = 8
+#? LATITUDE_MIN: int | float
+LATITUDE_MIN = 50
+#? LATITUDE_MAX: int | float
+LATITUDE_MAX = 90
+#? LONGITUDE_MIN: int | float
+LONGITUDE_MIN = -180
+#? LONGITUDE_MAX: int | float
+LONGITUDE_MAX = 180
+#? PROVIDERS: list[str]: providers to use data from
+PROVIDERS = ["GLODAP_2022"]
+#? VARIABLES: list[str]: variables to keep in the output file
+VARIABLES = [
+    "PROVIDER",
+    "EXPOCODE",
+    "YEAR",
+    "MONTH",
+    "DAY",
+    "HOUR",
+    "LONGITUDE",
+    "LATITUDE",
+    "DEPH",
+    "TEMP",
+    "PSAL",
+    "DOXY",
+    "PHOS",
+    "NTRA",
+    "SLCA",
+    "CPHL",
+]
+#? SAVING_DIR: str: directory in which to save data
+SAVING_DIR = "bgc_data"
+#? PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = ["GLODAP_2022", "CMEMS", "NMDC", "CLIVAR", "IMR", "ICES"]
+
+#? VERBOSE: int: verbose value, the higher, the more informations
+VERBOSE = 2

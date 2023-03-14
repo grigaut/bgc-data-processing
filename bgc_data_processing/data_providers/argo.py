@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="ARGO",
-    dirin=CONFIG.providers["ARGO"]["PATH"],
-    category=CONFIG.providers["ARGO"]["CATEGORY"],
+    dirin=PROVIDERS_CONFIG["ARGO"]["PATH"],
+    category=PROVIDERS_CONFIG["ARGO"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

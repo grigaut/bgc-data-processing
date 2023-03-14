@@ -1,11 +1,11 @@
 """Specific parameters to load NMDC-provided data."""
 
-from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="NMDC",
-    dirin=CONFIG.providers["NMDC"]["PATH"],
-    category=CONFIG.providers["NMDC"]["CATEGORY"],
+    dirin=PROVIDERS_CONFIG["NMDC"]["PATH"],
+    category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
     files_pattern="NMDC_1990-2019_all.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

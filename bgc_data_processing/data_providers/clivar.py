@@ -1,12 +1,12 @@
 """Specific parameters to load CLIVAR-provided data."""
 
 
-from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="CLIVAR",
-    dirin=CONFIG.providers["CLIVAR"]["PATH"],
-    category=CONFIG.providers["CLIVAR"]["CATEGORY"],
+    dirin=PROVIDERS_CONFIG["CLIVAR"]["PATH"],
+    category=PROVIDERS_CONFIG["CLIVAR"]["CATEGORY"],
     files_pattern="clivar_({years})[0-9][0-9][0-9][0-9]_.*.csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

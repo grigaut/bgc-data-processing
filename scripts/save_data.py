@@ -5,26 +5,29 @@ from time import time
 
 import pandas as pd
 
-from bgc_data_processing import CONFIG, data_providers, dateranges
+from bgc_data_processing import (
+    PROVIDERS_CONFIG,
+    SAVE_CONFIG,
+    data_providers,
+    dateranges,
+)
 from bgc_data_processing.data_classes import Storer
 
 if __name__ == "__main__":
     # Script arguments
-    config_aggregation = CONFIG.aggregation
-    VARIABLES: list[str] = config_aggregation["VARIABLES"]
-    DATE_MIN: dt.datetime = config_aggregation["DATE_MIN"]
-    DATE_MAX: dt.datetime = config_aggregation["DATE_MAX"]
-    INTERVAL: str = config_aggregation["INTERVAL"]
-    CUSTOM_INTERVAL: int = config_aggregation["CUSTOM_INTERVAL"]
-    LATITUDE_MIN: int | float = config_aggregation["LATITUDE_MIN"]
-    LATITUDE_MAX: int | float = config_aggregation["LATITUDE_MAX"]
-    LONGITUDE_MIN: int | float = config_aggregation["LONGITUDE_MIN"]
-    LONGITUDE_MAX: int | float = config_aggregation["LONGITUDE_MAX"]
-    PROVIDERS = config_aggregation["PROVIDERS"]
-    LIST_DIR = config_aggregation["LIST_DIR"]
-    SAVING_DIR = config_aggregation["SAVING_DIR"]
-    PRIORITY = config_aggregation["PRIORITY"]
-    VERBOSE = CONFIG.utils["VERBOSE"]
+    VARIABLES: list[str] = SAVE_CONFIG["VARIABLES"]
+    DATE_MIN: dt.datetime = SAVE_CONFIG["DATE_MIN"]
+    DATE_MAX: dt.datetime = SAVE_CONFIG["DATE_MAX"]
+    INTERVAL: str = SAVE_CONFIG["INTERVAL"]
+    CUSTOM_INTERVAL: int = SAVE_CONFIG["CUSTOM_INTERVAL"]
+    LATITUDE_MIN: int | float = SAVE_CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = SAVE_CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = SAVE_CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = SAVE_CONFIG["LONGITUDE_MAX"]
+    PROVIDERS = SAVE_CONFIG["PROVIDERS"]
+    SAVING_DIR = SAVE_CONFIG["SAVING_DIR"]
+    PRIORITY = SAVE_CONFIG["PRIORITY"]
+    VERBOSE = SAVE_CONFIG["VERBOSE"]
 
     # Dates parsing
     dates_generator = dateranges.DateRangeGenerator(
@@ -69,7 +72,7 @@ if __name__ == "__main__":
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
-        df = dset_loader(exclude=CONFIG.providers[data_src]["EXCLUDE"])
+        df = dset_loader(exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"])
         # Slicing data
         if VERBOSE > 0:
             print("Slicing data : {}".format(data_src))
