@@ -2,32 +2,31 @@
 
 import datetime as dt
 
-from bgc_data_processing import CONFIG, data_providers
+from bgc_data_processing import PLOT_CONFIG, PROVIDERS_CONFIG, data_providers
 from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":
     # Script arguments
-    config_mapping = CONFIG.mapping
-    DATE_MIN: dt.datetime = config_mapping["DATE_MIN"]
-    DATE_MAX: dt.datetime = config_mapping["DATE_MAX"]
-    LATITUDE_MIN: int | float = config_mapping["LATITUDE_MIN"]
-    LATITUDE_MAX: int | float = config_mapping["LATITUDE_MAX"]
-    LONGITUDE_MIN: int | float = config_mapping["LONGITUDE_MIN"]
-    LONGITUDE_MAX: int | float = config_mapping["LONGITUDE_MAX"]
-    BIN_SIZE: list | int | float = config_mapping["BIN_SIZE"]
-    VARIABLE: str = config_mapping["VARIABLE"]
-    PROVIDERS: list[str] = config_mapping["PROVIDERS"]
-    DEPTH_AGGREGATION: str = config_mapping["DEPTH_AGGREGATION"]
-    BIN_AGGREGATION: str = config_mapping["BIN_AGGREGATION"]
-    PRIORITY: list[str] = config_mapping["PRIORITY"]
-    VERBOSE: int = CONFIG.utils["VERBOSE"]
+    DATE_MIN: dt.datetime = PLOT_CONFIG["DATE_MIN"]
+    DATE_MAX: dt.datetime = PLOT_CONFIG["DATE_MAX"]
+    LATITUDE_MIN: int | float = PLOT_CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = PLOT_CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = PLOT_CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = PLOT_CONFIG["LONGITUDE_MAX"]
+    BIN_SIZE: list | int | float = PLOT_CONFIG["BIN_SIZE"]
+    VARIABLE: str = PLOT_CONFIG["VARIABLE"]
+    PROVIDERS: list[str] = PLOT_CONFIG["PROVIDERS"]
+    DEPTH_AGGREGATION: str = PLOT_CONFIG["DEPTH_AGGREGATION"]
+    BIN_AGGREGATION: str = PLOT_CONFIG["BIN_AGGREGATION"]
+    PRIORITY: list[str] = PLOT_CONFIG["PRIORITY"]
+    VERBOSE: int = PLOT_CONFIG["VERBOSE"]
 
     data_dict = {}
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print("Loading data : {}".format(data_src))
-        exclude = CONFIG.providers[data_src]["EXCLUDE"]
+        exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         dset_loader.set_date_boundaries(
             date_min=DATE_MIN,

@@ -1,11 +1,11 @@
 """Specific parameters to load Argo-provided data."""
 
-from bgc_data_processing import CONFIG, DEFAULT_VARS, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="CMEMS",
-    dirin=CONFIG.providers["CMEMS"]["PATH"],
-    category=CONFIG.providers["CMEMS"]["CATEGORY"],
+    dirin=PROVIDERS_CONFIG["CMEMS"]["PATH"],
+    category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

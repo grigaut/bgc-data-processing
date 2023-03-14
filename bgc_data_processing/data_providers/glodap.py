@@ -1,12 +1,12 @@
 """Specific parameters to load GLODAPv2-provided data."""
 
 
-from bgc_data_processing import CONFIG, DEFAULT_VARS, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="GLODAPv2",
-    dirin=CONFIG.providers["GLODAPv2"]["PATH"],
-    category=CONFIG.providers["GLODAPv2"]["CATEGORY"],
+    dirin=PROVIDERS_CONFIG["GLODAPv2"]["PATH"],
+    category=PROVIDERS_CONFIG["GLODAPv2"]["CATEGORY"],
     files_pattern="glodapv2_({years}).csv",
     variables=variables.VariablesStorer(
         DEFAULT_VARS["provider"].not_in_file(),

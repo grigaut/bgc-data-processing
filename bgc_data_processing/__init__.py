@@ -1,11 +1,27 @@
 from bgc_data_processing import parsers
 
 __all__ = [
-    "CONFIG",
+    "SAVE_CONFIG",
+    "PLOT_CONFIG",
+    "PROVIDERS_CONFIG",
     "DEFAULT_VARS",
 ]
-CONFIG = parsers.ConfigParser(filepath="config.toml", check_types=True)
+
+SAVE_CONFIG = parsers.ConfigParser(
+    "config/save.toml",
+    True,
+    ["DATE_MIN", "DATE_MAX"],
+    ["SAVING_DIR"],
+)
+PLOT_CONFIG = parsers.ConfigParser(
+    "config/plot.toml",
+    True,
+    ["DATE_MIN", "DATE_MAX"],
+    ["SAVING_DIR"],
+)
+PROVIDERS_CONFIG = parsers.ConfigParser("config/providers.toml", True)
+
 DEFAULT_VARS = parsers.DefaultTemplatesParser(
-    filepath="variables.toml",
+    filepath="config/variables.toml",
     check_types=True,
 )
