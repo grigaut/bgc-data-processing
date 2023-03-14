@@ -17,6 +17,8 @@ class TomlParser:
     ----------
     filepath : str
         Path to the config file.
+    check_types : bool, optional
+        Whether to check types or not., by default True
     """
 
     _str_to_type = {
