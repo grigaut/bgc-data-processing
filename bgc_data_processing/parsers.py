@@ -193,11 +193,19 @@ class TomlParser:
         var = self.get(keys)
         if not self._check:
             return
-        if not isinstance(var, dict):
-            self.raise_if_wrong_type(keys)
+        if keys:
+            var = self.get(keys)
+            if not isinstance(var, dict):
+                self.raise_if_wrong_type(keys)
+            else:
+                for key in var.keys():
+                    self.raise_if_wrong_type_below(keys=keys + [key])
         else:
-            for key in var.keys():
-                self.raise_if_wrong_type_below(keys=keys + [key])
+            if not isinstance(self._elements, dict):
+                raise TypeError("Wrong type for toml object, should be a dictionnary")
+            else:
+                for key in self._elements.keys():
+                    self.raise_if_wrong_type_below(keys=keys + [key])
 
     def get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
         """Return a variable from the toml using its path.
