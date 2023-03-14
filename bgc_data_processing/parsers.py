@@ -98,7 +98,7 @@ class TomlParser:
                 if (not isinstance(var, dict)) or (key not in var.keys()):
                     keys_str = ".".join(keys[: i + 2])
                     raise KeyError(
-                        f"Variable {keys_str} does nott exist in {self.filepath}"
+                        f"Variable {keys_str} does not exist in {self.filepath}"
                     )
                 var = var[key]
             var[keys[-1]] = value
