@@ -69,6 +69,42 @@ class TomlParser:
             var = var[key]
         return deepcopy(var)
 
+    def set(self, keys: list[str], value: Any) -> None:
+        """Set the value of an element of the dictionnary.
+
+        Parameters
+        ----------
+        keys : list[str]
+            List path to the variable: ["VAR1", "VAR2", "VAR3"]
+            is the path to the variable VAR1.VAR2.VAR3 in the toml.
+        value : Any
+            Value to set.
+
+        Raises
+        ------
+        KeyError
+            If the path doesn't match the file's architecture
+        """
+        if keys[0] not in self._elements.keys():
+            raise KeyError(
+                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
+            )
+        if len(keys) > 1:
+            var = self._elements[keys[0]]
+            for i in range(len(keys[1:-1])):
+                key = keys[1:][i]
+                if (not isinstance(var, dict)) or (key not in var.keys()):
+                    keys_str = ".".join(keys[: i + 2])
+                    raise KeyError(
+                        f"Variable {keys_str} does nott exist in {self.filepath}"
+                    )
+                var = var[key]
+            var[keys[-1]] = value
+        elif len(keys) == 1:
+            self._elements[keys[0]] = value
+        else:
+            raise KeyError("Can't set value with empty keys list.")
+
     def _get_keys_types(
         self,
         line: str,
