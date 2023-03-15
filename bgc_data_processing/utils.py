@@ -3,14 +3,6 @@ import warnings
 
 
 def temporarywarning(message: str = ""):
-    """Decorator to remind that a function must be modified/removed.
-
-    Parameters
-    ----------
-    message : str, optional
-        Message to display with the warning, by default ""
-    """
-
     def inner(func: callable):
         def wrapper(*args, **kwargs):
             warnings.warn(
