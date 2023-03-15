@@ -14,6 +14,10 @@ LATITUDE_MAX = 90
 LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 180
+#? DEPTH_MIN: int | float
+DEPTH_MIN = -0.1
+#? DEPTH_MAX: int | float
+DEPTH_MAX = 0
 #? PROVIDERS: list[str]: providers to use data from
 PROVIDERS = ["GLODAP_2022"]
 #? VARIABLES: list[str]: variables to keep in the output file

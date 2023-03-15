@@ -24,6 +24,8 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = SAVE_CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = SAVE_CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = SAVE_CONFIG["LONGITUDE_MAX"]
+    DEPTH_MIN: int | float = SAVE_CONFIG["DEPTH_MIN"]
+    DEPTH_MAX: int | float = SAVE_CONFIG["DEPTH_MAX"]
     PROVIDERS = SAVE_CONFIG["PROVIDERS"]
     SAVING_DIR = SAVE_CONFIG["SAVING_DIR"]
     PRIORITY = SAVE_CONFIG["PRIORITY"]
@@ -69,6 +71,10 @@ if __name__ == "__main__":
         dset_loader.set_longitude_boundaries(
             longitude_min=LONGITUDE_MIN,
             longitude_max=LONGITUDE_MAX,
+        )
+        dset_loader.set_depth_boundaries(
+            depth_min=DEPTH_MIN,
+            depth_max=DEPTH_MAX,
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
