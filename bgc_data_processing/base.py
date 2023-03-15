@@ -5,6 +5,7 @@ import datetime as dt
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
@@ -32,14 +33,14 @@ class BaseLoader(ABC):
     """
 
     _verbose: int = 1
-    _lon_min: int | float = None
-    _lon_max: int | float = None
-    _lat_min: int | float = None
-    _lat_max: int | float = None
-    _depth_min: int | float = None
-    _depth_max: int | float = None
-    _date_min: dt.datetime | dt.date = None
-    _date_max: dt.datetime | dt.date = None
+    _lon_min: int | float = np.nan
+    _lon_max: int | float = np.nan
+    _lat_min: int | float = np.nan
+    _lat_max: int | float = np.nan
+    _depth_min: int | float = np.nan
+    _depth_max: int | float = np.nan
+    _date_min: dt.datetime | dt.date = np.nan
+    _date_max: dt.datetime | dt.date = np.nan
 
     def __init__(
         self,
@@ -217,24 +218,24 @@ class BaseLoader(ABC):
 
     def set_date_boundaries(
         self,
-        date_min: dt.datetime | dt.date = None,
-        date_max: dt.datetime | dt.date = None,
+        date_min: dt.datetime | dt.date = np.nan,
+        date_max: dt.datetime | dt.date = np.nan,
     ) -> None:
         """Sets boundaries for date variable.
 
         Parameters
         ----------
         date_min : int | float
-            Minimal value for date (included).
+            Minimal value for date (included)., by default np.nan
         date_max : int | float
-            Maximal value for date (included).
+            Maximal value for date (included)., by default np.nan
         """
-        if date_min is None:
-            self._date_min = None
+        if isinstance(date_min, float) and np.isnan(date_min):
+            self._date_min = np.nan
         else:
             self._date_min = pd.to_datetime(date_min)
-        if date_max is None:
-            self._date_max = None
+        if isinstance(date_min, float) and np.isnan(date_max):
+            self._date_max = np.nan
         else:
             self._date_max = pd.to_datetime(date_max + dt.timedelta(days=1))
 
@@ -274,13 +275,15 @@ class BaseLoader(ABC):
         """
         if var_name not in self._variables.keys():
             return df
-        if min is None and max is None:
+        is_min_nan = isinstance(min, float) and np.isnan(min)
+        is_max_nan = isinstance(max, float) and np.isnan(max)
+        if is_min_nan and is_max_nan:
             return df
         to_compare = df[self._variables.labels[var_name]]
-        if min is None:
+        if is_min_nan:
             after_date_min = to_compare <= max
             return df.loc[after_date_min, :].copy()
-        elif max is None:
+        elif is_max_nan:
             before_date_max = to_compare >= min
             return df.loc[before_date_max, :].copy()
         else:
