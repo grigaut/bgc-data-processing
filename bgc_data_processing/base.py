@@ -36,6 +36,8 @@ class BaseLoader(ABC):
     _lon_max: int | float = None
     _lat_min: int | float = None
     _lat_max: int | float = None
+    _depth_min: int | float = None
+    _depth_max: int | float = None
     _date_min: dt.datetime | dt.date = None
     _date_max: dt.datetime | dt.date = None
 
@@ -195,6 +197,23 @@ class BaseLoader(ABC):
         """
         self._lat_min = latitude_min
         self._lat_max = latitude_max
+
+    def set_depth_boundaries(
+        self,
+        depth_min: int | float,
+        depth_max: int | float,
+    ) -> None:
+        """Sets boundaries for depth variable.
+
+        Parameters
+        ----------
+        depth_min : int | float
+            Minimal value for depth (included).
+        depth_max : int | float
+            Maximal value for depth (included).
+        """
+        self._depth_min = depth_min
+        self._depth_max = depth_max
 
     def set_date_boundaries(
         self,
