@@ -436,13 +436,6 @@ class DefaultTemplatesParser(TomlParser):
 
     @property
     def variables(self) -> dict[str, TemplateVar]:
-        """Return the dictionnary with all created variables.
-
-        Returns
-        -------
-        dict[str, TemplateVar]
-            Dictionnary mapping variables names to variables templates.
-        """
         variables = {}
         for key in self._elements.keys():
             value = self._elements.get(key)
