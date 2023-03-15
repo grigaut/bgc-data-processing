@@ -36,12 +36,12 @@ $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(VENV)
 
 $(CONFIG_DIR)/%.toml: $(CONFIG_DEFAULT_DIR)/%.toml
-	echo $*
+	echo "Copy $(CONFIG_DEFAULT_DIR)/$*.toml to $(CONFIG_DIR)/$*.toml";\
 	cp $(CONFIG_DEFAULT_DIR)/$*.toml $(CONFIG_DIR)/$*.toml
 
 .PHONY: copy-default-config
 copy-default-config: $(CONFIG_DIR) $(CONFIG_DEFAULT_DIR)
-	for name in $(CONFIG_DEFAULT_DIR)/*.toml ; do\
+	@for name in $(CONFIG_DEFAULT_DIR)/*.toml ; do\
 		$(MAKE) -s $(CONFIG_DIR)/$$(basename $${name});\
 	done
 
