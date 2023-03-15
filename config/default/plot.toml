@@ -11,7 +11,7 @@ LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 180
 #? DEPTH_MIN: int | float
-DEPTH_MIN = -1
+DEPTH_MIN = nan
 #? DEPTH_MAX: int | float
 DEPTH_MAX = 0
 #? BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
@@ -19,7 +19,7 @@ BIN_SIZE = [0.5, 1.5]
 #? VARIABLE: str: variable to map
 VARIABLE = "CPHL"
 #? PROVIDERS: list[str]: providers to use data from
-PROVIDERS = ["GLODAP_2022"]
+PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? DEPTH_AGGREGATION: str: function to use to aggregate data over depth
 DEPTH_AGGREGATION = "count"
 #? BIN_AGGREGATION: str: function to use to aggregate data into bins
@@ -27,6 +27,6 @@ BIN_AGGREGATION = "count"
 #? SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_figs"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
-PRIORITY = ["GLODAP_2022", "CMEMS", "NMDC", "CLIVAR", "IMR", "ICES"]
+PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2
