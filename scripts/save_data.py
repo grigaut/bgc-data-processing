@@ -110,7 +110,6 @@ if __name__ == "__main__":
         # Saving aggregated data's slices
         if VERBOSE > 0:
             print("Saving aggregated data")
-        print(DRNG.head())
         to_save = pd.concat([str_start, slices_index], keys=["dates", "slice"], axis=1)
         make_name = lambda x: f"{SAVING_DIR}/bgc_{category}_{x['dates']}.txt"
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
