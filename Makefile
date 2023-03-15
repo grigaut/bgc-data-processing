@@ -6,8 +6,8 @@ ENVIRONMENT_FILEPATH = environment.yml
 SAVE_SCRIPT_PATH = scripts/save_data.py
 PLOT_SCRIPT_PATH = scripts/plot_mesh.py
 OUTPUT_DIRS = bgc_data bgc_figs
-CONFIG := config/providers.toml
-CONFIG_TEMPLATE := config/providers.template.toml
+CONFIG_DIR := config
+CONFIG_DEFAULT_DIR := config/default
 VENV := ./.venv
 POETRY := $(VENV)/bin/poetry
 PYTHON := $(VENV)/bin/python3.11
@@ -19,24 +19,31 @@ default:
 	@echo "Call a specific subcommand: create-env,install,update,documentation"
 
 all:
-	@$(MAKE) -s $(CONFIG)
-	@$(MAKE) -s install
+	$(MAKE) -s copy-default-config
+	$(MAKE) -s install
 
 install-with-hooks:
-	@$(MAKE) -s $(CONFIG)
-	@$(MAKE) -s install
-	@$(MAKE) -s pre-commit
+	$(MAKE) -s copy-default-config
+	$(MAKE) -s install
+	$(MAKE) -s pre-commit
 
 clean:
 	rm -r -f $(VENV)
 	rm -r -f $(HOOKS)
 
-$(CONFIG): $(CONFIG_TEMPLATE)
-	cp $(CONFIG_TEMPLATE) $(CONFIG)
-
 $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 	@$(MAKE) -s clean
 	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(VENV)
+
+$(CONFIG_DIR)/%.toml: $(CONFIG_DEFAULT_DIR)/%.toml
+	echo $*
+	cp $(CONFIG_DEFAULT_DIR)/$*.toml $(CONFIG_DIR)/$*.toml
+
+.PHONY: copy-default-config
+copy-default-config: $(CONFIG_DIR) $(CONFIG_DEFAULT_DIR)
+	for name in $(CONFIG_DEFAULT_DIR)/*.toml ; do\
+		$(MAKE) -s $(CONFIG_DIR)/$$(basename $${name});\
+	done
 
 .PHONY: clean-dirs
 clean-dirs:
