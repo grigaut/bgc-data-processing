@@ -15,11 +15,11 @@ LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float
 LONGITUDE_MAX = 180
 #? DEPTH_MIN: int | float
-DEPTH_MIN = -0.1
+DEPTH_MIN = nan
 #? DEPTH_MAX: int | float
 DEPTH_MAX = 0
 #? PROVIDERS: list[str]: providers to use data from
-PROVIDERS = ["GLODAP_2022"]
+PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? VARIABLES: list[str]: variables to keep in the output file
 VARIABLES = [
     "PROVIDER",
@@ -42,7 +42,7 @@ VARIABLES = [
 #? SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_data"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
-PRIORITY = ["GLODAP_2022", "CMEMS", "NMDC", "CLIVAR", "IMR", "ICES"]
+PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 
 #? VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2

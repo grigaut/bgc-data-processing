@@ -10,4 +10,4 @@ bgc_data
 .venv
 .vscode
 # config file
-config/providers.toml
+config/*.toml
