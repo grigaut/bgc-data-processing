@@ -277,5 +277,8 @@ class CSVLoader(BaseLoader):
         df_blon = self._apply_boundaries(
             df_blat, "LONGITUDE", self._lon_min, self._lon_max
         )
-        df_rm = self.remove_nan_rows(df_blon)
+        df_bdep = self._apply_boundaries(
+            df_blon, "DEPH", self._depth_min, self._depth_max
+        )
+        df_rm = self.remove_nan_rows(df_bdep)
         return df_rm

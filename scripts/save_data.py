@@ -24,6 +24,8 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = SAVE_CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = SAVE_CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = SAVE_CONFIG["LONGITUDE_MAX"]
+    DEPTH_MIN: int | float = SAVE_CONFIG["DEPTH_MIN"]
+    DEPTH_MAX: int | float = SAVE_CONFIG["DEPTH_MAX"]
     PROVIDERS = SAVE_CONFIG["PROVIDERS"]
     SAVING_DIR = SAVE_CONFIG["SAVING_DIR"]
     PRIORITY = SAVE_CONFIG["PRIORITY"]
@@ -70,6 +72,10 @@ if __name__ == "__main__":
             longitude_min=LONGITUDE_MIN,
             longitude_max=LONGITUDE_MAX,
         )
+        dset_loader.set_depth_boundaries(
+            depth_min=DEPTH_MIN,
+            depth_max=DEPTH_MAX,
+        )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
         df = dset_loader(exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"])
@@ -110,7 +116,6 @@ if __name__ == "__main__":
         # Saving aggregated data's slices
         if VERBOSE > 0:
             print("Saving aggregated data")
-        print(DRNG.head())
         to_save = pd.concat([str_start, slices_index], keys=["dates", "slice"], axis=1)
         make_name = lambda x: f"{SAVING_DIR}/bgc_{category}_{x['dates']}.txt"
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
