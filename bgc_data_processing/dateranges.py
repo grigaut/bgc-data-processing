@@ -38,8 +38,8 @@ class DateRangeGenerator:
         interval_length: int = 1,
     ) -> None:
 
-        self.start = start
-        self.end = end
+        self.start = pd.to_datetime(start).normalize()
+        self.end = pd.to_datetime(end).normalize()
         self.interval = interval
         self.interval_length = interval_length
 
@@ -74,6 +74,7 @@ class DateRangeGenerator:
             end=self.end,
             freq=f"{self.interval_length}{self.freqs['day']}",
             inclusive="both",
+            normalize=True,
         )
         dates: pd.Series = date_range.to_series().reset_index(drop=True)
         # Use as start dates
@@ -107,6 +108,7 @@ class DateRangeGenerator:
             end=self.end,
             freq=self.freqs[self.interval],
             inclusive="both",
+            normalize=True,
         )
         dates: pd.Series = date_range.to_series().reset_index(drop=True)
         # Use as end dates
