@@ -27,6 +27,8 @@ class DateRangeGenerator:
         "month": "M",
         "year": "Y",
     }
+    start_column_name: str = "start_date"
+    end_column_name: str = "end_date"
 
     def __init__(
         self,
@@ -47,8 +49,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         if self.interval == "custom":
             return self._make_custom_range()
@@ -61,8 +64,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         # Create the date range
         date_range = pd.date_range(
@@ -79,8 +83,8 @@ class DateRangeGenerator:
         # Add final date.
         ends.loc[ends.index[-1]] = self.end
         # Rename Series
-        starts.name = "start_date"
-        ends.name = "end_date"
+        starts.rename(self.start_column_name, inplace=True)
+        ends.rename(self.end_column_name, inplace=True)
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
@@ -93,8 +97,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         # Create the date range
         date_range = pd.date_range(
@@ -118,8 +123,8 @@ class DateRangeGenerator:
             # Add `self.end` as the last ending date
             ends[ends.index[-1] + 1] = self.end
         # Rename Series
-        starts.name = "start_date"
-        ends.name = "end_date"
+        starts.rename(self.start_column_name, inplace=True)
+        ends.rename(self.end_column_name, inplace=True)
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
