@@ -294,10 +294,13 @@ class Storer:
         dates_col = self._data[self._variables.get("DATE").label]
         # Verbose
         if self._verbose > 1:
-            print("\tSlicing data for date range {} {}".format(start_date, end_date))
+            print(
+                "\tSlicing data for date range"
+                f" {start_date.date()} {end_date.date()}"
+            )
         # slice
-        after_start = dates_col.dt.date >= start_date
-        before_end = dates_col.dt.date <= end_date
+        after_start = dates_col >= start_date
+        before_end = dates_col <= end_date
         slice_index = dates_col.loc[after_start & before_end].index.values.tolist()
         return Slice(
             storer=self,

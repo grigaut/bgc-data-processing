@@ -1,0 +1,28 @@
+#? DATE_MIN: str: first date to map
+DATE_MIN = "20070101"
+#? DATE_MAX: str: last date to map
+DATE_MAX = "20201231"
+#? INTERVAL: str
+INTERVAL = "month"
+#? CUSTOM_INTERVAL: int
+CUSTOM_INTERVAL = 10
+#? LATITUDE: int | float
+LATITUDE = 62
+#? LONGITUDE: int | float
+LONGITUDE = 10
+#? DEPTH_MIN: int | float
+DEPTH_MIN = nan
+#? DEPTH_MAX: int | float
+DEPTH_MAX = 0
+#? BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
+BIN_SIZE = [5, 15]
+#? VARIABLE: str: variable to map
+VARIABLE = "CPHL"
+#? PROVIDERS: list[str]: providers to use data from
+PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? SAVING_DIR: str: directory in which to save data
+SAVING_DIR = "bgc_figs"
+#? PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? VERBOSE: int: verbose value, the higher, the more informations
+VERBOSE = 2

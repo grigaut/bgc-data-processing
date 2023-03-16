@@ -1,8 +1,9 @@
 """Plotting objects."""
 
 
+import datetime as dt
 import warnings
-from typing import TYPE_CHECKING, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,6 +12,7 @@ from cartopy import crs, feature
 
 from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
@@ -235,6 +237,7 @@ class MeshPlotter(BasePlot):
         depth_aggr: str | Callable,
         bin_aggr: Callable | Callable,
         extent: tuple | list,
+        **kwargs,
     ) -> "Figure":
         """Plots the colormesh for the given variable.
 
@@ -256,6 +259,8 @@ class MeshPlotter(BasePlot):
             or callable function to use to aggregate.
         extent : tuple | list
             Boundaries of the map.
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
@@ -286,7 +291,13 @@ class MeshPlotter(BasePlot):
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
         ax.set_extent(extent, crs.PlateCarree())
-        cbar = ax.pcolor(X1, Y1, Z1, transform=crs.PlateCarree())
+        cbar = ax.pcolor(
+            X1,
+            Y1,
+            Z1,
+            transform=crs.PlateCarree(),
+            **kwargs,
+        )
         if bin_aggr == "count":
             label = f"{variable_name} data points count"
         elif depth_aggr == "count" and bin_aggr == "sum":
@@ -309,6 +320,7 @@ class MeshPlotter(BasePlot):
         title: str = None,
         suptitle: str = None,
         extent: tuple | list = (-40, 40, 50, 89),
+        **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -337,6 +349,8 @@ class MeshPlotter(BasePlot):
             , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89).
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -344,6 +358,7 @@ class MeshPlotter(BasePlot):
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
             extent=extent,
+            **kwargs,
         )
         if title is not None:
             plt.title(title)
@@ -360,6 +375,7 @@ class MeshPlotter(BasePlot):
         title: str = None,
         suptitle: str = None,
         extent: tuple | list = (-40, 40, 50, 89),
+        **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
 
@@ -386,6 +402,8 @@ class MeshPlotter(BasePlot):
             , by default None.
         extent : tuple | list, optional
             Boundaries of the map., by default (-40, 40, 50, 89)
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
         """
         _ = self._build_plot(
             variable_name=variable_name,
@@ -393,6 +411,7 @@ class MeshPlotter(BasePlot):
             depth_aggr=depth_aggr,
             bin_aggr=bin_aggr,
             extent=extent,
+            **kwargs,
         )
 
         if title is not None:
@@ -459,3 +478,427 @@ class MeshPlotter(BasePlot):
             verbose=verbose,
         )
         return cls(storer=storer)
+
+
+class EvolutionProfile(BasePlot):
+    """Class to plot the evolution of data on a given area.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map data of.
+    date_variable : str, optional
+        Date variable name as saved in the variablesStorer., by default "DATE"
+    latitude_variable : str, optional
+        Latitude variable name as saved in the variablesStorer., by default "LATITUDE"
+    longitude_variable : str, optional
+        Longitude variable name as saved in the variablesStorer., by default "LONGITUDE"
+    depth_variable : str, optional
+        Depth variable name as saved in the variablesStorer., by default "DEPH"
+    """
+
+    __default_interval: str = "day"
+    __default_interval_length: int = 10
+    __default_depth_interval: int = 100
+    _interval: str = __default_interval
+    _interval_length: int = __default_interval_length
+    _depth_interval: int | float = __default_depth_interval
+
+    def __init__(
+        self,
+        storer: "Storer",
+        date_variable: str = "DATE",
+        latitude_variable: str = "LATITUDE",
+        longitude_variable: str = "LONGITUDE",
+        depth_variable: str = "DEPH",
+    ) -> None:
+
+        super().__init__(storer)
+        lats_info = self._get_default_infos(latitude_variable)
+        self._lat_col, self._lat_min, self._lat_max = lats_info
+        lons_info = self._get_default_infos(longitude_variable)
+        self._lon_col, self._lon_min, self._lon_max = lons_info
+        dates_info = self._get_default_infos(date_variable)
+        self._date_col, self._date_min, self._date_max = dates_info
+        depths_info = self._get_default_infos(depth_variable)
+        self._depth_col, self._depth_min, self._depth_max = depths_info
+
+    def _get_default_infos(self, variable: str) -> tuple[Any]:
+        """Return default information for a variable.
+
+        Parameters
+        ----------
+        variable : str
+            The name of the variable.
+
+        Returns
+        -------
+        tuple[Any]
+            Name of the corresponding column, minimum value, maximum value.
+        """
+        column_name = self._variables.get(variable).label
+        min_value, max_value = self._get_default_boundaries(column_name)
+        return column_name, min_value, max_value
+
+    def _get_default_boundaries(self, column_name: str) -> tuple[Any, Any]:
+        """Return minimum and maximum values for a given column name.
+
+        Parameters
+        ----------
+        column_name : str
+            Column to get the minimum and maximum of.
+
+        Returns
+        -------
+        tuple[Any, Any]
+            Minimum value, maximum value.
+        """
+        min_value = self._storer._data[column_name].min()
+        max_value = self._storer._data[column_name].max()
+        return min_value, max_value
+
+    def reset_boundaries(self) -> None:
+        """Reset boundaries extremum to the defaults ones \
+        (minimum and maximum observed in the data)."""
+        self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
+        self._depth_min, self._depth_max = self._get_default_boundaries(self._depth_col)
+        self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
+        self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
+
+    def reset_intervals(self) -> None:
+        """Reset interval parameters to the default ones."""
+        self._interval = self.__default_interval
+        self._interval_length = self.__default_interval_length
+        self._depth_interval = self.__default_depth_interval
+
+    def reset_parameters(self) -> None:
+        """Reset all boundaries and intervals to default values."""
+        self.reset_boundaries()
+        self.reset_intervals()
+
+    def set_geographic_boundaries(
+        self,
+        latitude_min: int | float = np.nan,
+        latitude_max: int | float = np.nan,
+        longitude_min: int | float = np.nan,
+        longitude_max: int | float = np.nan,
+    ) -> None:
+        """Set the geographic boundaries from latitude and longitude minimum / maximum.
+
+        Parameters
+        ----------
+        latitude_min : int | float, optional
+            Minimum value for latitude., by default np.nan
+        latitude_max : int | float, optional
+            Maximum value for latitude., by default np.nan
+        longitude_min : int | float, optional
+            Minimum value for longitude., by default np.nan
+        longitude_max : int | float, optional
+            Maximum value for longitude., by default np.nan
+        """
+        if not np.isnan(latitude_min):
+            self._lat_min = latitude_min
+        if not np.isnan(latitude_max):
+            self._lat_max = latitude_max
+        if not np.isnan(longitude_min):
+            self._lat_min = longitude_min
+        if not np.isnan(longitude_max):
+            self._lat_max = longitude_max
+
+    def set_geographic_bin(
+        self,
+        center_latitude: int | float,
+        center_longitude: int | float,
+        bins_size: int | float | Iterable[int | float],
+    ) -> None:
+        """Set the geographic boundaries based on a bin. The bin is considered \
+            centered on the center_latitude and center_longitude center \
+            and the bins_size argument defines its width and height.
+
+        Parameters
+        ----------
+        center_latitude : int | float
+            Latitude of the center of the bin.
+        center_longitude : int | float
+            Longitude of the center of the bin.
+        bins_size : int | float | Iterable[int  |  float]
+            Bin size, if iterable, the first coimponent is for latitude and the \
+            second for longitude. If not, the value is considered for both dimensions.
+        """
+        if isinstance(bins_size, Iterable):
+            lat_bin, lon_bin = bins_size[0], bins_size[1]
+        else:
+            lat_bin, lon_bin = bins_size, bins_size
+        # Bin boundaries
+        self._lat_min = center_latitude - lat_bin / 2
+        self._lat_max = center_latitude + lat_bin / 2
+        self._lon_min = center_longitude - lon_bin / 2
+        self._lon_max = center_longitude + lon_bin / 2
+
+    def set_dates_boundaries(
+        self,
+        date_min: dt.datetime = np.nan,
+        date_max: dt.datetime = np.nan,
+    ) -> None:
+        """Set the date boundaries.
+
+        Parameters
+        ----------
+        date_min : dt.datetime, optional
+            Minimum date (included)., by default np.nan
+        date_max : dt.datetime, optional
+            Maximum date (included)., by default np.nan
+        """
+        if not (isinstance(date_min, float) and (not np.isnan(date_min))):
+            self._date_min = date_min
+        if not (isinstance(date_max, float) and not np.isnan(date_max)):
+            self._date_max = date_max
+
+    def set_depth_boundaries(
+        self,
+        depth_min: int | float = np.nan,
+        depth_max: int | float = np.nan,
+    ) -> None:
+        """Set the depth boundaries.
+
+        Parameters
+        ----------
+        depth_min : int | float, optional
+            Minimum depth (included)., by default np.nan
+        depth_max : int | float, optional
+            Maximum depth (included)., by default np.nan
+        """
+        if not np.isnan(depth_min):
+            self._depth_min = depth_min
+        if not np.isnan(depth_max):
+            self._depth_max = depth_max
+
+    def set_depth_interval(self, depth_interval: int | float = np.nan) -> None:
+        """Set the depth interval value. This represent the vertical resolution \
+        of the final plot.
+
+        Parameters
+        ----------
+        depth_interval : int | float, optional
+            Value to use (positive integer)., by default np.nan
+        """
+        if not np.isnan(depth_interval):
+            self._depth_interval = depth_interval
+
+    def set_date_intervals(self, interval: str, interval_length: int = None) -> None:
+        """Set the date interval parameters. This represent the horizontal resolution \
+        of the final plot.
+
+        Parameters
+        ----------
+        interval : str
+            Interval resolution, can be "day", "week", "month", "year" or "custom".
+        interval_length : int, optional
+            Only useful if the resolution interval is "custom". \
+            Represents the interval length, in days., by default None
+        """
+        self._interval = interval
+        if interval_length is not None:
+            self._interval_length = interval_length
+
+    def _get_cut_intervals(
+        self,
+    ) -> pd.IntervalIndex:
+        """Create the datetime intervals to use for the cut.
+
+        Returns
+        -------
+        pd.IntervalIndex
+            Intervals to use for the cut.
+        """
+        drng_generator = DateRangeGenerator(
+            start=self._date_min,
+            end=self._date_max,
+            interval=self._interval,
+            interval_length=self._interval_length,
+        )
+        drng = drng_generator()
+        intervals = pd.IntervalIndex.from_arrays(
+            pd.to_datetime(drng[drng_generator.start_column_name]),
+            pd.to_datetime(drng[drng_generator.end_column_name]),
+            closed="both",
+        )
+        return intervals
+
+    def _build_plot(
+        self,
+        variable_name: str,
+        **kwargs,
+    ) -> "Figure":
+        """Build the plot to display or save.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
+
+        Returns
+        -------
+        Figure
+            Data evolution figure on the given area.
+
+        Raises
+        ------
+        ValueError
+            If there is not enough data to create a figure.
+        """
+        var_col = self._variables.get(variable_name).label
+        columns = [
+            self._lat_col,
+            self._lon_col,
+            self._depth_col,
+            self._date_col,
+            var_col,
+        ]
+        df = self._storer.data[columns]
+        # Boundaries boolean series
+        if self._verbose > 1:
+            print("\tSlicing Data based on given boundaries.")
+        lat_min_cond = df[self._lat_col] >= self._lat_min
+        lat_max_cond = df[self._lat_col] <= self._lat_max
+        lat_cond = (lat_min_cond) & (lat_max_cond)
+        lon_min_cond = df[self._lon_col] >= self._lon_min
+        lon_max_cond = df[self._lon_col] <= self._lon_max
+        lon_cond = (lon_min_cond) & (lon_max_cond)
+        depth_min_cond = df[self._depth_col] >= self._depth_min
+        depth_max_cond = df[self._depth_col] <= self._depth_max
+        depth_cond = depth_min_cond & depth_max_cond
+        # Slicing
+        df_slice = df.loc[lat_cond & lon_cond & depth_cond, :].copy(True)
+        if df_slice.empty:
+            raise ValueError("Not enough data at this location to build a figure.")
+        # Set 1 when the variable is not nan, otherwise 0
+        var_count = (~df_slice[var_col].isna()).astype(int)
+        var_count.rename("values", inplace=True)
+        # Make depth groups
+        depth_div = df_slice[self._depth_col] / self._depth_interval
+        depth_groups = depth_div.round() * self._depth_interval
+        depth_groups.rename("index", inplace=True)
+        if self._verbose > 1:
+            print("\tMaking date intervals.")
+        intervals = self._get_cut_intervals()
+        date_cut = pd.cut(df_slice[self._date_col], intervals)
+        date_cut_left = pd.Series(pd.IntervalIndex(date_cut).left)
+        date_cut_left.rename("columns", inplace=True)
+        # Pivot
+        data = pd.concat(
+            [
+                date_cut_left.to_frame(),
+                depth_groups.to_frame(),
+                var_count.to_frame(),
+            ],
+            axis=1,
+        )
+        if self._verbose > 1:
+            print("\tPivotting dataframe.")
+        # Aggregate using 'sum' to count non-nan values
+        pivotted = data.pivot_table(
+            values="values",
+            index="index",
+            columns="columns",
+            aggfunc="sum",
+        )
+        to_insert = intervals[~intervals.left.isin(pivotted.columns)].left
+        pivotted.loc[:, to_insert] = np.nan
+        pivotted.sort_index(axis=1, inplace=True)
+        # Figure
+        if self._verbose > 1:
+            print("\tCreating figure.")
+        fig = plt.figure(figsize=[10, 5])
+        suptitle = (
+            "Evolution of data in the area of latitude in "
+            f"[{round(self._lat_min,2)},{round(self._lat_max,2)}] and longitude in "
+            f"[{round(self._lon_min,2)},{round(self._lon_max,2)}]"
+        )
+        plt.suptitle(suptitle)
+        ax = plt.subplot(1, 1, 1)
+        X, Y = np.meshgrid(pivotted.columns, pivotted.index)
+        # Color mesh
+        cbar = ax.pcolor(X, Y, pivotted.values, **kwargs)
+        fig.colorbar(cbar, label="Number of data points", shrink=0.75)
+        if self._interval == "custom":
+            title = (
+                f"Horizontal resolution: {self._interval_length} "
+                f"day{'s' if self._interval_length > 1 else ''}. "
+                f"Vertical resolution: {self._depth_interval} meters."
+            )
+        else:
+            title = (
+                f"Horizontal resolution: 1 {self._interval}. "
+                f"Vertical resolution: {self._depth_interval} meters."
+            )
+        plt.title(title)
+        return fig
+
+    def plot(
+        self,
+        variable_name: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Plot the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            **kwargs,
+        )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.show()
+        plt.close()
+
+    def save_fig(
+        self,
+        save_path: str,
+        variable_name: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Save the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
+        """
+        _ = self._build_plot(
+            variable_name=variable_name,
+            **kwargs,
+        )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.savefig(save_path)

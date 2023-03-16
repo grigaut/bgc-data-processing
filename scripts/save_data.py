@@ -85,7 +85,7 @@ if __name__ == "__main__":
         slices_index = DRNG.apply(df.slice_on_dates, axis=1)
         # Saving slices
         if VERBOSE > 0:
-            print("saving slices : {}".format(data_src))
+            print("Saving slices : {}".format(data_src))
         to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
         make_name = (
             lambda x: f"{SAVING_DIR}/{data_src}/nutrients_{data_src}_{x['dates']}.csv"

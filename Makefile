@@ -5,6 +5,7 @@
 ENVIRONMENT_FILEPATH = environment.yml
 SAVE_SCRIPT_PATH = scripts/save_data.py
 PLOT_SCRIPT_PATH = scripts/plot_mesh.py
+EVOLUTION_SCRIPT_PATH = scripts/plot_evolution_profile.py
 OUTPUT_DIRS = bgc_data bgc_figs
 CONFIG_DIR := config
 CONFIG_DEFAULT_DIR := config/default
@@ -74,6 +75,12 @@ run-plot:
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install --without dev,docs
 	$(PYTHON) $(PLOT_SCRIPT_PATH)
+
+.PHONY: run-evolution-plot
+run-evolution-plot:
+	@$(MAKE) -s $(VENV)
+	$(POETRY) install --without dev,docs
+	$(PYTHON) $(EVOLUTION_SCRIPT_PATH)
 
 .PHONY: view-docs
 view-docs:

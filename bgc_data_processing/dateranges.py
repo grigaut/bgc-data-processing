@@ -27,6 +27,8 @@ class DateRangeGenerator:
         "month": "M",
         "year": "Y",
     }
+    start_column_name: str = "start_date"
+    end_column_name: str = "end_date"
 
     def __init__(
         self,
@@ -36,8 +38,8 @@ class DateRangeGenerator:
         interval_length: int = 1,
     ) -> None:
 
-        self.start = start
-        self.end = end
+        self.start = pd.to_datetime(start).normalize()
+        self.end = pd.to_datetime(end).normalize()
         self.interval = interval
         self.interval_length = interval_length
 
@@ -47,8 +49,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         if self.interval == "custom":
             return self._make_custom_range()
@@ -61,8 +64,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         # Create the date range
         date_range = pd.date_range(
@@ -70,6 +74,7 @@ class DateRangeGenerator:
             end=self.end,
             freq=f"{self.interval_length}{self.freqs['day']}",
             inclusive="both",
+            normalize=True,
         )
         dates: pd.Series = date_range.to_series().reset_index(drop=True)
         # Use as start dates
@@ -79,12 +84,13 @@ class DateRangeGenerator:
         # Add final date.
         ends.loc[ends.index[-1]] = self.end
         # Rename Series
-        starts.name = "start_date"
-        ends.name = "end_date"
+        starts.rename(self.start_column_name, inplace=True)
+        ends.rename(self.end_column_name, inplace=True)
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
-        return pd.concat([starts.dt.date, ends.dt.date], axis=1)
+        ends = ends + pd.Timedelta(86399, "s")
+        return pd.concat([starts, ends], axis=1)
 
     def _make_range(self) -> pd.DataFrame:
         """Create the range DataFrame for 'usual' date intervals: \
@@ -93,8 +99,9 @@ class DateRangeGenerator:
         Returns
         -------
         pd.DataFrame
-            Range DataFrame with "start_date" and "end_date" columns.
-            Both start and end dates are supposed to be included in the final range.
+            Range DataFrame with self.start_column_name and \
+            self.end_column_name columns. Both start and end dates \
+            are supposed to be included in the final range.
         """
         # Create the date range
         date_range = pd.date_range(
@@ -102,6 +109,7 @@ class DateRangeGenerator:
             end=self.end,
             freq=self.freqs[self.interval],
             inclusive="both",
+            normalize=True,
         )
         dates: pd.Series = date_range.to_series().reset_index(drop=True)
         # Use as end dates
@@ -111,16 +119,17 @@ class DateRangeGenerator:
         # Add start date as first date
         starts.loc[ends.index[0]] = self.start
         # If last end is not `sef.end`
-        if ends[ends.index[-1]] != self.end:
+        if ends[ends.index[-1]].date() != self.end.date():
             # Compute last period start date using current last period end
             last_period_start = ends[ends.index[-1]] + pd.to_timedelta("1 day")
             starts[starts.index[-1] + 1] = last_period_start
             # Add `self.end` as the last ending date
             ends[ends.index[-1] + 1] = self.end
         # Rename Series
-        starts.name = "start_date"
-        ends.name = "end_date"
+        starts.rename(self.start_column_name, inplace=True)
+        ends.rename(self.end_column_name, inplace=True)
         # Sort indexes
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
-        return pd.concat([starts.dt.date, ends.dt.date], axis=1)
+        ends = ends + pd.Timedelta(86399, "s")
+        return pd.concat([starts, ends], axis=1)

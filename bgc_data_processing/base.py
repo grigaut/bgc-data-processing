@@ -237,7 +237,7 @@ class BaseLoader(ABC):
         if isinstance(date_min, float) and np.isnan(date_max):
             self._date_max = np.nan
         else:
-            self._date_max = pd.to_datetime(date_max + dt.timedelta(days=1))
+            self._date_max = pd.to_datetime(date_max)
 
     def _apply_boundaries(
         self,
