@@ -119,7 +119,7 @@ class DateRangeGenerator:
         # Add start date as first date
         starts.loc[ends.index[0]] = self.start
         # If last end is not `sef.end`
-        if ends[ends.index[-1]] != self.end:
+        if ends[ends.index[-1]].date() != self.end.date():
             # Compute last period start date using current last period end
             last_period_start = ends[ends.index[-1]] + pd.to_timedelta("1 day")
             starts[starts.index[-1] + 1] = last_period_start
