@@ -480,7 +480,7 @@ class MeshPlotter(BasePlot):
         return cls(storer=storer)
 
 
-class BinEvolutionPlotter(BasePlot):
+class EvolutionProfile(BasePlot):
     """Class to plot the evolution of data on a given area.
 
     Parameters
