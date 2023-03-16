@@ -2,11 +2,9 @@
 	SHELL:=/bin/bash
 .PHONY: create-env install update run-save run-plot documentation docs-build clean-dirs
 
-ENVIRONMENT_FILEPATH = environment.yml
-SAVE_SCRIPT_PATH = scripts/save_data.py
-PLOT_SCRIPT_PATH = scripts/plot_mesh.py
-EVOLUTION_SCRIPT_PATH = scripts/plot_evolution_profile.py
-OUTPUT_DIRS = bgc_data bgc_figs
+ENVIRONMENT_FILEPATH := environment.yml
+OUTPUT_DIRS := bgc_data bgc_figs
+SCRIPTS_DIR := scripts
 CONFIG_DIR := config
 CONFIG_DEFAULT_DIR := config/default
 VENV := ./.venv
@@ -46,6 +44,14 @@ copy-default-config: $(CONFIG_DIR) $(CONFIG_DEFAULT_DIR)
 		$(MAKE) -s $(CONFIG_DIR)/$$(basename $${name});\
 	done
 
+.PHONY: run-%
+run-%:
+	@echo "Executing $(SCRIPTS_DIR)/$(subst -,_,$*).py"
+	@$(MAKE) -s $(VENV)
+	@$(MAKE) -s copy-default-config
+	$(POETRY) install --without dev,docs
+	$(PYTHON) $(SCRIPTS_DIR)/$(subst -,_,$*).py
+
 .PHONY: clean-dirs
 clean-dirs:
 	$(foreach dir, $(OUTPUT_DIRS), rm -r -f $(dir))
@@ -58,29 +64,6 @@ create-env:
 install: poetry.lock
 	@$(MAKE) -s $(VENV)
 	$(POETRY) install
-
-.PHONY: update
-update:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) update
-
-.PHONY: run-save
-run-save:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install --without dev,docs
-	$(PYTHON) $(SAVE_SCRIPT_PATH)
-
-.PHONY: run-plot
-run-plot:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install --without dev,docs
-	$(PYTHON) $(PLOT_SCRIPT_PATH)
-
-.PHONY: run-evolution-plot
-run-evolution-plot:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install --without dev,docs
-	$(PYTHON) $(EVOLUTION_SCRIPT_PATH)
 
 .PHONY: view-docs
 view-docs:
