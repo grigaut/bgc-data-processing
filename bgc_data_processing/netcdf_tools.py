@@ -445,13 +445,13 @@ class NetCDFLoader(BaseLoader):
         df_blon = self._apply_boundaries(
             df_blat, "LONGITUDE", self._lon_min, self._lon_max
         )
-        df_bdep = self._apply_boundaries(
-            df_blon, "DEPH", self._depth_min, self._depth_max
-        )
-        df_prov = self._set_provider(df_bdep)
+        df_prov = self._set_provider(df_blon)
         df_expo = self._set_expocode(df_prov, file_id)
         df_ecols = self._add_empty_cols(df_expo)
         df_types = self._convert_type(df_ecols)
         df_corr = self._correct(df_types)
-        df_rm = self.remove_nan_rows(df_corr)
+        df_bdep = self._apply_boundaries(
+            df_corr, "DEPH", self._depth_min, self._depth_max
+        )
+        df_rm = self.remove_nan_rows(df_bdep)
         return df_rm
