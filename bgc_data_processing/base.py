@@ -281,15 +281,15 @@ class BaseLoader(ABC):
             return df
         to_compare = df[self._variables.labels[var_name]]
         if is_min_nan:
-            after_date_min = to_compare <= max
-            return df.loc[after_date_min, :].copy()
+            after_min = to_compare <= max
+            return df.loc[after_min, :].copy()
         elif is_max_nan:
-            before_date_max = to_compare >= min
-            return df.loc[before_date_max, :].copy()
+            before_max = to_compare >= min
+            return df.loc[before_max, :].copy()
         else:
-            after_date_min = to_compare >= min
-            before_date_max = to_compare <= max
-            return df.loc[after_date_min & before_date_max, :].copy()
+            after_min = to_compare >= min
+            before_max = to_compare <= max
+            return df.loc[after_min & before_max, :].copy()
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows.
