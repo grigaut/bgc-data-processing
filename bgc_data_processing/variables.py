@@ -410,38 +410,89 @@ class VariablesStorer:
 
     Parameters
     ----------
+    provider : ExistingVar | NotExistingVar
+        Provider related variable.
+    expocode : ExistingVar | NotExistingVar
+        Expocode related variable.
+    date : ExistingVar | NotExistingVar
+        Date related variable.
+    year : ExistingVar | NotExistingVar
+        Year related variable.
+    month : ExistingVar | NotExistingVar
+        Month related variable.
+    day : ExistingVar | NotExistingVar
+        Day related variable.
+    hour : ExistingVar | NotExistingVar
+        Hour related variable. Can be set to None to be ignored.
+    latitude : ExistingVar | NotExistingVar
+        Latitude related variable.
+    longitude : ExistingVar | NotExistingVar
+        Longitude related variable.
+    depth : ExistingVar | NotExistingVar
+        Depth related variable.
     *args: list
         Var objects to represent the variables stored by the object.
         It is better if these Var object have been instanciated
         using .not_here or .here_as methods.
+    *kwargs: dict
+        Var objects to represent the variables stored by the object.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods. The parameter name has no importance.
 
     Raises
     ------
     ValueError:
-        If multiplie var object have the same name.
-
-    Examples
-    --------
-    >>> var1 = TemplateVar("LATITUDE", "[deg_N]", float, 0, 0, "%-12s", "%12.6f")
-    >>> var2 = TemplateVar("LONGITUDE", "[deg_E]", float, 1, 1, "%-12s", "%12.6f")
-    >>> var_storer = VariablesStorer(
-    ...     var1.in_file_as("latitude"),
-    ...     var2.not_in_file(),
-    ... )
-    >>> print(var_storer)
-    LATITUDE - [deg_N] (<class 'float'>): [('latitude', None, None)]
-    LONGITUDE - [deg_E] (<class 'float'>): not in file
+        If multiple var object have the same name.
     """
 
-    def __init__(self, *args: ExistingVar | NotExistingVar) -> None:
+    def __init__(
+        self,
+        provider: ExistingVar | NotExistingVar,
+        expocode: ExistingVar | NotExistingVar,
+        date: ExistingVar | NotExistingVar,
+        year: ExistingVar | NotExistingVar,
+        month: ExistingVar | NotExistingVar,
+        day: ExistingVar | NotExistingVar,
+        hour: ExistingVar | NotExistingVar,
+        latitude: ExistingVar | NotExistingVar,
+        longitude: ExistingVar | NotExistingVar,
+        depth: ExistingVar | NotExistingVar,
+        *args: ExistingVar | NotExistingVar,
+        **kwargs: ExistingVar | NotExistingVar,
+    ) -> None:
         if len(args) != len(set(var.name for var in args)):
             raise ValueError(
                 "To set multiple alias for the same variable, "
                 "use Var.in_file_as([alias1, alias2])"
             )
-
-        self._elements = list(args)
-        self._save = list(args)
+        mandatory_variables = []
+        self.provider_var_name = provider.name
+        mandatory_variables.append(provider)
+        self.expocode_var_name = expocode.name
+        mandatory_variables.append(expocode)
+        self.date_var_name = date.name
+        mandatory_variables.append(date)
+        self.year_var_name = year.name
+        mandatory_variables.append(year)
+        self.month_var_name = month.name
+        mandatory_variables.append(month)
+        self.day_var_name = day.name
+        mandatory_variables.append(day)
+        if hour is None:
+            self.has_hour = False
+            self.hour_var_name = None
+        else:
+            self.has_hour = True
+            self.hour_var_name = hour.name
+            mandatory_variables.append(hour)
+        self.latitude_var_name = latitude.name
+        mandatory_variables.append(latitude)
+        self.longitude_var_name = longitude.name
+        mandatory_variables.append(longitude)
+        self.depth_var_name = depth.name
+        mandatory_variables.append(depth)
+        self._elements = mandatory_variables + list(args) + list(kwargs.values())
+        self._save = mandatory_variables + list(args) + list(kwargs.values())
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 

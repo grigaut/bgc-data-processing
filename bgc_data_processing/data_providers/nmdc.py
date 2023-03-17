@@ -8,32 +8,32 @@ loader = csv_tools.CSVLoader(
     category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
     files_pattern="NMDC_1990-2019_all.csv",
     variables=variables.VariablesStorer(
-        DEFAULT_VARS["provider"].not_in_file(),
-        DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),
-        DEFAULT_VARS["date"].in_file_as("Time"),
-        DEFAULT_VARS["year"].not_in_file(),
-        DEFAULT_VARS["month"].not_in_file(),
-        DEFAULT_VARS["day"].not_in_file(),
-        DEFAULT_VARS["hour"].not_in_file(),
-        DEFAULT_VARS["longitude"].in_file_as("Longitude"),
-        DEFAULT_VARS["latitude"].in_file_as("Latitude"),
-        DEFAULT_VARS["depth"]
+        provider=DEFAULT_VARS["provider"].not_in_file(),
+        expocode=DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),
+        date=DEFAULT_VARS["date"].in_file_as("Time"),
+        year=DEFAULT_VARS["year"].not_in_file(),
+        month=DEFAULT_VARS["month"].not_in_file(),
+        day=DEFAULT_VARS["day"].not_in_file(),
+        hour=DEFAULT_VARS["hour"].not_in_file(),
+        longitude=DEFAULT_VARS["longitude"].in_file_as("Longitude"),
+        latitude=DEFAULT_VARS["latitude"].in_file_as("Latitude"),
+        depth=DEFAULT_VARS["depth"]
         .in_file_as("depth")
         .remove_when_nan()
         .correct_with(lambda x: -x),
-        DEFAULT_VARS["temperature"].not_in_file(),
-        DEFAULT_VARS["salinity"].not_in_file(),
-        DEFAULT_VARS["oxygen"].in_file_as("DOW"),
-        DEFAULT_VARS["phosphate"]
+        temperature=DEFAULT_VARS["temperature"].not_in_file(),
+        salinity=DEFAULT_VARS["salinity"].not_in_file(),
+        oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOW"),
+        phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("Phosphate", "Phosphate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["nitrate"]
+        nitrate=DEFAULT_VARS["nitrate"]
         .in_file_as(("Nitrate", "Nitrate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["silicate"]
+        silicate=DEFAULT_VARS["silicate"]
         .in_file_as(("Silicate", "Silicate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["chlorophyll"]
+        chlorophyll=DEFAULT_VARS["chlorophyll"]
         .in_file_as(("ChlA", "ChlA_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
     ),

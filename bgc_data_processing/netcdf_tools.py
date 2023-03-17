@@ -334,18 +334,16 @@ class NetCDFLoader(BaseLoader):
             Dataframe with date, year, month and day columns.
         """
         # Convert from timedeltas to datetime
-        timedeltas = df.pop(self.variables.get("DATE").label)
+        date_var_label = self.variables.get(self._variables._date).label
+        timedeltas = df.pop(date_var_label)
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
-        df[self.variables.get("DATE").label] = dates
+        df[date_var_label] = dates
         # Add year, month and day columns
-        if self._variables.has_name("YEAR"):
-            df[self.variables.get("YEAR").label] = dates.dt.year
-        if self._variables.has_name("MONTH"):
-            df[self.variables.get("MONTH").label] = dates.dt.month
-        if self._variables.has_name("DAY"):
-            df[self.variables.get("DAY").label] = dates.dt.day
-        if self._variables.has_name("HOUR"):
-            df[self.variables.get("HOUR").label] = dates.dt.hour
+        df[self.variables.get(self._variables.year_var_name).label] = dates.dt.year
+        df[self.variables.get(self._variables.month_var_name).label] = dates.dt.month
+        df[self.variables.get(self._variables.day_var_name).label] = dates.dt.day
+        if self._variables.has_hour:
+            df[self.variables.get(self._variables.hour_var_name).label] = dates.dt.hour
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -361,8 +359,8 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with provider column properly filled.
         """
-        if self.variables.has_name("PROVIDER"):
-            df[self._variables.labels["PROVIDER"]] = self.provider
+        provider_var_name = self._variables.provider_var_name
+        df[self._variables.get(provider_var_name).label] = self.provider
         return df
 
     def _set_expocode(self, df: pd.DataFrame, file_id: str) -> pd.DataFrame:
@@ -380,8 +378,8 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with expocode column properly filled.
         """
-        if self.variables.has_name("EXPOCODE"):
-            df[self._variables.labels["EXPOCODE"]] = file_id
+        expocode_var_name = self._variables.expocode_var_name
+        df[self._variables.get(expocode_var_name).label] = file_id
         return df
 
     def _add_empty_cols(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -9,34 +9,34 @@ loader = csv_tools.CSVLoader(
     category=PROVIDERS_CONFIG["GLODAP_2019"]["CATEGORY"],
     files_pattern="glodapv2_({years}).csv",
     variables=variables.VariablesStorer(
-        DEFAULT_VARS["provider"].not_in_file(),
-        DEFAULT_VARS["expocode"].in_file_as("cruise"),
-        DEFAULT_VARS["date"].not_in_file(),
-        DEFAULT_VARS["year"].in_file_as("YEAR"),
-        DEFAULT_VARS["month"].in_file_as("MONTH"),
-        DEFAULT_VARS["day"].in_file_as("DAY"),
-        DEFAULT_VARS["hour"].in_file_as("hour"),
-        DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
-        DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
-        DEFAULT_VARS["depth"]
+        provider=DEFAULT_VARS["provider"].not_in_file(),
+        expocode=DEFAULT_VARS["expocode"].in_file_as("cruise"),
+        date=DEFAULT_VARS["date"].not_in_file(),
+        year=DEFAULT_VARS["year"].in_file_as("YEAR"),
+        month=DEFAULT_VARS["month"].in_file_as("MONTH"),
+        day=DEFAULT_VARS["day"].in_file_as("DAY"),
+        hour=DEFAULT_VARS["hour"].in_file_as("hour"),
+        longitude=DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
+        latitude=DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
+        depth=DEFAULT_VARS["depth"]
         .in_file_as("DEPTH")
         .remove_when_nan()
         .correct_with(lambda x: -x),
-        DEFAULT_VARS["temperature"].in_file_as("THETA"),
-        DEFAULT_VARS["salinity"].in_file_as(("SALNTY", "salinityf", [2])),
-        DEFAULT_VARS["oxygen"]
+        temperature=DEFAULT_VARS["temperature"].in_file_as("THETA"),
+        salinity=DEFAULT_VARS["salinity"].in_file_as(("SALNTY", "salinityf", [2])),
+        oxygen=DEFAULT_VARS["oxygen"]
         .in_file_as(("OXYGEN", "oxygenf", [2]))
         .correct_with(lambda x: x / 32),
-        DEFAULT_VARS["phosphate"]
+        phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("PHSPHT", "phosphatef", [2]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["nitrate"]
+        nitrate=DEFAULT_VARS["nitrate"]
         .in_file_as(("NITRAT", "nitratef", [2]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["silicate"]
+        silicate=DEFAULT_VARS["silicate"]
         .in_file_as(("SILCAT", "silicatef", [2]))
         .remove_when_all_nan(),
-        DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
+        chlorophyll=DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
     ),
     read_params={
         "low_memory": False,

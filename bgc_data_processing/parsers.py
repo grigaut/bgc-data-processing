@@ -334,13 +334,6 @@ class ConfigParser(TomlParser):
     ) -> dict:
         """Parse the elements to verify types, convert dates and create directries.
 
-        Parameters
-        ----------
-        dates_vars_keys : list[str | list[str]], optional
-            Keys to variable defining dates.
-        dirs_vars_keys : list[str | list[str]], optional
-            Keys to variable defining directories.
-
         Returns
         -------
         dict

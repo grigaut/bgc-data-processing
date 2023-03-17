@@ -179,30 +179,34 @@ class CSVLoader(BaseLoader):
             if values is not None:
                 data[var.label] = values
         clean_df = pd.DataFrame(data)
-        clean_df[self._variables.get("PROVIDER").label] = self._provider
-        if self._variables.get("DATE").label in clean_df.columns:
+        provider_var_name = self._variables.provider_var_name
+        clean_df[self._variables.get(provider_var_name).label] = self._provider
+        if self._variables.get(self._variables.date_var_name).label in clean_df.columns:
             # Convert Date column to datetime (if existing)
-            raw_date_col = clean_df.pop(self._variables.get("DATE").label).astype(str)
+            date_label = self._variables.get(self._variables.date_var_name).label
+            raw_date_col = clean_df.pop(date_label).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
-            if self._variables.has_name("HOUR"):
-                clean_df.insert(0, self._variables.get("HOUR").label, dates.dt.hour)
-            if self._variables.has_name("DAY"):
-                clean_df.insert(0, self._variables.get("DAY").label, dates.dt.day)
-            if self._variables.has_name("MONTH"):
-                clean_df.insert(0, self._variables.get("MONTH").label, dates.dt.month)
-            if self._variables.has_name("YEAR"):
-                clean_df.insert(0, self._variables.get("YEAR").label, dates.dt.year)
+            if self._variables.has_hour:
+                hour_label = self._variables.get(self._variables._hour).label
+                clean_df.insert(0, hour_label, dates.dt.hour)
+            day_label = self._variables.get(self._variables.day_var_name).label
+            clean_df.insert(0, day_label, dates.dt.day)
+            month_label = self._variables.get(self._variables.month_var_name).label
+            clean_df.insert(0, month_label, dates.dt.month)
+            year_label = self._variables.get(self._variables.year_var_name).label
+            clean_df.insert(0, year_label, dates.dt.year)
         else:
             dates = pd.to_datetime(
                 clean_df[
                     [
-                        self._variables.get("YEAR").label,
-                        self._variables.get("MONTH").label,
-                        self._variables.get("DAY").label,
+                        self._variables.get(self._variables.year_var_name).label,
+                        self._variables.get(self._variables.month_var_name).label,
+                        self._variables.get(self._variables.day_var_name).label,
                     ]
                 ]
             )
-        clean_df.loc[:, self._variables.get("DATE").label] = dates
+        date_var_label = self._variables.get(self._variables.date_var_name).label
+        clean_df.loc[:, date_var_label] = dates
         for var in self._variables:
             if var.label in clean_df.columns:
                 clean_df.loc[pd.isna(clean_df[var.label]), var.label] = var.default

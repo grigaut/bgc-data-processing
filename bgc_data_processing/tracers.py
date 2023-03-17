@@ -45,9 +45,9 @@ class MeshPlotter(BasePlot):
         storer: "Storer",
     ) -> None:
         super().__init__(storer=storer)
-        self._data = storer.data.sort_values(
-            self._variables.get("DEPH").label, ascending=False
-        )
+        depth_var_name = self._variables.depth_var_name
+        depth_var_label = self._variables.get(depth_var_name).label
+        self._data = storer.data.sort_values(depth_var_label, ascending=False)
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
     def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
@@ -179,8 +179,8 @@ class MeshPlotter(BasePlot):
             Longitude values, Latitude values and variable values.
             Each one is 2 dimensionnal.
         """
-        lat = self._variables.get("LATITUDE").label
-        lon = self._variables.get("LONGITUDE").label
+        lat = self._variables.get(self._variables.latitude_var_name).label
+        lon = self._variables.get(self._variables.longitude_var_name).label
         df = self._group(
             var_key=label,
             lat_key=lat,
@@ -487,14 +487,6 @@ class EvolutionProfile(BasePlot):
     ----------
     storer : Storer
         Storer to map data of.
-    date_variable : str, optional
-        Date variable name as saved in the variablesStorer., by default "DATE"
-    latitude_variable : str, optional
-        Latitude variable name as saved in the variablesStorer., by default "LATITUDE"
-    longitude_variable : str, optional
-        Longitude variable name as saved in the variablesStorer., by default "LONGITUDE"
-    depth_variable : str, optional
-        Depth variable name as saved in the variablesStorer., by default "DEPH"
     """
 
     __default_interval: str = "day"
@@ -507,20 +499,16 @@ class EvolutionProfile(BasePlot):
     def __init__(
         self,
         storer: "Storer",
-        date_variable: str = "DATE",
-        latitude_variable: str = "LATITUDE",
-        longitude_variable: str = "LONGITUDE",
-        depth_variable: str = "DEPH",
     ) -> None:
 
         super().__init__(storer)
-        lats_info = self._get_default_infos(latitude_variable)
+        lats_info = self._get_default_infos(self._variables.latitude_var_name)
         self._lat_col, self._lat_min, self._lat_max = lats_info
-        lons_info = self._get_default_infos(longitude_variable)
+        lons_info = self._get_default_infos(self._variables.longitude_var_name)
         self._lon_col, self._lon_min, self._lon_max = lons_info
-        dates_info = self._get_default_infos(date_variable)
+        dates_info = self._get_default_infos(self._variables.date_var_name)
         self._date_col, self._date_min, self._date_max = dates_info
-        depths_info = self._get_default_infos(depth_variable)
+        depths_info = self._get_default_infos(self._variables.depth_var_name)
         self._depth_col, self._depth_min, self._depth_max = depths_info
 
     def _get_default_infos(self, variable: str) -> tuple[Any]:
