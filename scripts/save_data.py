@@ -7,7 +7,7 @@ import pandas as pd
 
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
-    SAVE_CONFIG,
+    parsers,
     data_providers,
     dateranges,
 )
@@ -15,21 +15,26 @@ from bgc_data_processing.data_classes import Storer
 
 if __name__ == "__main__":
     # Script arguments
-    VARIABLES: list[str] = SAVE_CONFIG["VARIABLES"]
-    DATE_MIN: dt.datetime = SAVE_CONFIG["DATE_MIN"]
-    DATE_MAX: dt.datetime = SAVE_CONFIG["DATE_MAX"]
-    INTERVAL: str = SAVE_CONFIG["INTERVAL"]
-    CUSTOM_INTERVAL: int = SAVE_CONFIG["CUSTOM_INTERVAL"]
-    LATITUDE_MIN: int | float = SAVE_CONFIG["LATITUDE_MIN"]
-    LATITUDE_MAX: int | float = SAVE_CONFIG["LATITUDE_MAX"]
-    LONGITUDE_MIN: int | float = SAVE_CONFIG["LONGITUDE_MIN"]
-    LONGITUDE_MAX: int | float = SAVE_CONFIG["LONGITUDE_MAX"]
-    DEPTH_MIN: int | float = SAVE_CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = SAVE_CONFIG["DEPTH_MAX"]
-    PROVIDERS = SAVE_CONFIG["PROVIDERS"]
-    SAVING_DIR = SAVE_CONFIG["SAVING_DIR"]
-    PRIORITY = SAVE_CONFIG["PRIORITY"]
-    VERBOSE = SAVE_CONFIG["VERBOSE"]
+    CONFIG = parsers.ConfigParser(
+        "config/save_data.toml",
+        check_types=True,
+        dates_vars_keys=["DATE_MIN", "DATE_MAX"],
+    )
+    VARIABLES: list[str] = CONFIG["VARIABLES"]
+    DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
+    DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
+    INTERVAL: str = CONFIG["INTERVAL"]
+    CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
+    LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
+    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
+    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    PROVIDERS = CONFIG["PROVIDERS"]
+    SAVING_DIR = CONFIG["SAVING_DIR"]
+    PRIORITY = CONFIG["PRIORITY"]
+    VERBOSE = CONFIG["VERBOSE"]
 
     # Dates parsing
     dates_generator = dateranges.DateRangeGenerator(
