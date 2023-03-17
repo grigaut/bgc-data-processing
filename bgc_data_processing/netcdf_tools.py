@@ -334,7 +334,7 @@ class NetCDFLoader(BaseLoader):
             Dataframe with date, year, month and day columns.
         """
         # Convert from timedeltas to datetime
-        date_var_label = self.variables.get(self._variables._date).label
+        date_var_label = self.variables.get(self._variables.date_var_name).label
         timedeltas = df.pop(date_var_label)
         dates = pd.to_timedelta(timedeltas, "D") + self._date_start
         df[date_var_label] = dates
