@@ -2,27 +2,32 @@
 
 import datetime as dt
 
-from bgc_data_processing import PLOT_CONFIG, PROVIDERS_CONFIG, data_providers
+from bgc_data_processing import PROVIDERS_CONFIG, data_providers, parsers
 from bgc_data_processing.data_classes import Storer
 from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":
     # Script arguments
-    DATE_MIN: dt.datetime = PLOT_CONFIG["DATE_MIN"]
-    DATE_MAX: dt.datetime = PLOT_CONFIG["DATE_MAX"]
-    LATITUDE_MIN: int | float = PLOT_CONFIG["LATITUDE_MIN"]
-    LATITUDE_MAX: int | float = PLOT_CONFIG["LATITUDE_MAX"]
-    LONGITUDE_MIN: int | float = PLOT_CONFIG["LONGITUDE_MIN"]
-    LONGITUDE_MAX: int | float = PLOT_CONFIG["LONGITUDE_MAX"]
-    DEPTH_MIN: int | float = PLOT_CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = PLOT_CONFIG["DEPTH_MAX"]
-    BIN_SIZE: list | int | float = PLOT_CONFIG["BIN_SIZE"]
-    VARIABLE: str = PLOT_CONFIG["VARIABLE"]
-    PROVIDERS: list[str] = PLOT_CONFIG["PROVIDERS"]
-    DEPTH_AGGREGATION: str = PLOT_CONFIG["DEPTH_AGGREGATION"]
-    BIN_AGGREGATION: str = PLOT_CONFIG["BIN_AGGREGATION"]
-    PRIORITY: list[str] = PLOT_CONFIG["PRIORITY"]
-    VERBOSE: int = PLOT_CONFIG["VERBOSE"]
+    CONFIG = parsers.ConfigParser(
+        "config/plot_mesh.toml",
+        check_types=True,
+        dates_vars_keys=["DATE_MIN", "DATE_MAX"],
+    )
+    DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
+    DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
+    LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
+    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
+    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
+    VARIABLE: str = CONFIG["VARIABLE"]
+    PROVIDERS: list[str] = CONFIG["PROVIDERS"]
+    DEPTH_AGGREGATION: str = CONFIG["DEPTH_AGGREGATION"]
+    BIN_AGGREGATION: str = CONFIG["BIN_AGGREGATION"]
+    PRIORITY: list[str] = CONFIG["PRIORITY"]
+    VERBOSE: int = CONFIG["VERBOSE"]
 
     data_dict = {}
     for data_src in PROVIDERS:
