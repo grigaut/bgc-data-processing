@@ -291,7 +291,7 @@ class Storer:
         # Params
         start_date = drng["start_date"]
         end_date = drng["end_date"]
-        dates_col = self._data[self._variables.get("DATE").label]
+        dates_col = self._data[self._variables.get(self._variables.date_var_name).label]
         # Verbose
         if self._verbose > 1:
             print(
@@ -497,9 +497,26 @@ class Reader:
     ----------
     filepath : str
         Path to the file to read.
-    providers : str | list, optional
-        Provider column in the dataframe (if str) or value
-        to attribute to self._providers (if list)., by default "PROVIDER"
+    providers_column_label : str, optional
+        Provider column in the dataframe., by default "PROVIDER"
+    expocode_column_label : str, optional
+        Expocode column in the dataframe., by default "EXPOCODE"
+    date_column_label : str, optional
+        Date column in the dataframe., by default "DATE"
+    year_column_label : str, optional
+        Year column in the dataframe., by default "YEAR"
+    month_column_label : str, optional
+        Month column in the dataframe., by default "MONTH"
+    day_column_label : str, optional
+        Day column in the dataframe., by default "DAY"
+    hour_column_label : str, optional
+        Hour column in the dataframe., by default "HOUR"
+    latitude_column_label : str, optional
+        Latitude column in the dataframe., by default "LATITUDE"
+    longitude_column_label : str, optional
+        Longitude column in the dataframe., by default "LONGITUDE"
+    depth_column_label : str, optional
+        Depth column in the dataframe., by default "DEPH"
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
@@ -522,18 +539,46 @@ class Reader:
     def __init__(
         self,
         filepath: str,
-        providers: str | list = "PROVIDER",
+        providers_column_label: str = "PROVIDER",
+        expocode_column_label: str = "EXPOCODE",
+        date_column_label: str = "DATE",
+        year_column_label: str = "YEAR",
+        month_column_label: str = "MONTH",
+        day_column_label: str = "DAY",
+        hour_column_label: str = "HOUR",
+        latitude_column_label: str = "LATITUDE",
+        longitude_column_label: str = "LONGITUDE",
+        depth_column_label: str = "DEPH",
         category: str = "in_situ",
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
         verbose: int = 1,
     ):
         self._verbose = verbose
+
         raw_df, unit_row = self._read(filepath, unit_row_index, delim_whitespace)
-        self._providers = self._get_providers(raw_df, providers)
-        self._variables = self._get_variables(raw_df, unit_row)
+        mandatory_vars = {
+            providers_column_label: "provider",
+            expocode_column_label: "expocode",
+            date_column_label: "date",
+            year_column_label: "year",
+            month_column_label: "month",
+            day_column_label: "day",
+            hour_column_label: "hour",
+            latitude_column_label: "latitude",
+            longitude_column_label: "longitude",
+            depth_column_label: "depth",
+        }
         self._category = category
-        self._data = self._add_missing_columns(raw_df)
+        self._providers = raw_df[providers_column_label].unique().tolist()
+        self._data = self._add_date_columns(
+            raw_df,
+            year_column_label,
+            month_column_label,
+            day_column_label,
+            date_column_label,
+        )
+        self._variables = self._get_variables(raw_df, unit_row, mandatory_vars)
 
     def _read(
         self, filepath: str, unit_row_index: int, delim_whitespace: bool
@@ -571,37 +616,11 @@ class Reader:
         )
         return raw_df, unit_row
 
-    def _get_providers(self, raw_df: pd.DataFrame, providers: str | list) -> list:
-        """Gets providers for the "provider" argument and the dataframe.
-
-        Parameters
-        ----------
-        raw_df : pd.DataFrame
-            Loaded dataframe.
-        providers : str | list
-            Provider instanciating argument.
-
-        Returns
-        -------
-        list
-            The correct provider value to use as attribute.
-
-        Raises
-        ------
-        InterruptedError
-            If the provider argument is not a string or a list.
-        """
-        if isinstance(providers, str):
-            return list(raw_df[providers].unique())
-        elif isinstance(providers, list):
-            return providers
-        else:
-            raise InterruptedError("Could no parse providers from argument")
-
     def _get_variables(
         self,
         raw_df: pd.DataFrame,
         unit_row: pd.Series,
+        mandatory_vars: dict,
     ) -> "VariablesStorer":
         """Parses variables from the csv data.
 
@@ -611,74 +630,94 @@ class Reader:
             Dataframe to parse.
         unit_row : pd.Series
             Unit row to use as reference for variables' units.
+        mandatory_vars: dict
+            Mapping between column name and parameter for mandatory variables.
 
         Returns
         -------
         VariablesStorer
             Collection of variables.
         """
-        variables = []
-        for i, column in enumerate(raw_df.columns):
-            if unit_row is None:
+        variables = {}
+        for column in raw_df.columns:
+            if unit_row is None or column not in unit_row.index:
                 unit = "[]"
             else:
                 unit = unit_row[column].values[0]
+
             var = ParsedVar(
                 name=column.upper(),
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
             )
-            variables.append(var)
-        return VariablesStorer(*variables)
+            if column in mandatory_vars.keys():
+                variables[mandatory_vars[column]] = var
+            else:
+                variables[column.lower()] = var
+        for param in mandatory_vars.values():
+            if param not in variables.keys():
+                variables[param] = None
+        return VariablesStorer(**variables)
 
-    def _make_date_column(self, raw_df: pd.DataFrame) -> tuple[pd.Series, str]:
+    def _make_date_column(
+        self,
+        raw_df: pd.DataFrame,
+        year_col: str,
+        month_col: str,
+        day_col: str,
+    ) -> pd.Series:
         """Make date column (datetime) from year, month, day columns if existing.
 
         Parameters
         ----------
         raw_df : pd.DataFrame
             Dataframe
+        year_col: str
+            Year column name.
+        month_col: str
+            Month column name.
+        day_col: str
+            Day column name.
 
         Returns
         -------
-        tuple[pd.Series, str]
-            Column to inser, column name to use.
+        pd.Series
+            Date column.
         """
-        year_in_vars = self._variables.has_name("YEAR")
-        month_in_vars = self._variables.has_name("MONTH")
-        day_in_vars = self._variables.has_name("DAY")
-        if not (year_in_vars and month_in_vars and day_in_vars):
-            return None, None
-        year_key = self._variables.labels["YEAR"]
-        month_key = self._variables.labels["MONTH"]
-        day_key = self._variables.labels["DAY"]
-        year_in = year_key in raw_df.columns
-        month_in = month_key in raw_df.columns
-        day_in = day_key in raw_df.columns
-        if year_in and month_in and day_in:
-            var = ParsedVar("DATE", "[]", "datetime64[ns]", None, None)
-            self._variables.add_var(var)
-            return pd.to_datetime(raw_df[[year_key, month_key, day_key]]), var.label
-        else:
-            return None, None
+        return pd.to_datetime(raw_df[[year_col, month_col, day_col]])
 
-    def _add_missing_columns(self, raw_df: pd.DataFrame) -> pd.DataFrame:
+    def _add_date_columns(
+        self,
+        raw_df: pd.DataFrame,
+        year_col: str,
+        month_col: str,
+        day_col: str,
+        date_col: str,
+    ) -> pd.DataFrame:
         """Adds missing columns to the dataframe.
 
         Parameters
         ----------
         raw_df : pd.DataFrame
             Dataframe to modify
+        year_col: str
+            Year column name.
+        month_col: str
+            Month column name.
+        day_col: str
+            Day column name.
+        date_col: str
+            Date column name.
 
         Returns
         -------
         pd.DataFrame
             Dataframe with new columns
         """
-        if not self._variables.has_name("DATE"):
-            missing_col, name = self._make_date_column(raw_df)
-            if (missing_col is not None) and (name is not None):
-                raw_df.insert(0, name, missing_col)
+        if date_col in raw_df.columns:
+            return raw_df
+        missing_col = self._make_date_column(raw_df, year_col, month_col, day_col)
+        raw_df.insert(0, date_col, missing_col)
         return raw_df
 
     def get_storer(self) -> "Storer":
