@@ -8,13 +8,13 @@ __all__ = [
 ]
 
 SAVE_CONFIG = parsers.ConfigParser(
-    "config/save.toml",
+    "config/save_data.toml",
     True,
     ["DATE_MIN", "DATE_MAX"],
     ["SAVING_DIR"],
 )
 PLOT_CONFIG = parsers.ConfigParser(
-    "config/plot.toml",
+    "config/plot_mesh.toml",
     True,
     ["DATE_MIN", "DATE_MAX"],
     ["SAVING_DIR"],
