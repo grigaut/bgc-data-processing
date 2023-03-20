@@ -12,6 +12,7 @@ if __name__ == "__main__":
         "config/plot_mesh.toml",
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
+        dirs_vars_keys=["SAVING_DIR"],
     )
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
@@ -27,6 +28,9 @@ if __name__ == "__main__":
     DEPTH_AGGREGATION: str = CONFIG["DEPTH_AGGREGATION"]
     BIN_AGGREGATION: str = CONFIG["BIN_AGGREGATION"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
+    SAVING_DIR: str = CONFIG["SAVING_DIR"]
+    SHOW: bool = CONFIG["SHOW"]
+    SAVE: bool = CONFIG["SAVE"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
     data_dict = {}
@@ -64,19 +68,39 @@ if __name__ == "__main__":
         df.remove_duplicates(priority_list=PRIORITY)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
-        MeshPlotter(df).plot(
-            VARIABLE,
-            BIN_SIZE,
-            depth_aggr=DEPTH_AGGREGATION,
-            bin_aggr=BIN_AGGREGATION,
-            suptitle=(
-                f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
-                f"{date_min}-{date_max}"
-            ),
-            extent=(
-                LONGITUDE_MIN,
-                LONGITUDE_MAX,
-                LATITUDE_MIN,
-                LATITUDE_MAX,
-            ),
-        )
+        if SHOW:
+            MeshPlotter(df).plot(
+                VARIABLE,
+                BIN_SIZE,
+                depth_aggr=DEPTH_AGGREGATION,
+                bin_aggr=BIN_AGGREGATION,
+                suptitle=(
+                    f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
+                    f"{date_min}-{date_max}"
+                ),
+                extent=(
+                    LONGITUDE_MIN,
+                    LONGITUDE_MAX,
+                    LATITUDE_MIN,
+                    LATITUDE_MAX,
+                ),
+            )
+        if SAVE:
+            save_name = f"density_map_{VARIABLE}_{date_min}_{date_max}.png"
+            MeshPlotter(df).save_fig(
+                f"{SAVING_DIR}/{save_name}.png",
+                VARIABLE,
+                BIN_SIZE,
+                depth_aggr=DEPTH_AGGREGATION,
+                bin_aggr=BIN_AGGREGATION,
+                suptitle=(
+                    f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
+                    f"{date_min}-{date_max}"
+                ),
+                extent=(
+                    LONGITUDE_MIN,
+                    LONGITUDE_MAX,
+                    LATITUDE_MIN,
+                    LATITUDE_MAX,
+                ),
+            )
