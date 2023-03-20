@@ -12,6 +12,7 @@ if __name__ == "__main__":
         "config/plot_profile.toml",
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
+        dirs_vars_keys=["SAVING_DIR"],
     )
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
@@ -26,6 +27,9 @@ if __name__ == "__main__":
     VARIABLE: str = CONFIG["VARIABLE"]
     PROVIDERS: list[str] = CONFIG["PROVIDERS"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
+    SAVING_DIR: str = CONFIG["SAVING_DIR"]
+    SHOW: bool = CONFIG["SHOW"]
+    SAVE: bool = CONFIG["SAVE"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
     data_dict = {}
@@ -63,4 +67,13 @@ if __name__ == "__main__":
         profile.set_geographic_bin(LATITUDE, LONGITUDE, BIN_SIZE)
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
-        profile.plot(VARIABLE)
+        if SHOW:
+            profile.plot(VARIABLE)
+        if SAVE:
+            date_min_str = DATE_MIN.strftime("%Y%m%d")
+            date_max_str = DATE_MAX.strftime("%Y%m%d")
+            save_name = f"profile_{VARIABLE}_{date_min_str}_{date_max_str}.png"
+            profile.save_fig(
+                save_path=f"{SAVING_DIR}/{save_name}",
+                variable_name=VARIABLE,
+            )
