@@ -64,6 +64,7 @@ if __name__ == "__main__":
         longitude_min=LONGITUDE_MIN,
         longitude_max=LONGITUDE_MAX,
     )
+    plot.set_depth_boundaries(depth_min=DEPTH_MIN, depth_max=DEPTH_MAX)
     plot.set_bin_aggregating_method(bin_aggr_method=BIN_AGGREGATION)
     plot.set_depth_aggregating_method(depth_aggr_method=DEPTH_AGGREGATION)
     plot.set_bins_size(bins_size=BIN_SIZE)

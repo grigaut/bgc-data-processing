@@ -106,7 +106,11 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        group = self._data.groupby(self._grouping_columns)
+        depth_label = self._variables.get(self._variables.depth_var_name).label
+        depth_min_cond = self._data[depth_label] >= self._depth_min
+        depth_max_cond = self._data[depth_label] <= self._depth_max
+        data = self._data[depth_min_cond & depth_max_cond].copy()
+        group = data.groupby(self._grouping_columns)
         if isinstance(self._depth_aggr_method, str):
             group_fn = self.depth_aggr[self._depth_aggr_method]
         else:
