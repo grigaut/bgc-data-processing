@@ -9,7 +9,7 @@ from bgc_data_processing.tracers import EvolutionProfile
 if __name__ == "__main__":
     # Script arguments
     CONFIG = parsers.ConfigParser(
-        "config/evolution_profile.toml",
+        "config/plot_profile.toml",
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
     )
