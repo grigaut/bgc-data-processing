@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 f"{date_min}-{date_max}"
             )
             plot.save(
-                save_path=f"{SAVING_DIR}/{save_name}.png",
+                save_path=f"{SAVING_DIR}/{save_name}",
                 variable_name=VARIABLE,
                 suptitle=suptitle,
             )
