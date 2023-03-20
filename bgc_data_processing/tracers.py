@@ -1,9 +1,8 @@
 """Plotting objects."""
 
 
-import datetime as dt
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,16 +28,20 @@ class MeshPlotter(BasePlot):
         Data Storer containing data to plot.
     """
 
-    depth_aggr = {
+    depth_aggr: dict = {
         "top": lambda x: x.first(),
         "bottom": lambda x: x.last(),
         "count": lambda x: x.count(),
     }
-    bin_aggr = {
+    _depth_aggr_method: str | Callable = "count"
+    bin_aggr: dict = {
         "mean": np.mean,
         "count": lambda x: x.count(),
         "sum": np.sum,
     }
+    _bin_aggr_method: str | Callable = "count"
+    _lat_bin: int | float = 1
+    _lon_bin: int | float = 1
 
     def __init__(
         self,
@@ -82,7 +85,6 @@ class MeshPlotter(BasePlot):
         var_key: str,
         lat_key: str,
         lon_key: str,
-        how: str | Callable,
     ) -> pd.DataFrame:
         """First grouping, to aggregate data points from the same measuring point.
 
@@ -105,10 +107,10 @@ class MeshPlotter(BasePlot):
             Column names are the same as in self._data.
         """
         group = self._data.groupby(self._grouping_columns)
-        if isinstance(how, str):
-            group_fn = self.depth_aggr[how]
+        if isinstance(self._depth_aggr_method, str):
+            group_fn = self.depth_aggr[self._depth_aggr_method]
         else:
-            group_fn = how
+            group_fn = self._depth_aggr_method
         var_series: pd.Series = group_fn(group[var_key])
         var_series.name = var_key
         return var_series.reset_index().filter([lat_key, lon_key, var_key])
@@ -149,12 +151,58 @@ class MeshPlotter(BasePlot):
         cut.name = cut_name
         return cut, intervals_mid
 
-    def mesh(
+    def set_depth_aggregating_method(
+        self,
+        depth_aggr_method: str | Callable,
+    ) -> None:
+        """Set the depth aggregation method.
+
+        Parameters
+        ----------
+        depth_aggr_method : str | Callable
+            Name of the function to use to aggregate data when group
+            by similar measuring point (from self.depth_aggr),
+            or callable function to use to aggregate.
+        """
+        self._depth_aggr_method = depth_aggr_method
+
+    def set_bin_aggregating_method(
+        self,
+        bin_aggr_method: str | Callable,
+    ) -> None:
+        """Set the bin aggregation method.
+
+        Parameters
+        ----------
+        bin_aggr_method : str | Callable
+            Name of the aggregation function to use to pivot data (from self.bin_aggr),
+            or callable function to use to aggregate.
+        """
+        self._bin_aggr_method = bin_aggr_method
+
+    def set_bins_size(
+        self,
+        bins_size: int | float | Iterable[int | float],
+    ) -> None:
+        """Set the bin sizes.
+
+        Parameters
+        ----------
+        bins_size : int | float | Iterable[int  |  float]
+            Bins size, if tuple, first for latitude, second for longitude.
+            If float or int, size is applied for both latitude and longitude.
+            Unit is supposed to be degree.
+        """
+        if isinstance(bins_size, Iterable):
+            self._lat_bin = bins_size[0]
+            self._lon_bin = bins_size[1]
+        else:
+            self._lat_bin = bins_size
+            self._lon_bin = bins_size
+
+    def _mesh(
         self,
         label: str,
-        bins_size: float | tuple[float, float],
-        depth_aggr: str | Callable,
-        bin_aggr: str | Callable,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
@@ -162,16 +210,6 @@ class MeshPlotter(BasePlot):
         ----------
         label : str
             Name of the column with the variable to mesh.
-        bins_size : float | tuple[float, float], optional
-            Bins size, if tuple: first for latitude, second for longitude.
-            If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree
-        depth_aggr : str | Callable
-            Name of the function to use to aggregate data when group by
-            similar measuring point or callable function to use to aggregate.
-        bin_aggr : str | Callable
-            Name of the function to aggregate when pivotting data or
-            callable function to use to aggregate.
 
         Returns
         -------
@@ -185,36 +223,29 @@ class MeshPlotter(BasePlot):
             var_key=label,
             lat_key=lat,
             lon_key=lon,
-            how=depth_aggr,
         )
-        if isinstance(bins_size, Iterable):
-            lat_bins_size = bins_size[0]
-            lon_bins_size = bins_size[1]
-        else:
-            lat_bins_size = bins_size
-            lon_bins_size = bins_size
         if self._verbose > 2:
             print("\t\tCreating latitude array")
         lat_cut, lat_points = self._geo_linspace(
             column=df[lat],
-            bin_size=lat_bins_size,
+            bin_size=self._lat_bin,
             cut_name="lat_cut",
         )
         if self._verbose > 2:
             print("\t\tCreating longitude array")
         lon_cut, lon_points = self._geo_linspace(
             column=df[lon],
-            bin_size=lon_bins_size,
+            bin_size=self._lon_bin,
             cut_name="lon_cut",
         )
         # Bining
         bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
-        if isinstance(bin_aggr, str):
-            aggfunc = self.bin_aggr[bin_aggr]
+        if isinstance(self._bin_aggr_method, str):
+            aggfunc = self.bin_aggr[self._bin_aggr_method]
         else:
-            aggfunc = bin_aggr
+            aggfunc = self._bin_aggr_method
         if self._verbose > 2:
             print("\t\tPivotting data to 2D table")
         vals = bins_concat.pivot_table(
@@ -230,13 +261,9 @@ class MeshPlotter(BasePlot):
 
         return lons, lats, vals.values
 
-    def _build_plot(
+    def _build(
         self,
         variable_name: str,
-        bins_size: float | tuple[float, float],
-        depth_aggr: str | Callable,
-        bin_aggr: Callable | Callable,
-        extent: tuple | list,
         **kwargs,
     ) -> "Figure":
         """Plots the colormesh for the given variable.
@@ -264,11 +291,8 @@ class MeshPlotter(BasePlot):
         """
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
-        X1, Y1, Z1 = self.mesh(
+        X1, Y1, Z1 = self._mesh(
             label=self._variables.get(variable_name).label,
-            bins_size=bins_size,
-            depth_aggr=depth_aggr,
-            bin_aggr=bin_aggr,
         )
         if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
             warnings.warn(
@@ -281,15 +305,12 @@ class MeshPlotter(BasePlot):
         provs = ", ".join(self._storer.providers)
         suptitle = f"{variable_name} - {provs} ({self._storer.category})"
         plt.suptitle(suptitle)
-        if isinstance(bins_size, Iterable):
-            lat, lon = bins_size[0], bins_size[1]
-        else:
-            lat, lon = bins_size, bins_size
         ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
         fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
+        extent = [self._lon_min, self._lon_max, self._lat_min, self._lat_max]
         ax.set_extent(extent, crs.PlateCarree())
         cbar = ax.pcolor(
             X1,
@@ -298,28 +319,24 @@ class MeshPlotter(BasePlot):
             transform=crs.PlateCarree(),
             **kwargs,
         )
-        if bin_aggr == "count":
+        if self._bin_aggr_method == "count":
             label = f"{variable_name} data points count"
-        elif depth_aggr == "count" and bin_aggr == "sum":
+        elif self._depth_aggr_method == "count" and self._bin_aggr_method == "sum":
             label = f"{variable_name} total data points count"
         else:
             unit = self._variables[variable_name].unit
-            label = f"{bin_aggr} {variable_name} levels {unit}"
+            label = f"{self._bin_aggr_method} {variable_name} levels {unit}"
         fig.colorbar(cbar, label=label, shrink=0.75)
-        title = f"{lat}° x {lon}° grid (lat x lon)"
+        title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
         plt.title(title)
         return fig
 
-    def save_fig(
+    def save(
         self,
         save_path: str,
         variable_name: str,
-        bins_size: float | tuple[float, float] = 0.5,
-        depth_aggr: str | Callable = "top",
-        bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
-        extent: tuple | list = (-40, 40, 50, 89),
         **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
@@ -330,51 +347,28 @@ class MeshPlotter(BasePlot):
             Path to save the figure at.
         variable_name : str
             Name of the variable to plot.
-        bins_size : float | tuple[float, float], optional
-            Bins size, if tuple, first for latitude, second for longitude.
-            If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree., by default 0.5
-        depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group
-            by similar measuring point (from self.depth_aggr),
-            or callable function to use to aggregate., by default "top"
-        bin_aggr : str | Callable, optional
-            Name of the aggregation function to use to pivot data (from self.bin_aggr),
-            or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created.
             , by default None.
         suptitle: str, optional
             Suptitle for the figure, if set to None, automatically created.
             , by default None.
-        extent : tuple | list, optional
-            Boundaries of the map., by default (-40, 40, 50, 89).
         **kwargs
             Additional arguments to pass to plt.pcolor.
         """
-        _ = self._build_plot(
+        super().save(
+            save_path=save_path,
             variable_name=variable_name,
-            bins_size=bins_size,
-            depth_aggr=depth_aggr,
-            bin_aggr=bin_aggr,
-            extent=extent,
+            title=title,
+            suptitle=suptitle,
             **kwargs,
         )
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
-        plt.savefig(save_path)
 
-    def plot(
+    def show(
         self,
         variable_name: str,
-        bins_size: float | tuple[float, float] = 0.5,
-        depth_aggr: str | Callable = "top",
-        bin_aggr: Callable | Callable = "count",
         title: str = None,
         suptitle: str = None,
-        extent: tuple | list = (-40, 40, 50, 89),
         **kwargs,
     ) -> None:
         """Plots the colormesh for the given variable.
@@ -383,101 +377,21 @@ class MeshPlotter(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        bins_size : float | tuple[float, float], optional
-            Bins size, if tuple, first component if for latitude, second for longitude.
-            If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree., by default 0.5
-        depth_aggr : str | Callable, optional
-            Name of the function to use to aggregate data when group
-            by similar measuring point (from self.depth_aggr),
-            or callable function to use to aggregate., by default "top"
-        bin_aggr : str | Callable, optional
-            Name of the aggregation function to use to pivot data (from self.bin_aggr),
-            or callable function to use to aggregate., by default "count"
         title: str, optional
             Title for the figure, if set to None, automatically created.
             , by default None.
         suptitle: str, optional
             Suptitle for the figure, if set to None, automatically created.
             , by default None.
-        extent : tuple | list, optional
-            Boundaries of the map., by default (-40, 40, 50, 89)
         **kwargs
             Additional arguments to pass to plt.pcolor.
         """
-        _ = self._build_plot(
+        super().show(
             variable_name=variable_name,
-            bins_size=bins_size,
-            depth_aggr=depth_aggr,
-            bin_aggr=bin_aggr,
-            extent=extent,
+            title=title,
+            suptitle=suptitle,
             **kwargs,
         )
-
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
-        plt.show()
-        plt.close()
-
-    @classmethod
-    def from_files(
-        cls,
-        filepath: str | list,
-        providers: str | list = "PROVIDER",
-        category: str = "in_situ",
-        unit_row_index: int = 1,
-        delim_whitespace: bool = True,
-        verbose: int = 1,
-    ) -> "MeshPlotter":
-        """Builds a MeshPlotter reading data from csv or txt files.
-
-        Parameters
-        ----------
-        filepath : str
-            Path to the file to read.
-        providers : str | list, optional
-            Provider column in the dataframe (if str) or
-            value to attribute to self._providers (if list).
-            , by default "PROVIDER"
-        category : str, optional
-            Category of the loaded file., by default "in_situ"
-        unit_row_index : int, optional
-            Index of the row with the units, None if there's no unit row., by default 1
-        delim_whitespace : bool, optional
-            Whether to use whitespace as delimiters., by default True
-        verbose : int, optional
-            Controls the verbose, by default 1
-
-        Returns
-        -------
-        MeshPlotter
-            mesh from the aggregation of the data from all the files
-
-        Examples
-        --------
-        Loading from a single file:
-        >>> filepath = "path/to/file"
-        >>> mesh = MeshPlotter.from_files(filepath, providers="providers_column_name")
-
-        Loading from multiple files:
-        >>> filepaths = [
-        ...     "path/to/file1",
-        ...     "path/to/file2",
-        ... ]
-        >>> mesh = MeshPlotter.from_files(filepaths, providers="providers_column_name")
-
-        """
-        storer = Storer.from_files(
-            filepath=filepath,
-            providers=providers,
-            category=category,
-            unit_row_index=unit_row_index,
-            delim_whitespace=delim_whitespace,
-            verbose=verbose,
-        )
-        return cls(storer=storer)
 
 
 class EvolutionProfile(BasePlot):
@@ -502,56 +416,6 @@ class EvolutionProfile(BasePlot):
     ) -> None:
 
         super().__init__(storer)
-        lats_info = self._get_default_infos(self._variables.latitude_var_name)
-        self._lat_col, self._lat_min, self._lat_max = lats_info
-        lons_info = self._get_default_infos(self._variables.longitude_var_name)
-        self._lon_col, self._lon_min, self._lon_max = lons_info
-        dates_info = self._get_default_infos(self._variables.date_var_name)
-        self._date_col, self._date_min, self._date_max = dates_info
-        depths_info = self._get_default_infos(self._variables.depth_var_name)
-        self._depth_col, self._depth_min, self._depth_max = depths_info
-
-    def _get_default_infos(self, variable: str) -> tuple[Any]:
-        """Return default information for a variable.
-
-        Parameters
-        ----------
-        variable : str
-            The name of the variable.
-
-        Returns
-        -------
-        tuple[Any]
-            Name of the corresponding column, minimum value, maximum value.
-        """
-        column_name = self._variables.get(variable).label
-        min_value, max_value = self._get_default_boundaries(column_name)
-        return column_name, min_value, max_value
-
-    def _get_default_boundaries(self, column_name: str) -> tuple[Any, Any]:
-        """Return minimum and maximum values for a given column name.
-
-        Parameters
-        ----------
-        column_name : str
-            Column to get the minimum and maximum of.
-
-        Returns
-        -------
-        tuple[Any, Any]
-            Minimum value, maximum value.
-        """
-        min_value = self._storer._data[column_name].min()
-        max_value = self._storer._data[column_name].max()
-        return min_value, max_value
-
-    def reset_boundaries(self) -> None:
-        """Reset boundaries extremum to the defaults ones \
-        (minimum and maximum observed in the data)."""
-        self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
-        self._depth_min, self._depth_max = self._get_default_boundaries(self._depth_col)
-        self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
-        self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
 
     def reset_intervals(self) -> None:
         """Reset interval parameters to the default ones."""
@@ -563,35 +427,6 @@ class EvolutionProfile(BasePlot):
         """Reset all boundaries and intervals to default values."""
         self.reset_boundaries()
         self.reset_intervals()
-
-    def set_geographic_boundaries(
-        self,
-        latitude_min: int | float = np.nan,
-        latitude_max: int | float = np.nan,
-        longitude_min: int | float = np.nan,
-        longitude_max: int | float = np.nan,
-    ) -> None:
-        """Set the geographic boundaries from latitude and longitude minimum / maximum.
-
-        Parameters
-        ----------
-        latitude_min : int | float, optional
-            Minimum value for latitude., by default np.nan
-        latitude_max : int | float, optional
-            Maximum value for latitude., by default np.nan
-        longitude_min : int | float, optional
-            Minimum value for longitude., by default np.nan
-        longitude_max : int | float, optional
-            Maximum value for longitude., by default np.nan
-        """
-        if not np.isnan(latitude_min):
-            self._lat_min = latitude_min
-        if not np.isnan(latitude_max):
-            self._lat_max = latitude_max
-        if not np.isnan(longitude_min):
-            self._lat_min = longitude_min
-        if not np.isnan(longitude_max):
-            self._lat_max = longitude_max
 
     def set_geographic_bin(
         self,
@@ -623,45 +458,7 @@ class EvolutionProfile(BasePlot):
         self._lon_min = center_longitude - lon_bin / 2
         self._lon_max = center_longitude + lon_bin / 2
 
-    def set_dates_boundaries(
-        self,
-        date_min: dt.datetime = np.nan,
-        date_max: dt.datetime = np.nan,
-    ) -> None:
-        """Set the date boundaries.
-
-        Parameters
-        ----------
-        date_min : dt.datetime, optional
-            Minimum date (included)., by default np.nan
-        date_max : dt.datetime, optional
-            Maximum date (included)., by default np.nan
-        """
-        if not (isinstance(date_min, float) and (not np.isnan(date_min))):
-            self._date_min = date_min
-        if not (isinstance(date_max, float) and not np.isnan(date_max)):
-            self._date_max = date_max
-
-    def set_depth_boundaries(
-        self,
-        depth_min: int | float = np.nan,
-        depth_max: int | float = np.nan,
-    ) -> None:
-        """Set the depth boundaries.
-
-        Parameters
-        ----------
-        depth_min : int | float, optional
-            Minimum depth (included)., by default np.nan
-        depth_max : int | float, optional
-            Maximum depth (included)., by default np.nan
-        """
-        if not np.isnan(depth_min):
-            self._depth_min = depth_min
-        if not np.isnan(depth_max):
-            self._depth_max = depth_max
-
-    def set_depth_interval(self, depth_interval: int | float = np.nan) -> None:
+    def set_depth_interval(self, depth_interval: int | float = "np.nan") -> None:
         """Set the depth interval value. This represent the vertical resolution \
         of the final plot.
 
@@ -713,7 +510,7 @@ class EvolutionProfile(BasePlot):
         )
         return intervals
 
-    def _build_plot(
+    def _build(
         self,
         variable_name: str,
         **kwargs,
@@ -825,7 +622,7 @@ class EvolutionProfile(BasePlot):
         plt.title(title)
         return fig
 
-    def plot(
+    def show(
         self,
         variable_name: str,
         title: str = None,
@@ -845,19 +642,14 @@ class EvolutionProfile(BasePlot):
         **kwargs
             Additional arguments to pass to plt.pcolor.
         """
-        _ = self._build_plot(
+        super().show(
             variable_name=variable_name,
+            title=title,
+            suptitle=suptitle,
             **kwargs,
         )
 
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
-        plt.show()
-        plt.close()
-
-    def save_fig(
+    def save(
         self,
         save_path: str,
         variable_name: str,
@@ -880,13 +672,10 @@ class EvolutionProfile(BasePlot):
         **kwargs
             Additional arguments to pass to plt.pcolor.
         """
-        _ = self._build_plot(
+        super().save(
+            save_path=save_path,
             variable_name=variable_name,
+            title=title,
+            suptitle=suptitle,
             **kwargs,
         )
-
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
-        plt.savefig(save_path)

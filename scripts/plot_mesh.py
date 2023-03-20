@@ -64,43 +64,38 @@ if __name__ == "__main__":
     for category, data in data_dict.items():
         if VERBOSE > 0:
             print(f"Plotting {category} data")
-        df: Storer = sum(data)
-        df.remove_duplicates(priority_list=PRIORITY)
+        storer: Storer = sum(data)
+        storer.remove_duplicates(priority_list=PRIORITY)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
+        plot = MeshPlotter(storer)
+        plot.set_dates_boundaries(date_min=DATE_MIN, date_max=DATE_MAX)
+        plot.set_geographic_boundaries(
+            latitude_min=LATITUDE_MIN,
+            latitude_max=LATITUDE_MAX,
+            longitude_min=LONGITUDE_MIN,
+            longitude_max=LONGITUDE_MAX,
+        )
+        plot.set_bin_aggregating_method(bin_aggr_method=BIN_AGGREGATION)
+        plot.set_depth_aggregating_method(depth_aggr_method=DEPTH_AGGREGATION)
+        plot.set_bins_size(bins_size=BIN_SIZE)
         if SHOW:
-            MeshPlotter(df).plot(
-                VARIABLE,
-                BIN_SIZE,
-                depth_aggr=DEPTH_AGGREGATION,
-                bin_aggr=BIN_AGGREGATION,
-                suptitle=(
-                    f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
-                    f"{date_min}-{date_max}"
-                ),
-                extent=(
-                    LONGITUDE_MIN,
-                    LONGITUDE_MAX,
-                    LATITUDE_MIN,
-                    LATITUDE_MAX,
-                ),
+            suptitle = (
+                f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
+                f"{date_min}-{date_max}"
+            )
+            plot.show(
+                variable_name=VARIABLE,
+                suptitle=suptitle,
             )
         if SAVE:
             save_name = f"density_map_{VARIABLE}_{date_min}_{date_max}.png"
-            MeshPlotter(df).save_fig(
-                f"{SAVING_DIR}/{save_name}.png",
-                VARIABLE,
-                BIN_SIZE,
-                depth_aggr=DEPTH_AGGREGATION,
-                bin_aggr=BIN_AGGREGATION,
-                suptitle=(
-                    f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
-                    f"{date_min}-{date_max}"
-                ),
-                extent=(
-                    LONGITUDE_MIN,
-                    LONGITUDE_MAX,
-                    LATITUDE_MIN,
-                    LATITUDE_MAX,
-                ),
+            suptitle = (
+                f"{VARIABLE} - {', '.join(PROVIDERS)} ({category})\n"
+                f"{date_min}-{date_max}"
+            )
+            plot.save(
+                save_path=f"{SAVING_DIR}/{save_name}.png",
+                variable_name=VARIABLE,
+                suptitle=suptitle,
             )
