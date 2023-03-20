@@ -187,7 +187,7 @@ class CSVLoader(BaseLoader):
             raw_date_col = clean_df.pop(date_label).astype(str)
             dates = pd.to_datetime(raw_date_col, infer_datetime_format=True)
             if self._variables.has_hour:
-                hour_label = self._variables.get(self._variables._hour).label
+                hour_label = self._variables.get(self._variables.hour_var_name).label
                 clean_df.insert(0, hour_label, dates.dt.hour)
             day_label = self._variables.get(self._variables.day_var_name).label
             clean_df.insert(0, day_label, dates.dt.day)
