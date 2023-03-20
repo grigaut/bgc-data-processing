@@ -19,6 +19,7 @@ if __name__ == "__main__":
         "config/save_data.toml",
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
+        dirs_vars_keys=["SAVING_DIR"],
     )
     VARIABLES: list[str] = CONFIG["VARIABLES"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
