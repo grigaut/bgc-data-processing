@@ -180,12 +180,15 @@ class MeshPlotter(BasePlot):
 
     def _mesh(
         self,
+        df: pd.DataFrame,
         label: str,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
         ----------
+        df: pd.DataFrame
+            Grouped dataframe to mesh.
         label : str
             Name of the column with the variable to mesh.
 
@@ -197,15 +200,6 @@ class MeshPlotter(BasePlot):
         """
         lat = self._variables.get(self._variables.latitude_var_name).label
         lon = self._variables.get(self._variables.longitude_var_name).label
-        df = self._group(
-            var_key=label,
-            lat_key=lat,
-            lon_key=lon,
-        )
-        if df.empty:
-            raise ValueError(
-                "Empty DataFrame, try with another variable or a longer time period"
-            )
         if self._verbose > 2:
             print("\t\tCreating latitude array")
         lat_cut, lat_points = self._geo_linspace(
@@ -273,14 +267,11 @@ class MeshPlotter(BasePlot):
             label = "all"
         else:
             label = self._variables.get(variable_name).label
-        X1, Y1, Z1 = self._mesh(
-            label=label,
+        df = self._group(
+            var_key=label,
+            lat_key=self._variables.get(self._variables.latitude_var_name).label,
+            lon_key=self._variables.get(self._variables.longitude_var_name).label,
         )
-        if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
-            warnings.warn(
-                "Not enough data to display, try decreasing the bin size"
-                " or representing more data sources"
-            )
         if self._verbose > 1:
             print("\tCreating figure")
         fig = plt.figure(figsize=[10, 10])
@@ -288,21 +279,31 @@ class MeshPlotter(BasePlot):
         suptitle = f"{variable_name} - {provs} ({self._storer.category})"
         plt.suptitle(suptitle)
         ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
-        fig.subplots_adjust(bottom=0.05, top=0.95, left=0.04, right=0.95, wspace=0.02)
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
         extent = [self._lon_min, self._lon_max, self._lat_min, self._lat_max]
         ax.set_extent(extent, crs.PlateCarree())
-        cbar = ax.pcolor(
-            X1,
-            Y1,
-            Z1,
-            transform=crs.PlateCarree(),
-            **kwargs,
-        )
+        if not df.empty:
+            X1, Y1, Z1 = self._mesh(
+                df=df,
+                label=label,
+            )
+            if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
+                warnings.warn(
+                    "Not enough data to display, try decreasing the bin size"
+                    " or representing more data sources"
+                )
+            cbar = ax.pcolor(
+                X1,
+                Y1,
+                Z1,
+                transform=crs.PlateCarree(),
+                **kwargs,
+            )
+            fig.colorbar(cbar, label=label, shrink=0.75)
         label = f"{variable_name} total data points count"
-        fig.colorbar(cbar, label=label, shrink=0.75)
+
         title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
         plt.title(title)
         return fig
