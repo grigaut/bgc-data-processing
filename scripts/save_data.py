@@ -20,6 +20,7 @@ if __name__ == "__main__":
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
+        existing_directory="raise",
     )
     VARIABLES: list[str] = CONFIG["VARIABLES"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
