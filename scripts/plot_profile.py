@@ -68,12 +68,12 @@ if __name__ == "__main__":
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
         if SHOW:
-            profile.plot(VARIABLE)
+            profile.show(VARIABLE)
         if SAVE:
             date_min_str = DATE_MIN.strftime("%Y%m%d")
             date_max_str = DATE_MAX.strftime("%Y%m%d")
             save_name = f"profile_{VARIABLE}_{date_min_str}_{date_max_str}.png"
-            profile.save_fig(
+            profile.save(
                 save_path=f"{SAVING_DIR}/{save_name}",
                 variable_name=VARIABLE,
             )

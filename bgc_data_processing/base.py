@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_classes import Storer
     from bgc_data_processing.variables import VariablesStorer
+    from matplotlib.figure import Figure
 
 
 class BaseLoader(ABC):
@@ -346,13 +348,254 @@ class BasePlot(ABC):
         self._storer = storer
         self._variables = storer.variables
         self._verbose = storer.verbose
+        lats_info = self._get_default_infos(self._variables.latitude_var_name)
+        self._lat_col, self._lat_min, self._lat_max = lats_info
+        lons_info = self._get_default_infos(self._variables.longitude_var_name)
+        self._lon_col, self._lon_min, self._lon_max = lons_info
+        dates_info = self._get_default_infos(self._variables.date_var_name)
+        self._date_col, self._date_min, self._date_max = dates_info
+        depths_info = self._get_default_infos(self._variables.depth_var_name)
+        self._depth_col, self._depth_min, self._depth_max = depths_info
+
+    def _get_default_infos(self, variable: str) -> tuple[Any]:
+        """Return default information for a variable.
+
+        Parameters
+        ----------
+        variable : str
+            The name of the variable.
+
+        Returns
+        -------
+        tuple[Any]
+            Name of the corresponding column, minimum value, maximum value.
+        """
+        column_name = self._variables.get(variable).label
+        min_value, max_value = self._get_default_boundaries(column_name)
+        return column_name, min_value, max_value
+
+    def _get_default_boundaries(self, column_name: str) -> tuple[Any, Any]:
+        """Return minimum and maximum values for a given column name.
+
+        Parameters
+        ----------
+        column_name : str
+            Column to get the minimum and maximum of.
+
+        Returns
+        -------
+        tuple[Any, Any]
+            Minimum value, maximum value.
+        """
+        min_value = self._storer._data[column_name].min()
+        max_value = self._storer._data[column_name].max()
+        return min_value, max_value
+
+    def reset_boundaries(self) -> None:
+        """Reset boundaries extremum to the defaults ones \
+        (minimum and maximum observed in the data)."""
+        self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
+        self._depth_min, self._depth_max = self._get_default_boundaries(self._depth_col)
+        self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
+        self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
+
+    def set_geographic_boundaries(
+        self,
+        latitude_min: int | float = np.nan,
+        latitude_max: int | float = np.nan,
+        longitude_min: int | float = np.nan,
+        longitude_max: int | float = np.nan,
+    ) -> None:
+        """Set the geographic boundaries from latitude and longitude minimum / maximum.
+
+        Parameters
+        ----------
+        latitude_min : int | float, optional
+            Minimum value for latitude., by default np.nan
+        latitude_max : int | float, optional
+            Maximum value for latitude., by default np.nan
+        longitude_min : int | float, optional
+            Minimum value for longitude., by default np.nan
+        longitude_max : int | float, optional
+            Maximum value for longitude., by default np.nan
+        """
+        if not np.isnan(latitude_min):
+            self._lat_min = latitude_min
+        if not np.isnan(latitude_max):
+            self._lat_max = latitude_max
+        if not np.isnan(longitude_min):
+            self._lon_min = longitude_min
+        if not np.isnan(longitude_max):
+            self._lon_max = longitude_max
+
+    def set_dates_boundaries(
+        self,
+        date_min: dt.datetime = np.nan,
+        date_max: dt.datetime = np.nan,
+    ) -> None:
+        """Set the date boundaries.
+
+        Parameters
+        ----------
+        date_min : dt.datetime, optional
+            Minimum date (included)., by default np.nan
+        date_max : dt.datetime, optional
+            Maximum date (included)., by default np.nan
+        """
+        if not (isinstance(date_min, float) and (not np.isnan(date_min))):
+            self._date_min = date_min
+        if not (isinstance(date_max, float) and not np.isnan(date_max)):
+            self._date_max = date_max
+
+    def set_depth_boundaries(
+        self,
+        depth_min: int | float = np.nan,
+        depth_max: int | float = np.nan,
+    ) -> None:
+        """Set the depth boundaries.
+
+        Parameters
+        ----------
+        depth_min : int | float, optional
+            Minimum depth (included)., by default np.nan
+        depth_max : int | float, optional
+            Maximum depth (included)., by default np.nan
+        """
+        if not np.isnan(depth_min):
+            self._depth_min = depth_min
+        if not np.isnan(depth_max):
+            self._depth_max = depth_max
 
     @abstractmethod
-    def plot(self) -> None:
-        """Plot method."""
+    def _build(self, *args, **kwargs) -> "Figure":
+        """Create the figure.
+
+        Parameters
+        ----------
+        *args: list
+            Parameters to build the figure.
+        *kwargs: dict
+            Parameters to build the figure.
+
+        Returns
+        -------
+        Figure
+            Figure to show or save.
+        """
         ...
 
     @abstractmethod
-    def save_fig(self) -> None:
-        """Figure saving method."""
-        ...
+    def show(self, title: str = None, suptitle: str = None, *args, **kwargs) -> None:
+        """Plot method.
+
+        Parameters
+        ----------
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *args: list
+            Additional parameters to pass to self._build.
+        *kwargs: dict
+            Additional parameters to pass to self._build.
+        """
+        _ = self._build(*args, **kwargs)
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.show()
+        plt.close()
+
+    @abstractmethod
+    def save(
+        self,
+        save_path: str,
+        title: str = None,
+        suptitle: str = None,
+        *args,
+        **kwargs,
+    ) -> None:
+        """Figure saving method.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *args: list
+            Additional parameters to pass to self._build.
+        *kwargs: dict
+            Additional parameters to pass to self._build.
+        """
+        _ = self._build(
+            *args,
+            **kwargs,
+        )
+
+        if title is not None:
+            plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        plt.savefig(save_path)
+
+    # @classmethod
+    # def from_files(
+    #     cls,
+    #     filepath: str | list,
+    #     providers: str | list = "PROVIDER",
+    #     category: str = "in_situ",
+    #     unit_row_index: int = 1,
+    #     delim_whitespace: bool = True,
+    #     verbose: int = 1,
+    # ) -> "BasePlot":
+    #     """Builds a MeshPlotter reading data from csv or txt files.
+
+    #     Parameters
+    #     ----------
+    #     filepath : str
+    #         Path to the file to read.
+    #     providers : str | list, optional
+    #         Provider column in the dataframe (if str) or
+    #         value to attribute to self._providers (if list).
+    #         , by default "PROVIDER"
+    #     category : str, optional
+    #         Category of the loaded file., by default "in_situ"
+    #     unit_row_index : int, optional
+    #         Index of the row with the units, None if there's no unit row., by default1
+    #     delim_whitespace : bool, optional
+    #         Whether to use whitespace as delimiters., by default True
+    #     verbose : int, optional
+    #         Controls the verbose, by default 1
+
+    #     Returns
+    #     -------
+    #     MeshPlotter
+    #         mesh from the aggregation of the data from all the files
+
+    #     Examples
+    #     --------
+    #     Loading from a single file:
+    #     >>> filepath = "path/to/file"
+    #     >>> mesh = MeshPlotter.from_files(filepath, providers="providers_column_name")
+
+    #     Loading from multiple files:
+    #     >>> filepaths = [
+    #     ...     "path/to/file1",
+    #     ...     "path/to/file2",
+    #     ... ]
+    #     >>> mesh = MeshPlotter.from_files(filepaths,providers="providers_column_name")
+
+    #     """
+    #     storer = Storer.from_files(
+    #         filepath=filepath,
+    #         providers=providers,
+    #         category=category,
+    #         unit_row_index=unit_row_index,
+    #         delim_whitespace=delim_whitespace,
+    #         verbose=verbose,
+    #     )
+    #     return cls(storer=storer)
