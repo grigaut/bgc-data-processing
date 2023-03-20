@@ -1,0 +1,34 @@
+#? LOADING_DIR: str: directory from which to load data
+LOADING_DIR = "bgc_data"
+#? VARIABLE: str: variable to map
+VARIABLE = "NTRA"
+#? SAVE: bool: whether to save the data or not
+SAVE = true
+#? SHOW: bool: whether to show the data or not
+SHOW = true
+#? DATE_MIN: str: first date to map
+DATE_MIN = "20070101"
+#? DATE_MAX: str: last date to map
+DATE_MAX = "20201231"
+#? INTERVAL: str
+INTERVAL = "month"
+#? CUSTOM_INTERVAL: int
+CUSTOM_INTERVAL = 8
+#? LATITUDE: int | float
+LATITUDE = 70
+#? LONGITUDE: int | float
+LONGITUDE = 15
+#? DEPTH_MIN: int | float
+DEPTH_MIN = -100
+#? DEPTH_MAX: int | float
+DEPTH_MAX = 0
+#? DEPTH_INTERVAL: int
+DEPTH_INTERVAL = 10
+#? BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
+BIN_SIZE = [10, 30]
+#? SAVING_DIR: str: directory in which to save data
+SAVING_DIR = "bgc_figs"
+#? PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? VERBOSE: int: verbose value, the higher, the more informations
+VERBOSE = 2
