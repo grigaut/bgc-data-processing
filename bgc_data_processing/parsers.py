@@ -27,6 +27,7 @@ class TomlParser:
         "list": list,
         "tuple": tuple,
         "float": float,
+        "bool": bool,
         "datetime64[ns]": "datetime64[ns]",
     }
 
