@@ -311,7 +311,16 @@ class Storer:
     def from_files(
         cls,
         filepath: str | list,
-        providers: str | list = "PROVIDER",
+        providers_column_label: str = "PROVIDER",
+        expocode_column_label: str = "EXPOCODE",
+        date_column_label: str = "DATE",
+        year_column_label: str = "YEAR",
+        month_column_label: str = "MONTH",
+        day_column_label: str = "DAY",
+        hour_column_label: str = "HOUR",
+        latitude_column_label: str = "LATITUDE",
+        longitude_column_label: str = "LONGITUDE",
+        depth_column_label: str = "DEPH",
         category: str = "in_situ",
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
@@ -323,9 +332,26 @@ class Storer:
         ----------
         filepath : str
             Path to the file to read.
-        providers : str | list, optional
-            Provider column in the dataframe (if str) or value to attribute
-            to self._providers (if list)., by default "PROVIDER"
+        providers_column_label : str, optional
+            Provider column in the dataframe., by default "PROVIDER"
+        expocode_column_label : str, optional
+            Expocode column in the dataframe., by default "EXPOCODE"
+        date_column_label : str, optional
+            Date column in the dataframe., by default "DATE"
+        year_column_label : str, optional
+            Year column in the dataframe., by default "YEAR"
+        month_column_label : str, optional
+            Month column in the dataframe., by default "MONTH"
+        day_column_label : str, optional
+            Day column in the dataframe., by default "DAY"
+        hour_column_label : str, optional
+            Hour column in the dataframe., by default "HOUR"
+        latitude_column_label : str, optional
+            Latitude column in the dataframe., by default "LATITUDE"
+        longitude_column_label : str, optional
+            Longitude column in the dataframe., by default "LONGITUDE"
+        depth_column_label : str, optional
+            Depth column in the dataframe., by default "DEPH"
         category : str, optional
             Category of the loaded file., by default "in_situ"
         unit_row_index : int, optional
@@ -366,7 +392,16 @@ class Storer:
             for path in filepath:
                 reader = Reader(
                     filepath=path,
-                    providers=providers,
+                    providers_column_label=providers_column_label,
+                    expocode_column_label=expocode_column_label,
+                    date_column_label=date_column_label,
+                    year_column_label=year_column_label,
+                    month_column_label=month_column_label,
+                    day_column_label=day_column_label,
+                    hour_column_label=hour_column_label,
+                    latitude_column_label=latitude_column_label,
+                    longitude_column_label=longitude_column_label,
+                    depth_column_label=depth_column_label,
                     category=category,
                     unit_row_index=unit_row_index,
                     delim_whitespace=delim_whitespace,
@@ -378,7 +413,16 @@ class Storer:
         elif isinstance(filepath, str):
             reader = Reader(
                 filepath=filepath,
-                providers=providers,
+                providers_column_label=providers_column_label,
+                expocode_column_label=expocode_column_label,
+                date_column_label=date_column_label,
+                year_column_label=year_column_label,
+                month_column_label=month_column_label,
+                day_column_label=day_column_label,
+                hour_column_label=hour_column_label,
+                latitude_column_label=latitude_column_label,
+                longitude_column_label=longitude_column_label,
+                depth_column_label=depth_column_label,
                 category=category,
                 unit_row_index=unit_row_index,
                 delim_whitespace=delim_whitespace,

@@ -13,6 +13,7 @@ if __name__ == "__main__":
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
+        existing_directory="raise",
     )
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
@@ -76,6 +77,7 @@ if __name__ == "__main__":
             longitude_min=LONGITUDE_MIN,
             longitude_max=LONGITUDE_MAX,
         )
+        plot.set_depth_boundaries(depth_min=DEPTH_MIN, depth_max=DEPTH_MAX)
         plot.set_bin_aggregating_method(bin_aggr_method=BIN_AGGREGATION)
         plot.set_depth_aggregating_method(depth_aggr_method=DEPTH_AGGREGATION)
         plot.set_bins_size(bins_size=BIN_SIZE)
@@ -95,7 +97,7 @@ if __name__ == "__main__":
                 f"{date_min}-{date_max}"
             )
             plot.save(
-                save_path=f"{SAVING_DIR}/{save_name}.png",
+                save_path=f"{SAVING_DIR}/{save_name}",
                 variable_name=VARIABLE,
                 suptitle=suptitle,
             )

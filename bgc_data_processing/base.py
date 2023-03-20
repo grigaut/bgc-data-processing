@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_classes import Storer
     from bgc_data_processing.variables import VariablesStorer
     from matplotlib.figure import Figure
 
@@ -541,61 +541,3 @@ class BasePlot(ABC):
         if suptitle is not None:
             plt.suptitle(suptitle)
         plt.savefig(save_path)
-
-    # @classmethod
-    # def from_files(
-    #     cls,
-    #     filepath: str | list,
-    #     providers: str | list = "PROVIDER",
-    #     category: str = "in_situ",
-    #     unit_row_index: int = 1,
-    #     delim_whitespace: bool = True,
-    #     verbose: int = 1,
-    # ) -> "BasePlot":
-    #     """Builds a MeshPlotter reading data from csv or txt files.
-
-    #     Parameters
-    #     ----------
-    #     filepath : str
-    #         Path to the file to read.
-    #     providers : str | list, optional
-    #         Provider column in the dataframe (if str) or
-    #         value to attribute to self._providers (if list).
-    #         , by default "PROVIDER"
-    #     category : str, optional
-    #         Category of the loaded file., by default "in_situ"
-    #     unit_row_index : int, optional
-    #         Index of the row with the units, None if there's no unit row., by default1
-    #     delim_whitespace : bool, optional
-    #         Whether to use whitespace as delimiters., by default True
-    #     verbose : int, optional
-    #         Controls the verbose, by default 1
-
-    #     Returns
-    #     -------
-    #     MeshPlotter
-    #         mesh from the aggregation of the data from all the files
-
-    #     Examples
-    #     --------
-    #     Loading from a single file:
-    #     >>> filepath = "path/to/file"
-    #     >>> mesh = MeshPlotter.from_files(filepath, providers="providers_column_name")
-
-    #     Loading from multiple files:
-    #     >>> filepaths = [
-    #     ...     "path/to/file1",
-    #     ...     "path/to/file2",
-    #     ... ]
-    #     >>> mesh = MeshPlotter.from_files(filepaths,providers="providers_column_name")
-
-    #     """
-    #     storer = Storer.from_files(
-    #         filepath=filepath,
-    #         providers=providers,
-    #         category=category,
-    #         unit_row_index=unit_row_index,
-    #         delim_whitespace=delim_whitespace,
-    #         verbose=verbose,
-    #     )
-    #     return cls(storer=storer)

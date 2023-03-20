@@ -2,6 +2,7 @@
 
 import datetime as dt
 import os
+import shutil
 from copy import deepcopy
 from typing import Any, Type
 
@@ -315,6 +316,10 @@ class ConfigParser(TomlParser):
         Keys to variable defining dates., by default []
     dirs_vars_keys : list[str | list[str]], optional
         Keys to variable defining directories., by default []
+    existing_directory: str, optional
+        Behavior for directory creation, 'raise' raises an error if the directory
+        exists and is not empty, 'merge' will keep the directory as is but might replace
+        its content when savong file and 'clean' will erase the directory if it exists.
     """
 
     _parsed = False
@@ -325,10 +330,12 @@ class ConfigParser(TomlParser):
         check_types: bool = True,
         dates_vars_keys: list[str | list[str]] = [],
         dirs_vars_keys: list[str | list[str]] = [],
+        existing_directory: str = "raise",
     ) -> None:
         super().__init__(filepath, check_types)
         self.dates_vars_keys = dates_vars_keys
         self.dirs_vars_keys = dirs_vars_keys
+        self.existing_dir_behavior = existing_directory
 
     def parse(
         self,
@@ -361,9 +368,15 @@ class ConfigParser(TomlParser):
             dir = self.get(keys)
             if os.path.isdir(dir):
                 if os.listdir(dir):
-                    raise IsADirectoryError(
-                        f"The directory {dir} already exists and is not empty."
-                    )
+                    if self.existing_dir_behavior == "raise":
+                        raise IsADirectoryError(
+                            f"The directory {dir} already exists and is not empty."
+                        )
+                    elif self.existing_dir_behavior == "merge":
+                        continue
+                    elif self.existing_dir_behavior == "clean":
+                        shutil.rmtree(dir)
+                        os.mkdir(dir)
             else:
                 os.mkdir(dir)
 
