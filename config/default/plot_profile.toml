@@ -24,6 +24,10 @@ VARIABLE = "NTRA"
 PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_figs"
+#? SAVE: bool: whether to save the data or not
+SAVE = true
+#? SHOW: bool: whether to show the data or not
+SHOW = true
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? VERBOSE: int: verbose value, the higher, the more informations

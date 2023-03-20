@@ -28,5 +28,9 @@ BIN_AGGREGATION = "count"
 SAVING_DIR = "bgc_figs"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? SAVE: bool: whether to save the data or not
+SAVE = true
+#? SHOW: bool: whether to show the data or not
+SHOW = true
 #? VERBOSE: int: verbose value, the higher, the more informations
 VERBOSE = 2
