@@ -511,7 +511,12 @@ class EvolutionProfile(BasePlot):
         ValueError
             If there is not enough data to create a figure.
         """
-        var_col = self._variables.get(variable_name).label
+        df = self._storer.data.copy()
+        if variable_name == "all":
+            df["all"] = 1
+            var_col = "all"
+        else:
+            var_col = self._variables.get(variable_name).label
         columns = [
             self._lat_col,
             self._lon_col,
@@ -519,7 +524,7 @@ class EvolutionProfile(BasePlot):
             self._date_col,
             var_col,
         ]
-        df = self._storer.data[columns]
+        df = df[columns]
         # Boundaries boolean series
         if self._verbose > 1:
             print("\tSlicing Data based on given boundaries.")
