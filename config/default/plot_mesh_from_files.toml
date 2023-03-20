@@ -1,7 +1,7 @@
 #? LOADING_DIR: str: directory from which to load data
 LOADING_DIR = "bgc_data"
 #? VARIABLE: str: variable to map
-VARIABLE = "CPHL"
+VARIABLE = "all"
 #? SAVE: bool: whether to save the data or not
 SAVE = true
 #? SHOW: bool: whether to show the data or not
@@ -24,10 +24,8 @@ DEPTH_MIN = nan
 DEPTH_MAX = 0
 #? BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
 BIN_SIZE = [0.5, 1.5]
-#? DEPTH_AGGREGATION: str: function to use to aggregate data over depth
-DEPTH_AGGREGATION = "count"
-#? BIN_AGGREGATION: str: function to use to aggregate data into bins
-BIN_AGGREGATION = "count"
+#? CONSIDER_DEPTH: bool
+CONSIDER_DEPTH = false
 #? SAVING_DIR: str: directory in which to save data
 SAVING_DIR = "bgc_figs"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
