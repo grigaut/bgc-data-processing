@@ -2,7 +2,7 @@
 
 
 import warnings
-from typing import TYPE_CHECKING, Callable, Iterable
+from typing import TYPE_CHECKING, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,20 +28,9 @@ class MeshPlotter(BasePlot):
         Data Storer containing data to plot.
     """
 
-    depth_aggr: dict = {
-        "top": lambda x: x.first(),
-        "bottom": lambda x: x.last(),
-        "count": lambda x: x.count(),
-    }
-    _depth_aggr_method: str | Callable = "count"
-    bin_aggr: dict = {
-        "mean": np.mean,
-        "count": lambda x: x.count(),
-        "sum": np.sum,
-    }
-    _bin_aggr_method: str | Callable = "count"
     _lat_bin: int | float = 1
     _lon_bin: int | float = 1
+    _depth_density: bool = True
 
     def __init__(
         self,
@@ -68,16 +57,17 @@ class MeshPlotter(BasePlot):
         """
         columns = []
         for var_name in [
-            "PROVIDER",
-            "EXPOCODE",
-            "YEAR",
-            "MONTH",
-            "DAY",
-            "LONGITUDE",
-            "LATITUDE",
+            self._variables.provider_var_name,
+            self._variables.expocode_var_name,
+            self._variables.year_var_name,
+            self._variables.month_var_name,
+            self._variables.day_var_name,
+            self._variables.hour_var_name,
+            self._variables.latitude_var_name,
+            self._variables.longitude_var_name,
         ]:
             if var_name in variables.keys():
-                columns.append(variables.labels[var_name])
+                columns.append(variables.get(var_name).label)
         return columns
 
     def _group(
@@ -110,13 +100,16 @@ class MeshPlotter(BasePlot):
         depth_min_cond = self._data[depth_label] >= self._depth_min
         depth_max_cond = self._data[depth_label] <= self._depth_max
         data = self._data[depth_min_cond & depth_max_cond].copy()
-        group = data.groupby(self._grouping_columns)
-        if isinstance(self._depth_aggr_method, str):
-            group_fn = self.depth_aggr[self._depth_aggr_method]
+        if var_key == "all":
+            data["all"] = 1
         else:
-            group_fn = self._depth_aggr_method
-        var_series: pd.Series = group_fn(group[var_key])
-        var_series.name = var_key
+            data[var_key] = (~data[var_key].isna()).astype(int)
+        data = data[data[var_key] == 1]
+        group = data[self._grouping_columns + [var_key]].groupby(self._grouping_columns)
+        if self._depth_density:
+            var_series: pd.Series = group.sum()
+        else:
+            var_series: pd.Series = group.first()
         return var_series.reset_index().filter([lat_key, lon_key, var_key])
 
     def _geo_linspace(
@@ -155,35 +148,6 @@ class MeshPlotter(BasePlot):
         cut.name = cut_name
         return cut, intervals_mid
 
-    def set_depth_aggregating_method(
-        self,
-        depth_aggr_method: str | Callable,
-    ) -> None:
-        """Set the depth aggregation method.
-
-        Parameters
-        ----------
-        depth_aggr_method : str | Callable
-            Name of the function to use to aggregate data when group
-            by similar measuring point (from self.depth_aggr),
-            or callable function to use to aggregate.
-        """
-        self._depth_aggr_method = depth_aggr_method
-
-    def set_bin_aggregating_method(
-        self,
-        bin_aggr_method: str | Callable,
-    ) -> None:
-        """Set the bin aggregation method.
-
-        Parameters
-        ----------
-        bin_aggr_method : str | Callable
-            Name of the aggregation function to use to pivot data (from self.bin_aggr),
-            or callable function to use to aggregate.
-        """
-        self._bin_aggr_method = bin_aggr_method
-
     def set_bins_size(
         self,
         bins_size: int | float | Iterable[int | float],
@@ -203,6 +167,16 @@ class MeshPlotter(BasePlot):
         else:
             self._lat_bin = bins_size
             self._lon_bin = bins_size
+
+    def set_density_type(self, consider_depth: bool) -> None:
+        """Set the self._depth_density value.
+
+        Parameters
+        ----------
+        consider_depth : bool
+            Whether to consider all value in the water for density mapping.
+        """
+        self._depth_density = consider_depth
 
     def _mesh(
         self,
@@ -228,6 +202,10 @@ class MeshPlotter(BasePlot):
             lat_key=lat,
             lon_key=lon,
         )
+        if df.empty:
+            raise ValueError(
+                "Empty DataFrame, try with another variable or a longer time period"
+            )
         if self._verbose > 2:
             print("\t\tCreating latitude array")
         lat_cut, lat_points = self._geo_linspace(
@@ -246,17 +224,13 @@ class MeshPlotter(BasePlot):
         bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
-        if isinstance(self._bin_aggr_method, str):
-            aggfunc = self.bin_aggr[self._bin_aggr_method]
-        else:
-            aggfunc = self._bin_aggr_method
         if self._verbose > 2:
             print("\t\tPivotting data to 2D table")
         vals = bins_concat.pivot_table(
             values=label,
             index="lat_cut",
             columns="lon_cut",
-            aggfunc=aggfunc,
+            aggfunc="sum",
         )
         all_indexes = [index for index in range(lons.shape[0])]
         all_columns = [colum for colum in range(lats.shape[1])]
@@ -295,8 +269,12 @@ class MeshPlotter(BasePlot):
         """
         if self._verbose > 1:
             print(f"\tMeshing {variable_name} data")
+        if variable_name == "all":
+            label = "all"
+        else:
+            label = self._variables.get(variable_name).label
         X1, Y1, Z1 = self._mesh(
-            label=self._variables.get(variable_name).label,
+            label=label,
         )
         if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
             warnings.warn(
@@ -323,13 +301,7 @@ class MeshPlotter(BasePlot):
             transform=crs.PlateCarree(),
             **kwargs,
         )
-        if self._bin_aggr_method == "count":
-            label = f"{variable_name} data points count"
-        elif self._depth_aggr_method == "count" and self._bin_aggr_method == "sum":
-            label = f"{variable_name} total data points count"
-        else:
-            unit = self._variables[variable_name].unit
-            label = f"{self._bin_aggr_method} {variable_name} levels {unit}"
+        label = f"{variable_name} total data points count"
         fig.colorbar(cbar, label=label, shrink=0.75)
         title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
         plt.title(title)

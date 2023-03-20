@@ -26,10 +26,9 @@ if __name__ == "__main__":
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
     VARIABLE: str = CONFIG["VARIABLE"]
     PROVIDERS: list[str] = CONFIG["PROVIDERS"]
-    DEPTH_AGGREGATION: str = CONFIG["DEPTH_AGGREGATION"]
-    BIN_AGGREGATION: str = CONFIG["BIN_AGGREGATION"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     SAVING_DIR: str = CONFIG["SAVING_DIR"]
+    CONSIDER_DEPTH: bool = CONFIG["CONSIDER_DEPTH"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     VERBOSE: int = CONFIG["VERBOSE"]
@@ -78,8 +77,7 @@ if __name__ == "__main__":
             longitude_max=LONGITUDE_MAX,
         )
         plot.set_depth_boundaries(depth_min=DEPTH_MIN, depth_max=DEPTH_MAX)
-        plot.set_bin_aggregating_method(bin_aggr_method=BIN_AGGREGATION)
-        plot.set_depth_aggregating_method(depth_aggr_method=DEPTH_AGGREGATION)
+        plot.set_density_type(consider_depth=CONSIDER_DEPTH)
         plot.set_bins_size(bins_size=BIN_SIZE)
         if SHOW:
             suptitle = (
