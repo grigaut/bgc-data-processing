@@ -6,10 +6,10 @@ DATE_MAX = "20200131"
 INTERVAL = "month"
 #? CUSTOM_INTERVAL: int
 CUSTOM_INTERVAL = 8
-#? LATITUDE: int | float
-LATITUDE = 70
-#? LONGITUDE: int | float
-LONGITUDE = 15
+#? LATITUDE_CENTER: int | float
+LATITUDE_CENTER = 70
+#? LONGITUDE_CENTER: int | float
+LONGITUDE_CENTER = 15
 #? DEPTH_MIN: int | float
 DEPTH_MIN = -100
 #? DEPTH_MAX: int | float
