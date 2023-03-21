@@ -1,6 +1,7 @@
 #? LOADING_DIR: str: directory from which to load data
 LOADING_DIR = "bgc_data"
 #? VARIABLE: str: variable to map
+# If 'all': will map density of datapoints, regardless of their variables.
 VARIABLE = "all"
 #? SAVE: bool: whether to save the Figure or not
 SAVE = true
