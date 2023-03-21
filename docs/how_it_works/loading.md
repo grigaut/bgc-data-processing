@@ -68,19 +68,37 @@ files = [
     "file2.csv",
 ]
 storer = Storer.from_files(
-    filepath = [ "file1.csv","file2.csv"],  # (1)
-    providers = "PROVIDER",                 # (2)
-    category = "in_situ",                   # (3)
-    unit_row_index = 1,                     # (4)
-    delim_whitespace = True,                # (5)
+    filepath = [ "file1.csv","file2.csv"],  # (1)!
+    providers_column_label = "PROVIDER",    # (2)!
+    expocode_column_label = "EXPOCODE",     # (3)!
+    date_column_label = "DATE",             # (4)!
+    year_column_label = "YEAR",             # (5)!
+    month_column_label = "MONTH",           # (6)!
+    day_column_label = "DAY",               # (7)!
+    hour_column_label = "HOUR",             # (8)!
+    latitude_column_label = "LATITUDE",     # (9)!
+    longitude_column_label = "LONGITUDE",   # (10)!
+    depth_column_label = "DEPH",            # (11)!
+    category = "in_situ",                   # (12)!
+    unit_row_index = 1,                     # (13)!
+    delim_whitespace = True,                # (14)!
 )
 ```
 
 1. List of the filepaths of the files to load
 2. Name of the column containing the provider informations in **all** files
-3. Category of **all** files (otherwise they shouldn't be aggregated together in a single storer)
-4. Index of the unit row.
-5. Whether to delimitate values based on whitespaces (true only if the file is txt basically)
+3. Name of the column containing the expocode informations in **all** files
+4. Name of the column containing the date informations in **all** files
+5. Name of the column containing the year informations in **all** files
+6. Name of the column containing the month informations in **all** files
+7. Name of the column containing the day informations in **all** files
+8. Name of the column containing the hour informations in **all** files
+9. Name of the column containing the latitude informations in **all** files
+10. Name of the column containing the longitude informations in **all** files
+11. Name of the column containing the depth informations in **all** files
+12. Category of **all** files (otherwise they shouldn't be aggregated together in a single storer)
+13. Index of the unit row.
+14. Whether to delimitate values based on whitespaces
 
 ## Storers
 
