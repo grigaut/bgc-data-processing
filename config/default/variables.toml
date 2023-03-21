@@ -7,9 +7,9 @@ UNIT = "[]"
 TYPE = "str"
 #? provider.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? provider.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? provider.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-15s"
-#? provider.VALUE_FORMAT: str: format to use to save the values of the variable
+#? provider.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%15s"
 [expocode]
 #? expocode.NAME: str: variable name
@@ -20,9 +20,9 @@ UNIT = "[]"
 TYPE = "str"
 #? expocode.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? expocode.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? expocode.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-15s"
-#? expocode.VALUE_FORMAT: str: format to use to save the values of the variable
+#? expocode.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%15s"
 [date]
 #? date.NAME: str: variable name
@@ -33,9 +33,9 @@ UNIT = "[]"
 TYPE = "datetime64[ns]"
 #? date.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? date.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? date.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = nan
-#? date.VALUE_FORMAT: str: format to use to save the values of the variable
+#? date.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = nan
 [year]
 #? year.NAME: str: variable name
@@ -46,9 +46,9 @@ UNIT = "[]"
 TYPE = "int"
 #? year.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? year.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? year.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-4s"
-#? year.VALUE_FORMAT: str: format to use to save the values of the variable
+#? year.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%4d"
 [month]
 #? month.NAME: str: variable name
@@ -59,9 +59,9 @@ UNIT = "[]"
 TYPE = "int"
 #? month.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? month.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? month.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-5s"
-#? month.VALUE_FORMAT: str: format to use to save the values of the variable
+#? month.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%5d"
 [day]
 #? day.NAME: str: variable name
@@ -72,9 +72,9 @@ UNIT = "[]"
 TYPE = "int"
 #? day.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? day.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? day.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-3s"
-#? day.VALUE_FORMAT: str: format to use to save the values of the variable
+#? day.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%3d"
 [hour]
 #? hour.NAME: str: variable name
@@ -85,9 +85,9 @@ UNIT = "[]"
 TYPE = "int"
 #? hour.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = 12
-#? hour.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? hour.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-4s"
-#? hour.VALUE_FORMAT: str: format to use to save the values of the variable
+#? hour.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%3d"
 [longitude]
 #? longitude.NAME: str: variable name
@@ -98,9 +98,9 @@ UNIT = "[deg_E]"
 TYPE = "float"
 #? longitude.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? longitude.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? longitude.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-12s"
-#? longitude.VALUE_FORMAT: str: format to use to save the values of the variable
+#? longitude.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%12.6f"
 [latitude]
 #? latitude.NAME: str: variable name
@@ -111,9 +111,9 @@ UNIT = "[deg_N]"
 TYPE = "float"
 #? latitude.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? latitude.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? latitude.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-12s"
-#? latitude.VALUE_FORMAT: str: format to use to save the values of the variable
+#? latitude.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%12.6f"
 [depth]
 #? depth.NAME: str: variable name
@@ -124,9 +124,9 @@ UNIT = "[meter]"
 TYPE = "float"
 #? depth.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? depth.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? depth.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? depth.VALUE_FORMAT: str: format to use to save the values of the variable
+#? depth.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.2f"
 [temperature]
 #? temperature.NAME: str: variable name
@@ -137,9 +137,9 @@ UNIT = "[deg_C]"
 TYPE = "float"
 #? temperature.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? temperature.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? temperature.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? temperature.VALUE_FORMAT: str: format to use to save the values of the variable
+#? temperature.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [salinity]
 #? salinity.NAME: str: variable name
@@ -150,9 +150,9 @@ UNIT = "[psu]"
 TYPE = "float"
 #? salinity.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? salinity.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? salinity.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? salinity.VALUE_FORMAT: str: format to use to save the values of the variable
+#? salinity.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [oxygen]
 #? oxygen.NAME: str: variable name
@@ -163,9 +163,9 @@ UNIT = "[ml/l]"
 TYPE = "float"
 #? oxygen.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? oxygen.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? oxygen.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? oxygen.VALUE_FORMAT: str: format to use to save the values of the variable
+#? oxygen.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [phosphate]
 #? phosphate.NAME: str: variable name
@@ -176,9 +176,9 @@ UNIT = "[umol/l]"
 TYPE = "float"
 #? phosphate.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? phosphate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? phosphate.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? phosphate.VALUE_FORMAT: str: format to use to save the values of the variable
+#? phosphate.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [nitrate]
 #? nitrate.NAME: str: variable name
@@ -189,9 +189,9 @@ UNIT = "[umol/l]"
 TYPE = "float"
 #? nitrate.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? nitrate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? nitrate.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? nitrate.VALUE_FORMAT: str: format to use to save the values of the variable
+#? nitrate.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [silicate]
 #? silicate.NAME: str: variable name
@@ -202,9 +202,9 @@ UNIT = "[umol/l]"
 TYPE = "float"
 #? silicate.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? silicate.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? silicate.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? silicate.VALUE_FORMAT: str: format to use to save the values of the variable
+#? silicate.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
 [chlorophyll]
 #? chlorophyll.NAME: str: variable name
@@ -215,7 +215,7 @@ UNIT = "[mg/m3]"
 TYPE = "float"
 #? chlorophyll.DEFAULT: str | int | float: default variable value if nan or not existing
 DEFAULT = nan
-#? chlorophyll.NAME_FORMAT: str: format to use to save the name and unit of the variable
+#? chlorophyll.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
 NAME_FORMAT = "%-10s"
-#? chlorophyll.VALUE_FORMAT: str: format to use to save the values of the variable
+#? chlorophyll.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
