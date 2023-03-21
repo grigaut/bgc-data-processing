@@ -1,9 +1,9 @@
 [ARGO]
-#? ARGO.PATH: str: path to data
+#? ARGO.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? ARGO.CATEGORY: str: data category
+#? ARGO.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "float"
-#? ARGO.EXCLUDE: list[str]: file to exclude from loading
+#? ARGO.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = [
     "GL_PR_PF_6900798.nc",
     "GL_PR_PF_5903592.nc",
@@ -19,58 +19,58 @@ EXCLUDE = [
     "GL_PR_PF_6903579.nc",
 ]
 [CLIVAR]
-#? CLIVAR.PATH: str: path to data
+#? CLIVAR.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? CLIVAR.CATEGORY: str: data category
+#? CLIVAR.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? CLIVAR.EXCLUDE: list[str]: file to exclude from loading
+#? CLIVAR.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [GLODAPv2]
-#? GLODAPv2.PATH: str: path to data
+#? GLODAPv2.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? GLODAPv2.CATEGORY: str: data category
+#? GLODAPv2.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? GLODAPv2.EXCLUDE: list[str]: file to exclude from loading
+#? GLODAPv2.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [GLODAP_2019]
-#? GLODAP_2019.PATH: str: path to data
+#? GLODAP_2019.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? GLODAP_2019.CATEGORY: str: data category
+#? GLODAP_2019.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? GLODAP_2019.EXCLUDE: list[str]: file to exclude from loading
+#? GLODAP_2019.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [GLODAP_2022]
-#? GLODAP_2022.PATH: str: path to data
+#? GLODAP_2022.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? GLODAP_2022.CATEGORY: str: data category
+#? GLODAP_2022.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? GLODAP_2022.EXCLUDE: list[str]: file to exclude from loading
+#? GLODAP_2022.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [ICES]
-#? ICES.PATH: str: path to data
+#? ICES.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? ICES.CATEGORY: str: data category
+#? ICES.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? ICES.EXCLUDE: list[str]: file to exclude from loading
+#? ICES.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [IMR]
-#? IMR.PATH: str: path to data
+#? IMR.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? IMR.CATEGORY: str: data category
+#? IMR.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? IMR.EXCLUDE: list[str]: file to exclude from loading
+#? IMR.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [NMDC]
-#? NMDC.PATH: str: path to data
+#? NMDC.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? NMDC.CATEGORY: str: data category
+#? NMDC.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? NMDC.EXCLUDE: list[str]: file to exclude from loading
+#? NMDC.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
 [CMEMS]
-#? CMEMS.PATH: str: path to data
+#? CMEMS.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
-#? CMEMS.CATEGORY: str: data category
+#? CMEMS.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
-#? CMEMS.EXCLUDE: list[str]: file to exclude from loading
+#? CMEMS.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
