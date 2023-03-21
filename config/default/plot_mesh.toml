@@ -22,7 +22,7 @@ DEPTH_MIN = nan
 DEPTH_MAX = 0
 #? BIN_SIZE: list[float] | list[int] | float | int: bins size
 # If list, first component is latitude size, second is longitude size
-# If int of float, represents both latitude and longitude size
+# If int or float, represents both latitude and longitude size
 BIN_SIZE = [0.5, 1.5]
 #? VARIABLE: str: variable to map
 # If 'all': will map density of datapoints, regardless of their variables.
