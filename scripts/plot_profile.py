@@ -19,8 +19,8 @@ if __name__ == "__main__":
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
-    LATITUDE: int | float = CONFIG["LATITUDE"]
-    LONGITUDE: int | float = CONFIG["LONGITUDE"]
+    LATITUDE_CENTER: int | float = CONFIG["LATITUDE_CENTER"]
+    LONGITUDE_CENTER: int | float = CONFIG["LONGITUDE_CENTER"]
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
     INTERVAL: str = CONFIG["INTERVAL"]
     CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
@@ -44,12 +44,12 @@ if __name__ == "__main__":
             date_max=DATE_MAX,
         )
         dset_loader.set_latitude_boundaries(
-            latitude_min=LATITUDE - BIN_SIZE[0] / 2,
-            latitude_max=LATITUDE + BIN_SIZE[0] / 2,
+            latitude_min=LATITUDE_CENTER - BIN_SIZE[0] / 2,
+            latitude_max=LATITUDE_CENTER + BIN_SIZE[0] / 2,
         )
         dset_loader.set_longitude_boundaries(
-            longitude_min=LONGITUDE - BIN_SIZE[1] / 2,
-            longitude_max=LONGITUDE + BIN_SIZE[1] / 2,
+            longitude_min=LONGITUDE_CENTER - BIN_SIZE[1] / 2,
+            longitude_max=LONGITUDE_CENTER + BIN_SIZE[1] / 2,
         )
         dset_loader.set_verbose(VERBOSE)
         storer = dset_loader(exclude=exclude)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         profile = EvolutionProfile(storer)
         profile.set_dates_boundaries(DATE_MIN, DATE_MAX)
         profile.set_depth_boundaries(DEPTH_MIN, DEPTH_MAX)
-        profile.set_geographic_bin(LATITUDE, LONGITUDE, BIN_SIZE)
+        profile.set_geographic_bin(LATITUDE_CENTER, LONGITUDE_CENTER, BIN_SIZE)
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
         if SHOW:

@@ -37,6 +37,8 @@ $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
 $(CONFIG_DIR)/%.toml: $(CONFIG_DEFAULT_DIR)/%.toml
 	echo "Copy $(CONFIG_DEFAULT_DIR)/$*.toml to $(CONFIG_DIR)/$*.toml";\
 	cp $(CONFIG_DEFAULT_DIR)/$*.toml $(CONFIG_DIR)/$*.toml
+	@echo "# CONFIGURATION FILE COPIED FROM DEFAULT: $(CONFIG_DEFAULT_DIR)/$*.toml\n" | cat - $(CONFIG_DIR)/$*.toml | sed '1s/^#.*$$/&/' > $(CONFIG_DIR)/$*.toml.tmp
+	@mv $(CONFIG_DIR)/$*.toml.tmp $(CONFIG_DIR)/$*.toml
 
 .PHONY: copy-default-config
 copy-default-config: $(CONFIG_DIR) $(CONFIG_DEFAULT_DIR)
@@ -88,3 +90,6 @@ deploy-docs:
 
 pre-commit: $(PRECOMMIT)
 	$(PRECOMMIT) install
+
+.PHONY: test-copy
+test-copy:

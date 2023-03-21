@@ -1,4 +1,4 @@
-"""Specific parameters to load Argo-provided data."""
+"""Specific parameters to load CMEMS-provided data."""
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 

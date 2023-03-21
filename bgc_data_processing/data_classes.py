@@ -384,7 +384,6 @@ class Storer:
         ... ]
         >>> storer = MeshPlotter.from_files(
         ...     filepaths,
-        ...     providers="providers_column_name",
         ... )
         """
         if isinstance(filepath, list):

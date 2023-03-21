@@ -1,34 +1,47 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
 #? LOADING_DIR: str: directory from which to load data
 LOADING_DIR = "bgc_data"
 #? VARIABLE: str: variable to map
+# If 'all': will map density of datapoints, regardless of their variables.
 VARIABLE = "all"
-#? SAVE: bool: whether to save the data or not
+#? SAVE: bool: whether to save the Figure or not
 SAVE = true
-#? SHOW: bool: whether to show the data or not
+#? SAVING_DIR: str: directory in which to save the Figure
+SAVING_DIR = "bgc_figs"
+#? SHOW: bool: whether to show the Figure or not
 SHOW = true
 #? DATE_MIN: str: first date to map
 DATE_MIN = "20070101"
 #? DATE_MAX: str: last date to map
 DATE_MAX = "20201231"
-#? LATITUDE_MIN: int | float
+#? LATITUDE_MIN: int | float: minimum latitude boundary (included)
 LATITUDE_MIN = 50
-#? LATITUDE_MAX: int | float
+#? LATITUDE_MAX: int | float: maximum latitude boundary (included)
 LATITUDE_MAX = 90
-#? LONGITUDE_MIN: int | float
+#? LONGITUDE_MIN: int | float: minimum longitude boundary (included)
 LONGITUDE_MIN = -180
-#? LONGITUDE_MAX: int | float
+#? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 180
-#? DEPTH_MIN: int | float
+#? DEPTH_MIN: int | float: minimum depth boundary (included)
 DEPTH_MIN = nan
-#? DEPTH_MAX: int | float
+#? DEPTH_MAX: int | float: maximum depth boundary (included)
 DEPTH_MAX = 0
-#? BIN_SIZE: list[float] | list[int] | float | int: bins size (latxlong)
+#? BIN_SIZE: list[float] | list[int] | float | int: bins size
+# If list, first component is latitude size, second is longitude size
+# If int or float, represents both latitude and longitude size
 BIN_SIZE = [0.5, 1.5]
 #? CONSIDER_DEPTH: bool
+# If true: the plotted density will consider all data points (even the ones in the water column)
+# If false: the plotted density will only consider one data point per location and date
 CONSIDER_DEPTH = false
-#? SAVING_DIR: str: directory in which to save data
-SAVING_DIR = "bgc_figs"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
-#? VERBOSE: int: verbose value, the higher, the more informations
+#? VERBOSE: int: verbose value, the higher, the more informations.
+# If set to 0 or below: no information displayed
+# If set to 1: minimal informations displayed
+# If set to 2: very complete informations displayed
+# if set to 3 or higher: exhaustive informations displayed
 VERBOSE = 2
