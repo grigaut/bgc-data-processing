@@ -16,18 +16,25 @@ files = [
 # Files Loading
 storer = Storer.from_files(
     filepath=files,
-    providers="PROVIDERS",
+    providers_column_label = "PROVIDER",
+    expocode_column_label = "EXPOCODE",
+    date_column_label = "DATE",
+    year_column_label = "YEAR",
+    month_column_label = "MONTH",
+    day_column_label = "DAY",
+    hour_column_label = "HOUR",
+    latitude_column_label = "LATITUDE",
+    longitude_column_label = "LONGITUDE",
+    depth_column_label = "DEPH",
     category="in_situ",
     unit_row_index=1,
     delim_whitespace=False,
 )
 # Mapping
 mesh = MeshPlotter(storer)
-mesh.plot(
+mesh.set_bin_size(bins_size=[0.5,1.5])
+mesh.show(
     variable_name="PHOS",
-    bins_size=[0.5,1.5],
-    depth_aggr="count",
-    bin_aggr="count",
     title="Phosphate data density",
 )
 ```
