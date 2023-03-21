@@ -34,6 +34,8 @@ nav:
     - examples/plot.md
   - Virtual Environment:
     - virtual_env/index.md
+  - Contributing:
+    - contributing/index.md
   - Code Reference: reference/
 
 plugins:
