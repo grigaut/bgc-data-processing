@@ -57,11 +57,12 @@ loader_prov1 = csv_tools.CSVLoader(
     category="in_situ",
     files_pattern="prov1_data_({years}).csv",
     variables=variables.VariablesStorer(
-        year_var.in_file_as(("year",None,None)).remove_when_nan(),
-        latitude_var.in_file_as(("lat",None,None)),
-        longitude_var.in_file_as(("lon",None,None)),
-        phos_var.not_in_file(),
-        ntra_var.in_file_as(("ntra",None,None)),
+        year=year_var.in_file_as(("year",None,None)).remove_when_nan(),
+        latitude=latitude_var.in_file_as(("lat",None,None)),
+        longitude=longitude_var.in_file_as(("lon",None,None)),
+        phophate=phos_var.not_in_file(),
+        ...                                                            # (1)!
+        nitrate=ntra_var.in_file_as(("ntra",None,None)),
     )
 )
 loader_prov2 = csv_tools.CSVLoader(
@@ -70,11 +71,12 @@ loader_prov2 = csv_tools.CSVLoader(
     category="in_situ",
     files_pattern="data_({years}).csv",
     variables=variables.VariablesStorer(
-        year_var.in_file_as(("year",None,None)).remove_when_nan(),
-        latitude_var.in_file_as(("latitude",None,None)),
-        longitude_var.in_file_as(("longitude",None,None)),
-        phos_var.in_file_as(("phosphate",None,None)),
-        ntra_var.not_in_file(),
+        year=year_var.in_file_as(("year",None,None)).remove_when_nan(),
+        latitude=latitude_var.in_file_as(("latitude",None,None)),
+        longitude=longitude_var.in_file_as(("longitude",None,None)),
+        ...                                                             # (2)!
+        phosphate=phos_var.in_file_as(("phosphate",None,None)),
+        nitrate=ntra_var.not_in_file(),
     )
 )
 # apply boundaries
@@ -93,3 +95,6 @@ for loader in [loader_prov1, loader_prov2]:
 # Aggregation
 aggregated_storer = sum(storers)
 ```
+
+1. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the VariablesStorer, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.
+2. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the VariablesStorer, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.

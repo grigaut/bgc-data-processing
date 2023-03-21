@@ -50,22 +50,22 @@ from bgc_data_processing.csv_tools import CSVLoader
 from bgc_data_processing.variables import VariablesStorer
 
 variables = VariablesStorer(
-    longitude,                          # (1)
-    latitude,                           # (2)
+    longitude,                          # (1)!
+    latitude,                           # (2)!
 )
 loader = CSVLoader(
-    provider_name="GLODAP_2022",        # (3)
-    dirin="path/to/file/directory",     # (4)
-    category="in_situ",                 # (5)
-    files_pattern="glodap_2022.csv",    # (6)
-    variables=variables,                # (7)
+    provider_name="GLODAP_2022",        # (3)!
+    dirin="path/to/file/directory",     # (4)!
+    category="in_situ",                 # (5)!
+    files_pattern="glodap_2022.csv",    # (6)!
+    variables=variables,                # (7)!
     read_params={
         "low_memory": False,
         "index_col": False,
         "na_values": -9999,
-    },                                  # (8)
+    },                                  # (8)!
 )
-storer = loader()                       # (9)
+storer = loader()                       # (9)!
 ```
 
 1. Variable object of type ExistingVar or NotExistingVar referring to longitude variable.
@@ -88,12 +88,12 @@ Once data has been loaded from some providers, the aggregation of the resulting 
 Then, in order to save a storer, one only has to call the [.save](/reference/data_classes/#bgc_data_processing.data_classes.Storer.save) method of the object.
 
 ``` py
-storer_glodap = loader_glodap()                 # (1)
-storer_imr = loader_imr()                       # (2)
+storer_glodap = loader_glodap()                 # (1)!
+storer_imr = loader_imr()                       # (2)!
 # Aggregation
-aggregated_storer = storer_glodap + storer_imr  # (3)
+aggregated_storer = storer_glodap + storer_imr  # (3)!
 # Saving
-aggregated_storer.save("path/to/save/file")     # (4)
+aggregated_storer.save("path/to/save/file")     # (4)!
 ```
 
 1. Loader for GLODAP 2022.
@@ -109,43 +109,33 @@ To save the data, one has to use the [.save_fig](/reference/tracers/#bgc_data_pr
 ``` py
 from bgc_data_processing.tracers import MeshPlotter
 
-mesher = MeshPlotter(
-    storer,                         # (1)
+mesher = MeshPlotter(storer)                # (1)!
+mesher.set_bins_soze(bins_size=[0.1, 0.2])  # (2)!
+mesher.set-geographic_boundaries(
+    latitude_min = 50,
+    latitude_max = 90,
+    longitude_min = -40,
+    longitude_max = 40,
 )
 mesher.plot(
-    variable_name="CPHL",           # (2)
-    bins_size=(0.1, 0.2),           # (3)
-    depth_aggr="top",               # (4)
-    bin_aggr="count",               # (5)
-    title="some title",             # (6)
-    suptitle="some suptitle",       # (7)
-    extent=(-40, 40, 50, 89),       # (8)
+    variable_name="CPHL",                   # (3)!
+    title="some title",                     # (4)!
+    suptitle="some suptitle",               # (5)!
 )
 mesher.save(
-    save_path="path/to/figure"      # (9)
-    variable_name="CPHL",           # (10)
-    bins_size=(0.1, 0.2),           # (11)
-    depth_aggr="top",               # (12)
-    bin_aggr="count",               # (13)
-    title="some title",             # (14)
-    suptitle="some suptitle",       # (15)
-    extent=(-40, 40, 50, 89),       # (16)
+    save_path="path/to/figure"              # (6)!
+    variable_name="CPHL",                   # (7)!
+    title="some title",                     # (8)!
+    suptitle="some suptitle",               # (9)!
 )
 ```
 
 1. Storer object to map the data of.
-2. Name of the variable to plot on the map.
-3. Size of the binning square (latitude, longitude)
-4. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.depth_aggr) or function to use to aggregate data points with same location and different depth.
-5. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.bin_aggr) or function to use to aggregate data points within the same bining area.
-6. Title for the plot.
-7. Suptitle for the plot.
-8. Area extent to restrains the mapping to.
-9. Path to the saving location.
-10. Name of the variable to plot on the map.
-11. Size of the binning square (latitude, longitude)
-12. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.depth_aggr) or function to use to aggregate data points with same location and different depth.
-13. [String reference](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.bin_aggr) or function to use to aggregate data points within the same bining area.
-14. Title for the plot.
-15. Suptitle for the plot.
-16. Area extent to restrains the mapping to.
+2. Size of the binning square (latitude, longitude)
+3. Name of the variable to plot on the map.
+4. Title for the plot.
+5. Suptitle for the plot.
+6. Path to the saving location.
+7. Name of the variable to plot on the map.
+8. Title for the plot.
+9. Suptitle for the plot.
