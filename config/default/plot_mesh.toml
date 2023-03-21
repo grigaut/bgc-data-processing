@@ -1,3 +1,7 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
 #? SAVE: bool: whether to save the data or not
 SAVE = true
 #? SAVING_DIR: str: directory in which to save the Figure

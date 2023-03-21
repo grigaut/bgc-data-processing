@@ -1,3 +1,7 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
 [ARGO]
 #? ARGO.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"

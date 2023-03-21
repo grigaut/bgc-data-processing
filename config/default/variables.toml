@@ -1,3 +1,7 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
 [provider]
 #? provider.NAME: str: variable name
 NAME = "PROVIDER"

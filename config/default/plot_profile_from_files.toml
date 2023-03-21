@@ -1,3 +1,7 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
 #? LOADING_DIR: str: directory from which to load data
 LOADING_DIR = "bgc_data"
 #? VARIABLE: str: variable to map
