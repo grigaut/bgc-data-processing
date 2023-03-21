@@ -225,8 +225,8 @@ existing_lon = template_lon.in_file_as(
     ("longitude","longitude_flag", [1])
 )
 variables_storer = VariablesStorer(
-    existing_lat,
-    existing_lon,
+    latitude=existing_lat,
+    longitude=existing_lon,
 )
 ```
 
