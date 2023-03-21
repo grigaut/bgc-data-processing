@@ -19,8 +19,8 @@ if __name__ == "__main__":
     SAVE: bool = CONFIG["SAVE"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
-    LATITUDE: int | float = CONFIG["LATITUDE"]
-    LONGITUDE: int | float = CONFIG["LONGITUDE"]
+    LATITUDE_CENTER: int | float = CONFIG["LATITUDE_CENTER"]
+    LONGITUDE_CENTER: int | float = CONFIG["LONGITUDE_CENTER"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     profile = EvolutionProfile(storer)
     profile.set_dates_boundaries(DATE_MIN, DATE_MAX)
     profile.set_depth_boundaries(DEPTH_MIN, DEPTH_MAX)
-    profile.set_geographic_bin(LATITUDE, LONGITUDE, BIN_SIZE)
+    profile.set_geographic_bin(LATITUDE_CENTER, LONGITUDE_CENTER, BIN_SIZE)
     profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
     profile.set_depth_interval(DEPTH_INTERVAL)
     if SHOW:
