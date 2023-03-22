@@ -2,7 +2,7 @@
 
 
 import warnings
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -435,16 +435,20 @@ class EvolutionProfile(BasePlot):
         self._lon_min = center_longitude - lon_bin / 2
         self._lon_max = center_longitude + lon_bin / 2
 
-    def set_depth_interval(self, depth_interval: int | float = "np.nan") -> None:
-        """Set the depth interval value. This represent the vertical resolution \
+    def set_depth_interval(
+        self,
+        depth_interval: int | float | list[int | float] = np.nan,
+    ) -> None:
+        """Set the depth interval value. This represents the vertical resolution \
         of the final plot.
 
         Parameters
         ----------
-        depth_interval : int | float, optional
-            Value to use (positive integer)., by default np.nan
+        depth_interval : int | float | list[int|float], optional
+            Depth interval values, if numeric, interval resolution, if instance of list,
+            list of depth bins to use., by default np.nan
         """
-        if not np.isnan(depth_interval):
+        if isinstance(depth_interval, list) or (not np.isnan(depth_interval)):
             self._depth_interval = depth_interval
 
     def set_date_intervals(self, interval: str, interval_length: int = None) -> None:
@@ -463,15 +467,94 @@ class EvolutionProfile(BasePlot):
         if interval_length is not None:
             self._interval_length = interval_length
 
-    def _get_cut_intervals(
-        self,
-    ) -> pd.IntervalIndex:
+    def _slice_dataframe(self, variable_label: str) -> pd.DataFrame:
+        """Return a slice of the dataframe respecting the plot boundaries.
+
+        Parameters
+        ----------
+        variable_label : str
+            Label of the variable of which the density is represented.
+
+        Returns
+        -------
+        pd.DataFrame
+            Slice of self._storer.data
+
+        Raises
+        ------
+        ValueError
+            If the slice is empty.
+        """
+        df = self._storer.data.copy()
+        if variable_label == "all":
+            df["all"] = 1
+        columns = [
+            self._lat_col,
+            self._lon_col,
+            self._depth_col,
+            self._date_col,
+            variable_label,
+        ]
+        df = df[columns]
+        # Boundaries boolean series
+        if self._verbose > 2:
+            print("\tSlicing Data based on given boundaries.")
+        # Latitude boundaries
+        lat_min_cond = df[self._lat_col] >= self._lat_min
+        lat_max_cond = df[self._lat_col] <= self._lat_max
+        lat_cond = (lat_min_cond) & (lat_max_cond)
+        # Longitude boundaries
+        lon_min_cond = df[self._lon_col] >= self._lon_min
+        lon_max_cond = df[self._lon_col] <= self._lon_max
+        lon_cond = (lon_min_cond) & (lon_max_cond)
+        # Depth boundaries
+        depth_min_cond = df[self._depth_col] >= self._depth_min
+        depth_max_cond = df[self._depth_col] <= self._depth_max
+        depth_cond = depth_min_cond & depth_max_cond
+        # Slicing
+        df_slice = df.loc[lat_cond & lon_cond & depth_cond, :].copy(True)
+        if df_slice.empty:
+            raise ValueError("Not enough data at this location to build a figure.")
+        return df_slice
+
+    def _make_depth_intervals(self) -> pd.IntervalIndex:
+        """Create the depth intervals from depth boundaries and interval resolution.
+
+        Returns
+        -------
+        pd.IntervalIndex
+            Interval to use when grouping data.
+        """
+        # if bins values are given as a list
+        if isinstance(self._depth_interval, list):
+            intervals = np.array(self._depth_interval)
+            if np.any(intervals < self._depth_min):
+                intervals = intervals[intervals >= self._depth_min]
+            if self._depth_min not in intervals:
+                intervals = np.append(intervals, self._depth_min)
+            if np.any(intervals > self._depth_max):
+                intervals = intervals[intervals <= self._depth_max]
+            if self._depth_max not in intervals:
+                intervals = np.append(intervals, self._depth_max)
+            intervals.sort()
+            depth_bins = pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
+        # if only the bin value resolution is given
+        else:
+            depth_bins = pd.interval_range(
+                start=self._depth_min - self._depth_min % self._depth_interval,
+                end=self._depth_max,
+                freq=self._depth_interval,
+                closed="right",
+            )
+        return depth_bins
+
+    def _make_date_intervals(self) -> pd.IntervalIndex:
         """Create the datetime intervals to use for the cut.
 
         Returns
         -------
         pd.IntervalIndex
-            Intervals to use for the cut.
+            Intervals to use for the date cut.
         """
         drng_generator = DateRangeGenerator(
             start=self._date_min,
@@ -486,6 +569,80 @@ class EvolutionProfile(BasePlot):
             closed="both",
         )
         return intervals
+
+    def _create_cut_and_ticks(
+        self,
+        column_to_cut: pd.Series,
+        cut_intervals: pd.IntervalIndex,
+    ) -> Tuple[pd.IntervalIndex, np.ndarray]:
+        """Return both the cut and the ticks values to use for the Figure.
+
+        Parameters
+        ----------
+        column_to_cut : pd.Series
+            Column to apply the cut to.
+        cut_intervals : pd.IntervalIndex
+            Intervals to use for the cut.
+
+        Returns
+        -------
+        Tuple[pd.IntervalIndex, np.ndarray]
+            _description_
+        """
+        cut = pd.cut(
+            column_to_cut,
+            bins=cut_intervals,
+            include_lowest=True,
+        )
+        intervals_cut = pd.Series(pd.IntervalIndex(cut).left).rename(column_to_cut.name)
+        last_tick = cut_intervals.right.values[-1]
+        ticks = np.append(cut_intervals.left.values, last_tick)
+        return intervals_cut, ticks
+
+    def _make_full_pivotted_table(
+        self,
+        df: pd.DataFrame,
+        depth_ticks: np.ndarray,
+        date_ticks: np.ndarray,
+        depth_series_name: str,
+        date_series_name: str,
+        values_series_name: str,
+    ) -> pd.DataFrame:
+        """Pivot the data and add the missing columns / index.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to pivot.
+        depth_ticks : np.ndarray
+            Ticks for depth.
+        date_ticks : np.ndarray
+            Ticks for dates.
+        depth_series_name : str
+            Depth column name.
+        date_series_name : str
+            Date column name.
+        values_series_name : str
+            Values column name.
+
+        Returns
+        -------
+        pd.DataFrame
+            Pivotted dataframe where all ticks (except last) are reprsented
+            in index and columns.
+        """
+        pivotted = df.pivot_table(
+            values=values_series_name,
+            index=depth_series_name,
+            columns=date_series_name,
+            aggfunc="sum",
+        )
+        to_insert = date_ticks[:-1][~np.isin(date_ticks[:-1], pivotted.columns)]
+        pivotted.loc[:, to_insert] = np.nan
+        pivotted: pd.DataFrame = pivotted.reindex(depth_ticks[:-1])
+        pivotted.sort_index(axis=1, inplace=True)
+        pivotted.sort_index(axis=0, inplace=True)
+        return pivotted
 
     def _build(
         self,
@@ -511,70 +668,44 @@ class EvolutionProfile(BasePlot):
         ValueError
             If there is not enough data to create a figure.
         """
-        df = self._storer.data.copy()
         if variable_name == "all":
-            df["all"] = 1
-            var_col = "all"
+            var_label = "all"
         else:
-            var_col = self._variables.get(variable_name).label
-        columns = [
-            self._lat_col,
-            self._lon_col,
-            self._depth_col,
-            self._date_col,
-            var_col,
-        ]
-        df = df[columns]
-        # Boundaries boolean series
-        if self._verbose > 1:
-            print("\tSlicing Data based on given boundaries.")
-        lat_min_cond = df[self._lat_col] >= self._lat_min
-        lat_max_cond = df[self._lat_col] <= self._lat_max
-        lat_cond = (lat_min_cond) & (lat_max_cond)
-        lon_min_cond = df[self._lon_col] >= self._lon_min
-        lon_max_cond = df[self._lon_col] <= self._lon_max
-        lon_cond = (lon_min_cond) & (lon_max_cond)
-        depth_min_cond = df[self._depth_col] >= self._depth_min
-        depth_max_cond = df[self._depth_col] <= self._depth_max
-        depth_cond = depth_min_cond & depth_max_cond
-        # Slicing
-        df_slice = df.loc[lat_cond & lon_cond & depth_cond, :].copy(True)
-        if df_slice.empty:
-            raise ValueError("Not enough data at this location to build a figure.")
+            var_label = self._variables.get(variable_name).label
+        df = self._slice_dataframe(variable_label=var_label)
         # Set 1 when the variable is not nan, otherwise 0
-        var_count = (~df_slice[var_col].isna()).astype(int)
-        var_count.rename("values", inplace=True)
-        # Make depth groups
-        depth_div = df_slice[self._depth_col] / self._depth_interval
-        depth_groups = depth_div.round() * self._depth_interval
-        depth_groups.rename("index", inplace=True)
+        var_count = (~df[var_label].isna()).astype(int)
+        # Make cuts
         if self._verbose > 1:
             print("\tMaking date intervals.")
-        intervals = self._get_cut_intervals()
-        date_cut = pd.cut(df_slice[self._date_col], intervals)
-        date_cut_left = pd.Series(pd.IntervalIndex(date_cut).left)
-        date_cut_left.rename("columns", inplace=True)
+        depth_cut, depth_ticks = self._create_cut_and_ticks(
+            column_to_cut=df[self._depth_col],
+            cut_intervals=self._make_depth_intervals(),
+        )
+        date_cut, date_ticks = self._create_cut_and_ticks(
+            column_to_cut=df[self._date_col],
+            cut_intervals=self._make_date_intervals(),
+        )
         # Pivot
         data = pd.concat(
             [
-                date_cut_left.to_frame(),
-                depth_groups.to_frame(),
-                var_count.to_frame(),
+                date_cut,
+                depth_cut,
+                var_count,
             ],
             axis=1,
         )
         if self._verbose > 1:
             print("\tPivotting dataframe.")
         # Aggregate using 'sum' to count non-nan values
-        pivotted = data.pivot_table(
-            values="values",
-            index="index",
-            columns="columns",
-            aggfunc="sum",
+        df_pivot = self._make_full_pivotted_table(
+            df=data,
+            depth_ticks=depth_ticks,
+            date_ticks=date_ticks,
+            depth_series_name=depth_cut.name,
+            date_series_name=date_cut.name,
+            values_series_name=var_count.name,
         )
-        to_insert = intervals[~intervals.left.isin(pivotted.columns)].left
-        pivotted.loc[:, to_insert] = np.nan
-        pivotted.sort_index(axis=1, inplace=True)
         # Figure
         if self._verbose > 1:
             print("\tCreating figure.")
@@ -586,9 +717,9 @@ class EvolutionProfile(BasePlot):
         )
         plt.suptitle(suptitle)
         ax = plt.subplot(1, 1, 1)
-        X, Y = np.meshgrid(pivotted.columns, pivotted.index)
+        X, Y = np.meshgrid(date_ticks, depth_ticks)
         # Color mesh
-        cbar = ax.pcolor(X, Y, pivotted.values, **kwargs)
+        cbar = ax.pcolormesh(X, Y, df_pivot.values, **kwargs)
         fig.colorbar(cbar, label="Number of data points", shrink=0.75)
         if self._interval == "custom":
             title = (
