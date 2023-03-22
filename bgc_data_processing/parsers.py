@@ -4,8 +4,8 @@ import datetime as dt
 import os
 import shutil
 from copy import deepcopy
-from typing import Any, Type
-
+from typing import Any, Callable, Type
+from functools import wraps
 import tomllib
 
 from bgc_data_processing.variables import TemplateVar
@@ -40,7 +40,7 @@ class TomlParser:
         if check_types:
             self._parsed_types = self._parse_types(filepath=filepath)
 
-    def get(self, keys: list[str]) -> Any:
+    def _get(self, keys: list[str]) -> Any:
         """Return a variable from the toml using its path.
 
         Parameters
@@ -73,7 +73,7 @@ class TomlParser:
             var = var[key]
         return deepcopy(var)
 
-    def set(self, keys: list[str], value: Any) -> None:
+    def _set(self, keys: list[str], value: Any) -> None:
         """Set the value of an element of the dictionnary.
 
         Parameters
@@ -231,7 +231,7 @@ class TomlParser:
         if not self._check:
             return
         if keys:
-            var = self.get(keys)
+            var = self._get(keys)
             if not isinstance(var, dict):
                 self.raise_if_wrong_type(keys)
             else:
@@ -244,7 +244,7 @@ class TomlParser:
                 for key in self._elements.keys():
                     self.raise_if_wrong_type_below(keys=keys + [key])
 
-    def get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
+    def _get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
         """Return a variable from the toml using its path.
 
         Parameters
@@ -295,12 +295,63 @@ class TomlParser:
         TypeError
             If the variable doesn't match any of the required types.
         """
-        var = self.get(keys)
-        types = self.get_type(keys)
+        var = self._get(keys)
+        types = self._get_type(keys)
         # Check type:
         is_any_type = any(self._check_type(var, var_type) for var_type in types)
         if not is_any_type:
             raise TypeError(self._make_error_msg(keys=keys, types=types))
+
+
+def directory_check(get_variable: Callable) -> Callable:
+    """Decorator to create directories only when needed.
+
+    Parameters
+    ----------
+    get_variable : Callable
+        get of __getitem__ function.
+
+    Returns
+    -------
+    Callable
+        Wrapper function.
+
+    Raises
+    ------
+    IsADirectoryError
+        If the directory exists
+    """
+
+    @wraps(get_variable)
+    def wrapper_func(self: "ConfigParser", keys: str | list[str]):
+        if isinstance(keys, str):
+            keys_dirs = [keys]
+        else:
+            keys_dirs = keys
+        if (
+            keys_dirs in self.dirs_vars_keys
+            and not self._dir_created["-".join(keys_dirs)]
+        ):
+            dir = get_variable(self, keys)
+            if os.path.isdir(dir):
+                if os.listdir(dir):
+                    if self.existing_dir_behavior == "raise":
+                        raise IsADirectoryError(
+                            f"The directory {dir} already exists and is not empty."
+                        )
+                    elif self.existing_dir_behavior == "merge":
+                        pass
+                    elif self.existing_dir_behavior == "clean":
+                        shutil.rmtree(dir)
+                        os.mkdir(dir)
+            else:
+                os.mkdir(dir)
+            self._dir_created["-".join(keys_dirs)] = True
+            return dir
+        else:
+            return get_variable(self, keys)
+
+    return wrapper_func
 
 
 class ConfigParser(TomlParser):
@@ -334,8 +385,18 @@ class ConfigParser(TomlParser):
     ) -> None:
         super().__init__(filepath, check_types)
         self.dates_vars_keys = dates_vars_keys
-        self.dirs_vars_keys = dirs_vars_keys
+        self.dirs_vars_keys: list[list[str]] = []
+        for var in dirs_vars_keys:
+            if isinstance(var, list):
+                self.dirs_vars_keys.append(var)
+            elif isinstance(var, str):
+                self.dirs_vars_keys.append([var])
+            else:
+                raise TypeError(f"Unsupported type for directpory key {var}")
         self.existing_dir_behavior = existing_directory
+        self._dir_created = {
+            "-".join(directory): False for directory in self.dirs_vars_keys
+        }
 
     def parse(
         self,
@@ -346,11 +407,6 @@ class ConfigParser(TomlParser):
         -------
         dict
             Transformed dictionnary
-
-        Raises
-        ------
-        IsADirectoryError
-            If one the directories to create exists.
         """
         if self._parsed:
             return
@@ -360,26 +416,26 @@ class ConfigParser(TomlParser):
         for keys in self.dates_vars_keys:
             if isinstance(keys, str):
                 keys = [keys]
-            date = dt.datetime.strptime(self.get(keys), "%Y%m%d")
-            self.set(keys, date)
-        for keys in self.dirs_vars_keys:
-            if isinstance(keys, str):
-                keys = [keys]
-            dir = self.get(keys)
-            if os.path.isdir(dir):
-                if os.listdir(dir):
-                    if self.existing_dir_behavior == "raise":
-                        raise IsADirectoryError(
-                            f"The directory {dir} already exists and is not empty."
-                        )
-                    elif self.existing_dir_behavior == "merge":
-                        continue
-                    elif self.existing_dir_behavior == "clean":
-                        shutil.rmtree(dir)
-                        os.mkdir(dir)
-            else:
-                os.mkdir(dir)
+            date = dt.datetime.strptime(self._get(keys), "%Y%m%d")
+            self._set(keys, date)
 
+    @directory_check
+    def get(self, keys: list[str]) -> Any:
+        """Get a variable by giving the list of keys to reach the variable.
+
+        Parameters
+        ----------
+        keys : list[str]
+            Keys to the variable.
+
+        Returns
+        -------
+        Any
+            The desired variable.
+        """
+        return super()._get(keys)
+
+    @directory_check
     def __getitem__(self, __k: str) -> Any:
         """Return self._elements[__k].
 
