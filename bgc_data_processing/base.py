@@ -344,6 +344,8 @@ class BasePlot(ABC):
         Storer to plot data of.
     """
 
+    __default_depth_max: int | str = 0
+
     def __init__(self, storer: "Storer") -> None:
         self._storer = storer
         self._variables = storer.variables
@@ -355,7 +357,8 @@ class BasePlot(ABC):
         dates_info = self._get_default_infos(self._variables.date_var_name)
         self._date_col, self._date_min, self._date_max = dates_info
         depths_info = self._get_default_infos(self._variables.depth_var_name)
-        self._depth_col, self._depth_min, self._depth_max = depths_info
+        self._depth_col, self._depth_min, _ = depths_info
+        self._depth_max = self.__default_depth_max
 
     def _get_default_infos(self, variable: str) -> tuple[Any]:
         """Return default information for a variable.
@@ -395,7 +398,8 @@ class BasePlot(ABC):
         """Reset boundaries extremum to the defaults ones \
         (minimum and maximum observed in the data)."""
         self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
-        self._depth_min, self._depth_max = self._get_default_boundaries(self._depth_col)
+        self._depth_min, _ = self._get_default_boundaries(self._depth_col)
+        self._depth_max == self.__default_depth_max
         self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
         self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
 
