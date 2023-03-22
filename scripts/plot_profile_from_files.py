@@ -27,7 +27,6 @@ if __name__ == "__main__":
     INTERVAL: str = CONFIG["INTERVAL"]
     CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
     DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
-    SAVING_DIR: str = CONFIG["SAVING_DIR"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
@@ -69,6 +68,6 @@ if __name__ == "__main__":
         date_max_str = DATE_MAX.strftime("%Y%m%d")
         save_name = f"profile_{VARIABLE}_{date_min_str}_{date_max_str}.png"
         profile.save(
-            save_path=f"{SAVING_DIR}/{save_name}",
+            save_path=f"{CONFIG['SAVING_DIR']}/{save_name}",
             variable_name=VARIABLE,
         )
