@@ -27,7 +27,6 @@ if __name__ == "__main__":
     VARIABLE: str = CONFIG["VARIABLE"]
     PROVIDERS: list[str] = CONFIG["PROVIDERS"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
-    SAVING_DIR: str = CONFIG["SAVING_DIR"]
     CONSIDER_DEPTH: bool = CONFIG["CONSIDER_DEPTH"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
@@ -95,7 +94,7 @@ if __name__ == "__main__":
                 f"{date_min}-{date_max}"
             )
             plot.save(
-                save_path=f"{SAVING_DIR}/{save_name}",
+                save_path=f"{CONFIG['SAVING_DIR']}/{save_name}",
                 variable_name=VARIABLE,
                 suptitle=suptitle,
             )

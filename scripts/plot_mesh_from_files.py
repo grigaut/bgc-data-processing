@@ -27,7 +27,6 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
     CONSIDER_DEPTH: bool = CONFIG["CONSIDER_DEPTH"]
-    SAVING_DIR: str = CONFIG["SAVING_DIR"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         save_name = f"density_map_{VARIABLE}_{date_min}_{date_max}.png"
         suptitle = f"{VARIABLE} - from {LOADING_DIR}\n" f"{date_min}-{date_max}"
         plot.save(
-            save_path=f"{SAVING_DIR}/{save_name}",
+            save_path=f"{CONFIG['SAVING_DIR']}/{save_name}",
             variable_name=VARIABLE,
             suptitle=suptitle,
         )
