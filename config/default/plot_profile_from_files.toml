@@ -39,6 +39,8 @@ DEPTH_MIN = nan
 #? DEPTH_MAX: int | float: maximum depth boundary (included), 'nan' indicate not boundary
 DEPTH_MAX = 0
 #? DEPTH_INTERVAL: int | list[int]: vertical resolution of the Figure
+# If of type int: vertical axis will be divided in equally sized bins of size DEPTH_INTERVAL
+# If of type list[int]: vertical axis will be divided according to the given levels (levls value ar supposed to negative)
 DEPTH_INTERVAL = 10
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
