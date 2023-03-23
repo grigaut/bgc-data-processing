@@ -1,6 +1,7 @@
 """Specific parameters to load CMEMS-provided data."""
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
+import numpy as np
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="CMEMS",
@@ -20,7 +21,7 @@ loader = netcdf_tools.NetCDFLoader(
         depth=DEFAULT_VARS["depth"]
         .in_file_as("DEPH", "PRES")
         .remove_when_nan()
-        .correct_with(lambda x: -x if x > 0 else x),
+        .correct_with(lambda x: -np.abs(x)),
         temperature=DEFAULT_VARS["temperature"].in_file_as("TEMP"),
         salinity=DEFAULT_VARS["salinity"].in_file_as("PSAL"),
         oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOX1"),
