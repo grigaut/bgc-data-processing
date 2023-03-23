@@ -322,8 +322,8 @@ class BaseLoader(ABC):
             Dataframe with whose expocode values match requirements.
         """
         if self._accepted_expocodes:
-            isin = df[self._variables.expocode_var_name].isin(self._accepted_expocodes)
-            print(isin)
+            expocode_var = self._variables.get(self._variables.expocode_var_name)
+            isin = df[expocode_var.label].isin(self._accepted_expocodes)
             return df.filter(df[isin].index, axis=0)
         else:
             return df
