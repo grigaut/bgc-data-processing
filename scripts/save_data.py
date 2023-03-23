@@ -33,6 +33,7 @@ if __name__ == "__main__":
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
     SAVING_DIR = CONFIG["SAVING_DIR"]
     PRIORITY = CONFIG["PRIORITY"]
@@ -83,6 +84,7 @@ if __name__ == "__main__":
             depth_min=DEPTH_MIN,
             depth_max=DEPTH_MAX,
         )
+        dset_loader.set_accepted_expocodes(expocodes=EXPOCODES_TO_LOAD)
         dset_loader.set_verbose(VERBOSE)
         # Loading data
         df = dset_loader(exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"])
