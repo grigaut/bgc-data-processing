@@ -43,6 +43,7 @@ class BaseLoader(ABC):
     _depth_max: int | float = np.nan
     _date_min: dt.datetime | dt.date = np.nan
     _date_max: dt.datetime | dt.date = np.nan
+    _accepted_expocodes: list[str] = []
 
     def __init__(
         self,
@@ -166,6 +167,17 @@ class BaseLoader(ABC):
             List of variable names => saving variables sorted.
         """
         self._variables.set_saving_order(var_names=var_names)
+
+    def set_accepted_expocodes(self, expocodes: list[str] = []) -> None:
+        """Set the list of accepted expocode values.
+
+        Parameters
+        ----------
+        expocodes : list[str], optional
+            List of the expocodes to include, all will be included if empty.
+            , by default []
+        """
+        self._accepted_expocodes = expocodes
 
     def set_longitude_boundaries(
         self,
@@ -292,6 +304,29 @@ class BaseLoader(ABC):
             after_min = to_compare >= min
             before_max = to_compare <= max
             return df.loc[after_min & before_max, :].copy()
+
+    def _select_expocodes(
+        self,
+        df: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Select rows matching the expocodes' requirements.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Original dataframe.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with whose expocode values match requirements.
+        """
+        if self._accepted_expocodes:
+            isin = df[self._variables.expocode_var_name].isin(self._accepted_expocodes)
+            print(isin)
+            return df.filter(df[isin].index, axis=0)
+        else:
+            return df
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows.
