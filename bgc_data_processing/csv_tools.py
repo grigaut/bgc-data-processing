@@ -284,5 +284,6 @@ class CSVLoader(BaseLoader):
         df_bdep = self._apply_boundaries(
             df_blon, "DEPH", self._depth_min, self._depth_max
         )
-        df_rm = self.remove_nan_rows(df_bdep)
+        df_expo = self._select_expocodes(df_bdep)
+        df_rm = self.remove_nan_rows(df_expo)
         return df_rm
