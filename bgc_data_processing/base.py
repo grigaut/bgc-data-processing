@@ -1,11 +1,9 @@
 """Base objects."""
 
 
-import datetime as dt
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from bgc_data_processing.data_classes import Storer
@@ -213,131 +211,11 @@ class BasePlot(ABC):
         Storer to plot data of.
     """
 
-    __default_depth_max: int | str = 0
-
-    def __init__(self, storer: "Storer") -> None:
+    def __init__(self, storer: "Storer", constraints: "DataSlicer") -> None:
         self._storer = storer
         self._variables = storer.variables
+        self._constraints = constraints
         self._verbose = storer.verbose
-        lats_info = self._get_default_infos(self._variables.latitude_var_name)
-        self._lat_col, self._lat_min, self._lat_max = lats_info
-        lons_info = self._get_default_infos(self._variables.longitude_var_name)
-        self._lon_col, self._lon_min, self._lon_max = lons_info
-        dates_info = self._get_default_infos(self._variables.date_var_name)
-        self._date_col, self._date_min, self._date_max = dates_info
-        depths_info = self._get_default_infos(self._variables.depth_var_name)
-        self._depth_col, self._depth_min, _ = depths_info
-        self._depth_max = self.__default_depth_max
-
-    def _get_default_infos(self, variable: str) -> tuple[Any]:
-        """Return default information for a variable.
-
-        Parameters
-        ----------
-        variable : str
-            The name of the variable.
-
-        Returns
-        -------
-        tuple[Any]
-            Name of the corresponding column, minimum value, maximum value.
-        """
-        column_name = self._variables.get(variable).label
-        min_value, max_value = self._get_default_boundaries(column_name)
-        return column_name, min_value, max_value
-
-    def _get_default_boundaries(self, column_name: str) -> tuple[Any, Any]:
-        """Return minimum and maximum values for a given column name.
-
-        Parameters
-        ----------
-        column_name : str
-            Column to get the minimum and maximum of.
-
-        Returns
-        -------
-        tuple[Any, Any]
-            Minimum value, maximum value.
-        """
-        min_value = self._storer._data[column_name].min()
-        max_value = self._storer._data[column_name].max()
-        return min_value, max_value
-
-    def reset_boundaries(self) -> None:
-        """Reset boundaries extremum to the defaults ones \
-        (minimum and maximum observed in the data)."""
-        self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
-        self._depth_min, _ = self._get_default_boundaries(self._depth_col)
-        self._depth_max == self.__default_depth_max
-        self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
-        self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
-
-    def set_geographic_boundaries(
-        self,
-        latitude_min: int | float = np.nan,
-        latitude_max: int | float = np.nan,
-        longitude_min: int | float = np.nan,
-        longitude_max: int | float = np.nan,
-    ) -> None:
-        """Set the geographic boundaries from latitude and longitude minimum / maximum.
-
-        Parameters
-        ----------
-        latitude_min : int | float, optional
-            Minimum value for latitude., by default np.nan
-        latitude_max : int | float, optional
-            Maximum value for latitude., by default np.nan
-        longitude_min : int | float, optional
-            Minimum value for longitude., by default np.nan
-        longitude_max : int | float, optional
-            Maximum value for longitude., by default np.nan
-        """
-        if not np.isnan(latitude_min):
-            self._lat_min = latitude_min
-        if not np.isnan(latitude_max):
-            self._lat_max = latitude_max
-        if not np.isnan(longitude_min):
-            self._lon_min = longitude_min
-        if not np.isnan(longitude_max):
-            self._lon_max = longitude_max
-
-    def set_dates_boundaries(
-        self,
-        date_min: dt.datetime = np.nan,
-        date_max: dt.datetime = np.nan,
-    ) -> None:
-        """Set the date boundaries.
-
-        Parameters
-        ----------
-        date_min : dt.datetime, optional
-            Minimum date (included)., by default np.nan
-        date_max : dt.datetime, optional
-            Maximum date (included)., by default np.nan
-        """
-        if not (isinstance(date_min, float) and (not np.isnan(date_min))):
-            self._date_min = date_min
-        if not (isinstance(date_max, float) and not np.isnan(date_max)):
-            self._date_max = date_max
-
-    def set_depth_boundaries(
-        self,
-        depth_min: int | float = np.nan,
-        depth_max: int | float = np.nan,
-    ) -> None:
-        """Set the depth boundaries.
-
-        Parameters
-        ----------
-        depth_min : int | float, optional
-            Minimum depth (included)., by default np.nan
-        depth_max : int | float, optional
-            Maximum depth (included)., by default np.nan
-        """
-        if not np.isnan(depth_min):
-            self._depth_min = depth_min
-        if not np.isnan(depth_max):
-            self._depth_max = depth_max
 
     @abstractmethod
     def _build(self, *args, **kwargs) -> "Figure":
