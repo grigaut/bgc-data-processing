@@ -741,6 +741,49 @@ class DataSlicer:
             constraint_params["superset"] = self.supersets[field_name]
         return constraint_params
 
+    def get_extremes(
+        self,
+        field_name: str,
+        default_min: int | float | datetime = None,
+        default_max: int | float | datetime = None,
+    ) -> tuple[int | float | datetime, int | float | datetime]:
+        """Return extreme values as they appear in the constraints.
+
+        Parameters
+        ----------
+        field_name : str
+            Name of the field to get the extreme of.
+        default_min : int | float | datetime, optional
+            Default value for the minimum if not constraint exists., by default None
+        default_max : int | float | datetime, optional
+            Default value for the maximum if not constraint exists., by default None
+
+        Returns
+        -------
+        tuple[int | float | datetime, int | float | datetime]
+            Minimum value, maximum value
+        """
+        if not self.is_constrained(field_name=field_name):
+            return default_min, default_max
+        constraints = self.get_constraint_parameters(field_name=field_name)
+        boundary_in = "boundary" in constraints.keys()
+        superset_in = "superset" in constraints.keys()
+        if boundary_in and superset_in and constraints["superset"]:
+            b_min = constraints["boundary"]["min"]
+            b_max = constraints["boundary"]["max"]
+            s_min = min(constraints["superset"])
+            s_max = max(constraints["superset"])
+            all_min = min(b_min, s_min)
+            all_max = max(b_max, s_max)
+        elif not boundary_in:
+            all_min = min(constraints["superset"])
+            all_max = max(constraints["superset"])
+        elif not superset_in:
+            all_min = constraints["boundary"]["min"]
+            all_max = constraints["boundary"]["max"]
+            print(field_name)
+            return all_min, all_max
+
 
 class Reader:
     """Reading routine to parse csv files.
