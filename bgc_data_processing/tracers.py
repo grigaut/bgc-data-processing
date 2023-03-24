@@ -422,36 +422,6 @@ class EvolutionProfile(BasePlot):
         """Reset all boundaries and intervals to default values."""
         self.reset_intervals()
 
-    def set_geographic_bin(
-        self,
-        center_latitude: int | float,
-        center_longitude: int | float,
-        bins_size: int | float | Iterable[int | float],
-    ) -> None:
-        """Set the geographic boundaries based on a bin. The bin is considered \
-            centered on the center_latitude and center_longitude center \
-            and the bins_size argument defines its width and height.
-
-        Parameters
-        ----------
-        center_latitude : int | float
-            Latitude of the center of the bin.
-        center_longitude : int | float
-            Longitude of the center of the bin.
-        bins_size : int | float | Iterable[int  |  float]
-            Bin size, if iterable, the first coimponent is for latitude and the \
-            second for longitude. If not, the value is considered for both dimensions.
-        """
-        if isinstance(bins_size, Iterable):
-            lat_bin, lon_bin = bins_size[0], bins_size[1]
-        else:
-            lat_bin, lon_bin = bins_size, bins_size
-        # Bin boundaries
-        self._lat_min = center_latitude - lat_bin / 2
-        self._lat_max = center_latitude + lat_bin / 2
-        self._lon_min = center_longitude - lon_bin / 2
-        self._lon_max = center_longitude + lon_bin / 2
-
     def set_depth_interval(
         self,
         depth_interval: int | float | list[int | float] = np.nan,
