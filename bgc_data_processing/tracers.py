@@ -378,6 +378,8 @@ class EvolutionProfile(BasePlot):
     ----------
     storer : Storer
         Storer to map data of.
+    constraints: DataSlicer
+            Constraint slicer.
     """
 
     __default_interval: str = "day"

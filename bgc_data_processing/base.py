@@ -209,6 +209,8 @@ class BasePlot(ABC):
     ----------
     storer : Storer
         Storer to plot data of.
+    constraints: DataSlicer
+            Constraint slicer.
     """
 
     def __init__(self, storer: "Storer", constraints: "DataSlicer") -> None:
