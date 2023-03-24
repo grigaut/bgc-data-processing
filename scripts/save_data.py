@@ -69,10 +69,6 @@ if __name__ == "__main__":
         dset_loader.set_saving_order(
             var_names=VARIABLES,
         )
-        dset_loader.set_date_boundaries(
-            date_min=DRNG.values.min(),
-            date_max=DRNG.values.max(),
-        )
         # Constraint slicer
         constraints = DataSlicer()
         constraints.add_superset_constraint(

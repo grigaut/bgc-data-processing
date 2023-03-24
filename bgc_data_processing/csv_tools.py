@@ -68,7 +68,11 @@ class CSVLoader(BaseLoader):
         Storer
             Storer for the loaded data.
         """
-        filepaths = self._select_filepaths(exclude=exclude)
+        date_label = self._variables.get(self._variables.date_var_name).label
+        filepaths = self._select_filepaths(
+            exclude=exclude,
+            date_constraint=constraints.get_constraint_parameters(date_label),
+        )
         data_list = []
         for filepath in filepaths:
             data_list.append(self.load(filepath=filepath, constraints=constraints))
@@ -81,35 +85,56 @@ class CSVLoader(BaseLoader):
             verbose=self.verbose,
         )
 
-    def _pattern(self) -> str:
+    def _pattern(self, date_constraint: dict) -> str:
         """Returns files pattern for given years for this provider.
 
         Returns
         -------
         str
             Pattern.
+        date_constraint: dict
+            Date-related constraint dictionnary.
         """
-        if self._date_min is None or self._date_max is None:
+        if not date_constraint:
             years_str = "...."
         else:
-            year_min = self._date_min.year
-            year_max = self._date_max.year
-            years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            boundary_in = "boundary" in date_constraint.keys()
+            superset_in = "superset" in date_constraint.keys()
+            if boundary_in and superset_in and date_constraint["superset"]:
+                b_min = date_constraint["boundary"]["min"]
+                b_max = date_constraint["boundary"]["max"]
+                s_min = min(date_constraint["superset"])
+                s_max = max(date_constraint["superset"])
+                year_min = min(b_min, s_min).year
+                year_max = max(b_max, s_max).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not boundary_in:
+                year_min = min(date_constraint["superset"]).year
+                year_max = max(date_constraint["superset"]).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not superset_in:
+                year_min = date_constraint["boundary"]["min"].year
+                year_max = date_constraint["boundary"]["max"].year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            else:
+                raise KeyError("Date constraint dictionnary has invalid keys")
         pattern = self._files_pattern.format(years=years_str)
         return pattern
 
-    def _select_filepaths(self, exclude: list) -> list[str]:
+    def _select_filepaths(self, exclude: list, date_constraint: dict = {}) -> list[str]:
         """Selects filepaths to use when loading the data.
 
         exclude: list
             List of files to exclude when loading.
+        date_constraint: dict, optionnal
+            Date-related constraint dictionnary., by default {}
 
         Returns
         -------
         list[str]
             List of filepath to use when loading the data.
         """
-        regex = re.compile(self._pattern())
+        regex = re.compile(self._pattern(date_constraint=date_constraint))
         files = filter(regex.match, os.listdir(self._dirin))
         full_paths = []
         for filename in files:

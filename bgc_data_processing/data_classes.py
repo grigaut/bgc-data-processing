@@ -704,6 +704,43 @@ class DataSlicer:
             )
         return constraint.apply_constraints(df=df, inplace=inplace)
 
+    def is_constrained(self, field_name: str) -> bool:
+        """Return True if 'field_name' is constrained.
+
+        Parameters
+        ----------
+        field_name : str
+            Field to name to test the constraint.
+
+        Returns
+        -------
+        bool
+            True if the field has a constraint.
+        """
+        in_boundaries = field_name in self.constraints.keys()
+        in_supersets = field_name in self.supersets.keys()
+        return in_boundaries or in_supersets
+
+    def get_constraint_parameters(self, field_name: str) -> dict:
+        """Return the constraints on 'field_name'.
+
+        Parameters
+        ----------
+        field_name : str
+            Field to get the constraint of.
+
+        Returns
+        -------
+        dict
+            Dictionnary with keys 'boundary' and/or 'superset' if constraints exist.
+        """
+        constraint_params = {}
+        if field_name in self.boundaries.keys():
+            constraint_params["boundary"] = self.boundaries[field_name]
+        if field_name in self.supersets.keys():
+            constraint_params["superset"] = self.supersets[field_name]
+        return constraint_params
+
 
 class Reader:
     """Reading routine to parse csv files.

@@ -36,8 +36,6 @@ class BaseLoader(ABC):
     """
 
     _verbose: int = 1
-    _date_min: dt.datetime | dt.date = np.nan
-    _date_max: dt.datetime | dt.date = np.nan
 
     def __init__(
         self,
@@ -163,29 +161,6 @@ class BaseLoader(ABC):
             List of variable names => saving variables sorted.
         """
         self._variables.set_saving_order(var_names=var_names)
-
-    def set_date_boundaries(
-        self,
-        date_min: dt.datetime | dt.date = np.nan,
-        date_max: dt.datetime | dt.date = np.nan,
-    ) -> None:
-        """Sets boundaries for date variable.
-
-        Parameters
-        ----------
-        date_min : int | float
-            Minimal value for date (included)., by default np.nan
-        date_max : int | float
-            Maximal value for date (included)., by default np.nan
-        """
-        if isinstance(date_min, float) and np.isnan(date_min):
-            self._date_min = np.nan
-        else:
-            self._date_min = pd.to_datetime(date_min)
-        if isinstance(date_min, float) and np.isnan(date_max):
-            self._date_max = np.nan
-        else:
-            self._date_max = pd.to_datetime(date_max)
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows.
