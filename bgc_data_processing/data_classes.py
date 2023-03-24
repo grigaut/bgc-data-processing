@@ -647,7 +647,7 @@ class DataSlicer:
             series = series & bool_series
         return series
 
-    def __call__(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
+    def apply_constraints(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
         """Apply all constraints to a DataFrame.
 
         Parameters
