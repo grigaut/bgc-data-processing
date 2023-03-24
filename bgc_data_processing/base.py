@@ -1,17 +1,16 @@
 """Base objects."""
 
 
-import datetime as dt
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.data_classes import Constraints
     from matplotlib.figure import Figure
 
 
@@ -35,14 +34,6 @@ class BaseLoader(ABC):
     """
 
     _verbose: int = 1
-    _lon_min: int | float = np.nan
-    _lon_max: int | float = np.nan
-    _lat_min: int | float = np.nan
-    _lat_max: int | float = np.nan
-    _depth_min: int | float = np.nan
-    _depth_max: int | float = np.nan
-    _date_min: dt.datetime | dt.date = np.nan
-    _date_max: dt.datetime | dt.date = np.nan
 
     def __init__(
         self,
@@ -104,11 +95,13 @@ class BaseLoader(ABC):
         return self._variables
 
     @abstractmethod
-    def __call__(self, exclude: list = []) -> "Storer":
+    def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
+        constraints: Constraints
+            Constraint slicer.
         exclude : list, optional
             Files not to load., by default []
 
@@ -167,132 +160,6 @@ class BaseLoader(ABC):
         """
         self._variables.set_saving_order(var_names=var_names)
 
-    def set_longitude_boundaries(
-        self,
-        longitude_min: int | float,
-        longitude_max: int | float,
-    ) -> None:
-        """Sets boundaries for longitude variable.
-
-        Parameters
-        ----------
-        longitude_min : int | float
-            Minimal value for longitude (included).
-        longitude_max : int | float
-            Maximal value for longitude (included).
-        """
-        self._lon_min = longitude_min
-        self._lon_max = longitude_max
-
-    def set_latitude_boundaries(
-        self,
-        latitude_min: int | float,
-        latitude_max: int | float,
-    ) -> None:
-        """Sets boundaries for latitude variable.
-
-        Parameters
-        ----------
-        latitude_min : int | float
-            Minimal value for latitude (included).
-        latitude_max : int | float
-            Maximal value for latitude (included).
-        """
-        self._lat_min = latitude_min
-        self._lat_max = latitude_max
-
-    def set_depth_boundaries(
-        self,
-        depth_min: int | float,
-        depth_max: int | float,
-    ) -> None:
-        """Sets boundaries for depth variable.
-
-        Parameters
-        ----------
-        depth_min : int | float
-            Minimal value for depth (included).
-        depth_max : int | float
-            Maximal value for depth (included).
-        """
-        self._depth_min = depth_min
-        self._depth_max = depth_max
-
-    def set_date_boundaries(
-        self,
-        date_min: dt.datetime | dt.date = np.nan,
-        date_max: dt.datetime | dt.date = np.nan,
-    ) -> None:
-        """Sets boundaries for date variable.
-
-        Parameters
-        ----------
-        date_min : int | float
-            Minimal value for date (included)., by default np.nan
-        date_max : int | float
-            Maximal value for date (included)., by default np.nan
-        """
-        if isinstance(date_min, float) and np.isnan(date_min):
-            self._date_min = np.nan
-        else:
-            self._date_min = pd.to_datetime(date_min)
-        if isinstance(date_min, float) and np.isnan(date_max):
-            self._date_max = np.nan
-        else:
-            self._date_max = pd.to_datetime(date_max)
-
-    def _apply_boundaries(
-        self,
-        df: pd.DataFrame,
-        var_name: str,
-        min: Any,
-        max: Any,
-    ) -> pd.DataFrame:
-        """Applies boundaries restrictions on a dataframe.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Dataframe to reduce using boundaries values.
-        var_name : str
-            Variable name to consider.
-        min : Any
-            Minimal value to use.
-        max : Any
-            Maximal value to use.
-
-        Returns
-        -------
-        pd.DataFrame
-            Reduced DataFrame.
-
-        Examples
-        --------
-        >>> df = self._apply_boundaries(not_bounded_df,
-        ...     "DATE",
-        ...     self._date_min,
-        ...     self._date_max,
-        ... )
-
-        """
-        if var_name not in self._variables.keys():
-            return df
-        is_min_nan = isinstance(min, float) and np.isnan(min)
-        is_max_nan = isinstance(max, float) and np.isnan(max)
-        if is_min_nan and is_max_nan:
-            return df
-        to_compare = df[self._variables.labels[var_name]]
-        if is_min_nan:
-            after_min = to_compare <= max
-            return df.loc[after_min, :].copy()
-        elif is_max_nan:
-            before_max = to_compare >= min
-            return df.loc[before_max, :].copy()
-        else:
-            after_min = to_compare >= min
-            before_max = to_compare <= max
-            return df.loc[after_min & before_max, :].copy()
-
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows.
 
@@ -331,7 +198,9 @@ class BaseLoader(ABC):
         """
         # Modify type :
         for label, correction_func in self._variables.corrections.items():
-            to_correct[label] = to_correct[label].apply(correction_func)
+            correct = to_correct.pop(label).apply(correction_func)
+            to_correct.insert(len(to_correct.columns), label, correct)
+            # to_correct[label] = to_correct[label]  #
         return to_correct
 
 
@@ -342,133 +211,15 @@ class BasePlot(ABC):
     ----------
     storer : Storer
         Storer to plot data of.
+    constraints: Constraints
+            Constraint slicer.
     """
 
-    __default_depth_max: int | str = 0
-
-    def __init__(self, storer: "Storer") -> None:
+    def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
         self._storer = storer
         self._variables = storer.variables
+        self._constraints = constraints
         self._verbose = storer.verbose
-        lats_info = self._get_default_infos(self._variables.latitude_var_name)
-        self._lat_col, self._lat_min, self._lat_max = lats_info
-        lons_info = self._get_default_infos(self._variables.longitude_var_name)
-        self._lon_col, self._lon_min, self._lon_max = lons_info
-        dates_info = self._get_default_infos(self._variables.date_var_name)
-        self._date_col, self._date_min, self._date_max = dates_info
-        depths_info = self._get_default_infos(self._variables.depth_var_name)
-        self._depth_col, self._depth_min, _ = depths_info
-        self._depth_max = self.__default_depth_max
-
-    def _get_default_infos(self, variable: str) -> tuple[Any]:
-        """Return default information for a variable.
-
-        Parameters
-        ----------
-        variable : str
-            The name of the variable.
-
-        Returns
-        -------
-        tuple[Any]
-            Name of the corresponding column, minimum value, maximum value.
-        """
-        column_name = self._variables.get(variable).label
-        min_value, max_value = self._get_default_boundaries(column_name)
-        return column_name, min_value, max_value
-
-    def _get_default_boundaries(self, column_name: str) -> tuple[Any, Any]:
-        """Return minimum and maximum values for a given column name.
-
-        Parameters
-        ----------
-        column_name : str
-            Column to get the minimum and maximum of.
-
-        Returns
-        -------
-        tuple[Any, Any]
-            Minimum value, maximum value.
-        """
-        min_value = self._storer._data[column_name].min()
-        max_value = self._storer._data[column_name].max()
-        return min_value, max_value
-
-    def reset_boundaries(self) -> None:
-        """Reset boundaries extremum to the defaults ones \
-        (minimum and maximum observed in the data)."""
-        self._date_min, self._date_max = self._get_default_boundaries(self._date_col)
-        self._depth_min, _ = self._get_default_boundaries(self._depth_col)
-        self._depth_max == self.__default_depth_max
-        self._lat_min, self._lat_max = self._get_default_boundaries(self._lat_col)
-        self._lon_min, self._lon_max = self._get_default_boundaries(self._lon_col)
-
-    def set_geographic_boundaries(
-        self,
-        latitude_min: int | float = np.nan,
-        latitude_max: int | float = np.nan,
-        longitude_min: int | float = np.nan,
-        longitude_max: int | float = np.nan,
-    ) -> None:
-        """Set the geographic boundaries from latitude and longitude minimum / maximum.
-
-        Parameters
-        ----------
-        latitude_min : int | float, optional
-            Minimum value for latitude., by default np.nan
-        latitude_max : int | float, optional
-            Maximum value for latitude., by default np.nan
-        longitude_min : int | float, optional
-            Minimum value for longitude., by default np.nan
-        longitude_max : int | float, optional
-            Maximum value for longitude., by default np.nan
-        """
-        if not np.isnan(latitude_min):
-            self._lat_min = latitude_min
-        if not np.isnan(latitude_max):
-            self._lat_max = latitude_max
-        if not np.isnan(longitude_min):
-            self._lon_min = longitude_min
-        if not np.isnan(longitude_max):
-            self._lon_max = longitude_max
-
-    def set_dates_boundaries(
-        self,
-        date_min: dt.datetime = np.nan,
-        date_max: dt.datetime = np.nan,
-    ) -> None:
-        """Set the date boundaries.
-
-        Parameters
-        ----------
-        date_min : dt.datetime, optional
-            Minimum date (included)., by default np.nan
-        date_max : dt.datetime, optional
-            Maximum date (included)., by default np.nan
-        """
-        if not (isinstance(date_min, float) and (not np.isnan(date_min))):
-            self._date_min = date_min
-        if not (isinstance(date_max, float) and not np.isnan(date_max)):
-            self._date_max = date_max
-
-    def set_depth_boundaries(
-        self,
-        depth_min: int | float = np.nan,
-        depth_max: int | float = np.nan,
-    ) -> None:
-        """Set the depth boundaries.
-
-        Parameters
-        ----------
-        depth_min : int | float, optional
-            Minimum depth (included)., by default np.nan
-        depth_max : int | float, optional
-            Maximum depth (included)., by default np.nan
-        """
-        if not np.isnan(depth_min):
-            self._depth_min = depth_min
-        if not np.isnan(depth_max):
-            self._depth_max = depth_max
 
     @abstractmethod
     def _build(self, *args, **kwargs) -> "Figure":

@@ -10,7 +10,7 @@ import pandas as pd
 from cartopy import crs, feature
 
 from bgc_data_processing.base import BasePlot
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, Constraints
 from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
@@ -26,6 +26,8 @@ class MeshPlotter(BasePlot):
     ----------
     storer : Storer
         Data Storer containing data to plot.
+    constraints: Constraints
+            Constraint slicer.
     """
 
     _lat_bin: int | float = 1
@@ -35,8 +37,9 @@ class MeshPlotter(BasePlot):
     def __init__(
         self,
         storer: "Storer",
+        constraints: "Constraints" = Constraints(),
     ) -> None:
-        super().__init__(storer=storer)
+        super().__init__(storer=storer, constraints=constraints)
         depth_var_name = self._variables.depth_var_name
         depth_var_label = self._variables.get(depth_var_name).label
         self._data = storer.data.sort_values(depth_var_label, ascending=False)
@@ -96,12 +99,9 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        depth_label = self._variables.get(self._variables.depth_var_name).label
-        depth_min_cond = self._data[depth_label] >= self._depth_min
-        depth_max_cond = self._data[depth_label] <= self._depth_max
-        data = self._data[depth_min_cond & depth_max_cond].copy()
+        data = self._constraints.apply_constraints(self._data, False)
         if var_key == "all":
-            data["all"] = 1
+            data.insert(0, var_key, 1)
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
@@ -282,7 +282,19 @@ class MeshPlotter(BasePlot):
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
-        extent = [self._lon_min, self._lon_max, self._lat_min, self._lat_max]
+        lat_col = self._variables.get(self._variables.latitude_var_name).label
+        lon_col = self._variables.get(self._variables.longitude_var_name).label
+        lat_min, lat_max = self._constraints.get_extremes(
+            lat_col,
+            df[lat_col].min(),
+            df[lat_col].max(),
+        )
+        lon_min, lon_max = self._constraints.get_extremes(
+            lon_col,
+            df[lon_col].min(),
+            df[lon_col].max(),
+        )
+        extent = [lon_min, lon_max, lat_min, lat_max]
         ax.set_extent(extent, crs.PlateCarree())
         if not df.empty:
             X1, Y1, Z1 = self._mesh(
@@ -378,11 +390,14 @@ class EvolutionProfile(BasePlot):
     ----------
     storer : Storer
         Storer to map data of.
+    constraints: Constraints
+            Constraint slicer.
     """
 
     __default_interval: str = "day"
     __default_interval_length: int = 10
     __default_depth_interval: int = 100
+    __default_depth_max: int = 0
     _interval: str = __default_interval
     _interval_length: int = __default_interval_length
     _depth_interval: int | float = __default_depth_interval
@@ -390,9 +405,12 @@ class EvolutionProfile(BasePlot):
     def __init__(
         self,
         storer: "Storer",
+        constraints: "Constraints" = Constraints(),
     ) -> None:
 
-        super().__init__(storer)
+        super().__init__(storer, constraints)
+        self._depth_col = self._variables.get(self._variables.depth_var_name).label
+        self._date_col = self._variables.get(self._variables.date_var_name).label
 
     def reset_intervals(self) -> None:
         """Reset interval parameters to the default ones."""
@@ -402,38 +420,7 @@ class EvolutionProfile(BasePlot):
 
     def reset_parameters(self) -> None:
         """Reset all boundaries and intervals to default values."""
-        self.reset_boundaries()
         self.reset_intervals()
-
-    def set_geographic_bin(
-        self,
-        center_latitude: int | float,
-        center_longitude: int | float,
-        bins_size: int | float | Iterable[int | float],
-    ) -> None:
-        """Set the geographic boundaries based on a bin. The bin is considered \
-            centered on the center_latitude and center_longitude center \
-            and the bins_size argument defines its width and height.
-
-        Parameters
-        ----------
-        center_latitude : int | float
-            Latitude of the center of the bin.
-        center_longitude : int | float
-            Longitude of the center of the bin.
-        bins_size : int | float | Iterable[int  |  float]
-            Bin size, if iterable, the first coimponent is for latitude and the \
-            second for longitude. If not, the value is considered for both dimensions.
-        """
-        if isinstance(bins_size, Iterable):
-            lat_bin, lon_bin = bins_size[0], bins_size[1]
-        else:
-            lat_bin, lon_bin = bins_size, bins_size
-        # Bin boundaries
-        self._lat_min = center_latitude - lat_bin / 2
-        self._lat_max = center_latitude + lat_bin / 2
-        self._lon_min = center_longitude - lon_bin / 2
-        self._lon_max = center_longitude + lon_bin / 2
 
     def set_depth_interval(
         self,
@@ -467,56 +454,6 @@ class EvolutionProfile(BasePlot):
         if interval_length is not None:
             self._interval_length = interval_length
 
-    def _slice_dataframe(self, variable_label: str) -> pd.DataFrame:
-        """Return a slice of the dataframe respecting the plot boundaries.
-
-        Parameters
-        ----------
-        variable_label : str
-            Label of the variable of which the density is represented.
-
-        Returns
-        -------
-        pd.DataFrame
-            Slice of self._storer.data
-
-        Raises
-        ------
-        ValueError
-            If the slice is empty.
-        """
-        df = self._storer.data.copy()
-        if variable_label == "all":
-            df["all"] = 1
-        columns = [
-            self._lat_col,
-            self._lon_col,
-            self._depth_col,
-            self._date_col,
-            variable_label,
-        ]
-        df = df[columns]
-        # Boundaries boolean series
-        if self._verbose > 2:
-            print("\tSlicing Data based on given boundaries.")
-        # Latitude boundaries
-        lat_min_cond = df[self._lat_col] >= self._lat_min
-        lat_max_cond = df[self._lat_col] <= self._lat_max
-        lat_cond = (lat_min_cond) & (lat_max_cond)
-        # Longitude boundaries
-        lon_min_cond = df[self._lon_col] >= self._lon_min
-        lon_max_cond = df[self._lon_col] <= self._lon_max
-        lon_cond = (lon_min_cond) & (lon_max_cond)
-        # Depth boundaries
-        depth_min_cond = df[self._depth_col] >= self._depth_min
-        depth_max_cond = df[self._depth_col] <= self._depth_max
-        depth_cond = depth_min_cond & depth_max_cond
-        # Slicing
-        df_slice = df.loc[lat_cond & lon_cond & depth_cond, :].copy(True)
-        if df_slice.empty:
-            raise ValueError("Not enough data at this location to build a figure.")
-        return df_slice
-
     def _make_depth_intervals(self) -> pd.IntervalIndex:
         """Create the depth intervals from depth boundaries and interval resolution.
 
@@ -525,24 +462,33 @@ class EvolutionProfile(BasePlot):
         pd.IntervalIndex
             Interval to use when grouping data.
         """
+        if self._constraints.is_constrained(self._depth_col):
+            depth_min, depth_max = self._constraints.get_extremes(self._depth_col)
+        else:
+            depth_min = self._storer.data[self._depth_col].min()
+            depth_max = self.__default_depth_max
+        if np.isnan(depth_min):
+            depth_min = self._storer.data[self._depth_col].min()
+        if np.isnan(depth_max):
+            depth_max = self.__default_depth_max
         # if bins values are given as a list
         if isinstance(self._depth_interval, list):
             intervals = np.array(self._depth_interval)
-            if np.any(intervals < self._depth_min):
-                intervals = intervals[intervals >= self._depth_min]
-            if self._depth_min not in intervals:
-                intervals = np.append(intervals, self._depth_min)
-            if np.any(intervals > self._depth_max):
-                intervals = intervals[intervals <= self._depth_max]
-            if self._depth_max not in intervals:
-                intervals = np.append(intervals, self._depth_max)
+            if np.any(intervals < depth_min):
+                intervals = intervals[intervals >= depth_min]
+            if depth_min not in intervals:
+                intervals = np.append(intervals, depth_min)
+            if np.any(intervals > depth_max):
+                intervals = intervals[intervals <= depth_max]
+            if depth_max not in intervals:
+                intervals = np.append(intervals, depth_max)
             intervals.sort()
             depth_bins = pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
         # if only the bin value resolution is given
         else:
             depth_bins = pd.interval_range(
-                start=self._depth_min - self._depth_min % self._depth_interval,
-                end=self._depth_max,
+                start=depth_min - depth_min % self._depth_interval,
+                end=depth_max,
                 freq=self._depth_interval,
                 closed="right",
             )
@@ -556,9 +502,15 @@ class EvolutionProfile(BasePlot):
         pd.IntervalIndex
             Intervals to use for the date cut.
         """
+        if self._constraints.is_constrained(self._date_col):
+            date_min, date_max = self._constraints.get_extremes(self._date_col)
+        else:
+            date_min = self._storer.data[self._date_col].min()
+            date_max = self._storer.data[self._date_col].max()
+
         drng_generator = DateRangeGenerator(
-            start=self._date_min,
-            end=self._date_max,
+            start=date_min,
+            end=date_max,
             interval=self._interval,
             interval_length=self._interval_length,
         )
@@ -672,7 +624,9 @@ class EvolutionProfile(BasePlot):
             var_label = "all"
         else:
             var_label = self._variables.get(variable_name).label
-        df = self._slice_dataframe(variable_label=var_label)
+        df = self._constraints.apply_constraints(self._storer.data, inplace=False)
+        if var_label == "all":
+            df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
         var_count = (~df[var_label].isna()).astype(int)
         # Make cuts
@@ -710,10 +664,22 @@ class EvolutionProfile(BasePlot):
         if self._verbose > 1:
             print("\tCreating figure.")
         fig = plt.figure(figsize=[10, 5])
+        lat_col = self._variables.get(self._variables.latitude_var_name).label
+        lon_col = self._variables.get(self._variables.longitude_var_name).label
+        lat_min, lat_max = self._constraints.get_extremes(
+            lat_col,
+            df[lat_col].min(),
+            df[lat_col].max(),
+        )
+        lon_min, lon_max = self._constraints.get_extremes(
+            lon_col,
+            df[lon_col].min(),
+            df[lon_col].max(),
+        )
         suptitle = (
             "Evolution of data in the area of latitude in "
-            f"[{round(self._lat_min,2)},{round(self._lat_max,2)}] and longitude in "
-            f"[{round(self._lon_min,2)},{round(self._lon_max,2)}]"
+            f"[{round(lat_min,2)},{round(lat_max,2)}] and longitude in "
+            f"[{round(lon_min,2)},{round(lon_max,2)}]"
         )
         plt.suptitle(suptitle)
         ax = plt.subplot(1, 1, 1)

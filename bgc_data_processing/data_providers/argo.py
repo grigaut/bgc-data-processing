@@ -22,7 +22,7 @@ loader = netcdf_tools.NetCDFLoader(
         depth=DEFAULT_VARS["depth"]
         .in_file_as("PRES_ADJUSTED")
         .remove_when_nan()
-        .correct_with(lambda x: -x if x > 0 else x),
+        .correct_with(lambda x: -np.abs(x)),
         temperature=DEFAULT_VARS["temperature"].in_file_as("TEMP_ADJUSTED", "TEMP"),
         salinity=DEFAULT_VARS["salinity"].in_file_as("PSAL_ADJUSTED", "PSAl"),
         oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOX2_ADJUSTED", "DOX2"),

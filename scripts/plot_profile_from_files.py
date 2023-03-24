@@ -2,7 +2,7 @@
 
 import os
 from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, Constraints
 from bgc_data_processing.tracers import EvolutionProfile
 import datetime as dt
 
@@ -19,15 +19,17 @@ if __name__ == "__main__":
     SAVE: bool = CONFIG["SAVE"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
-    LATITUDE_CENTER: int | float = CONFIG["LATITUDE_CENTER"]
-    LONGITUDE_CENTER: int | float = CONFIG["LONGITUDE_CENTER"]
+    LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
-    BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
     INTERVAL: str = CONFIG["INTERVAL"]
     CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
     DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
     filepaths = [
@@ -55,10 +57,33 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     storer.remove_duplicates(priority_list=PRIORITY)
-    profile = EvolutionProfile(storer)
-    profile.set_dates_boundaries(DATE_MIN, DATE_MAX)
-    profile.set_depth_boundaries(DEPTH_MIN, DEPTH_MAX)
-    profile.set_geographic_bin(LATITUDE_CENTER, LONGITUDE_CENTER, BIN_SIZE)
+    variables = storer.variables
+    constraints = Constraints()
+    constraints.add_superset_constraint(
+        field_label=variables.get(variables.expocode_var_name).label,
+        values_superset=EXPOCODES_TO_LOAD,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.date_var_name).label,
+        minimal_value=DATE_MIN,
+        maximal_value=DATE_MAX,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.latitude_var_name).label,
+        minimal_value=LATITUDE_MIN,
+        maximal_value=LATITUDE_MAX,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.longitude_var_name).label,
+        minimal_value=LONGITUDE_MIN,
+        maximal_value=LONGITUDE_MAX,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.depth_var_name).label,
+        minimal_value=DEPTH_MIN,
+        maximal_value=DEPTH_MAX,
+    )
+    profile = EvolutionProfile(storer, constraints=constraints)
     profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
     profile.set_depth_interval(DEPTH_INTERVAL)
     if SHOW:

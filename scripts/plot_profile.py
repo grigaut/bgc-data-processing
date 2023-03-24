@@ -3,7 +3,7 @@
 import datetime as dt
 
 from bgc_data_processing import PROVIDERS_CONFIG, data_providers, parsers
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.tracers import EvolutionProfile
 
 if __name__ == "__main__":
@@ -19,14 +19,16 @@ if __name__ == "__main__":
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
-    LATITUDE_CENTER: int | float = CONFIG["LATITUDE_CENTER"]
-    LONGITUDE_CENTER: int | float = CONFIG["LONGITUDE_CENTER"]
-    BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
+    LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     INTERVAL: str = CONFIG["INTERVAL"]
     CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
     DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
     VARIABLE: str = CONFIG["VARIABLE"]
     PROVIDERS: list[str] = CONFIG["PROVIDERS"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
@@ -38,20 +40,34 @@ if __name__ == "__main__":
             print("Loading data : {}".format(data_src))
         exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
-        dset_loader.set_date_boundaries(
-            date_min=DATE_MIN,
-            date_max=DATE_MAX,
+        variables = dset_loader.variables
+        constraints = Constraints()
+        constraints.add_superset_constraint(
+            field_label=variables.get(variables.expocode_var_name).label,
+            values_superset=EXPOCODES_TO_LOAD,
         )
-        dset_loader.set_latitude_boundaries(
-            latitude_min=LATITUDE_CENTER - BIN_SIZE[0] / 2,
-            latitude_max=LATITUDE_CENTER + BIN_SIZE[0] / 2,
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.date_var_name).label,
+            minimal_value=DATE_MIN,
+            maximal_value=DATE_MAX,
         )
-        dset_loader.set_longitude_boundaries(
-            longitude_min=LONGITUDE_CENTER - BIN_SIZE[1] / 2,
-            longitude_max=LONGITUDE_CENTER + BIN_SIZE[1] / 2,
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.latitude_var_name).label,
+            minimal_value=LATITUDE_MIN,
+            maximal_value=LATITUDE_MAX,
+        )
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.longitude_var_name).label,
+            minimal_value=LONGITUDE_MIN,
+            maximal_value=LONGITUDE_MAX,
+        )
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.depth_var_name).label,
+            minimal_value=DEPTH_MIN,
+            maximal_value=DEPTH_MAX,
         )
         dset_loader.set_verbose(VERBOSE)
-        storer = dset_loader(exclude=exclude)
+        storer = dset_loader(exclude=exclude, constraints=constraints)
         category = dset_loader.category
         if category not in data_dict.keys():
             data_dict[category] = []
@@ -61,10 +77,8 @@ if __name__ == "__main__":
             print(f"Plotting {category} data")
         storer: Storer = sum(data)
         storer.remove_duplicates(priority_list=PRIORITY)
+        variables = storer.variables
         profile = EvolutionProfile(storer)
-        profile.set_dates_boundaries(DATE_MIN, DATE_MAX)
-        profile.set_depth_boundaries(DEPTH_MIN, DEPTH_MAX)
-        profile.set_geographic_bin(LATITUDE_CENTER, LONGITUDE_CENTER, BIN_SIZE)
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
         if SHOW:

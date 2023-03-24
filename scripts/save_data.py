@@ -11,7 +11,7 @@ from bgc_data_processing import (
     data_providers,
     dateranges,
 )
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, Constraints
 
 if __name__ == "__main__":
     # Script arguments
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
     SAVING_DIR = CONFIG["SAVING_DIR"]
     PRIORITY = CONFIG["PRIORITY"]
@@ -64,28 +65,42 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print("Loading data : {}".format(data_src))
         dset_loader = data_providers.LOADERS[data_src]
+        variables = dset_loader.variables
         dset_loader.set_saving_order(
             var_names=VARIABLES,
         )
-        dset_loader.set_date_boundaries(
-            date_min=DRNG.values.min(),
-            date_max=DRNG.values.max(),
+        # Constraint slicer
+        constraints = Constraints()
+        constraints.add_superset_constraint(
+            field_label=variables.get(variables.expocode_var_name).label,
+            values_superset=EXPOCODES_TO_LOAD,
         )
-        dset_loader.set_latitude_boundaries(
-            latitude_min=LATITUDE_MIN,
-            latitude_max=LATITUDE_MAX,
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.date_var_name).label,
+            minimal_value=DATE_MIN,
+            maximal_value=DATE_MAX,
         )
-        dset_loader.set_longitude_boundaries(
-            longitude_min=LONGITUDE_MIN,
-            longitude_max=LONGITUDE_MAX,
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.latitude_var_name).label,
+            minimal_value=LATITUDE_MIN,
+            maximal_value=LATITUDE_MAX,
         )
-        dset_loader.set_depth_boundaries(
-            depth_min=DEPTH_MIN,
-            depth_max=DEPTH_MAX,
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.longitude_var_name).label,
+            minimal_value=LONGITUDE_MIN,
+            maximal_value=LONGITUDE_MAX,
+        )
+        constraints.add_boundary_constraint(
+            field_label=variables.get(variables.depth_var_name).label,
+            minimal_value=DEPTH_MIN,
+            maximal_value=DEPTH_MAX,
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
-        df = dset_loader(exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"])
+        df = dset_loader(
+            constraints=constraints,
+            exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"],
+        )
         # Slicing data
         if VERBOSE > 0:
             print("Slicing data : {}".format(data_src))
