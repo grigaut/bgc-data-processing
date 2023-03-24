@@ -26,6 +26,8 @@ class MeshPlotter(BasePlot):
     ----------
     storer : Storer
         Data Storer containing data to plot.
+    constraints: DataSlicer
+            Constraint slicer.
     """
 
     _lat_bin: int | float = 1
@@ -35,8 +37,9 @@ class MeshPlotter(BasePlot):
     def __init__(
         self,
         storer: "Storer",
+        constraints: "DataSlicer" = DataSlicer(),
     ) -> None:
-        super().__init__(storer=storer)
+        super().__init__(storer=storer, constraints=constraints)
         depth_var_name = self._variables.depth_var_name
         depth_var_label = self._variables.get(depth_var_name).label
         self._data = storer.data.sort_values(depth_var_label, ascending=False)
@@ -96,10 +99,7 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        depth_label = self._variables.get(self._variables.depth_var_name).label
-        depth_min_cond = self._data[depth_label] >= self._depth_min
-        depth_max_cond = self._data[depth_label] <= self._depth_max
-        data = self._data[depth_min_cond & depth_max_cond].copy()
+        data = self._constraints.apply_constraints(self._data, False)
         if var_key == "all":
             data["all"] = 1
         else:
@@ -282,7 +282,19 @@ class MeshPlotter(BasePlot):
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
-        extent = [self._lon_min, self._lon_max, self._lat_min, self._lat_max]
+        lat_col = self._variables.get(self._variables.latitude_var_name).label
+        lon_col = self._variables.get(self._variables.longitude_var_name).label
+        lat_min, lat_max = self._constraints.get_extremes(
+            lat_col,
+            df[lat_col].min(),
+            df[lat_col].max(),
+        )
+        lon_min, lon_max = self._constraints.get_extremes(
+            lon_col,
+            df[lon_col].min(),
+            df[lon_col].max(),
+        )
+        extent = [lon_min, lon_max, lat_min, lat_max]
         ax.set_extent(extent, crs.PlateCarree())
         if not df.empty:
             X1, Y1, Z1 = self._mesh(
