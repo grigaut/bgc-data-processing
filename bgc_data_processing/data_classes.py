@@ -2,7 +2,8 @@
 
 
 import os
-from typing import Any
+from typing import Any, Callable
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -531,6 +532,143 @@ class Slice(Storer):
         >>> slice = Slicer.slice_on_dates(drng)
         """
         return storer.slice_on_dates(drng)
+
+
+class DataSlicer:
+    """Slicer object to slice dataframes."""
+
+    boundaries: dict[str, dict[str, int | float | datetime]] = {}
+    supersets: dict[str, list] = {}
+    constraints: dict[str, Callable] = {}
+
+    def __init__(self) -> None:
+        pass
+
+    def reset(self) -> None:
+        """Reset all defined constraints."""
+        self.boundaries = {}
+        self.supersets = {}
+        self.constraints = {}
+
+    def add_boundary_constraint(
+        self,
+        field_label: str,
+        minimal_value: int | float | datetime = np.nan,
+        maximal_value: int | float | datetime = np.nan,
+    ) -> None:
+        """Add a constraint of type 'boundary'.
+
+        Parameters
+        ----------
+        field_label : str
+            Name of the column to apply the constraint to.
+        minimal_value : int | float | datetime, optional
+            Minimum value for the column., by default np.nan
+        maximal_value : int | float | datetime, optional
+            Maximum value for the column., by default np.nan
+        """
+        is_min_nan = isinstance(minimal_value, float) and np.isnan(minimal_value)
+        is_max_nan = isinstance(maximal_value, float) and np.isnan(maximal_value)
+        if not (is_min_nan and is_max_nan):
+            self.boundaries[field_label] = {
+                "min": minimal_value,
+                "max": maximal_value,
+            }
+
+    def add_superset_constraint(
+        self,
+        field_label: str,
+        values_superset: list[Any] = [],
+    ) -> None:
+        """Add a constrainte of type 'superset'.
+
+        Parameters
+        ----------
+        field_label : str
+            Name of the column to apply the constraint to.
+        values_superset : list[Any]
+            All the values that the column can take.
+            If empty, no constraint will be applied.
+        """
+        if values_superset:
+            self.supersets[field_label] = values_superset
+
+    def _apply_boundary_constraints(self, df: pd.DataFrame) -> pd.Series:
+        """Evaluate all boundary constraints to a DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Datafarme to evaluate the constraints on.
+
+        Returns
+        -------
+        pd.Series
+            Boolean series of the rows verifying all constraints.
+        """
+        series = np.empty(df.iloc[:, 0].shape, dtype=bool)
+        series.fill(True)
+        for label, bounds in self.boundaries.items():
+            minimum = bounds["min"]
+            maximum = bounds["max"]
+            label_series = df[label]
+            is_min_nan = isinstance(minimum, float) and np.isnan(minimum)
+            is_max_nan = isinstance(maximum, float) and np.isnan(maximum)
+            if is_min_nan and is_max_nan:
+                continue
+            elif is_max_nan:
+                bool_series = label_series >= minimum
+            elif is_min_nan:
+                bool_series = label_series <= maximum
+            else:
+                bool_series = (label_series >= minimum) & (label_series <= maximum)
+            series = series & bool_series
+        return series
+
+    def _apply_superset_constraints(self, df: pd.DataFrame) -> pd.Series:
+        """Evaluate all superset constraints to a DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Datafarme to evaluate the constraints on.
+
+        Returns
+        -------
+        pd.Series
+            Boolean series of the rows verifying all constraints.
+        """
+        series = np.empty(df.iloc[:, 0].shape, dtype=bool)
+        series.fill(True)
+        for label, value_set in self.supersets.items():
+            if value_set:
+                label_series = df[label]
+                bool_series = label_series.isin(value_set)
+            series = series & bool_series
+        return series
+
+    def __call__(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
+        """Apply all constraints to a DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to apply the constraints to.
+        inplace : bool, optional
+            If False, return a copy. Otherwise, do operation inplace and return None.
+            , by default False
+
+        Returns
+        -------
+        pd.DataFrame | None
+            DataFrame whose rows verify all constraints or None if inplace=True.
+        """
+        bool_boundaries = self._apply_boundary_constraints(df)
+        bool_supersets = self._apply_superset_constraints(df)
+        if not inplace:
+            return df.loc[bool_boundaries & bool_supersets, :]
+        else:
+            df = df.loc[bool_boundaries & bool_supersets, :]
 
 
 class Reader:
