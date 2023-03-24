@@ -366,7 +366,8 @@ class NetCDFLoader(BaseLoader):
             Dataframe with provider column properly filled.
         """
         provider_var_name = self._variables.provider_var_name
-        df[self._variables.get(provider_var_name).label] = self.provider
+        df.insert(0, self._variables.get(provider_var_name).label, self.provider)
+        # df[self._variables.get(provider_var_name).label] = self.provider  #
         return df
 
     def _set_expocode(self, df: pd.DataFrame, file_id: str) -> pd.DataFrame:
@@ -385,7 +386,8 @@ class NetCDFLoader(BaseLoader):
             Dataframe with expocode column properly filled.
         """
         expocode_var_name = self._variables.expocode_var_name
-        df[self._variables.get(expocode_var_name).label] = file_id
+        df.insert(0, self._variables.get(expocode_var_name).label, file_id)
+        # df[self._variables.get(expocode_var_name).label] = file_id  #
         return df
 
     def _add_empty_cols(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -420,7 +422,8 @@ class NetCDFLoader(BaseLoader):
             Dataframe with wished types.
         """
         for var in self._variables:
-            df[var.label] = df[var.label].astype(var.type)
+            correct_type = df.pop(var.label).astype(var.type)
+            df.insert(len(df.columns), var.label, correct_type)
         return df
 
     def load(

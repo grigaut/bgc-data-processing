@@ -198,7 +198,9 @@ class BaseLoader(ABC):
         """
         # Modify type :
         for label, correction_func in self._variables.corrections.items():
-            to_correct[label] = to_correct[label].apply(correction_func)
+            correct = to_correct.pop(label).apply(correction_func)
+            to_correct.insert(len(to_correct.columns), label, correct)
+            # to_correct[label] = to_correct[label]  #
         return to_correct
 
 
