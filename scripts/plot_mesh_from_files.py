@@ -2,7 +2,7 @@
 
 import os
 from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, DataSlicer
 from bgc_data_processing.tracers import MeshPlotter
 import datetime as dt
 
@@ -54,15 +54,29 @@ if __name__ == "__main__":
         verbose=1,
     )
     storer.remove_duplicates(PRIORITY)
-    plot = MeshPlotter(storer)
-    plot.set_dates_boundaries(date_min=DATE_MIN, date_max=DATE_MAX)
-    plot.set_geographic_boundaries(
-        latitude_min=LATITUDE_MIN,
-        latitude_max=LATITUDE_MAX,
-        longitude_min=LONGITUDE_MIN,
-        longitude_max=LONGITUDE_MAX,
+    variables = storer.variables
+    constraints = DataSlicer()
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.date_var_name).label,
+        minimal_value=DATE_MIN,
+        maximal_value=DATE_MAX,
     )
-    plot.set_depth_boundaries(depth_min=DEPTH_MIN, depth_max=DEPTH_MAX)
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.latitude_var_name).label,
+        minimal_value=LATITUDE_MIN,
+        maximal_value=LATITUDE_MAX,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.longitude_var_name).label,
+        minimal_value=LONGITUDE_MIN,
+        maximal_value=LONGITUDE_MAX,
+    )
+    constraints.add_boundary_constraint(
+        field_label=variables.get(variables.depth_var_name).label,
+        minimal_value=DEPTH_MIN,
+        maximal_value=DEPTH_MAX,
+    )
+    plot = MeshPlotter(storer, constraints=constraints)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
     date_min = DATE_MIN.strftime("%Y%m%d")
