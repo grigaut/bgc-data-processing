@@ -12,6 +12,7 @@ from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.data_classes import DataSlicer
     from matplotlib.figure import Figure
 
 
@@ -35,15 +36,8 @@ class BaseLoader(ABC):
     """
 
     _verbose: int = 1
-    _lon_min: int | float = np.nan
-    _lon_max: int | float = np.nan
-    _lat_min: int | float = np.nan
-    _lat_max: int | float = np.nan
-    _depth_min: int | float = np.nan
-    _depth_max: int | float = np.nan
     _date_min: dt.datetime | dt.date = np.nan
     _date_max: dt.datetime | dt.date = np.nan
-    _accepted_expocodes: list[str] = []
 
     def __init__(
         self,
@@ -105,11 +99,13 @@ class BaseLoader(ABC):
         return self._variables
 
     @abstractmethod
-    def __call__(self, exclude: list = []) -> "Storer":
+    def __call__(self, constraints: "DataSlicer", exclude: list = []) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
+        constraints: DataSlicer
+            Constraint slicer.
         exclude : list, optional
             Files not to load., by default []
 
@@ -168,68 +164,6 @@ class BaseLoader(ABC):
         """
         self._variables.set_saving_order(var_names=var_names)
 
-    def set_accepted_expocodes(self, expocodes: list[str] = []) -> None:
-        """Set the list of accepted expocode values.
-
-        Parameters
-        ----------
-        expocodes : list[str], optional
-            List of the expocodes to include, all will be included if empty.
-            , by default []
-        """
-        self._accepted_expocodes = expocodes
-
-    def set_longitude_boundaries(
-        self,
-        longitude_min: int | float,
-        longitude_max: int | float,
-    ) -> None:
-        """Sets boundaries for longitude variable.
-
-        Parameters
-        ----------
-        longitude_min : int | float
-            Minimal value for longitude (included).
-        longitude_max : int | float
-            Maximal value for longitude (included).
-        """
-        self._lon_min = longitude_min
-        self._lon_max = longitude_max
-
-    def set_latitude_boundaries(
-        self,
-        latitude_min: int | float,
-        latitude_max: int | float,
-    ) -> None:
-        """Sets boundaries for latitude variable.
-
-        Parameters
-        ----------
-        latitude_min : int | float
-            Minimal value for latitude (included).
-        latitude_max : int | float
-            Maximal value for latitude (included).
-        """
-        self._lat_min = latitude_min
-        self._lat_max = latitude_max
-
-    def set_depth_boundaries(
-        self,
-        depth_min: int | float,
-        depth_max: int | float,
-    ) -> None:
-        """Sets boundaries for depth variable.
-
-        Parameters
-        ----------
-        depth_min : int | float
-            Minimal value for depth (included).
-        depth_max : int | float
-            Maximal value for depth (included).
-        """
-        self._depth_min = depth_min
-        self._depth_max = depth_max
-
     def set_date_boundaries(
         self,
         date_min: dt.datetime | dt.date = np.nan,
@@ -252,81 +186,6 @@ class BaseLoader(ABC):
             self._date_max = np.nan
         else:
             self._date_max = pd.to_datetime(date_max)
-
-    def _apply_boundaries(
-        self,
-        df: pd.DataFrame,
-        var_name: str,
-        min: Any,
-        max: Any,
-    ) -> pd.DataFrame:
-        """Applies boundaries restrictions on a dataframe.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Dataframe to reduce using boundaries values.
-        var_name : str
-            Variable name to consider.
-        min : Any
-            Minimal value to use.
-        max : Any
-            Maximal value to use.
-
-        Returns
-        -------
-        pd.DataFrame
-            Reduced DataFrame.
-
-        Examples
-        --------
-        >>> df = self._apply_boundaries(not_bounded_df,
-        ...     "DATE",
-        ...     self._date_min,
-        ...     self._date_max,
-        ... )
-
-        """
-        if var_name not in self._variables.keys():
-            return df
-        is_min_nan = isinstance(min, float) and np.isnan(min)
-        is_max_nan = isinstance(max, float) and np.isnan(max)
-        if is_min_nan and is_max_nan:
-            return df
-        to_compare = df[self._variables.labels[var_name]]
-        if is_min_nan:
-            after_min = to_compare <= max
-            return df.loc[after_min, :].copy()
-        elif is_max_nan:
-            before_max = to_compare >= min
-            return df.loc[before_max, :].copy()
-        else:
-            after_min = to_compare >= min
-            before_max = to_compare <= max
-            return df.loc[after_min & before_max, :].copy()
-
-    def _select_expocodes(
-        self,
-        df: pd.DataFrame,
-    ) -> pd.DataFrame:
-        """Select rows matching the expocodes' requirements.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Original dataframe.
-
-        Returns
-        -------
-        pd.DataFrame
-            Dataframe with whose expocode values match requirements.
-        """
-        if self._accepted_expocodes:
-            expocode_var = self._variables.get(self._variables.expocode_var_name)
-            isin = df[expocode_var.label].isin(self._accepted_expocodes)
-            return df.filter(df[isin].index, axis=0)
-        else:
-            return df
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
         """Removes rows.

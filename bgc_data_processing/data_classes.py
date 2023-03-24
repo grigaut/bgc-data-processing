@@ -670,6 +670,40 @@ class DataSlicer:
         else:
             df = df.loc[bool_boundaries & bool_supersets, :]
 
+    def apply_specific_constraint(
+        self, field_label: str, df: pd.DataFrame, inplace: bool = False
+    ) -> pd.DataFrame | None:
+        """Only apply a single constraint.
+
+        Parameters
+        ----------
+        field_label : str
+            Label of the field to apply the constraint to.
+        df : pd.DataFrame
+            DataFrame to apply the constraints to.
+        inplace : bool, optional
+            If False, return a copy. Otherwise, do operation inplace and return None.
+            , by default False
+
+        Returns
+        -------
+        pd.DataFrame | None
+            DataFrame whose rows verify all constraints or None if inplace=True.
+        """
+        constraint = DataSlicer()
+        if field_label in self.boundaries:
+            constraint.add_boundary_constraint(
+                field_label=field_label,
+                minimal_value=self.boundaries[field_label]["min"],
+                maximal_value=self.boundaries[field_label]["max"],
+            )
+        if field_label in self.supersets:
+            constraint.add_superset_constraint(
+                field_label=field_label,
+                value_superset=self.supersets[field_label],
+            )
+        return constraint.apply_constraints(df=df, inplace=inplace)
+
 
 class Reader:
     """Reading routine to parse csv files.

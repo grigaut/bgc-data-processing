@@ -9,7 +9,7 @@ import pandas as pd
 from pandas.errors import EmptyDataError
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, DataSlicer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import ExistingVar, VariablesStorer
@@ -49,11 +49,17 @@ class CSVLoader(BaseLoader):
         self._read_params = read_params
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
-    def __call__(self, exclude: list = []) -> "Storer":
+    def __call__(
+        self,
+        constraints: DataSlicer = DataSlicer(),
+        exclude: list = [],
+    ) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
+        constraints : DataSlicer, optional
+            Constraints slicer., by default DataSlicer()
         exclude : list, optional
             Files not to load., by default []
 
@@ -65,7 +71,7 @@ class CSVLoader(BaseLoader):
         filepaths = self._select_filepaths(exclude=exclude)
         data_list = []
         for filepath in filepaths:
-            data_list.append(self.load(filepath=filepath))
+            data_list.append(self.load(filepath=filepath, constraints=constraints))
         data = pd.concat(data_list, ignore_index=True, axis=0)
         return Storer(
             data=data,
@@ -251,13 +257,19 @@ class CSVLoader(BaseLoader):
                 df[var.label] = df[var.label].astype(var.type).str.strip()
         return df
 
-    def load(self, filepath: str) -> pd.DataFrame:
+    def load(
+        self,
+        filepath: str,
+        constraints: DataSlicer = DataSlicer(),
+    ) -> pd.DataFrame:
         """Loading function to load a csv file from filepath.
 
         Parameters
         ----------
         filepath: str
             Path to the file to load.
+        constraints : DataSlicer, optional
+            Constraints slicer., by default DataSlicer()
 
         Returns
         -------
@@ -270,20 +282,6 @@ class CSVLoader(BaseLoader):
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)
         df_corr = self._correct(df_type)
-        df_bdate = self._apply_boundaries(
-            df_corr, "DATE", self._date_min, self._date_max
-        )
-
-        df_blat = self._apply_boundaries(
-            df_bdate, "LATITUDE", self._lat_min, self._lat_max
-        )
-
-        df_blon = self._apply_boundaries(
-            df_blat, "LONGITUDE", self._lon_min, self._lon_max
-        )
-        df_bdep = self._apply_boundaries(
-            df_blon, "DEPH", self._depth_min, self._depth_max
-        )
-        df_expo = self._select_expocodes(df_bdep)
-        df_rm = self.remove_nan_rows(df_expo)
+        df_sliced = constraints.apply_constraints(df_corr)
+        df_rm = self.remove_nan_rows(df_sliced)
         return df_rm

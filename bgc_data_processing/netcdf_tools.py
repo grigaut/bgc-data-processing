@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_classes import Storer, DataSlicer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
@@ -53,11 +53,17 @@ class NetCDFLoader(BaseLoader):
     ) -> None:
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
-    def __call__(self, exclude: list = []) -> "Storer":
+    def __call__(
+        self,
+        constraints: DataSlicer = DataSlicer(),
+        exclude: list = [],
+    ) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
+        constraints : DataSlicer, optional
+            Constraints slicer., by default DataSlicer()
         exclude : list, optional
             Files not to load., by default []
 
@@ -69,7 +75,7 @@ class NetCDFLoader(BaseLoader):
         filepaths = self._select_filepaths(exclude=exclude)
         data_list = []
         for filepath in filepaths:
-            data_list.append(self.load(filepath=filepath))
+            data_list.append(self.load(filepath=filepath, constraints=constraints))
         data = pd.concat(data_list, ignore_index=True, axis=0)
         return Storer(
             data=data,
@@ -417,13 +423,19 @@ class NetCDFLoader(BaseLoader):
             df[var.label] = df[var.label].astype(var.type)
         return df
 
-    def load(self, filepath: str) -> pd.DataFrame:
+    def load(
+        self,
+        filepath: str,
+        constraints: DataSlicer = DataSlicer(),
+    ) -> pd.DataFrame:
         """Loading function to load a netCDF file from filepath.
 
         Parameters
         ----------
         filepath: str
             Path to the file to load.
+        constraints : DataSlicer, optional
+            Constraints slicer., by default DataSlicer()
 
         Returns
         -------
@@ -436,23 +448,16 @@ class NetCDFLoader(BaseLoader):
         nc_data = self._read(filepath=filepath)
         df_format = self._format(nc_data)
         df_dates = self._set_dates(df_format)
-        df_bdates = self._apply_boundaries(
-            df_dates, "DATE", self._date_min, self._date_max
+        df_dates_sliced = constraints.apply_specific_constraint(
+            field_label=self._variables.get(self._variables.date_var_name).label,
+            df=df_dates,
+            inplace=False,
         )
-        df_blat = self._apply_boundaries(
-            df_bdates, "LATITUDE", self._lat_min, self._lat_max
-        )
-        df_blon = self._apply_boundaries(
-            df_blat, "LONGITUDE", self._lon_min, self._lon_max
-        )
-        df_prov = self._set_provider(df_blon)
+        df_prov = self._set_provider(df_dates_sliced)
         df_expo = self._set_expocode(df_prov, file_id)
         df_ecols = self._add_empty_cols(df_expo)
         df_types = self._convert_type(df_ecols)
         df_corr = self._correct(df_types)
-        df_bdep = self._apply_boundaries(
-            df_corr, "DEPH", self._depth_min, self._depth_max
-        )
-        df_expo = self._select_expocodes(df_bdep)
-        df_rm = self.remove_nan_rows(df_expo)
+        df_sliced = constraints.apply_constraints(df_corr)
+        df_rm = self.remove_nan_rows(df_sliced)
         return df_rm
