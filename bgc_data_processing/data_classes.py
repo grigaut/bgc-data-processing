@@ -534,7 +534,7 @@ class Slice(Storer):
         return storer.slice_on_dates(drng)
 
 
-class DataSlicer:
+class Constraints:
     """Slicer object to slice dataframes."""
 
     boundaries: dict[str, dict[str, int | float | datetime]] = {}
@@ -690,7 +690,7 @@ class DataSlicer:
         pd.DataFrame | None
             DataFrame whose rows verify all constraints or None if inplace=True.
         """
-        constraint = DataSlicer()
+        constraint = Constraints()
         if field_label in self.boundaries:
             constraint.add_boundary_constraint(
                 field_label=field_label,

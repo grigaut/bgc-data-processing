@@ -2,7 +2,7 @@
 
 import os
 from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.data_classes import Storer, DataSlicer
+from bgc_data_processing.data_classes import Storer, Constraints
 from bgc_data_processing.tracers import MeshPlotter
 import datetime as dt
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    constraints = DataSlicer()
+    constraints = Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,

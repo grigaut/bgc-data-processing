@@ -10,7 +10,7 @@ from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
-    from bgc_data_processing.data_classes import DataSlicer
+    from bgc_data_processing.data_classes import Constraints
     from matplotlib.figure import Figure
 
 
@@ -95,12 +95,12 @@ class BaseLoader(ABC):
         return self._variables
 
     @abstractmethod
-    def __call__(self, constraints: "DataSlicer", exclude: list = []) -> "Storer":
+    def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
-        constraints: DataSlicer
+        constraints: Constraints
             Constraint slicer.
         exclude : list, optional
             Files not to load., by default []
@@ -209,11 +209,11 @@ class BasePlot(ABC):
     ----------
     storer : Storer
         Storer to plot data of.
-    constraints: DataSlicer
+    constraints: Constraints
             Constraint slicer.
     """
 
-    def __init__(self, storer: "Storer", constraints: "DataSlicer") -> None:
+    def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
         self._storer = storer
         self._variables = storer.variables
         self._constraints = constraints

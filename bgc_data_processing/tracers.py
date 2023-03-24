@@ -10,7 +10,7 @@ import pandas as pd
 from cartopy import crs, feature
 
 from bgc_data_processing.base import BasePlot
-from bgc_data_processing.data_classes import Storer, DataSlicer
+from bgc_data_processing.data_classes import Storer, Constraints
 from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class MeshPlotter(BasePlot):
     ----------
     storer : Storer
         Data Storer containing data to plot.
-    constraints: DataSlicer
+    constraints: Constraints
             Constraint slicer.
     """
 
@@ -37,7 +37,7 @@ class MeshPlotter(BasePlot):
     def __init__(
         self,
         storer: "Storer",
-        constraints: "DataSlicer" = DataSlicer(),
+        constraints: "Constraints" = Constraints(),
     ) -> None:
         super().__init__(storer=storer, constraints=constraints)
         depth_var_name = self._variables.depth_var_name
@@ -390,7 +390,7 @@ class EvolutionProfile(BasePlot):
     ----------
     storer : Storer
         Storer to map data of.
-    constraints: DataSlicer
+    constraints: Constraints
             Constraint slicer.
     """
 
@@ -405,7 +405,7 @@ class EvolutionProfile(BasePlot):
     def __init__(
         self,
         storer: "Storer",
-        constraints: "DataSlicer" = DataSlicer(),
+        constraints: "Constraints" = Constraints(),
     ) -> None:
 
         super().__init__(storer, constraints)

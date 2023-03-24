@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer, DataSlicer
+from bgc_data_processing.data_classes import Storer, Constraints
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
@@ -55,15 +55,15 @@ class NetCDFLoader(BaseLoader):
 
     def __call__(
         self,
-        constraints: DataSlicer = DataSlicer(),
+        constraints: Constraints = Constraints(),
         exclude: list = [],
     ) -> "Storer":
         """Loads all files for the loader.
 
         Parameters
         ----------
-        constraints : DataSlicer, optional
-            Constraints slicer., by default DataSlicer()
+        constraints : Constraints, optional
+            Constraints slicer., by default Constraints()
         exclude : list, optional
             Files not to load., by default []
 
@@ -426,7 +426,7 @@ class NetCDFLoader(BaseLoader):
     def load(
         self,
         filepath: str,
-        constraints: DataSlicer = DataSlicer(),
+        constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Loading function to load a netCDF file from filepath.
 
@@ -434,8 +434,8 @@ class NetCDFLoader(BaseLoader):
         ----------
         filepath: str
             Path to the file to load.
-        constraints : DataSlicer, optional
-            Constraints slicer., by default DataSlicer()
+        constraints : Constraints, optional
+            Constraints slicer., by default Constraints()
 
         Returns
         -------

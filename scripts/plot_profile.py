@@ -3,7 +3,7 @@
 import datetime as dt
 
 from bgc_data_processing import PROVIDERS_CONFIG, data_providers, parsers
-from bgc_data_processing.data_classes import DataSlicer, Storer
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.tracers import EvolutionProfile
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables
-        constraints = DataSlicer()
+        constraints = Constraints()
         constraints.add_superset_constraint(
             field_label=variables.get(variables.expocode_var_name).label,
             values_superset=EXPOCODES_TO_LOAD,

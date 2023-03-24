@@ -11,7 +11,7 @@ from bgc_data_processing import (
     data_providers,
     dateranges,
 )
-from bgc_data_processing.data_classes import Storer, DataSlicer
+from bgc_data_processing.data_classes import Storer, Constraints
 
 if __name__ == "__main__":
     # Script arguments
@@ -70,7 +70,7 @@ if __name__ == "__main__":
             var_names=VARIABLES,
         )
         # Constraint slicer
-        constraints = DataSlicer()
+        constraints = Constraints()
         constraints.add_superset_constraint(
             field_label=variables.get(variables.expocode_var_name).label,
             values_superset=EXPOCODES_TO_LOAD,
