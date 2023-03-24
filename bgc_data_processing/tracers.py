@@ -101,7 +101,7 @@ class MeshPlotter(BasePlot):
         """
         data = self._constraints.apply_constraints(self._data, False)
         if var_key == "all":
-            data["all"] = 1
+            data.insert(0, var_key, 1)
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
@@ -651,8 +651,8 @@ class EvolutionProfile(BasePlot):
         else:
             var_label = self._variables.get(variable_name).label
         df = self._constraints.apply_constraints(self._storer.data, inplace=False)
-        if variable_name == "all":
-            df["all"] = 1
+        if var_label == "all":
+            df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
         var_count = (~df[var_label].isna()).astype(int)
         # Make cuts
