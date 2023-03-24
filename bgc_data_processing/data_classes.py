@@ -717,7 +717,7 @@ class DataSlicer:
         bool
             True if the field has a constraint.
         """
-        in_boundaries = field_name in self.constraints.keys()
+        in_boundaries = field_name in self.boundaries.keys()
         in_supersets = field_name in self.supersets.keys()
         return in_boundaries or in_supersets
 
