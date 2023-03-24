@@ -26,14 +26,14 @@ DATE_MAX = "20200131"
 INTERVAL = "month"
 #? CUSTOM_INTERVAL: int
 CUSTOM_INTERVAL = 8
-#? LATITUDE_CENTER: int | float
-LATITUDE_CENTER = 70
-#? LONGITUDE_CENTER: int | float
-LONGITUDE_CENTER = 15
-#? BIN_SIZE: list[float] | list[int] | float | int: size of the area to consider for the profile
-# If list, first component is latitude size, second is longitude size
-# If int or float, represents both latitude and longitude size
-BIN_SIZE = [10, 30]
+#? LATITUDE_MIN: int | float: minimum latitude boundary (included)
+LATITUDE_MIN = 50
+#? LATITUDE_MAX: int | float: maximum latitude boundary (included)
+LATITUDE_MAX = 90
+#? LONGITUDE_MIN: int | float: minimum longitude boundary (included)
+LONGITUDE_MIN = -180
+#? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
+LONGITUDE_MAX = 180
 #? DEPTH_MIN: int | float: minimum depth boundary (included), 'nan' indicate not boundary
 DEPTH_MIN = nan
 #? DEPTH_MAX: int | float: maximum depth boundary (included), 'nan' indicate not boundary

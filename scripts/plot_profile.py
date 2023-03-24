@@ -19,9 +19,10 @@ if __name__ == "__main__":
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
-    LATITUDE_CENTER: int | float = CONFIG["LATITUDE_CENTER"]
-    LONGITUDE_CENTER: int | float = CONFIG["LONGITUDE_CENTER"]
-    BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
+    LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
+    LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
+    LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
+    LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     INTERVAL: str = CONFIG["INTERVAL"]
     CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
     DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
@@ -52,13 +53,13 @@ if __name__ == "__main__":
         )
         constraints.add_boundary_constraint(
             field_label=variables.get(variables.latitude_var_name).label,
-            minimal_value=LATITUDE_CENTER - BIN_SIZE[0],
-            maximal_value=LATITUDE_CENTER + BIN_SIZE[0],
+            minimal_value=LATITUDE_MIN,
+            maximal_value=LATITUDE_MAX,
         )
         constraints.add_boundary_constraint(
             field_label=variables.get(variables.longitude_var_name).label,
-            minimal_value=LONGITUDE_CENTER - BIN_SIZE[1],
-            maximal_value=LONGITUDE_CENTER + BIN_SIZE[1],
+            minimal_value=LONGITUDE_MIN,
+            maximal_value=LONGITUDE_MAX,
         )
         constraints.add_boundary_constraint(
             field_label=variables.get(variables.depth_var_name).label,
