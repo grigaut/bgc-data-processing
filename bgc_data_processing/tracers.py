@@ -467,6 +467,10 @@ class EvolutionProfile(BasePlot):
         else:
             depth_min = self._storer.data[self._depth_col].min()
             depth_max = self.__default_depth_max
+        if np.isnan(depth_min):
+            depth_min = self._storer.data[self._depth_col].min()
+        if np.isnan(depth_max):
+            depth_max = self.__default_depth_max
         # if bins values are given as a list
         if isinstance(self._depth_interval, list):
             intervals = np.array(self._depth_interval)
