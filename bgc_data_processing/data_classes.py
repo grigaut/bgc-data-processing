@@ -781,7 +781,6 @@ class DataSlicer:
         elif not superset_in:
             all_min = constraints["boundary"]["min"]
             all_max = constraints["boundary"]["max"]
-            print(field_name)
             return all_min, all_max
 
 
