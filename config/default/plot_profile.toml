@@ -42,6 +42,9 @@ DEPTH_MAX = 0
 # If of type int: vertical axis will be divided in equally sized bins of size DEPTH_INTERVAL
 # If of type list[int]: vertical axis will be divided according to the given levels (levls value ar supposed to negative)
 DEPTH_INTERVAL = 10
+#? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
+# If empty, no discrimination on expocode will be conducted
+EXPOCODES_TO_LOAD = []
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? VERBOSE: int: verbose value, the higher, the more informations.

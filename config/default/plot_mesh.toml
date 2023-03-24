@@ -33,6 +33,9 @@ BIN_SIZE = [0.5, 1.5]
 VARIABLE = "all"
 #? PROVIDERS: list[str]: providers to use data from
 PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
+# If empty, no discrimination on expocode will be conducted
+EXPOCODES_TO_LOAD = []
 #? CONSIDER_DEPTH: bool
 # If true: the plotted density will consider all data points (even the ones in the water column)
 # If false: the plotted density will only consider one data point per location and date

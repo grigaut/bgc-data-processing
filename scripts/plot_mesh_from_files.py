@@ -27,6 +27,7 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
     CONSIDER_DEPTH: bool = CONFIG["CONSIDER_DEPTH"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
@@ -56,6 +57,10 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
     constraints = DataSlicer()
+    constraints.add_superset_constraint(
+        field_label=variables.get(variables.expocode_var_name).label,
+        values_superset=EXPOCODES_TO_LOAD,
+    )
     constraints.add_boundary_constraint(
         field_label=variables.get(variables.date_var_name).label,
         minimal_value=DATE_MIN,

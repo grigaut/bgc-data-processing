@@ -27,6 +27,7 @@ if __name__ == "__main__":
     DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
     VARIABLE: str = CONFIG["VARIABLE"]
     PROVIDERS: list[str] = CONFIG["PROVIDERS"]
+    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
@@ -40,6 +41,10 @@ if __name__ == "__main__":
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables
         constraints = DataSlicer()
+        constraints.add_superset_constraint(
+            field_label=variables.get(variables.expocode_var_name).label,
+            values_superset=EXPOCODES_TO_LOAD,
+        )
         constraints.add_boundary_constraint(
             field_label=variables.get(variables.date_var_name).label,
             minimal_value=DATE_MIN,
