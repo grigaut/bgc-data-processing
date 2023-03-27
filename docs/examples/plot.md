@@ -30,11 +30,15 @@ storer = Storer.from_files(
     unit_row_index=1,
     delim_whitespace=False,
 )
+# Constraints
+constraints = data_classes.Constraints()            # (1)!
 # Mapping
-mesh = MeshPlotter(storer)
+mesh = MeshPlotter(storer, constraints=constraints)
 mesh.set_bin_size(bins_size=[0.5,1.5])
 mesh.show(
     variable_name="PHOS",
     title="Phosphate data density",
 )
 ```
+
+1. No constraint defined for this example
