@@ -25,6 +25,18 @@ LATITUDE_MAX = 90
 LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 180
+#? LATITUDE_MAP_MIN: int | float: minimum latitude boundary (included)
+# If set to nan, the map boundaries will match the extremum of the dataframe
+LATITUDE_MAP_MIN = nan
+#? LATITUDE_MAP_MAX: int | float: maximum latitude boundary (included)
+# If set to nan, the map boundaries will match the extremum of the dataframe
+LATITUDE_MAP_MAX = nan
+#? LONGITUDE_MAP_MIN: int | float: minimum longitude boundary (included)
+# If set to nan, the map boundaries will match the extremum of the dataframe
+LONGITUDE_MAP_MIN = nan
+#? LONGITUDE_MAP_MAX: int | float: maximum longitude boundary (included)
+# If set to nan, the map boundaries will match the extremum of the dataframe
+LONGITUDE_MAP_MAX = nan
 #? DEPTH_MIN: int | float: minimum depth boundary (included)
 DEPTH_MIN = nan
 #? DEPTH_MAX: int | float: maximum depth boundary (included)
