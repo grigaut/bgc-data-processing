@@ -43,6 +43,10 @@ class MeshPlotter(BasePlot):
         self._lat_bin: int | float = self.__default_lat_bin
         self._lon_bin: int | float = self.__default_lon_bin
         self._depth_density: bool = self.__default_depth_density
+        self._lat_map_min = np.nan
+        self._lat_map_max = np.nan
+        self._lon_map_min = np.nan
+        self._lon_map_max = np.nan
         depth_var_name = self._variables.depth_var_name
         depth_var_label = self._variables.get(depth_var_name).label
         self._data = storer.data.sort_values(depth_var_label, ascending=False)
@@ -151,6 +155,51 @@ class MeshPlotter(BasePlot):
         cut.name = cut_name
         return cut, intervals_mid
 
+    def _get_map_extent(self, df: pd.DataFrame) -> list[int | float]:
+        """Compute map's extents.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame to plot. Its boundaries values will be used
+             if map bondaries are not specified.
+
+        Returns
+        -------
+        list[int | float]
+            Minimal longitude, maximal longitude, minimal latitude, maximal latitude.
+        """
+        lat_col = self._variables.get(self._variables.latitude_var_name).label
+        lon_col = self._variables.get(self._variables.longitude_var_name).label
+        if not np.isnan(self._lat_map_min):
+            default_lat_map_min = self._lat_map_min
+        else:
+            default_lat_map_min = df[lat_col].min()
+        if not np.isnan(self._lat_map_max):
+            default_lat_map_max = self._lat_map_max
+        else:
+            default_lat_map_max = df[lat_col].max()
+        if not np.isnan(self._lon_map_min):
+            default_lon_map_min = self._lon_map_min
+        else:
+            default_lon_map_min = df[lon_col].min()
+        if not np.isnan(self._lon_map_max):
+            default_lon_map_max = self._lon_map_max
+        else:
+            default_lon_map_max = df[lon_col].max()
+
+        lat_min, lat_max = self._constraints.get_extremes(
+            lat_col,
+            default_lat_map_min,
+            default_lat_map_max,
+        )
+        lon_min, lon_max = self._constraints.get_extremes(
+            lon_col,
+            default_lon_map_min,
+            default_lon_map_max,
+        )
+        return [lon_min, lon_max, lat_min, lat_max]
+
     def set_bins_size(
         self,
         bins_size: int | float | Iterable[int | float],
@@ -180,6 +229,36 @@ class MeshPlotter(BasePlot):
             Whether to consider all value in the water for density mapping.
         """
         self._depth_density = consider_depth
+
+    def set_map_boundaries(
+        self,
+        latitude_min: int | float = np.nan,
+        latitude_max: int | float = np.nan,
+        longitude_min: int | float = np.nan,
+        longitude_max: int | float = np.nan,
+    ) -> None:
+        """Define the boundaries of the map \
+        (different from the boundaries of the plotted data).
+
+        Parameters
+        ----------
+        latitude_min : int | float, optional
+            Minimum latitude, by default np.nan
+        latitude_max : int | float, optional
+            Maximal latitude, by default np.nan
+        longitude_min : int | float, optional
+            Mnimal longitude, by default np.nan
+        longitude_max : int | float, optional
+            Maximal longitude, by default np.nan
+        """
+        if not np.isnan(latitude_min):
+            self._lat_map_min = latitude_min
+        if not np.isnan(latitude_max):
+            self._lat_map_max = latitude_max
+        if not np.isnan(longitude_min):
+            self._lon_map_min = longitude_min
+        if not np.isnan(longitude_max):
+            self._lon_map_max = longitude_max
 
     def _mesh(
         self,
@@ -285,19 +364,7 @@ class MeshPlotter(BasePlot):
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
-        lat_col = self._variables.get(self._variables.latitude_var_name).label
-        lon_col = self._variables.get(self._variables.longitude_var_name).label
-        lat_min, lat_max = self._constraints.get_extremes(
-            lat_col,
-            df[lat_col].min(),
-            df[lat_col].max(),
-        )
-        lon_min, lon_max = self._constraints.get_extremes(
-            lon_col,
-            df[lon_col].min(),
-            df[lon_col].max(),
-        )
-        extent = [lon_min, lon_max, lat_min, lat_max]
+        extent = self._get_map_extent(df)
         ax.set_extent(extent, crs.PlateCarree())
         if not df.empty:
             X1, Y1, Z1 = self._mesh(
