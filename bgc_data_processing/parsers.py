@@ -373,8 +373,6 @@ class ConfigParser(TomlParser):
         its content when savong file and 'clean' will erase the directory if it exists.
     """
 
-    _parsed = False
-
     def __init__(
         self,
         filepath: str,
@@ -386,6 +384,7 @@ class ConfigParser(TomlParser):
         super().__init__(filepath, check_types)
         self.dates_vars_keys = dates_vars_keys
         self.dirs_vars_keys: list[list[str]] = []
+        self._parsed = False
         for var in dirs_vars_keys:
             if isinstance(var, list):
                 self.dirs_vars_keys.append(var)

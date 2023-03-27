@@ -30,9 +30,9 @@ class MeshPlotter(BasePlot):
             Constraint slicer.
     """
 
-    _lat_bin: int | float = 1
-    _lon_bin: int | float = 1
-    _depth_density: bool = True
+    __default_lat_bin: int | float = 1
+    __default_lon_bin: int | float = 1
+    __default_depth_density: bool = True
 
     def __init__(
         self,
@@ -40,6 +40,9 @@ class MeshPlotter(BasePlot):
         constraints: "Constraints" = Constraints(),
     ) -> None:
         super().__init__(storer=storer, constraints=constraints)
+        self._lat_bin: int | float = self.__default_lat_bin
+        self._lon_bin: int | float = self.__default_lon_bin
+        self._depth_density: bool = self.__default_depth_density
         depth_var_name = self._variables.depth_var_name
         depth_var_label = self._variables.get(depth_var_name).label
         self._data = storer.data.sort_values(depth_var_label, ascending=False)
@@ -398,9 +401,6 @@ class EvolutionProfile(BasePlot):
     __default_interval_length: int = 10
     __default_depth_interval: int = 100
     __default_depth_max: int = 0
-    _interval: str = __default_interval
-    _interval_length: int = __default_interval_length
-    _depth_interval: int | float = __default_depth_interval
 
     def __init__(
         self,
@@ -409,6 +409,9 @@ class EvolutionProfile(BasePlot):
     ) -> None:
 
         super().__init__(storer, constraints)
+        self._interval: str = self.__default_interval
+        self._interval_length: int = self.__default_interval_length
+        self._depth_interval: int | float = self.__default_depth_interval
         self._depth_col = self._variables.get(self._variables.depth_var_name).label
         self._date_col = self._variables.get(self._variables.date_var_name).label
 

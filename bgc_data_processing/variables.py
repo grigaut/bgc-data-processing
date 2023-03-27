@@ -171,11 +171,44 @@ class TemplateVar(BaseVar):
 
 
 class NotExistingVar(BaseVar):
-    """Class to represent variables which don't exist in the dataset."""
+    """Class to represent variables which don't exist in the dataset.
 
-    exist_in_dset: bool = False
-    _remove_if_nan: bool = False
-    _remove_if_all_nan: bool = False
+    Parameters
+    ----------
+    name : str
+        'Official' name for the variable : name to use when displaying the variable.
+    unit : str
+        Variable unit (written using the following format:
+        [deg_C] for Celsius degree of [kg] for kilograms).
+    var_type : str
+        Variable type (str, int, datetime...).
+        It will be used to convert the data using df[variable].astype(type)
+    default: Any
+        Default value to set instead of nan., by default np.nan
+    name_format: str
+        Format to use to save the data name and unit in a csv of txt file.
+        , by default "%-15s"
+    value_format: str
+        Format to use to save the data value in a csv of txt file., by default "%15s"
+    """
+
+    __default_exist_in_dset: bool = False
+    __default_remove_if_nan: bool = False
+    __default_remove_if_all_nan: bool = False
+
+    def __init__(
+        self,
+        name: str,
+        unit: str,
+        var_type: str,
+        default: Any = np.nan,
+        name_format: str = "%-15s",
+        value_format: str = "%15s",
+    ):
+        super().__init__(name, unit, var_type, default, name_format, value_format)
+        self.exist_in_dset = self.__default_exist_in_dset
+        self._remove_if_nan = self.__default_remove_if_nan
+        self._remove_if_all_nan = self.__default_remove_if_all_nan
 
     @property
     def remove_if_nan(self) -> bool:
@@ -259,11 +292,44 @@ class NotExistingVar(BaseVar):
 
 class ExistingVar(NotExistingVar):
     """Class to represent variables existing in the dataset, \
-    to be able to specify flag columns, corecction functions..."""
+    to be able to specify flag columns, correction functions...
 
-    exist_in_dset: bool = True
-    _correction: callable = None
-    _aliases: list = []
+    Parameters
+    ----------
+    name : str
+        'Official' name for the variable : name to use when displaying the variable.
+    unit : str
+        Variable unit (written using the following format:
+        [deg_C] for Celsius degree of [kg] for kilograms).
+    var_type : str
+        Variable type (str, int, datetime...).
+        It will be used to convert the data using df[variable].astype(type)
+    default: Any
+        Default value to set instead of nan., by default np.nan
+    name_format: str
+        Format to use to save the data name and unit in a csv of txt file.
+        , by default "%-15s"
+    value_format: str
+        Format to use to save the data value in a csv of txt file., by default "%15s"
+    """
+
+    __default_exist_in_dset: bool = True
+    __default_correction: callable = None
+    __default_aliases: list = []
+
+    def __init__(
+        self,
+        name: str,
+        unit: str,
+        var_type: str,
+        default: Any = np.nan,
+        name_format: str = "%-15s",
+        value_format: str = "%15s",
+    ):
+        super().__init__(name, unit, var_type, default, name_format, value_format)
+        self.exist_in_dset = self.__default_exist_in_dset
+        self._correction = self.__default_correction
+        self._aliases = self.__default_aliases
 
     @property
     def aliases(self) -> list[tuple[str, str, list]]:
