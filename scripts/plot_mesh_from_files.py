@@ -23,6 +23,10 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
+    LATITUDE_MAP_MIN: int | float = CONFIG["LATITUDE_MAP_MIN"]
+    LATITUDE_MAP_MAX: int | float = CONFIG["LATITUDE_MAP_MAX"]
+    LONGITUDE_MAP_MIN: int | float = CONFIG["LONGITUDE_MAP_MIN"]
+    LONGITUDE_MAP_MAX: int | float = CONFIG["LONGITUDE_MAP_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     BIN_SIZE: list | int | float = CONFIG["BIN_SIZE"]
@@ -84,6 +88,12 @@ if __name__ == "__main__":
     plot = MeshPlotter(storer, constraints=constraints)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
+    plot.set_map_boundaries(
+        latitude_min=LATITUDE_MAP_MIN,
+        latitude_max=LATITUDE_MAP_MAX,
+        longitude_min=LONGITUDE_MAP_MIN,
+        longitude_max=LONGITUDE_MAP_MAX,
+    )
     date_min = DATE_MIN.strftime("%Y%m%d")
     date_max = DATE_MAX.strftime("%Y%m%d")
     if SHOW:
