@@ -537,12 +537,10 @@ class Slice(Storer):
 class Constraints:
     """Slicer object to slice dataframes."""
 
-    boundaries: dict[str, dict[str, int | float | datetime]] = {}
-    supersets: dict[str, list] = {}
-    constraints: dict[str, Callable] = {}
-
     def __init__(self) -> None:
-        pass
+        self.boundaries: dict[str, dict[str, int | float | datetime]] = {}
+        self.supersets: dict[str, list] = {}
+        self.constraints: dict[str, Callable] = {}
 
     def reset(self) -> None:
         """Reset all defined constraints."""
