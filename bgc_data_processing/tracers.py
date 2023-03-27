@@ -171,34 +171,36 @@ class MeshPlotter(BasePlot):
         """
         lat_col = self._variables.get(self._variables.latitude_var_name).label
         lon_col = self._variables.get(self._variables.longitude_var_name).label
-        if not np.isnan(self._lat_map_min):
-            default_lat_map_min = self._lat_map_min
-        else:
-            default_lat_map_min = df[lat_col].min()
-        if not np.isnan(self._lat_map_max):
-            default_lat_map_max = self._lat_map_max
-        else:
-            default_lat_map_max = df[lat_col].max()
-        if not np.isnan(self._lon_map_min):
-            default_lon_map_min = self._lon_map_min
-        else:
-            default_lon_map_min = df[lon_col].min()
-        if not np.isnan(self._lon_map_max):
-            default_lon_map_max = self._lon_map_max
-        else:
-            default_lon_map_max = df[lon_col].max()
 
         lat_min, lat_max = self._constraints.get_extremes(
             lat_col,
-            default_lat_map_min,
-            default_lat_map_max,
+            df[lat_col].min(),
+            df[lat_col].max(),
         )
         lon_min, lon_max = self._constraints.get_extremes(
             lon_col,
-            default_lon_map_min,
-            default_lon_map_max,
+            df[lon_col].min(),
+            df[lon_col].max(),
         )
-        return [lon_min, lon_max, lat_min, lat_max]
+
+        if not np.isnan(self._lat_map_min):
+            lat_map_min = self._lat_map_min
+        else:
+            lat_map_min = lat_min
+        if not np.isnan(self._lat_map_max):
+            lat_map_max = self._lat_map_max
+        else:
+            lat_map_max = lat_max
+        if not np.isnan(self._lon_map_min):
+            lon_map_min = self._lon_map_min
+        else:
+            lon_map_min = lon_min
+        if not np.isnan(self._lon_map_max):
+            lon_map_max = self._lon_map_max
+        else:
+            lon_map_max = lon_max
+
+        return [lon_map_min, lon_map_max, lat_map_min, lat_map_max]
 
     def set_bins_size(
         self,
@@ -326,20 +328,6 @@ class MeshPlotter(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        bins_size : float | tuple[float, float]
-            Bins size, if tuple, first is latitude, second is longitude.
-            If float or int, size is applied for both latitude and longitude.
-            Unit is supposed to be degree.
-        depth_aggr : str | Callable
-            Name of the function to use to aggregate data when group
-            by similar measuring point (from self.depth_aggr),
-             or callable function to use to aggregate.
-        bin_aggr : str | Callable
-            Name of the aggregation function to use when pivotting data
-            (from self.bin_aggr),
-            or callable function to use to aggregate.
-        extent : tuple | list
-            Boundaries of the map.
         **kwargs
             Additional arguments to pass to plt.pcolor.
         """
