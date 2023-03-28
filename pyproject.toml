@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Set of scripts to prepare csv files with BGC variables for EnKF prepobs"
 authors = ["Gaétan Rigaut <gaetanrigaut.s@gmail.com>"]
 readme = "README.md"
-packages = [{include = "bgc_data_processing"}]
+packages = [{ include = "bgc_data_processing" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,6 +12,7 @@ pandas = "^1.5.2"
 numpy = "^1.24.1"
 cartopy = "0.21.1"
 netcdf4 = "^1.6.2"
+pyproj = "~3.4"
 
 
 [tool.poetry.group.docs.dependencies]
@@ -20,7 +21,7 @@ mkdocs-gen-files = "^0.4.0"
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-autorefs = "^0.4.1"
 mkdocs-material = "^9.0.6"
-mkdocstrings = {extras = ["python"], version = "^0.20.0"}
+mkdocstrings = { extras = ["python"], version = "^0.20.0" }
 
 
 [tool.poetry.group.dev.dependencies]
@@ -41,7 +42,7 @@ line-length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-ignore=["E731"]
+ignore = ["E731"]
 
 [tool.isort]
 profile = 'black'
@@ -68,5 +69,21 @@ generate-badge = "docs/assets/badges"
 badge-format = "svg"
 
 [tool.pydocstyle]
-ignore = ["D104", "D105", "D107", "D203", "D204", "D213", "D215", "D400", "D401", "D404", "D406", "D407", "D408", "D409", "D413"]
+ignore = [
+    "D104",
+    "D105",
+    "D107",
+    "D203",
+    "D204",
+    "D213",
+    "D215",
+    "D400",
+    "D401",
+    "D404",
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D413",
+]
 match-dir = "bgc_data_processing/*"
