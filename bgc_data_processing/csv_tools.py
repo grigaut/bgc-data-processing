@@ -76,7 +76,10 @@ class CSVLoader(BaseLoader):
         data_list = []
         for filepath in filepaths:
             data_list.append(self.load(filepath=filepath, constraints=constraints))
-        data = pd.concat(data_list, ignore_index=True, axis=0)
+        if data_list:
+            data = pd.concat(data_list, ignore_index=True, axis=0)
+        else:
+            data = pd.DataFrame(columns=[v for v in self._variables.labels.values()])
         return Storer(
             data=data,
             category=self.category,
