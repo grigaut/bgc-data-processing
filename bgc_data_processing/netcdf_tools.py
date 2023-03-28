@@ -405,7 +405,7 @@ class NetCDFLoader(BaseLoader):
         """
         for var in self._variables:
             if var.label not in df.columns:
-                df[var.label] = np.nan
+                df.insert(len(df.columns), var.label, np.nan)
         return df
 
     def _convert_type(self, df: pd.DataFrame) -> pd.DataFrame:
