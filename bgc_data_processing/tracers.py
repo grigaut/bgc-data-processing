@@ -758,6 +758,7 @@ class EvolutionProfile(BasePlot):
             )
         plt.title(title)
         plt.xticks(rotation=45)
+        plt.tight_layout()
         return fig
 
     def show(
