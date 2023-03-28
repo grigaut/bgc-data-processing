@@ -757,6 +757,8 @@ class EvolutionProfile(BasePlot):
                 f"Vertical resolution: {self._depth_interval} meters."
             )
         plt.title(title)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
         return fig
 
     def show(
