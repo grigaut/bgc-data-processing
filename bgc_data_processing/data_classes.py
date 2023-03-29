@@ -204,8 +204,12 @@ class Storer:
         pd.DataFrame
             DataFrame without duplicates.
         """
-        provider_label = self._variables.labels["PROVIDER"]
-        providers = df[provider_label].unique()
+        if self._variables.has_provider:
+            provider_var_name = self._variables.provider_var_name
+            provider_label = self._variables.get(provider_var_name).label
+            providers = df[provider_label].unique()
+        else:
+            return df
         if len(providers) == 1:
             return df
         grouping_vars = [
@@ -862,7 +866,10 @@ class Reader:
             depth_column_label: "depth",
         }
         self._category = category
-        self._providers = raw_df[providers_column_label].unique().tolist()
+        if providers_column_label is not None:
+            self._providers = raw_df[providers_column_label].unique().tolist()
+        else:
+            self._providers = ["????"]
         self._data = self._add_date_columns(
             raw_df,
             year_column_label,
