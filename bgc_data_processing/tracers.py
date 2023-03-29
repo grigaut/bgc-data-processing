@@ -76,7 +76,7 @@ class MeshPlotter(BasePlot):
             self._variables.latitude_var_name,
             self._variables.longitude_var_name,
         ]:
-            if var_name in variables.keys():
+            if var_name is not None and var_name in variables.keys():
                 columns.append(variables.get(var_name).label)
         return columns
 
