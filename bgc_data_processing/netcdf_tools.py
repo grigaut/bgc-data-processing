@@ -365,8 +365,9 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             Dataframe with provider column properly filled.
         """
-        provider_var_name = self._variables.provider_var_name
-        df.insert(0, self._variables.get(provider_var_name).label, self.provider)
+        if self._variables.has_provider:
+            provider_var_name = self._variables.provider_var_name
+            df.insert(0, self._variables.get(provider_var_name).label, self.provider)
         # df[self._variables.get(provider_var_name).label] = self.provider  #
         return df
 
