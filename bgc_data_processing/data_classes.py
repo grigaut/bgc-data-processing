@@ -866,7 +866,10 @@ class Reader:
             depth_column_label: "depth",
         }
         self._category = category
-        self._providers = raw_df[providers_column_label].unique().tolist()
+        if providers_column_label is not None:
+            self._providers = raw_df[providers_column_label].unique().tolist()
+        else:
+            self._providers = ["????"]
         self._data = self._add_date_columns(
             raw_df,
             year_column_label,

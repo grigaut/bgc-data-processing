@@ -476,8 +476,6 @@ class VariablesStorer:
 
     Parameters
     ----------
-    provider : ExistingVar | NotExistingVar
-        Provider related variable.
     expocode : ExistingVar | NotExistingVar
         Expocode related variable.
     date : ExistingVar | NotExistingVar
@@ -488,14 +486,16 @@ class VariablesStorer:
         Month related variable.
     day : ExistingVar | NotExistingVar
         Day related variable.
-    hour : ExistingVar | NotExistingVar
-        Hour related variable. Can be set to None to be ignored.
     latitude : ExistingVar | NotExistingVar
         Latitude related variable.
     longitude : ExistingVar | NotExistingVar
         Longitude related variable.
     depth : ExistingVar | NotExistingVar
         Depth related variable.
+    provider : ExistingVar | NotExistingVar, optional
+        Provider related variable. Can be set to None to be ignored., by default None
+    hour : ExistingVar | NotExistingVar, optional
+        Hour related variable. Can be set to None to be ignored., by default None
     *args: list
         Var objects to represent the variables stored by the object.
         It is better if these Var object have been instanciated
@@ -513,16 +513,16 @@ class VariablesStorer:
 
     def __init__(
         self,
-        provider: ExistingVar | NotExistingVar,
         expocode: ExistingVar | NotExistingVar,
         date: ExistingVar | NotExistingVar,
         year: ExistingVar | NotExistingVar,
         month: ExistingVar | NotExistingVar,
         day: ExistingVar | NotExistingVar,
-        hour: ExistingVar | NotExistingVar,
         latitude: ExistingVar | NotExistingVar,
         longitude: ExistingVar | NotExistingVar,
         depth: ExistingVar | NotExistingVar,
+        hour: ExistingVar | NotExistingVar = None,
+        provider: ExistingVar | NotExistingVar = None,
         *args: ExistingVar | NotExistingVar,
         **kwargs: ExistingVar | NotExistingVar,
     ) -> None:
@@ -532,8 +532,13 @@ class VariablesStorer:
                 "use Var.in_file_as([alias1, alias2])"
             )
         mandatory_variables = []
-        self.provider_var_name = provider.name
-        mandatory_variables.append(provider)
+        if provider is None:
+            self.has_provider = False
+            self.provider_var_name = None
+        else:
+            self.has_provider = True
+            self.provider_var_name = provider.name
+            mandatory_variables.append(provider)
         self.expocode_var_name = expocode.name
         mandatory_variables.append(expocode)
         self.date_var_name = date.name

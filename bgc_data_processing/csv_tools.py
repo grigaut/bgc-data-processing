@@ -213,8 +213,9 @@ class CSVLoader(BaseLoader):
             if values is not None:
                 data[var.label] = values
         clean_df = pd.DataFrame(data)
-        provider_var_name = self._variables.provider_var_name
-        clean_df[self._variables.get(provider_var_name).label] = self._provider
+        if self._variables.has_provider:
+            provider_var_name = self._variables.provider_var_name
+            clean_df[self._variables.get(provider_var_name).label] = self._provider
         if self._variables.get(self._variables.date_var_name).label in clean_df.columns:
             # Convert Date column to datetime (if existing)
             date_label = self._variables.get(self._variables.date_var_name).label
