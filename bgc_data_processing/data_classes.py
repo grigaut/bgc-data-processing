@@ -172,7 +172,7 @@ class Storer:
         subset_group = []
         for name in grouping_vars:
             if self._variables.has_name(name):
-                subset_group.append(self._variables.labels[name])
+                subset_group.append(self._variables.get(name).label)
         # Select dupliacted rows
         is_duplicated = df.duplicated(subset=subset_group, keep=False)
         duplicates = df.filter(items=df[is_duplicated].index, axis=0)
@@ -225,7 +225,7 @@ class Storer:
         subset = []
         for name in grouping_vars:
             if self._variables.has_name(name):
-                subset.append(self._variables.labels[name])
+                subset.append(self._variables.get(name).label)
         # every row concerned by duplication of the variables in subset
         is_duplicated = df.duplicated(
             subset=subset,
