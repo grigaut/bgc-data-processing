@@ -204,8 +204,12 @@ class Storer:
         pd.DataFrame
             DataFrame without duplicates.
         """
-        provider_label = self._variables.labels["PROVIDER"]
-        providers = df[provider_label].unique()
+        if self._variables.has_provider:
+            provider_var_name = self._variables.provider_var_name
+            provider_label = self._variables.get(provider_var_name).label
+            providers = df[provider_label].unique()
+        else:
+            return df
         if len(providers) == 1:
             return df
         grouping_vars = [
