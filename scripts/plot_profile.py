@@ -78,7 +78,7 @@ if __name__ == "__main__":
         storer: Storer = sum(data)
         storer.remove_duplicates(priority_list=PRIORITY)
         variables = storer.variables
-        profile = EvolutionProfile(storer)
+        profile = EvolutionProfile(storer, constraints=constraints)
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
         if SHOW:

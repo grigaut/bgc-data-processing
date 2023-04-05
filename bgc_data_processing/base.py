@@ -222,7 +222,7 @@ class BasePlot(ABC):
         self._verbose = storer.verbose
 
     @abstractmethod
-    def _build(self, *args, **kwargs) -> "Figure":
+    def _build_to_new_figure(self, *args, **kwargs) -> "Figure":
         """Create the figure.
 
         Parameters
@@ -254,11 +254,12 @@ class BasePlot(ABC):
         *kwargs: dict
             Additional parameters to pass to self._build.
         """
-        _ = self._build(*args, **kwargs)
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
+        self._build_to_new_figure(
+            title=title,
+            suptitle=suptitle,
+            *args,
+            **kwargs,
+        )
         plt.show()
         plt.close()
 
@@ -286,13 +287,10 @@ class BasePlot(ABC):
         *kwargs: dict
             Additional parameters to pass to self._build.
         """
-        _ = self._build(
+        self._build_to_new_figure(
+            title=title,
+            suptitle=suptitle,
             *args,
             **kwargs,
         )
-
-        if title is not None:
-            plt.title(title)
-        if suptitle is not None:
-            plt.suptitle(suptitle)
         plt.savefig(save_path)
