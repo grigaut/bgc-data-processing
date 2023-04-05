@@ -16,17 +16,10 @@ repos:
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
-  - repo: local
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
     hooks:
-    -   id: black
-        name: black
-        entry: poetry run black
-        language: system
-        types: [python]
-  # - repo: https://github.com/psf/black
-  #   rev: 22.3.0
-  #   hooks:
-  #     - id: black
+      - id: black
   - repo: https://github.com/econchick/interrogate
     rev: 1.5.0
     hooks:
