@@ -15,6 +15,9 @@ from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
+    from matplotlib.axes import Axes
+    from matplotlib.collections import Collection
+    from cartopy.mpl.geoaxes import GeoAxes
 
     from bgc_data_processing.variables import VariablesStorer
 
@@ -317,67 +320,6 @@ class MeshPlotter(BasePlot):
 
         return lons, lats, vals.values
 
-    def _build(
-        self,
-        variable_name: str,
-        **kwargs,
-    ) -> "Figure":
-        """Plots the colormesh for the given variable.
-
-        Parameters
-        ----------
-        variable_name : str
-            Name of the variable to plot.
-        **kwargs
-            Additional arguments to pass to plt.pcolor.
-        """
-        if self._verbose > 1:
-            print(f"\tMeshing {variable_name} data")
-        if variable_name == "all":
-            label = "all"
-        else:
-            label = self._variables.get(variable_name).label
-        df = self._group(
-            var_key=label,
-            lat_key=self._variables.get(self._variables.latitude_var_name).label,
-            lon_key=self._variables.get(self._variables.longitude_var_name).label,
-        )
-        if self._verbose > 1:
-            print("\tCreating figure")
-        fig = plt.figure(figsize=[10, 10])
-        provs = ", ".join(self._storer.providers)
-        suptitle = f"{variable_name} - {provs} ({self._storer.category})"
-        plt.suptitle(suptitle)
-        ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
-        ax.gridlines(draw_labels=True)
-        ax.add_feature(feature.LAND, zorder=4)
-        ax.add_feature(feature.OCEAN, zorder=1)
-        extent = self._get_map_extent(df)
-        ax.set_extent(extent, crs.PlateCarree())
-        if not df.empty:
-            X1, Y1, Z1 = self._mesh(
-                df=df,
-                label=label,
-            )
-            if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
-                warnings.warn(
-                    "Not enough data to display, try decreasing the bin size"
-                    " or representing more data sources"
-                )
-            cbar = ax.pcolor(
-                X1,
-                Y1,
-                Z1,
-                transform=crs.PlateCarree(),
-                **kwargs,
-            )
-            fig.colorbar(cbar, label=label, shrink=0.75)
-        label = f"{variable_name} total data points count"
-
-        title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
-        plt.title(title)
-        return fig
-
     def save(
         self,
         save_path: str,
@@ -439,6 +381,115 @@ class MeshPlotter(BasePlot):
             suptitle=suptitle,
             **kwargs,
         )
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        title: str,
+        suptitle: str,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the axes of the Figure.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 10])
+        ax: "GeoAxes" = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
+        if suptitle is not None:
+            ax.set_title(suptitle)
+        ax.gridlines(draw_labels=True)
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        ax, cbar = self._build_to_geoaxes(variable_name=variable_name, ax=ax, **kwargs)
+        if cbar is not None:
+            label = f"{variable_name} total data points count"
+            fig.colorbar(cbar, label=label, shrink=0.75)
+        if suptitle is None:
+            provs = ", ".join(self._storer.providers)
+            suptitle = f"{variable_name} - {provs} ({self._storer.category})"
+        if title is None:
+            title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
+        plt.suptitle(suptitle)
+        ax.set_title(title)
+        return fig
+
+    def _build_to_geoaxes(
+        self,
+        variable_name: str,
+        ax: "GeoAxes",
+        **kwargs,
+    ) -> Tuple["GeoAxes", "Collection"]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        ax : GeoAxes
+            GeoAxes (from cartopy) to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Tuple[GeoAxes, Collection]
+            Axes, Colorbar.
+        """
+        if self._verbose > 1:
+            print(f"\tMeshing {variable_name} data")
+        if variable_name == "all":
+            label = "all"
+        else:
+            label = self._variables.get(variable_name).label
+        df = self._group(
+            var_key=label,
+            lat_key=self._variables.get(self._variables.latitude_var_name).label,
+            lon_key=self._variables.get(self._variables.longitude_var_name).label,
+        )
+        if self._verbose > 1:
+            print("\tCreating figure")
+        ax.gridlines(draw_labels=True)
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        extent = self._get_map_extent(df)
+        ax.set_extent(extent, crs.PlateCarree())
+        if not df.empty:
+            X1, Y1, Z1 = self._mesh(
+                df=df,
+                label=label,
+            )
+            if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
+                warnings.warn(
+                    "Not enough data to display, try decreasing the bin size"
+                    " or representing more data sources"
+                )
+            cbar = ax.pcolormesh(
+                X1,
+                Y1,
+                Z1,
+                transform=crs.PlateCarree(),
+                **kwargs,
+            )
+        else:
+            cbar = None
+
+        title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
+        ax.set_title(title)
+        return ax, cbar
 
 
 class EvolutionProfile(BasePlot):
@@ -654,29 +705,27 @@ class EvolutionProfile(BasePlot):
         pivotted.sort_index(axis=0, inplace=True)
         return pivotted
 
-    def _build(
+    def _build_to_axes(
         self,
         variable_name: str,
+        ax: "Axes",
         **kwargs,
-    ) -> "Figure":
-        """Build the plot to display or save.
+    ) -> Tuple["Axes", "Collection"]:
+        """Build the plot to given axes.
 
         Parameters
         ----------
         variable_name : str
             Name of the variable to plot.
+        ax : Axes
+            Axes to plot the data to.
         **kwargs
-            Additional arguments to pass to plt.pcolor.
+            Additional arguments to pass to plt.pcolormesh.
 
         Returns
         -------
-        Figure
-            Data evolution figure on the given area.
-
-        Raises
-        ------
-        ValueError
-            If there is not enough data to create a figure.
+        Tuple[Axes, Collection]
+            Axes, Colorbar.
         """
         if variable_name == "all":
             var_label = "all"
@@ -721,41 +770,77 @@ class EvolutionProfile(BasePlot):
         # Figure
         if self._verbose > 1:
             print("\tCreating figure.")
-        fig = plt.figure(figsize=[10, 5])
-        lat_col = self._variables.get(self._variables.latitude_var_name).label
-        lon_col = self._variables.get(self._variables.longitude_var_name).label
-        lat_min, lat_max = self._constraints.get_extremes(
-            lat_col,
-            df[lat_col].min(),
-            df[lat_col].max(),
-        )
-        lon_min, lon_max = self._constraints.get_extremes(
-            lon_col,
-            df[lon_col].min(),
-            df[lon_col].max(),
-        )
-        suptitle = (
-            "Evolution of data in the area of latitude in "
-            f"[{round(lat_min,2)},{round(lat_max,2)}] and longitude in "
-            f"[{round(lon_min,2)},{round(lon_max,2)}]"
-        )
-        plt.suptitle(suptitle)
-        ax = plt.subplot(1, 1, 1)
+
         X, Y = np.meshgrid(date_ticks, depth_ticks)
         # Color mesh
         cbar = ax.pcolormesh(X, Y, df_pivot.values, **kwargs)
+
+        return ax, cbar
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the Figure.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 5])
+        ax = plt.subplot(1, 1, 1)
+        ax, cbar = self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
         fig.colorbar(cbar, label="Number of data points", shrink=0.75)
-        if self._interval == "custom":
-            title = (
-                f"Horizontal resolution: {self._interval_length} "
-                f"day{'s' if self._interval_length > 1 else ''}. "
-                f"Vertical resolution: {self._depth_interval} meters."
+        if title is None:
+            if self._interval == "custom":
+                title = (
+                    f"Horizontal resolution: {self._interval_length} "
+                    f"day{'s' if self._interval_length > 1 else ''}. "
+                    f"Vertical resolution: {self._depth_interval} meters."
+                )
+            else:
+                title = (
+                    f"Horizontal resolution: 1 {self._interval}. "
+                    f"Vertical resolution: {self._depth_interval} meters."
+                )
+        if suptitle is None:
+            lat_col = self._variables.get(self._variables.latitude_var_name).label
+            lon_col = self._variables.get(self._variables.longitude_var_name).label
+            lat_min, lat_max = self._constraints.get_extremes(
+                lat_col,
+                self._storer.data[lat_col].min(),
+                self._storer.data[lat_col].max(),
             )
-        else:
-            title = (
-                f"Horizontal resolution: 1 {self._interval}. "
-                f"Vertical resolution: {self._depth_interval} meters."
+            lon_min, lon_max = self._constraints.get_extremes(
+                lon_col,
+                self._storer.data[lon_col].min(),
+                self._storer.data[lon_col].max(),
             )
+            suptitle = (
+                "Evolution of data in the area of latitude in "
+                f"[{round(lat_min,2)},{round(lat_max,2)}] and longitude in "
+                f"[{round(lon_min,2)},{round(lon_max,2)}]"
+            )
+        plt.suptitle(suptitle)
         plt.title(title)
         plt.xticks(rotation=45)
         plt.tight_layout()
