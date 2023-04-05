@@ -82,7 +82,7 @@ if __name__ == "__main__":
         storer.remove_duplicates(priority_list=PRIORITY)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
-        plot = MeshPlotter(storer)
+        plot = MeshPlotter(storer, constraints=constraints)
         plot.set_density_type(consider_depth=CONSIDER_DEPTH)
         plot.set_bins_size(bins_size=BIN_SIZE)
         plot.set_map_boundaries(
