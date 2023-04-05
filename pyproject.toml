@@ -13,6 +13,8 @@ numpy = "^1.24.1"
 cartopy = "0.21.1"
 netcdf4 = "^1.6.2"
 pyproj = "~3.4"
+shapely = "^2.0.1"
+geopandas = "^0.12.2"
 
 
 [tool.poetry.group.docs.dependencies]
