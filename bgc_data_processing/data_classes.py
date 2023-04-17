@@ -2,13 +2,17 @@
 
 
 import os
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
+
+if TYPE_CHECKING:
+    from shapely import Polygon
 
 
 class Storer:
@@ -545,6 +549,7 @@ class Constraints:
         self.boundaries: dict[str, dict[str, int | float | datetime]] = {}
         self.supersets: dict[str, list] = {}
         self.constraints: dict[str, Callable] = {}
+        self.polygons: list[dict[str, str | "Polygon"]] = []
 
     def reset(self) -> None:
         """Reset all defined constraints."""
@@ -594,6 +599,30 @@ class Constraints:
         """
         if values_superset:
             self.supersets[field_label] = values_superset
+
+    def add_polygon_constraint(
+        self,
+        latitude_field: str,
+        longitude_field: str,
+        polygon: "Polygon",
+    ) -> None:
+        """Add a polygon constraint.
+
+        Parameters
+        ----------
+        latitude_field : str
+            Name of the latitude-related field.
+        longitude_field : str
+            Name of the longitude-related field.
+        polygon : Polygon
+            Polygon to use as boundary.
+        """
+        constraint_dict = {
+            "latitude_field": latitude_field,
+            "longitude_field": longitude_field,
+            "polygon": polygon,
+        }
+        self.polygons.append(constraint_dict)
 
     def _apply_boundary_constraints(self, df: pd.DataFrame) -> pd.Series:
         """Evaluate all boundary constraints to a DataFrame.
@@ -649,6 +678,33 @@ class Constraints:
             series = series & bool_series
         return series
 
+    def _apply_polygon_constraints(self, df: pd.DataFrame) -> pd.Series:
+        """Evaluate all polygon constraints to a DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Datafarme to evaluate the constraints on.
+
+        Returns
+        -------
+        pd.Series
+            Boolean series of the rows verifying all constraints.
+        """
+        series = np.empty(df.iloc[:, 0].shape, dtype=bool)
+        series.fill(True)
+        for constraint in self.polygons:
+            longitude = constraint["longitude_field"]
+            latitude = constraint["latitude_field"]
+            polygon = constraint["polygon"]
+            geometry = gpd.points_from_xy(
+                x=df[longitude],
+                y=df[latitude],
+            )
+            is_in_polygon = geometry.within(polygon)
+            series = series & is_in_polygon
+        return series
+
     def apply_constraints(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
         """Apply all constraints to a DataFrame.
 
@@ -667,10 +723,12 @@ class Constraints:
         """
         bool_boundaries = self._apply_boundary_constraints(df)
         bool_supersets = self._apply_superset_constraints(df)
+        bool_polygons = self._apply_polygon_constraints(df)
+        verify_all = bool_boundaries & bool_supersets & bool_polygons
         if not inplace:
-            return df.loc[bool_boundaries & bool_supersets, :]
+            return df.loc[verify_all, :]
         else:
-            df = df.loc[bool_boundaries & bool_supersets, :]
+            df = df.loc[verify_all, :]
 
     def apply_specific_constraint(
         self, field_label: str, df: pd.DataFrame, inplace: bool = False
