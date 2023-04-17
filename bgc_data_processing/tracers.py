@@ -496,7 +496,7 @@ class MeshPlotter(BasePlot):
         variable_name: str,
         ax: "GeoAxes",
         **kwargs,
-    ) -> Tuple[GeoAxes, Collection]:
+    ) -> Tuple["GeoAxes", "Collection"]:
         """Build the plot to given axes.
 
         Parameters
@@ -937,7 +937,7 @@ class EvolutionProfile(BasePlot):
         variable_name: str,
         ax: "Axes",
         **kwargs,
-    ) -> Tuple[Axes, Collection]:
+    ) -> Tuple["Axes", "Collection"]:
         """Plot the data on a given axes.
 
         Parameters

@@ -300,10 +300,10 @@ class BasePlot(ABC):
     @abstractmethod
     def plot_to_axes(
         self,
-        ax: "Axes" | "GeoAxes",
+        ax: "Axes | GeoAxes",
         *args,
         **kwargs,
-    ) -> "Axes" | "GeoAxes":
+    ) -> "Axes | GeoAxes":
         """Plot data to the given axes.
 
         Parameters
