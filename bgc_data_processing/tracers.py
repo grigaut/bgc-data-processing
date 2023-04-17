@@ -519,6 +519,54 @@ class MeshPlotter(BasePlot):
             **kwargs,
         )
 
+    def get_df(
+        self,
+        variable_name: str,
+    ) -> pd.DataFrame:
+        """Return the density of the given variable on the bins.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to bin.
+
+        Returns
+        -------
+        pd.Dataframe
+            Three columns dataframe : longitude, latitude and variable density.
+             The column names are the same as in the original DataFrame.
+        """
+        if self._verbose > 1:
+            print(f"\tMeshing {variable_name} data")
+        if variable_name == "all":
+            label = "all"
+        else:
+            label = self._variables.get(variable_name).label
+        lon_label = self._variables.get(self._variables.longitude_var_name).label
+        lat_label = self._variables.get(self._variables.latitude_var_name).label
+        df = self._group(
+            var_key=label,
+            lat_key=lat_label,
+            lon_key=lon_label,
+        )
+        if self._verbose > 1:
+            print("\tCreating figure")
+        if not df.empty:
+            longis_2D, latis_2D, values_2D = self._mesh(
+                df=df,
+                label=label,
+            )
+            # Ravel the arrays to concatenate them in a single dataframe
+            lons = longis_2D.ravel()
+            lats = latis_2D.ravel()
+            vals = values_2D.ravel()
+            data = {lon_label: lons, lat_label: lats, label: vals}
+            transformed_df = pd.DataFrame.from_dict(data)
+            transformed_df = transformed_df[~transformed_df[label].isna()]
+            return transformed_df
+        else:
+            return pd.DataFrame(columns=[lon_label, lat_label, label])
+
 
 class EvolutionProfile(BasePlot):
     """Class to plot the evolution of data on a given area.
