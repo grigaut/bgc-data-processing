@@ -491,6 +491,34 @@ class MeshPlotter(BasePlot):
         ax.set_title(title)
         return ax, cbar
 
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        ax: "GeoAxes",
+        **kwargs,
+    ) -> Tuple[GeoAxes, Collection]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        ax : GeoAxes
+            GeoAxes (from cartopy) to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Tuple[GeoAxes, Collection]
+            Axes, Colorbar.
+        """
+        return self._build_to_geoaxes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
+
 
 class EvolutionProfile(BasePlot):
     """Class to plot the evolution of data on a given area.
@@ -901,5 +929,33 @@ class EvolutionProfile(BasePlot):
             variable_name=variable_name,
             title=title,
             suptitle=suptitle,
+            **kwargs,
+        )
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> Tuple[Axes, Collection]:
+        """Plot the data on a given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot the data of.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Tuple[Axes, Collection]
+            Axes, colorbar
+        """
+        return self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
             **kwargs,
         )

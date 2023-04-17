@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
     from bgc_data_processing.data_classes import Constraints
     from matplotlib.figure import Figure
+    from matplotlib.axes import Axes
+    from cartopy.mpl.geoaxes import GeoAxes
 
 
 class BaseLoader(ABC):
@@ -250,9 +252,9 @@ class BasePlot(ABC):
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
         *args: list
-            Additional parameters to pass to self._build.
+            Additional parameters to pass to self._build_to_new_figure.
         *kwargs: dict
-            Additional parameters to pass to self._build.
+            Additional parameters to pass to self._build_to_new_figure.
         """
         self._build_to_new_figure(
             title=title,
@@ -283,9 +285,9 @@ class BasePlot(ABC):
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
         *args: list
-            Additional parameters to pass to self._build.
+            Additional parameters to pass to self._build_to_new_figure.
         *kwargs: dict
-            Additional parameters to pass to self._build.
+            Additional parameters to pass to self._build_to_new_figure.
         """
         self._build_to_new_figure(
             title=title,
@@ -294,3 +296,27 @@ class BasePlot(ABC):
             **kwargs,
         )
         plt.savefig(save_path)
+
+    @abstractmethod
+    def plot_to_axes(
+        self,
+        ax: "Axes" | "GeoAxes",
+        *args,
+        **kwargs,
+    ) -> "Axes" | "GeoAxes":
+        """Plot data to the given axes.
+
+        Parameters
+        ----------
+        ax : Axes | GeoAxes
+            Axes to plot the data on.
+        *args: list
+            Additional parameters for the axes plotting method.
+        *kwargs: dict
+            Additional parameters for the axes plotting method.
+
+        Returns
+        -------
+        Axes | GeoAxes
+            Axes were the data is plotted on.
+        """
