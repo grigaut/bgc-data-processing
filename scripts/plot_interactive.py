@@ -8,6 +8,7 @@ from cartopy import crs
 import time
 from matplotlib import cm, colors
 from eomaps import Maps
+import shapely
 from eomaps.draw import ShapeDrawer
 import matplotlib.pyplot as plt
 
@@ -57,13 +58,24 @@ profile_axes_cbar = figure.add_subplot(10, 15, (90, 150), projection="rectilinea
 # --------- Initialize Instructions Axes
 # We use a Maps otherwise the axes doesn't render in the beginning
 text_map = Maps(ax=text_axes)
-text_map.set_extent([-180, 180, -35, 35])
-text_axes.text(-175, 25, "Controls:")
+text_map.set_extent([-180, 180, -40, 45])
+text_axes.text(-175, 35, "Controls:")
+text_axes.text(-175, 25, "  - 'd' to start drawing a polygon, then: ")
 text_axes.text(-175, 15, "    - Left Click to draw polygon (keep the button clicked).")
 text_axes.text(-175, 5, "    - Middle Click to close the polygon shape.")
-text_axes.text(-175, -5, "    - 'Enter' key to confirm the polygon as area to zoom in.")
-text_axes.text(-175, -15, "    - 'z' key to remove the polygon and draw another one.")
-text_axes.text(-175, -25, "    - 's' to save the data within the polygon.")
+text_axes.text(-175, -5, "  - 'Enter' key to confirm the polygon as area to zoom in.")
+text_axes.text(-175, -15, "  - 'z' key to remove the polygon and draw another one.")
+text_axes.text(
+    -175,
+    -25,
+    "  - 's' to save the data within the polygon"
+    " (then you must enter a filename in the terminal).",
+)
+text_axes.text(
+    -175,
+    -35,
+    "  - 'p' to save the polygon (then you must enter a filename in the terminal).",
+)
 
 # --------- Initialize Main Map
 # Create Map
@@ -107,9 +119,6 @@ zoom_map_bg.show_layer(zoom_map_bg.layer)
 
 # --------- Initialize Drawers
 drawers = []
-drawer = ShapeDrawer(main_map)
-drawer.polygon(draw_on_drag=True)
-drawers.append(drawer)
 
 # --------- Initialize Callbacks
 def get_polygon_constraints(
@@ -227,7 +236,6 @@ def update_map(
 
 def clear(
     drawers: list[ShapeDrawer],
-    main_map: Maps,
     zoom_map_bg: Maps,
     rectilinear_axes: list[Axes],
     **kwargs,
@@ -249,15 +257,13 @@ def clear(
         axes.clear()
         axes.relim()
     zoom_map_bg.show_layer(zoom_map_bg.layer)
-    drawers[0].remove_last_shape()
-    drawers[0] = ShapeDrawer(main_map)
-    drawers[0].polygon()
+    if drawers:
+        drawers[0].remove_last_shape()
 
 
 def save(
     drawers: list[ShapeDrawer],
     storer: Storer,
-    filepath: str,
     **kwargs,
 ) -> None:
     """Save the data from the polygon in a file.
@@ -278,7 +284,58 @@ def save(
         drawers[-1], latitude_field=latitude_field, longitude_field=longitude_field
     )
     new_storer = Storer.from_constraints(storer=storer, constraints=constraints)
-    new_storer.save(filepath=filepath)
+    print("Enter the name of the file (don't write the extension):")
+    filename = input() + ".txt"
+    if filename == ".txt":
+        filename = f"output_{round(time.time())}.txt"
+    new_storer.save(filepath=filename)
+    print(f"File saved under {filename}")
+
+
+def start_drawing(drawers: list, main_map: Maps, **kwargs) -> None:
+    """Trigger the drawing of a polygon.
+
+    Parameters
+    ----------
+    drawers : list
+        List of all the drawers.
+    main_map : Maps
+        Map to draw onto.
+    """
+    drawer = ShapeDrawer(main_map)
+    drawer.polygon(draw_on_drag=True)
+    if not drawers:
+        drawers.append(drawer)
+    else:
+        drawers[0] = drawer
+
+
+def save_polygon(drawers: list[ShapeDrawer], **kwargs):
+    """Save polygon to file.
+
+    Parameters
+    ----------
+    drawers : list[ShapeDrawer]
+        List of drawers, only the last one will be saved.
+    """
+    if not drawers:
+        print("No Polygon existing at the moment")
+        return
+    gdf = drawers[-1].gdf
+    gdf.to_crs(crs=4326, inplace=True)
+    if gdf.empty:
+        print("No Polygon existing at the moment")
+        return
+    polygon = gdf["geometry"].iloc[-1]
+    print("Enter the name of the file (don't write the extension):")
+    filename = input() + ".txt"
+    if filename == ".txt":
+        filename = f"polygon_{round(time.time())}.txt"
+    filepath = "polygons/" + filename
+    polygon_wkt = shapely.to_wkt(polygon)
+    with open(filepath, "w") as file:
+        file.write(polygon_wkt)
+    print(f"Polygon saved under {filepath}")
 
 
 # --------- Callbacks
@@ -302,7 +359,6 @@ main_map.cb.keypress.attach(
     clear,
     key="z",
     drawers=drawers,
-    main_map=main_map,
     zoom_map_bg=zoom_map_bg,
     rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
 )
@@ -312,5 +368,24 @@ main_map.cb.keypress.attach(
     drawers=drawers,
     storer=storer,
     filepath="output.txt",
+)
+
+
+main_map.cb.keypress.attach(save_polygon, key="p", drawers=drawers)
+
+main_map.cb.keypress.attach(
+    clear,
+    key="d",
+    drawers=drawers,
+    zoom_map_bg=zoom_map_bg,
+    rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
+)
+main_map.cb.keypress.attach(
+    start_drawing,
+    key="d",
+    drawers=drawers,
+    main_map=main_map,
+    zoom_map_bg=zoom_map_bg,
+    rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
 )
 plt.show()
