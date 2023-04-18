@@ -267,7 +267,9 @@ class Storer:
         units = [self.variables.unit_mapping[col] for col in df.columns]
         dirout = os.path.dirname(filepath)
         # make directory if needed
-        if not os.path.isdir(dirout):
+        if dirout == "":
+            pass
+        elif not os.path.isdir(dirout):
             os.mkdir(dirout)
         # Save file
         with open(filepath, "w") as file:
@@ -439,6 +441,35 @@ class Storer:
             return reader.get_storer()
         else:
             raise TypeError(f"Can't read filepaths from {filepath}")
+
+    @classmethod
+    def from_constraints(
+        cls,
+        storer: "Storer",
+        constraints: "Constraints",
+    ) -> "Storer":
+        """Create a new storer object from an existing storer and constraints.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to modify with constraints.
+        constraints : Constraints
+            Constraints to use to modify the storer.
+
+        Returns
+        -------
+        Storer
+            New storer respecting the constraints.
+        """
+        data = constraints.apply_constraints(df=storer.data, inplace=False)
+        return Storer(
+            data=data,
+            category=storer.category,
+            providers=storer.providers,
+            variables=storer.variables,
+            verbose=storer.verbose,
+        )
 
 
 class Slice(Storer):
