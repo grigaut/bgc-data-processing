@@ -8,31 +8,43 @@ SCRIPTS_DIR := scripts
 CONFIG_DIR := config
 CONFIG_DEFAULT_DIR := config/default
 VENV := ./.venv
-POETRY := $(VENV)/bin/poetry
-PYTHON := $(VENV)/bin/python3.11
-MKDOCS := $(VENV)/bin/mkdocs
-PRECOMMIT := $(VENV)/bin/pre-commit
+BIN := $(VENV)/bin/
 HOOKS := ./.git/hooks
 
 default:
 	@echo "Call a specific subcommand: create-env,install,update,documentation"
 
+# Main Rules
+
 all:
 	$(MAKE) -s copy-default-config
 	$(MAKE) -s install
-
-install-with-hooks:
-	$(MAKE) -s copy-default-config
-	$(MAKE) -s install
-	$(MAKE) -s pre-commit
 
 clean:
 	rm -r -f $(VENV)
 	rm -r -f $(HOOKS)
 
+.PHONY: clean-dirs
+clean-dirs:
+	$(foreach dir, $(OUTPUT_DIRS), rm -r -f $(dir))
+
 $(VENV): $(CONDA_EXE) $(ENVIRONMENT_FILEPATH)
-	@$(MAKE) -s clean
+	$(MAKE) -s clean
 	$(CONDA_EXE) env create -q --file $(ENVIRONMENT_FILEPATH) --prefix $(VENV)
+
+.PHONY: create-env
+create-env:
+	$(MAKE) -s $(VENV)
+
+.PHONY: poetry-install
+poetry-install: poetry.lock
+	$(BIN)poetry install --only main
+
+
+.PHONY: install
+install: poetry.lock
+	$(MAKE) -s create-env
+	$(MAKE) -s poetry-install
 
 $(CONFIG_DIR)/%.toml: $(CONFIG_DEFAULT_DIR)/%.toml
 	echo "Copy $(CONFIG_DEFAULT_DIR)/$*.toml to $(CONFIG_DIR)/$*.toml";\
@@ -49,47 +61,53 @@ copy-default-config: $(CONFIG_DIR) $(CONFIG_DEFAULT_DIR)
 .PHONY: run-%
 run-%:
 	@echo "Executing $(SCRIPTS_DIR)/$(subst -,_,$*).py"
-	@$(MAKE) -s $(VENV)
-	@$(MAKE) -s copy-default-config
-	$(POETRY) install --without dev,docs
-	$(PYTHON) $(SCRIPTS_DIR)/$(subst -,_,$*).py
+	$(MAKE) -s install
+	$(MAKE) -s copy-default-config
+	$(BIN)python3.11 $(SCRIPTS_DIR)/$(subst -,_,$*).py
 
-.PHONY: clean-dirs
-clean-dirs:
-	$(foreach dir, $(OUTPUT_DIRS), rm -r -f $(dir))
+# Documentation Rules
 
-.PHONY: create-env
-create-env:
-	@$(MAKE) -s $(VENV)
+.PHONY: poetry-install-docs
+poetry-install-docs: poetry.lock
+	$(BIN)poetry install --only docs
 
-.PHONY: install
-install: poetry.lock
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install
+
+.PHONY: install-docs
+install-docs:
+	$(MAKE) -s create-env
+	$(MAKE) -s poetry-install-docs
 
 .PHONY: view-docs
 view-docs:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install --only docs
-	$(MKDOCS) serve
+	$(MAKE) -s install-docs
+	$(BIN)mkdocs serve
 
 ./site:
-	@$(MAKE) -s $(VENV)
-	$(POETRY) install --only docs
-	$(MKDOCS) build
+	$(MAKE) -s install-docs
+	$(BIN)mkdocs build
 
 .PHONY: build-docs
 build-docs:
-	@$(MAKE) -s ./site
+	$(MAKE) -s ./site
 
 .PHONY: deploy-docs
 deploy-docs:
-	$(POETRY) install --only docs
-	$(MKDOCS) gh-deploy
+	$(MAKE) -s install-docs
+	$(BIN)mkdocs gh-deploy
 	rm -r -f ./site
 
-pre-commit: $(PRECOMMIT)
-	$(PRECOMMIT) install
+# Development Rules
 
-.PHONY: test-copy
-test-copy:
+.PHONY: poetry-dev
+poetry-install-dev: poetry.lock
+	$(BIN)poetry install
+
+.PHONY: hooks
+hooks: $(BIN)pre-commit
+	$(BIN)pre-commit install
+
+.PHONY: install-dev
+install-dev: poetry.lock
+	$(MAKE) -s create-env
+	$(MAKE) -s poetry-install-dev
+	$(MAKE) -s hooks
