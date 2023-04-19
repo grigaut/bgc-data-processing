@@ -13,6 +13,8 @@ from eomaps.draw import ShapeDrawer
 import matplotlib.pyplot as plt
 
 
+POLYGONS_FOLDER = "polygons"
+
 filepaths = [
     f"bgc_data/{file}"
     for file in os.listdir("bgc_data")
@@ -58,23 +60,28 @@ profile_axes_cbar = figure.add_subplot(10, 15, (90, 150), projection="rectilinea
 # --------- Initialize Instructions Axes
 # We use a Maps otherwise the axes doesn't render in the beginning
 text_map = Maps(ax=text_axes)
-text_map.set_extent([-180, 180, -40, 45])
-text_axes.text(-175, 35, "Controls:")
-text_axes.text(-175, 25, "  - 'd' to start drawing a polygon, then: ")
-text_axes.text(-175, 15, "    - Left Click to draw polygon (keep the button clicked).")
-text_axes.text(-175, 5, "    - Middle Click to close the polygon shape.")
-text_axes.text(-175, -5, "  - 'Enter' key to confirm the polygon as area to zoom in.")
-text_axes.text(-175, -15, "  - 'z' key to remove the polygon and draw another one.")
+text_map.set_extent([-180, 180, -34, 40])
+text_axes.text(-175, 32, "Controls:")
+text_axes.text(-175, 24, "  - 'D' to start drawing a polygon, then: ")
+text_axes.text(-175, 16, "    - Left Click to draw polygon (keep the button clicked).")
+text_axes.text(-175, 8, "    - Middle Click to close the polygon shape.")
+text_axes.text(-175, 0, "  - 'Enter' key to confirm the polygon as area to zoom in.")
+text_axes.text(-175, -8, "  - 'Z' key to remove the polygon and draw another one.")
 text_axes.text(
     -175,
-    -25,
-    "  - 's' to save the data within the polygon"
+    -16,
+    "  - 'S' to save the data within the polygon"
     " (then you must enter a filename in the terminal).",
 )
 text_axes.text(
     -175,
-    -35,
-    "  - 'p' to save the polygon (then you must enter a filename in the terminal).",
+    -24,
+    "  - 'P' to save the polygon (then you must enter a filename in the terminal).",
+)
+text_axes.text(
+    -175,
+    -32,
+    "  - 'L' to load a polygon (then you must enter the name of the file to load).",
 )
 
 # --------- Initialize Main Map
@@ -121,52 +128,39 @@ zoom_map_bg.show_layer(zoom_map_bg.layer)
 drawers = []
 
 # --------- Initialize Callbacks
-def get_polygon_constraints(
+def get_drawer_polygon(
     drawer: ShapeDrawer,
-    latitude_field: str,
-    longitude_field: str,
-) -> Constraints:
-    """Create the polygon constraint using the drawer.
+) -> shapely.Polygon:
+    """Collect the polygon from a ShapeDrawer.
 
     Parameters
     ----------
     drawer : ShapeDrawer
-        Drawer to get polygon from.
-    latitude_field : str
-        Latitude field to use for the constraint.
-    longitude_field : str
-        Longitude field to use for the constraint.
+        Drawer to get the polygon from.
 
     Returns
     -------
-    Constraints
-        Resulting constraint object.
+    shapely.Polygon
+        Polygon object.
     """
     gdf = drawer.gdf
     gdf.to_crs(crs=4326, inplace=True)
     polygon = gdf["geometry"].iloc[-1]
-    constraint = Constraints()
-    constraint.add_polygon_constraint(
-        latitude_field=latitude_field,
-        longitude_field=longitude_field,
-        polygon=polygon,
-    )
-    return constraint
+    return polygon
 
 
 def update_profile(
-    drawers: list[ShapeDrawer],
+    polygon: shapely.Polygon,
     storer: Storer,
     axes: Axes,
     colorbar_axes: Axes,
-    **kwargs,
 ):
     """Update the evolution profile plot.
 
     Parameters
     ----------
-    drawers : list[ShapeDrawer]
-        List of drawers, the polygon shape will be taken from the last one.
+    polygon : shapely.Polygon
+        Polygon to use to select data.
     storer : Storer
         Storer to use the data of for plotting.
     axes : Axes
@@ -177,8 +171,11 @@ def update_profile(
     variables = storer.variables
     latitude_field = variables.get(variables.latitude_var_name).label
     longitude_field = variables.get(variables.longitude_var_name).label
-    constraints = get_polygon_constraints(
-        drawers[-1], latitude_field=latitude_field, longitude_field=longitude_field
+    constraints = Constraints()
+    constraints.add_polygon_constraint(
+        latitude_field=latitude_field,
+        longitude_field=longitude_field,
+        polygon=polygon,
     )
     profile_tmp = EvolutionProfile(storer, constraints)
     profile_tmp.set_date_intervals("week")
@@ -188,18 +185,17 @@ def update_profile(
 
 
 def update_map(
-    drawers: list[ShapeDrawer],
+    polygon: shapely.Polygon,
     storer: Storer,
     zoom_map_bg: Maps,
     colorbar_axes: Axes,
-    **kwargs,
 ):
     """Update the zoomed map.
 
     Parameters
     ----------
-    drawers : list[ShapeDrawer]
-        List of drawers, the polygon shape will be taken from the last one.
+    polygon : shapely.Polygon
+        Polygon to use to select data.
     storer : Storer
         Storer to use the data of for plotting.
     zoom_map_bg : Maps
@@ -210,12 +206,12 @@ def update_map(
     variables = storer.variables
     latitude_field = variables.get(variables.latitude_var_name).label
     longitude_field = variables.get(variables.longitude_var_name).label
-    constraints = get_polygon_constraints(
-        drawers[-1], latitude_field=latitude_field, longitude_field=longitude_field
+    constraints = Constraints()
+    constraints.add_polygon_constraint(
+        latitude_field=latitude_field,
+        longitude_field=longitude_field,
+        polygon=polygon,
     )
-    gdf = drawers[-1].gdf
-    gdf.to_crs(crs=4326, inplace=True)
-    polygon = gdf["geometry"].iloc[-1]
     lon_bin = (polygon.bounds[2] - polygon.bounds[0]) / 100
     plot_tmp = MeshPlotter(storer, constraints)
     plot_tmp.set_density_type(consider_depth=True)
@@ -232,6 +228,85 @@ def update_map(
         cax=colorbar_axes,
     )
     zoom_map_bg.show_layer(zoom_map_bg.layer, new_map.layer)
+
+
+def update_from_drawer(
+    drawers: list[ShapeDrawer],
+    storer: Storer,
+    zoom_map_bg: Maps,
+    zoom_cbar_axes: Axes,
+    profile_axes: Axes,
+    profile_cbar_axes: Axes,
+    **kwargs,
+):
+    """Update the lateral maps using the ShapeDrawer polygon.
+
+    Parameters
+    ----------
+    drawers : list[ShapeDrawer]
+        List of all drawers, only the last one will be used.
+    storer : Storer
+        Storer to use the data of.
+    zoom_map_bg : Maps
+        Map on which to plot the zoomed view.
+    zoom_cbar_axes : Axes
+        Axes on which to plot the zoomed view colorbar.
+    profile_axes : Axes
+        Axes on which to plot the evolution profile.
+    profile_cbar_axes : Axes
+        Axes on which to plot the evolution profile colorbar.
+    """
+    polygon = get_drawer_polygon(drawer=drawers[-1])
+    update_map(
+        polygon=polygon,
+        storer=storer,
+        zoom_map_bg=zoom_map_bg,
+        colorbar_axes=zoom_cbar_axes,
+    )
+    update_profile(
+        polygon=polygon,
+        storer=storer,
+        axes=profile_axes,
+        colorbar_axes=profile_cbar_axes,
+    )
+
+
+def update_from_loaded(
+    storer: Storer,
+    zoom_map_bg: Maps,
+    zoom_cbar_axes: Axes,
+    profile_axes: Axes,
+    profile_cbar_axes: Axes,
+    **kwargs,
+):
+    """Update the lateral maps from a loaded polygon.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to use the data of.
+    zoom_map_bg : Maps
+        Map on which to plot the zoomed view.
+    zoom_cbar_axes : Axes
+        Axes on which to plot the zoomed view colorbar.
+    profile_axes : Axes
+        Axes on which to plot the evolution profile.
+    profile_cbar_axes : Axes
+        Axes on which to plot the evolution profile colorbar.
+    """
+    polygon = load_polygon()
+    update_map(
+        polygon=polygon,
+        storer=storer,
+        zoom_map_bg=zoom_map_bg,
+        colorbar_axes=zoom_cbar_axes,
+    )
+    update_profile(
+        polygon=polygon,
+        storer=storer,
+        axes=profile_axes,
+        colorbar_axes=profile_cbar_axes,
+    )
 
 
 def clear(
@@ -277,11 +352,15 @@ def save(
     filepath : str
         Saving filepath.
     """
+    polygon = get_drawer_polygon(drawers[-1])
     variables = storer.variables
     latitude_field = variables.get(variables.latitude_var_name).label
     longitude_field = variables.get(variables.longitude_var_name).label
-    constraints = get_polygon_constraints(
-        drawers[-1], latitude_field=latitude_field, longitude_field=longitude_field
+    constraints = Constraints()
+    constraints.add_polygon_constraint(
+        latitude_field=latitude_field,
+        longitude_field=longitude_field,
+        polygon=polygon,
     )
     new_storer = Storer.from_constraints(storer=storer, constraints=constraints)
     print("Enter the name of the file (don't write the extension):")
@@ -331,29 +410,51 @@ def save_polygon(drawers: list[ShapeDrawer], **kwargs):
     filename = input() + ".txt"
     if filename == ".txt":
         filename = f"polygon_{round(time.time())}.txt"
-    filepath = "polygons/" + filename
+    filepath = f"{POLYGONS_FOLDER}/" + filename
     polygon_wkt = shapely.to_wkt(polygon)
     with open(filepath, "w") as file:
         file.write(polygon_wkt)
     print(f"Polygon saved under {filepath}")
 
 
+def load_polygon(**kwargs) -> shapely.Polygon:
+    """Load Polygon from a file.
+
+    Returns
+    -------
+    shapely.Polygon
+        The loaded polygon.
+    """
+    print(
+        "Enter the name of file storing a polygon"
+        f"(inside the '{POLYGONS_FOLDER}' folder) without its extension"
+    )
+    filename = input() + ".txt"
+    filepath = POLYGONS_FOLDER + "/" + filename
+    if not os.path.isfile(filepath):
+        print(f"Loading aborted : the file {filepath} doesn't exist.")
+        return
+    with open(filepath, "r") as file:
+        first_line = file.readlines()[0]
+        polygon = shapely.from_wkt(first_line)
+    print(f"Successfully loaded polygon from {filepath}")
+    print(polygon)
+    from bgc_data_processing.convert_polygons import polygon_to_list
+
+    print(polygon_to_list(polygon))
+    return polygon
+
+
 # --------- Callbacks
 main_map.cb.keypress.attach(
-    update_map,
+    update_from_drawer,
     key="enter",
     drawers=drawers,
     storer=storer,
     zoom_map_bg=zoom_map_bg,
-    colorbar_axes=zoom_axes_cbar,
-)
-main_map.cb.keypress.attach(
-    update_profile,
-    key="enter",
-    drawers=drawers,
-    storer=storer,
-    axes=profile_axes,
-    colorbar_axes=profile_axes_cbar,
+    zoom_cbar_axes=zoom_axes_cbar,
+    profile_axes=profile_axes,
+    profile_cbar_axes=profile_axes_cbar,
 )
 main_map.cb.keypress.attach(
     clear,
@@ -387,5 +488,21 @@ main_map.cb.keypress.attach(
     main_map=main_map,
     zoom_map_bg=zoom_map_bg,
     rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
+)
+main_map.cb.keypress.attach(
+    clear,
+    key="l",
+    drawers=drawers,
+    zoom_map_bg=zoom_map_bg,
+    rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
+)
+main_map.cb.keypress.attach(
+    update_from_loaded,
+    key="l",
+    storer=storer,
+    zoom_map_bg=zoom_map_bg,
+    zoom_cbar_axes=zoom_axes_cbar,
+    profile_axes=profile_axes,
+    profile_cbar_axes=profile_axes_cbar,
 )
 plt.show()
