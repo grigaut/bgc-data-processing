@@ -779,19 +779,19 @@ class VariablesStorer:
         bool
             True if the objects have same types and all equal variables.
         """
-        if isinstance(__o, VariablesStorer):
-            if len(self) != len(__o):
-                return False
-            elif set(self.mapper_by_name.keys()) != set(__o.mapper_by_name.keys()):
-                return False
-            else:
-                repr_eq = [
-                    repr(self[key]) == repr(__o[key])
-                    for key in self.mapper_by_name.keys()
-                ]
-                return np.all(repr_eq)
-        else:
+        if not isinstance(__o, VariablesStorer):
             return False
+
+        has_wrong_len = len(self) != len(__o)
+        self_keys = set(self.mapper_by_name.keys())
+        other_keys = set(__o.mapper_by_name.keys())
+        has_wrong_keys = self_keys != other_keys
+
+        if has_wrong_len or has_wrong_keys:
+            return False
+        else:
+            repr_eq = [repr(self[key]) == repr(__o[key]) for key in self.mapper_by_name]
+            return np.all(repr_eq)
 
     def get(self, var_name: str) -> ExistingVar | NotExistingVar:
         """Return the variable which name corresponds to var_name.
@@ -829,7 +829,7 @@ class VariablesStorer:
         var : Var
             Variable to add
         """
-        if var.name in self.keys():
+        if var.name in self.keys():  # noqa: SIM118
             raise ValueError("A variable already exists with his name")
         self._elements.append(var)
 
@@ -846,7 +846,7 @@ class VariablesStorer:
         bool
             True if the name is in self.keys(), False otherwise.
         """
-        return var_name in self.keys()
+        return var_name in self.keys()  # noqa: SIM118
 
     def keys(self) -> dict_keys:
         """Keys to use when calling self[key].

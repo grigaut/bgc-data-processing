@@ -244,12 +244,12 @@ class TomlParser:
             if not isinstance(var, dict):
                 self.raise_if_wrong_type(keys)
             else:
-                for key in var.keys():
+                for key in var:
                     self.raise_if_wrong_type_below(keys=[*keys, key])
         elif not isinstance(self._elements, dict):
             raise TypeError("Wrong type for toml object, should be a dictionnary")
         else:
-            for key in self._elements.keys():
+            for key in self._elements:
                 self.raise_if_wrong_type_below(keys=[*keys, key])
 
     def _get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
@@ -332,10 +332,7 @@ def directory_check(get_variable: Callable) -> Callable:
 
     @wraps(get_variable)
     def wrapper_func(self: "ConfigParser", keys: str | list[str]):
-        if isinstance(keys, str):
-            keys_dirs = [keys]
-        else:
-            keys_dirs = keys
+        keys_dirs = [keys] if isinstance(keys, str) else keys
         if (
             keys_dirs in self.dirs_vars_keys
             and not self._dir_created["-".join(keys_dirs)]
@@ -439,10 +436,7 @@ class ConfigParser(TomlParser):
             self._parsed = True
         self.raise_if_wrong_type_below([])
         for keys in self.dates_vars_keys:
-            if isinstance(keys, str):
-                all_keys = [keys]
-            else:
-                all_keys = keys
+            all_keys = [keys] if isinstance(keys, str) else keys
             date = dt.datetime.strptime(self._get(all_keys), "%Y%m%d")
             self._set(all_keys, date)
 
@@ -541,7 +535,7 @@ class DefaultTemplatesParser(TomlParser):
             Dictionnary mapping variables names to variables templates.
         """
         variables = {}
-        for key in self._elements.keys():
+        for key in self._elements:
             value = self._elements.get(key)
             variables[key] = self._make_template_from_args(value)
         return variables

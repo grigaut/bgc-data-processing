@@ -875,8 +875,8 @@ class Constraints:
         bool
             True if the field has a constraint.
         """
-        in_boundaries = field_name in self.boundaries.keys()
-        in_supersets = field_name in self.supersets.keys()
+        in_boundaries = field_name in self.boundaries
+        in_supersets = field_name in self.supersets
         return in_boundaries or in_supersets
 
     def get_constraint_parameters(self, field_name: str) -> dict:
@@ -893,9 +893,9 @@ class Constraints:
             Dictionnary with keys 'boundary' and/or 'superset' if constraints exist.
         """
         constraint_params = {}
-        if field_name in self.boundaries.keys():
+        if field_name in self.boundaries:
             constraint_params["boundary"] = self.boundaries[field_name]
-        if field_name in self.supersets.keys():
+        if field_name in self.supersets:
             constraint_params["superset"] = self.supersets[field_name]
         return constraint_params
 
@@ -924,8 +924,8 @@ class Constraints:
         if not self.is_constrained(field_name=field_name):
             return default_min, default_max
         constraints = self.get_constraint_parameters(field_name=field_name)
-        boundary_in = "boundary" in constraints.keys()
-        superset_in = "superset" in constraints.keys()
+        boundary_in = "boundary" in constraints
+        superset_in = "superset" in constraints
         if boundary_in and superset_in and constraints["superset"]:
             b_min = constraints["boundary"]["min"]
             b_max = constraints["boundary"]["max"]
@@ -1154,7 +1154,7 @@ class Reader:
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
             )
-            if column in mandatory_vars.keys():
+            if column in mandatory_vars:
                 variables[mandatory_vars[column]] = var
             else:
                 variables[column.lower()] = var

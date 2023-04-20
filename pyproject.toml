@@ -67,6 +67,8 @@ select = [
     'Q',
     # flake8-self
     "SLF",
+    # flake8-simplify
+    "SIM",
     # flake8-type-checking
     "TCH",
     # pep8-naming

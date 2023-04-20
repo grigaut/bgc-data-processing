@@ -119,8 +119,8 @@ class CSVLoader(BaseLoader):
         if not date_constraint:
             years_str = "...."
         else:
-            boundary_in = "boundary" in date_constraint.keys()
-            superset_in = "superset" in date_constraint.keys()
+            boundary_in = "boundary" in date_constraint
+            superset_in = "superset" in date_constraint
             if boundary_in and superset_in and date_constraint["superset"]:
                 b_min = date_constraint["boundary"]["min"]
                 b_max = date_constraint["boundary"]["max"]

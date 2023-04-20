@@ -88,7 +88,7 @@ class MeshPlotter(BasePlot):
             self._variables.latitude_var_name,
             self._variables.longitude_var_name,
         ]:
-            if var_name is not None and var_name in variables.keys():
+            if var_name is not None and var_name in variables.keys():  # noqa: SIM118
                 columns.append(variables.get(var_name).label)
         return columns
 
@@ -196,22 +196,10 @@ class MeshPlotter(BasePlot):
             df[lon_col].max(),
         )
 
-        if not np.isnan(self._lat_map_min):
-            lat_map_min = self._lat_map_min
-        else:
-            lat_map_min = lat_min
-        if not np.isnan(self._lat_map_max):
-            lat_map_max = self._lat_map_max
-        else:
-            lat_map_max = lat_max
-        if not np.isnan(self._lon_map_min):
-            lon_map_min = self._lon_map_min
-        else:
-            lon_map_min = lon_min
-        if not np.isnan(self._lon_map_max):
-            lon_map_max = self._lon_map_max
-        else:
-            lon_map_max = lon_max
+        lat_map_min = self._lat_map_min if not np.isnan(self._lat_map_min) else lat_min
+        lat_map_max = self._lat_map_max if not np.isnan(self._lat_map_max) else lat_max
+        lon_map_min = self._lon_map_min if not np.isnan(self._lon_map_min) else lon_min
+        lon_map_max = self._lon_map_max if not np.isnan(self._lon_map_max) else lon_max
 
         return [lon_map_min, lon_map_max, lat_map_min, lat_map_max]
 
