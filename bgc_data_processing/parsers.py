@@ -198,8 +198,7 @@ class TomlParser:
         if isinstance(var_type, tuple):
             is_correct_iterator = isinstance(var, var_type[0])
             return is_correct_iterator and all(isinstance(x, var_type[1]) for x in var)
-        else:
-            return isinstance(var, var_type)
+        return isinstance(var, var_type)
 
     def _make_error_msg(self, keys: list[str], types: list[Type]) -> str:
         """Create error message for TypeErrors.
@@ -344,7 +343,7 @@ def directory_check(get_variable: Callable) -> Callable:
                         raise IsADirectoryError(
                             f"Directory {directory} already exists and is not empty.",
                         )
-                    elif self.existing_dir_behavior == "merge":
+                    if self.existing_dir_behavior == "merge":
                         pass
                     elif self.existing_dir_behavior == "clean":
                         shutil.rmtree(directory)
@@ -353,8 +352,7 @@ def directory_check(get_variable: Callable) -> Callable:
                 os.mkdir(directory)
             self._dir_created["-".join(keys_dirs)] = True
             return directory
-        else:
-            return get_variable(self, keys)
+        return get_variable(self, keys)
 
     return wrapper_func
 
@@ -432,8 +430,7 @@ class ConfigParser(TomlParser):
         """
         if self._parsed:
             return
-        else:
-            self._parsed = True
+        self._parsed = True
         self.raise_if_wrong_type_below([])
         for keys in self.dates_vars_keys:
             all_keys = [keys] if isinstance(keys, str) else keys
@@ -515,7 +512,7 @@ class DefaultTemplatesParser(TomlParser):
         TemplateVar
             Template variable corresponding to the arguments.
         """
-        template = TemplateVar(
+        return TemplateVar(
             name=var_args["NAME"],
             unit=var_args["UNIT"],
             var_type=self._str_to_type[var_args["TYPE"]],
@@ -523,7 +520,6 @@ class DefaultTemplatesParser(TomlParser):
             name_format=var_args["NAME_FORMAT"],
             value_format=var_args["VALUE_FORMAT"],
         )
-        return template
 
     @property
     def variables(self) -> dict[str, TemplateVar]:

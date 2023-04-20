@@ -156,8 +156,7 @@ class Storer:
         """
         if other == 0:
             return self
-        else:
-            return self.__add__(other)
+        return self.__add__(other)
 
     def __add__(self, other: object) -> "Storer":
         """Perform left addition.
@@ -184,14 +183,13 @@ class Storer:
         concat_data = pd.concat([self._data, other.data], ignore_index=True)
         concat_providers = list(set(self.providers + other.providers))
         # Return Storer with similar variables
-        concat_storer = Storer(
+        return Storer(
             data=concat_data,
             category=self.category,
             providers=concat_providers,
             variables=self.variables,
             verbose=min(self._verbose, other.verbose),
         )
-        return concat_storer
 
     def remove_duplicates(self, priority_list: list = None) -> None:
         """Update self._data to remove duplicates in data.
@@ -244,8 +242,7 @@ class Storer:
         # Group duplicates and average them
         grouped = duplicates.groupby(subset_group).mean().reset_index()
         # Concatenate dataframe with droppped duplicates and duplicates averaged
-        concat = pd.concat([dropped, grouped], ignore_index=True, axis=0)
-        return concat
+        return pd.concat([dropped, grouped], ignore_index=True, axis=0)
 
     def _remove_duplicates_between_providers(
         self,
@@ -480,7 +477,7 @@ class Storer:
 
                 storers.append(reader.get_storer())
             return sum(storers)
-        elif isinstance(filepath, str):
+        if isinstance(filepath, str):
             reader = Reader(
                 filepath=filepath,
                 providers_column_label=providers_column_label,
@@ -499,8 +496,7 @@ class Storer:
                 verbose=verbose,
             )
             return reader.get_storer()
-        else:
-            raise TypeError(f"Can't read filepaths from {filepath}")
+        raise TypeError(f"Can't read filepaths from {filepath}")
 
     @classmethod
     def from_constraints(
@@ -742,7 +738,7 @@ class Constraints:
             is_max_nan = isinstance(maximum, float) and np.isnan(maximum)
             if is_min_nan and is_max_nan:
                 continue
-            elif is_max_nan:
+            if is_max_nan:
                 bool_series = label_series >= minimum
             elif is_min_nan:
                 bool_series = label_series <= maximum
@@ -822,8 +818,8 @@ class Constraints:
         verify_all = bool_boundaries & bool_supersets & bool_polygons
         if not inplace:
             return df.loc[verify_all, :]
-        else:
-            df = df.loc[verify_all, :]
+        df = df.loc[verify_all, :]
+        return None
 
     def apply_specific_constraint(
         self,
@@ -939,7 +935,7 @@ class Constraints:
         elif not superset_in:
             all_min = constraints["boundary"]["min"]
             all_max = constraints["boundary"]["max"]
-            return all_min, all_max
+        return all_min, all_max
 
 
 class Reader:

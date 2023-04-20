@@ -188,11 +188,7 @@ class NetCDFLoader(BaseLoader):
             raise NetCDFLoadingError(
                 "Some variables have different size (first dimension)",
             )
-        elif len(set(shapes0)) == 1:
-            shape0 = shapes0[0]
-        else:
-            # if the shape list is empty => all variables have a 1st dimension of 1
-            shape0 = 1
+        shape0 = shapes0[0] if len(set(shapes0)) == 1 else 1
         if shapes1:
             # Assert all shape (2nd dimension) are the same
             if len(set(shapes1)) != 1:
@@ -313,8 +309,7 @@ class NetCDFLoader(BaseLoader):
                 for value in correct_flags:
                     good_flags = good_flags | (flag_values == value)
                 return np.where(good_flags, values, np.nan)
-            else:
-                return values
+            return values
         return None
 
     def _format(self, nc_data: netCDF4.Dataset) -> pd.DataFrame:
@@ -482,5 +477,4 @@ class NetCDFLoader(BaseLoader):
         df_types = self._convert_type(df_ecols)
         df_corr = self._correct(df_types)
         df_sliced = constraints.apply_constraints(df_corr)
-        df_rm = self.remove_nan_rows(df_sliced)
-        return df_rm
+        return self.remove_nan_rows(df_sliced)

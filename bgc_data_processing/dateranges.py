@@ -67,8 +67,7 @@ class DateRangeGenerator:
         """
         if self.interval == "custom":
             return self._make_custom_range()
-        else:
-            return self._make_range()
+        return self._make_range()
 
     def _make_custom_range(self) -> pd.DataFrame:
         """Create the range DataFrame for custom date intervals.

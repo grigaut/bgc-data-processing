@@ -139,8 +139,7 @@ class CSVLoader(BaseLoader):
                 years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
             else:
                 raise KeyError("Date constraint dictionnary has invalid keys")
-        pattern = self._files_pattern.format(years=years_str)
-        return pattern
+        return self._files_pattern.format(years=years_str)
 
     def _select_filepaths(self, exclude: list, date_constraint: dict = {}) -> list[str]:
         """Select filepaths to use when loading the data.
@@ -204,8 +203,7 @@ class CSVLoader(BaseLoader):
                 corrects = df[flag_alias].isin(correct_flags)
                 values = df[alias].where(corrects, np.nan)
                 return values
-            else:
-                return df[alias]
+            return df[alias]
         return None
 
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -333,5 +331,4 @@ class CSVLoader(BaseLoader):
         df_type = self._convert_types(df_form)
         df_corr = self._correct(df_type)
         df_sliced = constraints.apply_constraints(df_corr)
-        df_rm = self.remove_nan_rows(df_sliced)
-        return df_rm
+        return self.remove_nan_rows(df_sliced)

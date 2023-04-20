@@ -35,8 +35,7 @@ def get_drawer_polygon(
     """
     gdf = drawer.gdf
     gdf.to_crs(crs=4326, inplace=True)
-    polygon = gdf["geometry"].iloc[-1]
-    return polygon
+    return gdf["geometry"].iloc[-1]
 
 
 def update_profile(
@@ -346,7 +345,7 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
     filepath = POLYGONS_FOLDER + "/" + filename
     if not os.path.isfile(filepath):
         print(f"Loading aborted : the file {filepath} doesn't exist.")
-        return
+        return None
     with open(filepath, "r") as file:
         first_line = file.readlines()[0]
         polygon = shapely.from_wkt(first_line)

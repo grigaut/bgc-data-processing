@@ -95,8 +95,7 @@ class BaseVar(ABC):
         str
             name_unit_type
         """
-        txt = f"{self.name}_{self.unit}_{self.type}"
-        return txt
+        return f"{self.name}_{self.unit}_{self.type}"
 
     def __eq__(self, __o: object) -> bool:
         """Test variable equality.
@@ -113,8 +112,7 @@ class BaseVar(ABC):
         """
         if isinstance(__o, BaseVar):
             return repr(self) == repr(__o)
-        else:
-            return False
+        return False
 
     @property
     def label(self) -> str:
@@ -139,7 +137,7 @@ class TemplateVar(BaseVar):
         dict
             arguments to use when initiating an instance of BaseVar.
         """
-        informations = {
+        return {
             "name": self.name,
             "unit": self.unit,
             "var_type": self.type,
@@ -147,7 +145,6 @@ class TemplateVar(BaseVar):
             "name_format": self.name_format,
             "value_format": self.value_format,
         }
-        return informations
 
     def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
         """Return an ExistingVar.
@@ -321,8 +318,7 @@ class NotExistingVar(BaseVar):
         NotExistingVar
             NotExistingVar from template.
         """
-        var = cls(**template.building_informations())
-        return var
+        return cls(**template.building_informations())
 
     def set_default(self, default: Any) -> Self:
         """Set the default value for the variable column.
@@ -566,8 +562,7 @@ class ParsedVar(BaseVar):
         str
             name_unit
         """
-        txt = f"{self.name}_{self.unit}"
-        return txt
+        return f"{self.name}_{self.unit}"
 
 
 class VariablesStorer:
@@ -789,9 +784,9 @@ class VariablesStorer:
 
         if has_wrong_len or has_wrong_keys:
             return False
-        else:
-            repr_eq = [repr(self[key]) == repr(__o[key]) for key in self.mapper_by_name]
-            return np.all(repr_eq)
+
+        repr_eq = [repr(self[key]) == repr(__o[key]) for key in self.mapper_by_name]
+        return np.all(repr_eq)
 
     def get(self, var_name: str) -> ExistingVar | NotExistingVar:
         """Return the variable which name corresponds to var_name.
@@ -813,13 +808,12 @@ class VariablesStorer:
         """
         if self.has_name(var_name=var_name):
             return self.mapper_by_name[var_name]
-        else:
-            valid_keys = self.mapper_by_name.keys()
-            error_msg = (
-                f"{var_name} is not a valid variable name."
-                f"Valid names are: {list(valid_keys)}"
-            )
-            raise KeyError(error_msg)
+        valid_keys = self.mapper_by_name.keys()
+        error_msg = (
+            f"{var_name} is not a valid variable name."
+            f"Valid names are: {list(valid_keys)}"
+        )
+        raise KeyError(error_msg)
 
     def add_var(self, var: ExistingVar | NotExistingVar) -> None:
         """Add a new variable to self._elements.
@@ -941,8 +935,7 @@ class VariablesStorer:
         >>> storer.name_save_format % tuple(storer.save_labels)
         "YEAR PROVIDER "
         """
-        format_string = " ".join([var.name_format for var in self._save])
-        return format_string
+        return " ".join([var.name_format for var in self._save])
 
     @property
     def value_save_format(self) -> str:
@@ -953,8 +946,7 @@ class VariablesStorer:
         str
             Format string"
         """
-        format_string = " ".join([var.value_format for var in self._save])
-        return format_string
+        return " ".join([var.value_format for var in self._save])
 
     @property
     def in_dset(self) -> list[ExistingVar]:

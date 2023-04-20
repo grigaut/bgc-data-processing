@@ -554,21 +554,19 @@ class MeshPlotter(BasePlot):
         )
         if self._verbose > 1:
             print("\tCreating figure")
-        if not df.empty:
-            longis_2d, latis_2d, values_2d = self._mesh(
-                df=df,
-                label=label,
-            )
-            # Ravel the arrays to concatenate them in a single dataframe
-            lons = longis_2d.ravel()
-            lats = latis_2d.ravel()
-            vals = values_2d.ravel()
-            data = {lon_label: lons, lat_label: lats, label: vals}
-            transformed_df = pd.DataFrame.from_dict(data)
-            transformed_df = transformed_df[~transformed_df[label].isna()]
-            return transformed_df
-        else:
+        if df.empty:
             return pd.DataFrame(columns=[lon_label, lat_label, label])
+        longis_2d, latis_2d, values_2d = self._mesh(
+            df=df,
+            label=label,
+        )
+        # Ravel the arrays to concatenate them in a single dataframe
+        lons = longis_2d.ravel()
+        lats = latis_2d.ravel()
+        vals = values_2d.ravel()
+        data = {lon_label: lons, lat_label: lats, label: vals}
+        transformed_df = pd.DataFrame.from_dict(data)
+        return transformed_df[~transformed_df[label].isna()]
 
 
 class EvolutionProfile(BasePlot):
@@ -681,16 +679,15 @@ class EvolutionProfile(BasePlot):
             if depth_max not in intervals:
                 intervals = np.append(intervals, depth_max)
             intervals.sort()
-            depth_bins = pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
+            return pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
+
         # if only the bin value resolution is given
-        else:
-            depth_bins = pd.interval_range(
-                start=depth_min - depth_min % self._depth_interval,
-                end=depth_max,
-                freq=self._depth_interval,
-                closed="right",
-            )
-        return depth_bins
+        return pd.interval_range(
+            start=depth_min - depth_min % self._depth_interval,
+            end=depth_max,
+            freq=self._depth_interval,
+            closed="right",
+        )
 
     def _make_date_intervals(self) -> pd.IntervalIndex:
         """Create the datetime intervals to use for the cut.
@@ -713,12 +710,11 @@ class EvolutionProfile(BasePlot):
             interval_length=self._interval_length,
         )
         drng = drng_generator()
-        intervals = pd.IntervalIndex.from_arrays(
+        return pd.IntervalIndex.from_arrays(
             pd.to_datetime(drng[drng_generator.start_column_name]),
             pd.to_datetime(drng[drng_generator.end_column_name]),
             closed="both",
         )
-        return intervals
 
     def _create_cut_and_ticks(
         self,
