@@ -42,6 +42,15 @@ class MeshPlotter(BasePlot):
         storer: "Storer",
         constraints: "Constraints" = Constraints(),
     ) -> None:
+        """Instanciate base class for tracing on earthmaps.
+
+        Parameters
+        ----------
+        storer : Storer
+            Data Storer containing data to plot.
+        constraints: Constraints
+                Constraint slicer.
+        """
         super().__init__(storer=storer, constraints=constraints)
         self._lat_bin: int | float = self.__default_lat_bin
         self._lon_bin: int | float = self.__default_lon_bin
@@ -56,7 +65,7 @@ class MeshPlotter(BasePlot):
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
     def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
-        """Returns a list of columns to use when grouping the data.
+        """Return a list of columns to use when grouping the data.
 
         Parameters
         ----------
@@ -115,7 +124,7 @@ class MeshPlotter(BasePlot):
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
-        group = data[self._grouping_columns + [var_key]].groupby(self._grouping_columns)
+        group = data[[*self._grouping_columns, var_key]].groupby(self._grouping_columns)
         if self._depth_density:
             var_series: pd.Series = group.sum()
         else:
@@ -128,7 +137,8 @@ class MeshPlotter(BasePlot):
         bin_size: float,
         cut_name: str,
     ) -> tuple[pd.Series, np.ndarray]:
-        """Generates evenly spaced points to use when creating the meshgrid. \
+        """Generate evenly spaced points to use when creating the meshgrid.
+
         Also performs a cut on the dataframe column to bin the values.
 
         Parameters
@@ -242,7 +252,8 @@ class MeshPlotter(BasePlot):
         longitude_min: int | float = np.nan,
         longitude_max: int | float = np.nan,
     ) -> None:
-        """Define the boundaries of the map \
+        """Define the boundaries of the map.
+
         (different from the boundaries of the plotted data).
 
         Parameters
@@ -270,7 +281,7 @@ class MeshPlotter(BasePlot):
         df: pd.DataFrame,
         label: str,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
+        """Return the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
         ----------
@@ -313,8 +324,8 @@ class MeshPlotter(BasePlot):
             columns="lon_cut",
             aggfunc="sum",
         )
-        all_indexes = [index for index in range(lons.shape[0])]
-        all_columns = [colum for colum in range(lats.shape[1])]
+        all_indexes = list(range(lons.shape[0]))
+        all_columns = list(range(lats.shape[1]))
         vals: pd.DataFrame = vals.reindex(all_indexes, axis=0)
         vals: pd.DataFrame = vals.reindex(all_columns, axis=1)
 
@@ -328,7 +339,7 @@ class MeshPlotter(BasePlot):
         suptitle: str = None,
         **kwargs,
     ) -> None:
-        """Plots the colormesh for the given variable.
+        """Plot the colormesh for the given variable.
 
         Parameters
         ----------
@@ -360,7 +371,7 @@ class MeshPlotter(BasePlot):
         suptitle: str = None,
         **kwargs,
     ) -> None:
-        """Plots the colormesh for the given variable.
+        """Plot the colormesh for the given variable.
 
         Parameters
         ----------
@@ -468,19 +479,23 @@ class MeshPlotter(BasePlot):
         extent = self._get_map_extent(df)
         ax.set_extent(extent, crs.PlateCarree())
         if not df.empty:
-            X1, Y1, Z1 = self._mesh(
+            lat_2d, lon_2d, vals_2d = self._mesh(
                 df=df,
                 label=label,
             )
-            if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
+            if (
+                lat_2d.shape == (1, 1)
+                or lon_2d.shape == (1, 1)
+                or vals_2d.shape == (1, 1)
+            ):
                 warnings.warn(
                     "Not enough data to display, try decreasing the bin size"
-                    " or representing more data sources"
+                    " or representing more data sources",
                 )
             cbar = ax.pcolormesh(
-                X1,
-                Y1,
-                Z1,
+                lat_2d,
+                lon_2d,
+                vals_2d,
                 transform=crs.PlateCarree(),
                 **kwargs,
             )
@@ -552,14 +567,14 @@ class MeshPlotter(BasePlot):
         if self._verbose > 1:
             print("\tCreating figure")
         if not df.empty:
-            longis_2D, latis_2D, values_2D = self._mesh(
+            longis_2d, latis_2d, values_2d = self._mesh(
                 df=df,
                 label=label,
             )
             # Ravel the arrays to concatenate them in a single dataframe
-            lons = longis_2D.ravel()
-            lats = latis_2D.ravel()
-            vals = values_2D.ravel()
+            lons = longis_2d.ravel()
+            lats = latis_2d.ravel()
+            vals = values_2d.ravel()
             data = {lon_label: lons, lat_label: lats, label: vals}
             transformed_df = pd.DataFrame.from_dict(data)
             transformed_df = transformed_df[~transformed_df[label].isna()]
@@ -589,7 +604,15 @@ class EvolutionProfile(BasePlot):
         storer: "Storer",
         constraints: "Constraints" = Constraints(),
     ) -> None:
+        """Class to plot the evolution of data on a given area.
 
+        Parameters
+        ----------
+        storer : Storer
+            Storer to map data of.
+        constraints: Constraints
+                Constraint slicer.
+        """
         super().__init__(storer, constraints)
         self._interval: str = self.__default_interval
         self._interval_length: int = self.__default_interval_length
@@ -611,8 +634,9 @@ class EvolutionProfile(BasePlot):
         self,
         depth_interval: int | float | list[int | float] = np.nan,
     ) -> None:
-        """Set the depth interval value. This represents the vertical resolution \
-        of the final plot.
+        """Set the depth interval value.
+
+        This represents the vertical resolution of the final plot.
 
         Parameters
         ----------
@@ -624,8 +648,9 @@ class EvolutionProfile(BasePlot):
             self._depth_interval = depth_interval
 
     def set_date_intervals(self, interval: str, interval_length: int = None) -> None:
-        """Set the date interval parameters. This represent the horizontal resolution \
-        of the final plot.
+        """Set the date interval parameters.
+
+        This represent the horizontal resolution of the final plot.
 
         Parameters
         ----------
@@ -847,9 +872,9 @@ class EvolutionProfile(BasePlot):
         if self._verbose > 1:
             print("\tCreating figure.")
 
-        X, Y = np.meshgrid(date_ticks, depth_ticks)
+        lon, lat = np.meshgrid(date_ticks, depth_ticks)
         # Color mesh
-        cbar = ax.pcolormesh(X, Y, df_pivot.values, **kwargs)
+        cbar = ax.pcolormesh(lon, lat, df_pivot.values, **kwargs)
 
         return ax, cbar
 

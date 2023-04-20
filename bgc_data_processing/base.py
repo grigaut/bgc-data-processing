@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from bgc_data_processing.data_classes import Storer
 
 if TYPE_CHECKING:
+    from bgc_data_processing.data_classes import Storer
     from bgc_data_processing.variables import VariablesStorer
     from bgc_data_processing.data_classes import Constraints
     from matplotlib.figure import Figure
@@ -45,7 +45,23 @@ class BaseLoader(ABC):
         files_pattern: str,
         variables: "VariablesStorer",
     ) -> None:
+        """Initiate base class to load data.
 
+        Parameters
+        ----------
+        provider_name : str
+            Data provider name.
+        dirin : str
+            Directory to browse for files to load.
+        category: str
+            Category provider belongs to.
+        files_pattern : str
+            Pattern to use to parse files.
+            Must contain a '{years}' in order to be completed using the .format method.
+        variables : VariablesStorer
+            Storer object containing all variables to consider for this data,
+            both the one in the data file but and the one not represented in the file.
+        """
         self._provider = provider_name
         self._dirin = dirin
         self._category = category
@@ -98,7 +114,7 @@ class BaseLoader(ABC):
 
     @abstractmethod
     def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
-        """Loads all files for the loader.
+        """Load all files for the loader.
 
         Parameters
         ----------
@@ -132,7 +148,7 @@ class BaseLoader(ABC):
 
     @abstractmethod
     def load(self, filepath: str) -> pd.DataFrame:
-        """Main method to use to load data.
+        """Load data.
 
         Returns
         -------
@@ -163,7 +179,7 @@ class BaseLoader(ABC):
         self._variables.set_saving_order(var_names=var_names)
 
     def remove_nan_rows(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Removes rows.
+        """Remove rows.
 
         Parameters
         ----------
@@ -186,7 +202,7 @@ class BaseLoader(ABC):
         return df.drop(index=indexes_to_drop)
 
     def _correct(self, to_correct: pd.DataFrame) -> pd.DataFrame:
-        """Applies corrections functions defined in Var object to dataframe.
+        """Apply corrections functions defined in Var object to dataframe.
 
         Parameters
         ----------
@@ -218,6 +234,15 @@ class BasePlot(ABC):
     """
 
     def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
+        """Initiate Base class to plot data from a storer.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to plot data of.
+        constraints: Constraints
+                Constraint slicer.
+        """
         self._storer = storer
         self._variables = storer.variables
         self._constraints = constraints
@@ -242,7 +267,7 @@ class BasePlot(ABC):
         ...
 
     @abstractmethod
-    def show(self, title: str = None, suptitle: str = None, *args, **kwargs) -> None:
+    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
         """Plot method.
 
         Parameters
@@ -251,15 +276,12 @@ class BasePlot(ABC):
             Specify a title to change from default., by default None
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
-        *args: list
-            Additional parameters to pass to self._build_to_new_figure.
         *kwargs: dict
             Additional parameters to pass to self._build_to_new_figure.
         """
         self._build_to_new_figure(
             title=title,
             suptitle=suptitle,
-            *args,
             **kwargs,
         )
         plt.show()
@@ -271,7 +293,6 @@ class BasePlot(ABC):
         save_path: str,
         title: str = None,
         suptitle: str = None,
-        *args,
         **kwargs,
     ) -> None:
         """Figure saving method.
@@ -284,15 +305,12 @@ class BasePlot(ABC):
             Specify a title to change from default., by default None
         suptitle : str, optional
             Specify a suptitle to change from default., by default None
-        *args: list
-            Additional parameters to pass to self._build_to_new_figure.
         *kwargs: dict
             Additional parameters to pass to self._build_to_new_figure.
         """
         self._build_to_new_figure(
             title=title,
             suptitle=suptitle,
-            *args,
             **kwargs,
         )
         plt.savefig(save_path)

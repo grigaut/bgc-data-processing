@@ -46,7 +46,30 @@ class BaseVar(ABC):
         name_format: str = "%-15s",
         value_format: str = "%15s",
     ):
+        """Class to store Meta data on a variable of interest.
 
+        Parameters
+        ----------
+        name : str
+            'Official' name for the variable : name to use when displaying the variable.
+        unit : str
+            Variable unit (written using the following format:
+            [deg_C] for Celsius degree of [kg] for kilograms).
+        var_type : str
+            Variable type (str, int, datetime...).
+            It will be used to convert the data using df[variable].astype(type)
+        default: Any
+            Default value to set instead of nan., by default np.nan
+        name_format: str
+            Format to use to save the data name and unit in a csv of txt file.
+            , by default "%-15s"
+        value_format: str
+            Format to use to save the data value in a csv/txt file., by default "%15s"
+
+        Examples
+        --------
+        >>> var_lat = BaseVar("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
+        """
         self.name = name
         self.unit = unit
         self.type = var_type
@@ -55,13 +78,39 @@ class BaseVar(ABC):
         self.value_format = value_format
 
     def __str__(self) -> str:
+        """Convert the variable to a string.
+
+        Returns
+        -------
+        str
+            name - unit (type)
+        """
         return f"{self.name} - {self.unit} ({self.type})"
 
     def __repr__(self) -> str:
+        """Represent the variable as string.
+
+        Returns
+        -------
+        str
+            name_unit_type
+        """
         txt = f"{self.name}_{self.unit}_{self.type}"
         return txt
 
     def __eq__(self, __o: object) -> bool:
+        """Test variable equality.
+
+        Parameters
+        ----------
+        __o : object
+            Object to test equality with.
+
+        Returns
+        -------
+        bool
+            True if both are instance of basevar with same representation.
+        """
         if isinstance(__o, BaseVar):
             return repr(self) == repr(__o)
         else:
@@ -82,7 +131,7 @@ class BaseVar(ABC):
 class TemplateVar(BaseVar):
     """Class to define default variable as a template to ease variable instantiation."""
 
-    def _building_informations(self) -> dict:
+    def building_informations(self) -> dict:
         """Self's informations to instanciate object with same informations as self.
 
         Returns
@@ -90,18 +139,20 @@ class TemplateVar(BaseVar):
         dict
             arguments to use when initiating an instance of BaseVar.
         """
-        informations = dict(
-            name=self.name,
-            unit=self.unit,
-            var_type=self.type,
-            default=self.default,
-            name_format=self.name_format,
-            value_format=self.value_format,
-        )
+        informations = {
+            "name": self.name,
+            "unit": self.unit,
+            "var_type": self.type,
+            "default": self.default,
+            "name_format": self.name_format,
+            "value_format": self.value_format,
+        }
         return informations
 
     def in_file_as(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
-        """Returns an ExistingVar object with same attributes as self and \
+        """Return an ExistingVar.
+
+        New object has same attributes as self and \
         the property 'aliases' correctly set up using ExistingVar._set_aliases method.
 
         Parameters
@@ -160,7 +211,7 @@ class TemplateVar(BaseVar):
         return ExistingVar.from_template(self).set_aliases(*args)
 
     def not_in_file(self) -> "NotExistingVar":
-        """Returns a NotExistingVar object with same attributes as self.
+        """Return a NotExistingVar object with same attributes as self.
 
         Returns
         -------
@@ -205,6 +256,26 @@ class NotExistingVar(BaseVar):
         name_format: str = "%-15s",
         value_format: str = "%15s",
     ):
+        """Class to represent variables which don't exist in the dataset.
+
+        Parameters
+        ----------
+        name : str
+            'Official' name for the variable : name to use when displaying the variable.
+        unit : str
+            Variable unit (written using the following format:
+            [deg_C] for Celsius degree of [kg] for kilograms).
+        var_type : str
+            Variable type (str, int, datetime...).
+            It will be used to convert the data using df[variable].astype(type)
+        default: Any
+            Default value to set instead of nan., by default np.nan
+        name_format: str
+            Format to use to save the data name and unit in a csv of txt file.
+            , by default "%-15s"
+        value_format: str
+            Format to use to save the data value in a csv/txt file., by default "%15s"
+        """
         super().__init__(name, unit, var_type, default, name_format, value_format)
         self.exist_in_dset = self.__default_exist_in_dset
         self._remove_if_nan = self.__default_remove_if_nan
@@ -223,7 +294,9 @@ class NotExistingVar(BaseVar):
 
     @property
     def remove_if_all_nan(self) -> bool:
-        """True if the variable must be removed when this variable and \
+        """Whether the variable must be removed if all same are NaN.
+
+        If True, then the variable must be removed when this variable and
         other 'remove if all nan' variables are NaN.
 
         Returns
@@ -236,7 +309,7 @@ class NotExistingVar(BaseVar):
 
     @classmethod
     def from_template(cls, template: "TemplateVar") -> "NotExistingVar":
-        """Instantiates a NotExistingVar from a TemplateVar.
+        """Instantiate a NotExistingVar from a TemplateVar.
 
         Parameters
         ----------
@@ -248,7 +321,7 @@ class NotExistingVar(BaseVar):
         NotExistingVar
             NotExistingVar from template.
         """
-        var = cls(**template._building_informations())
+        var = cls(**template.building_informations())
         return var
 
     def set_default(self, default: Any) -> Self:
@@ -268,7 +341,7 @@ class NotExistingVar(BaseVar):
         return self
 
     def remove_when_all_nan(self) -> Self:
-        """Sets self._remove_if_all_nan to True.
+        """Set self._remove_if_all_nan to True.
 
         Returns
         -------
@@ -279,7 +352,7 @@ class NotExistingVar(BaseVar):
         return self
 
     def remove_when_nan(self) -> Self:
-        """Sets self._remove_if_nan to True.
+        """Set self._remove_if_nan to True.
 
         Returns
         -------
@@ -291,8 +364,9 @@ class NotExistingVar(BaseVar):
 
 
 class ExistingVar(NotExistingVar):
-    """Class to represent variables existing in the dataset, \
-    to be able to specify flag columns, correction functions...
+    """Class to represent variables existing in the dataset.
+
+    This class allows to specify flag columns, correction functions...
 
     Parameters
     ----------
@@ -326,9 +400,31 @@ class ExistingVar(NotExistingVar):
         name_format: str = "%-15s",
         value_format: str = "%15s",
     ):
+        """Class to represent variables existing in the dataset.
+
+        This class allows to specify flag columns, correction functions...
+
+        Parameters
+        ----------
+        name : str
+            'Official' name for the variable : name to use when displaying the variable.
+        unit : str
+            Variable unit (written using the following format:
+            [deg_C] for Celsius degree of [kg] for kilograms).
+        var_type : str
+            Variable type (str, int, datetime...).
+            It will be used to convert the data using df[variable].astype(type)
+        default: Any
+            Default value to set instead of nan., by default np.nan
+        name_format: str
+            Format to use to save the data name and unit in a csv of txt file.
+            , by default "%-15s"
+        value_format: str
+            Format to use to save the data value in a csv/txt file., by default "%15s"
+        """
         super().__init__(name, unit, var_type, default, name_format, value_format)
         self.exist_in_dset = self.__default_exist_in_dset
-        self._correction = self.__default_correction
+        self.correction = self.__default_correction
         self._aliases = self.__default_aliases
 
     @property
@@ -345,8 +441,7 @@ class ExistingVar(NotExistingVar):
 
     @property
     def remove_if_all_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when multiple \
-        variables (this one included if True) are np.nan.
+        """Whether or not to suppress the row when this an other variables are NaN.
 
         Returns
         -------
@@ -358,8 +453,7 @@ class ExistingVar(NotExistingVar):
 
     @property
     def remove_if_nan(self) -> bool:
-        """Get the boolean indicating whether or not to suppress the row when \
-        the variable is np.nan.
+        """Whether or not to suppress the row when the variable is np.nan.
 
         Returns
         -------
@@ -370,7 +464,7 @@ class ExistingVar(NotExistingVar):
 
     @classmethod
     def from_template(cls, template: "TemplateVar") -> "ExistingVar":
-        """Instantiates a ExistingVar from a TemplateVar.
+        """Instantiate a ExistingVar from a TemplateVar.
 
         Parameters
         ----------
@@ -385,7 +479,7 @@ class ExistingVar(NotExistingVar):
         return super().from_template(template)
 
     def set_aliases(self, *args: str | tuple[str, str, list]) -> Self:
-        """Sets aliases for the variable.
+        """Set aliases for the variable.
 
         Parameters
         ----------
@@ -456,7 +550,7 @@ class ExistingVar(NotExistingVar):
         """
         if not isinstance(function, Callable):
             raise VariableInstantiationError("Correcting function must be callable.")
-        self._correction = function
+        self.correction = function
         self._has_correction = True
         return self
 
@@ -465,12 +559,21 @@ class ParsedVar(BaseVar):
     """Variables parsed from a csv file."""
 
     def __repr__(self) -> str:
+        """Represent the parsed variable as a string.
+
+        Returns
+        -------
+        str
+            name_unit
+        """
         txt = f"{self.name}_{self.unit}"
         return txt
 
 
 class VariablesStorer:
-    """General storer for Var object to represent the set of both variables present \
+    """General storer for Var object.
+
+    This class represents the set of both variables present \
     in the file and variables to take in consideration \
     (therefore to add even if empty) when loading the data.
 
@@ -526,10 +629,52 @@ class VariablesStorer:
         *args: ExistingVar | NotExistingVar,
         **kwargs: ExistingVar | NotExistingVar,
     ) -> None:
-        if len(args) != len(set(var.name for var in args)):
+        """General storer for Var object.
+
+        This class represents the set of both variables present \
+        in the file and variables to take in consideration \
+        (therefore to add even if empty) when loading the data.
+
+        Parameters
+        ----------
+        expocode : ExistingVar | NotExistingVar
+            Expocode related variable.
+        date : ExistingVar | NotExistingVar
+            Date related variable.
+        year : ExistingVar | NotExistingVar
+            Year related variable.
+        month : ExistingVar | NotExistingVar
+            Month related variable.
+        day : ExistingVar | NotExistingVar
+            Day related variable.
+        latitude : ExistingVar | NotExistingVar
+            Latitude related variable.
+        longitude : ExistingVar | NotExistingVar
+            Longitude related variable.
+        depth : ExistingVar | NotExistingVar
+            Depth related variable.
+        provider : ExistingVar | NotExistingVar, optional
+            Provider related variable. Set to None to ignore., by default None
+        hour : ExistingVar | NotExistingVar, optional
+            Hour related variable. Can be set to None to be ignored., by default None
+        *args: list
+            Var objects to represent the variables stored by the object.
+            It is better if these Var object have been instanciated
+            using .not_here or .here_as methods.
+        *kwargs: dict
+            Var objects to represent the variables stored by the object.
+            It is better if these Var object have been instanciated
+            using .not_here or .here_as methods. The parameter name has no importance.
+
+        Raises
+        ------
+        ValueError:
+            If multiple var object have the same name.
+        """
+        if len(args) != len({var.name for var in args}):
             raise ValueError(
                 "To set multiple alias for the same variable, "
-                "use Var.in_file_as([alias1, alias2])"
+                "use Var.in_file_as([alias1, alias2])",
             )
         mandatory_variables = []
         if provider is None:
@@ -568,12 +713,38 @@ class VariablesStorer:
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
     def __getitem__(self, __k: str) -> ExistingVar | NotExistingVar:
+        """Get variable by its name.
+
+        Parameters
+        ----------
+        __k : str
+            Variable name
+
+        Returns
+        -------
+        ExistingVar | NotExistingVar
+            Corresponding variable with name __k
+        """
         return self.get(__k)
 
     def __iter__(self) -> Iterator[ExistingVar | NotExistingVar]:
+        """Get an iterator of all variables.
+
+        Yields
+        ------
+        Iterator[ExistingVar | NotExistingVar]
+            Ietrator of all element in the storer.
+        """
         return iter(self._elements)
 
     def __str__(self) -> str:
+        """Convert the object to string.
+
+        Returns
+        -------
+        str
+            All variable as strings.
+        """
         txt = ""
         for var in self._elements:
             if var.exist_in_dset is None:
@@ -586,18 +757,37 @@ class VariablesStorer:
         return txt
 
     def __len__(self) -> int:
+        """Return the number of elements.
+
+        Returns
+        -------
+        int
+            Number of elements.
+        """
         return len(self._elements)
 
     def __eq__(self, __o: object) -> bool:
+        """Compare to object for equality.
+
+        Parameters
+        ----------
+        __o : object
+            Object to compare with.
+
+        Returns
+        -------
+        bool
+            True if the objects have same types and all equal variables.
+        """
         if isinstance(__o, VariablesStorer):
             if len(self) != len(__o):
                 return False
-            elif set(self._mapper_by_name.keys()) != set(__o._mapper_by_name.keys()):
+            elif set(self.mapper_by_name.keys()) != set(__o.mapper_by_name.keys()):
                 return False
             else:
                 repr_eq = [
                     repr(self[key]) == repr(__o[key])
-                    for key in self._mapper_by_name.keys()
+                    for key in self.mapper_by_name.keys()
                 ]
                 return np.all(repr_eq)
         else:
@@ -622,9 +812,9 @@ class VariablesStorer:
             If var_name doesn't correspond to any name.
         """
         if self.has_name(var_name=var_name):
-            return self._mapper_by_name[var_name]
+            return self.mapper_by_name[var_name]
         else:
-            valid_keys = self._mapper_by_name.keys()
+            valid_keys = self.mapper_by_name.keys()
             error_msg = (
                 f"{var_name} is not a valid variable name."
                 f"Valid names are: {list(valid_keys)}"
@@ -632,7 +822,7 @@ class VariablesStorer:
             raise KeyError(error_msg)
 
     def add_var(self, var: ExistingVar | NotExistingVar) -> None:
-        """Adds a new variable to self._elements.
+        """Add a new variable to self._elements.
 
         Parameters
         ----------
@@ -644,7 +834,7 @@ class VariablesStorer:
         self._elements.append(var)
 
     def has_name(self, var_name: str) -> bool:
-        """Checks if a variable name is the nam eof one of the variables.
+        """Check if a variable name is the nam eof one of the variables.
 
         Parameters
         ----------
@@ -664,9 +854,9 @@ class VariablesStorer:
         Returns
         -------
         dict_keys
-            View of self._mapper_by_name keys.
+            View of self.mapper_by_name keys.
         """
-        return self._mapper_by_name.keys()
+        return self.mapper_by_name.keys()
 
     def set_saving_order(self, var_names: list[str] = []) -> None:
         """Set the saving order for the variables.
@@ -698,7 +888,7 @@ class VariablesStorer:
         return {var.name: var.label for var in self._elements}
 
     @property
-    def _mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
+    def mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
         """Mapper between variables names and variables Var objects (for __getitem__).
 
         Returns
@@ -710,7 +900,8 @@ class VariablesStorer:
 
     @property
     def unit_mapping(self) -> dict[str, str]:
-        """Mapper between variables names and variables units. \
+        """Map variables names and variables units.
+
         Mostly used to create unit row.
 
         Returns
@@ -786,15 +977,17 @@ class VariablesStorer:
             Mapping.
         """
         return {
-            var.label: var._correction
+            var.label: var.correction
             for var in self._in_dset
-            if var._correction is not None
+            if var.correction is not None
         }
 
     @property
     def to_remove_if_all_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where \
-        all variables are np.nan.
+        """Return the list of keys to inspect when removing rows.
+
+        This is suited when seeking for rows to delete
+        when many given variables are NaN.
 
         Returns
         -------
@@ -805,8 +998,10 @@ class VariablesStorer:
 
     @property
     def to_remove_if_any_nan(self) -> list[str]:
-        """Returns the list of keys to inspect when removing rows where \
-        any variable is np.nan.
+        """Return the list of keys to inspect when removing rows.
+
+        This is suited when seeking for rows to delete
+        when at least one given variable is NaN.
 
         Returns
         -------

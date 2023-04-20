@@ -45,7 +45,25 @@ class CSVLoader(BaseLoader):
         variables: "VariablesStorer",
         read_params: dict = {},
     ) -> None:
+        """Loader class to use with csv files.
 
+        Parameters
+        ----------
+        provider_name : str
+            Data provider name.
+        dirin : str
+            Directory to browse for files to load.
+        category: str
+            Category provider belongs to.
+        files_pattern : str
+            Pattern to use to parse files.
+            Must contain a '{years}' in order to be completed using the .format method.
+        variables : VariablesStorer
+            Storer object containing all variables to consider for this data,
+            both the one in the data file but and the one not represented in the file.
+        read_params : dict, optional
+            Additional parameter to pass to pandas.read_csv., by default {}
+        """
         self._read_params = read_params
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
@@ -54,7 +72,7 @@ class CSVLoader(BaseLoader):
         constraints: Constraints = Constraints(),
         exclude: list = [],
     ) -> "Storer":
-        """Loads all files for the loader.
+        """Load all files for the loader.
 
         Parameters
         ----------
@@ -79,7 +97,7 @@ class CSVLoader(BaseLoader):
         if data_list:
             data = pd.concat(data_list, ignore_index=True, axis=0)
         else:
-            data = pd.DataFrame(columns=[v for v in self._variables.labels.values()])
+            data = pd.DataFrame(columns=list(self._variables.labels.values()))
         return Storer(
             data=data,
             category=self.category,
@@ -89,7 +107,7 @@ class CSVLoader(BaseLoader):
         )
 
     def _pattern(self, date_constraint: dict) -> str:
-        """Returns files pattern for given years for this provider.
+        """Return files pattern for given years for this provider.
 
         Returns
         -------
@@ -125,7 +143,7 @@ class CSVLoader(BaseLoader):
         return pattern
 
     def _select_filepaths(self, exclude: list, date_constraint: dict = {}) -> list[str]:
-        """Selects filepaths to use when loading the data.
+        """Select filepaths to use when loading the data.
 
         exclude: list
             List of files to exclude when loading.
@@ -146,7 +164,7 @@ class CSVLoader(BaseLoader):
         return sorted(full_paths)
 
     def _read(self, filepath: str) -> pd.DataFrame:
-        """Reading function for csv files, using self._read_params when loading files.
+        """Read csv files, using self._read_params when loading files.
 
         Parameters
         ----------
@@ -165,7 +183,7 @@ class CSVLoader(BaseLoader):
         return file
 
     def _filter_flags(self, df: pd.DataFrame, var: "ExistingVar") -> pd.Series:
-        """Filters data selecting only some flag values.
+        """Filter data selecting only some flag values.
 
         Parameters
         ----------
@@ -191,7 +209,9 @@ class CSVLoader(BaseLoader):
         return None
 
     def _format(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Formatting function for csv files, modified to drop useless columns, \
+        """Format csv files.
+
+        It will drop useless columns, \
         rename columns and add missing columns (variables in self._variables \
         but not in csv file).
 
@@ -238,7 +258,7 @@ class CSVLoader(BaseLoader):
                         self._variables.get(self._variables.month_var_name).label,
                         self._variables.get(self._variables.day_var_name).label,
                     ]
-                ]
+                ],
             )
         date_var_label = self._variables.get(self._variables.date_var_name).label
         clean_df.loc[:, date_var_label] = dates
@@ -264,7 +284,8 @@ class CSVLoader(BaseLoader):
         """
         # Checking for outliers : change "<0,05" into "0,05" (example)
         wrong_format_columns = df.apply(
-            lambda x: x.astype(str).str.contains("<").sum() > 0, axis=0
+            lambda x: x.astype(str).str.contains("<").sum() > 0,
+            axis=0,
         )
         if wrong_format_columns.any():
             correction_func = (
@@ -291,7 +312,7 @@ class CSVLoader(BaseLoader):
         filepath: str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
-        """Loading function to load a csv file from filepath.
+        """Load a csv file from filepath.
 
         Parameters
         ----------

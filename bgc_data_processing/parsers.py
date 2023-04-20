@@ -33,6 +33,15 @@ class TomlParser:
     }
 
     def __init__(self, filepath: str, check_types: bool = True) -> None:
+        """Instanciate a parsing class for config.toml.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the config file.
+        check_types : bool, optional
+            Whether to check types or not., by default True
+        """
         self.filepath = filepath
         self._check = check_types
         with open(filepath, "rb") as f:
@@ -61,14 +70,14 @@ class TomlParser:
         """
         if keys[0] not in self._elements.keys():
             raise KeyError(
-                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
+                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}",
             )
         var = self._elements[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var, dict)) or (key not in var.keys()):
                 raise KeyError(
-                    f"Variable {'.'.join(keys[:i+2])} does not exist in {self.filepath}"
+                    f"Variable {'.'.join(keys[:i+2])} doesn't exist in {self.filepath}",
                 )
             var = var[key]
         return deepcopy(var)
@@ -91,7 +100,7 @@ class TomlParser:
         """
         if keys[0] not in self._elements.keys():
             raise KeyError(
-                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
+                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}",
             )
         if len(keys) > 1:
             var = self._elements[keys[0]]
@@ -100,7 +109,7 @@ class TomlParser:
                 if (not isinstance(var, dict)) or (key not in var.keys()):
                     keys_str = ".".join(keys[: i + 2])
                     raise KeyError(
-                        f"Variable {keys_str} does not exist in {self.filepath}"
+                        f"Variable {keys_str} does not exist in {self.filepath}",
                     )
                 var = var[key]
             var[keys[-1]] = value
@@ -111,7 +120,7 @@ class TomlParser:
         self,
         line: str,
     ) -> tuple[list[str], list[Type | tuple[Type, Type]]]:
-        """Parses a type hinting line.
+        """Parse a type hinting line.
 
         Parameters
         ----------
@@ -133,11 +142,11 @@ class TomlParser:
         for str_type in types_list:
             # Iterable type
             if "[" in str_type:
-                str_type = str_type[:-1].split("[")
-                str_type = tuple([self._str_to_type[x] for x in str_type])
+                splitted_type = str_type[:-1].split("[")
+                final_type = tuple([self._str_to_type[x] for x in splitted_type])
             else:
-                str_type = self._str_to_type[str_type]
-            types.append(str_type)
+                final_type = self._str_to_type[str_type]
+            types.append(final_type)
         return keys, types
 
     def _parse_types(self, filepath: str) -> dict:
@@ -171,7 +180,7 @@ class TomlParser:
         return types_dict
 
     def _check_type(self, var: Any, var_type: Type | tuple[Type, Type]) -> bool:
-        """Checks if the type of the variable correspond to the required type.
+        """Check if the type of the variable correspond to the required type.
 
         Parameters
         ----------
@@ -193,7 +202,7 @@ class TomlParser:
             return isinstance(var, var_type)
 
     def _make_error_msg(self, keys: list[str], types: list[Type]) -> str:
-        """Creates error message for TypeErrors.
+        """Create error message for TypeErrors.
 
         Parameters
         ----------
@@ -221,7 +230,7 @@ class TomlParser:
         self,
         keys: list[str],
     ) -> None:
-        """Verifies types for all variables 'below' keys level.
+        """Verify types for all variables 'below' keys level.
 
         Parameters
         ----------
@@ -236,13 +245,12 @@ class TomlParser:
                 self.raise_if_wrong_type(keys)
             else:
                 for key in var.keys():
-                    self.raise_if_wrong_type_below(keys=keys + [key])
+                    self.raise_if_wrong_type_below(keys=[*keys, key])
+        elif not isinstance(self._elements, dict):
+            raise TypeError("Wrong type for toml object, should be a dictionnary")
         else:
-            if not isinstance(self._elements, dict):
-                raise TypeError("Wrong type for toml object, should be a dictionnary")
-            else:
-                for key in self._elements.keys():
-                    self.raise_if_wrong_type_below(keys=keys + [key])
+            for key in self._elements.keys():
+                self.raise_if_wrong_type_below(keys=[*keys, key])
 
     def _get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
         """Return a variable from the toml using its path.
@@ -265,7 +273,7 @@ class TomlParser:
         """
         if keys[0] not in self._parsed_types.keys():
             raise KeyError(
-                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}"
+                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}",
             )
         var_type = self._parsed_types[keys[0]]
         for i in range(len(keys[1:])):
@@ -273,7 +281,7 @@ class TomlParser:
             if (not isinstance(var_type, dict)) or (key not in var_type.keys()):
                 keys_str = ".".join(keys[: i + 2])
                 raise KeyError(
-                    f"Type of {keys_str} can't be parsed from {self.filepath}"
+                    f"Type of {keys_str} can't be parsed from {self.filepath}",
                 )
             var_type = var_type[key]
         return var_type
@@ -282,7 +290,7 @@ class TomlParser:
         self,
         keys: list[str],
     ) -> None:
-        """Raises a TypeError if the variable type is none of the specified types.
+        """Raise a TypeError if the variable type is none of the specified types.
 
         Parameters
         ----------
@@ -304,7 +312,7 @@ class TomlParser:
 
 
 def directory_check(get_variable: Callable) -> Callable:
-    """Decorator to create directories only when needed.
+    """Use as decorator to create directories only when needed.
 
     Parameters
     ----------
@@ -332,22 +340,22 @@ def directory_check(get_variable: Callable) -> Callable:
             keys_dirs in self.dirs_vars_keys
             and not self._dir_created["-".join(keys_dirs)]
         ):
-            dir = get_variable(self, keys)
-            if os.path.isdir(dir):
-                if os.listdir(dir):
+            directory = get_variable(self, keys)
+            if os.path.isdir(directory):
+                if os.listdir(directory):
                     if self.existing_dir_behavior == "raise":
                         raise IsADirectoryError(
-                            f"The directory {dir} already exists and is not empty."
+                            f"Directory {directory} already exists and is not empty.",
                         )
                     elif self.existing_dir_behavior == "merge":
                         pass
                     elif self.existing_dir_behavior == "clean":
-                        shutil.rmtree(dir)
-                        os.mkdir(dir)
+                        shutil.rmtree(directory)
+                        os.mkdir(directory)
             else:
-                os.mkdir(dir)
+                os.mkdir(directory)
             self._dir_created["-".join(keys_dirs)] = True
-            return dir
+            return directory
         else:
             return get_variable(self, keys)
 
@@ -381,6 +389,24 @@ class ConfigParser(TomlParser):
         dirs_vars_keys: list[str | list[str]] = [],
         existing_directory: str = "raise",
     ) -> None:
+        """Class to parse toml config scripts.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the file.
+        check_types : bool, optional
+            Whether to check types or not., by default True
+        dates_vars_keys : list[str | list[str]], optional
+            Keys to variable defining dates., by default []
+        dirs_vars_keys : list[str | list[str]], optional
+            Keys to variable defining directories., by default []
+        existing_directory: str, optional
+            Behavior for directory creation, 'raise' raises an error if the directory
+            exists and is not empty, 'merge' will keep the directory as is
+            but might replace its content when savong file and 'clean'
+            will erase the directory if it exists.
+        """
         super().__init__(filepath, check_types)
         self.dates_vars_keys = dates_vars_keys
         self.dirs_vars_keys: list[list[str]] = []
@@ -414,9 +440,11 @@ class ConfigParser(TomlParser):
         self.raise_if_wrong_type_below([])
         for keys in self.dates_vars_keys:
             if isinstance(keys, str):
-                keys = [keys]
-            date = dt.datetime.strptime(self._get(keys), "%Y%m%d")
-            self._set(keys, date)
+                all_keys = [keys]
+            else:
+                all_keys = keys
+            date = dt.datetime.strptime(self._get(all_keys), "%Y%m%d")
+            self._set(all_keys, date)
 
     @directory_check
     def get(self, keys: list[str]) -> Any:
@@ -452,6 +480,13 @@ class ConfigParser(TomlParser):
         return self._elements[__k]
 
     def __repr__(self) -> str:
+        """Represent the object as a string.
+
+        Returns
+        -------
+        str
+            self._elements.__repr__()
+        """
         return self._elements.__repr__()
 
 

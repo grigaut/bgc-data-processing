@@ -115,11 +115,8 @@ if __name__ == "__main__":
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
         if VERBOSE > 0:
             print(
-                f"\n-------Loading, Slicing, Saving completed for {data_src}-------\n"
+                f"\n-------Loading, Slicing, Saving completed for {data_src}-------\n",
             )
-        else:
-            if VERBOSE > 0:
-                print(f"\n-----------Loading completed for {data_src}-----------\n")
         category = dset_loader.category
         if category not in data_dict.keys():
             data_dict[category] = []

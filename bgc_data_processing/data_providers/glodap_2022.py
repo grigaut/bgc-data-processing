@@ -26,7 +26,7 @@ loader = csv_tools.CSVLoader(
         .correct_with(lambda x: -x),
         temperature=DEFAULT_VARS["temperature"].in_file_as("G2temperature"),
         salinity=DEFAULT_VARS["salinity"].in_file_as(
-            ("G2salinity", "G2salinityf", [2])
+            ("G2salinity", "G2salinityf", [2]),
         ),
         oxygen=DEFAULT_VARS["oxygen"]
         .in_file_as(("G2oxygen", "G2oxygenf", [2]))

@@ -39,7 +39,7 @@ storer = Storer.from_files(
     verbose=1,
 )
 storer.remove_duplicates(
-    ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+    ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"],
 )
 # --------- Initialize the axes
 figure = plt.figure(figsize=(15, 10), layout="tight")
@@ -108,7 +108,7 @@ main_map.set_data(data=data, x="LONGITUDE", y="LATITUDE", crs=4326, parameter="a
 main_map.set_shape.rectangles()
 cbar = plt.colorbar(
     cm.ScalarMappable(
-        norm=colors.Normalize(vmin=data["all"].min(), vmax=data["all"].max())
+        norm=colors.Normalize(vmin=data["all"].min(), vmax=data["all"].max()),
     ),
     cax=main_axes_cbar,
 )
@@ -223,7 +223,7 @@ def update_map(
     new_map.plot_map(zorder=0)
     plt.colorbar(
         cm.ScalarMappable(
-            norm=colors.Normalize(vmin=df["all"].min(), vmax=df["all"].max())
+            norm=colors.Normalize(vmin=df["all"].min(), vmax=df["all"].max()),
         ),
         cax=colorbar_axes,
     )
@@ -237,7 +237,7 @@ def update_from_drawer(
     zoom_cbar_axes: Axes,
     profile_axes: Axes,
     profile_cbar_axes: Axes,
-    **kwargs,
+    **_kwargs,
 ):
     """Update the lateral maps using the ShapeDrawer polygon.
 
@@ -277,7 +277,7 @@ def update_from_loaded(
     zoom_cbar_axes: Axes,
     profile_axes: Axes,
     profile_cbar_axes: Axes,
-    **kwargs,
+    **_kwargs,
 ):
     """Update the lateral maps from a loaded polygon.
 
@@ -313,7 +313,7 @@ def clear(
     drawers: list[ShapeDrawer],
     zoom_map_bg: Maps,
     rectilinear_axes: list[Axes],
-    **kwargs,
+    **_kwargs,
 ):
     """Clear the temporary plots and the polygon trace.
 
@@ -339,7 +339,7 @@ def clear(
 def save(
     drawers: list[ShapeDrawer],
     storer: Storer,
-    **kwargs,
+    **_kwargs,
 ) -> None:
     """Save the data from the polygon in a file.
 
@@ -371,7 +371,7 @@ def save(
     print(f"File saved under {filename}")
 
 
-def start_drawing(drawers: list, main_map: Maps, **kwargs) -> None:
+def start_drawing(drawers: list, main_map: Maps, **_kwargs) -> None:
     """Trigger the drawing of a polygon.
 
     Parameters
@@ -389,7 +389,7 @@ def start_drawing(drawers: list, main_map: Maps, **kwargs) -> None:
         drawers[0] = drawer
 
 
-def save_polygon(drawers: list[ShapeDrawer], **kwargs):
+def save_polygon(drawers: list[ShapeDrawer], **_kwargs):
     """Save polygon to file.
 
     Parameters
@@ -417,7 +417,7 @@ def save_polygon(drawers: list[ShapeDrawer], **kwargs):
     print(f"Polygon saved under {filepath}")
 
 
-def load_polygon(**kwargs) -> shapely.Polygon:
+def load_polygon(**_kwargs) -> shapely.Polygon:
     """Load Polygon from a file.
 
     Returns
@@ -427,7 +427,7 @@ def load_polygon(**kwargs) -> shapely.Polygon:
     """
     print(
         "Enter the name of file storing a polygon"
-        f"(inside the '{POLYGONS_FOLDER}' folder) without its extension"
+        f"(inside the '{POLYGONS_FOLDER}' folder) without its extension",
     )
     filename = input() + ".txt"
     filepath = POLYGONS_FOLDER + "/" + filename
