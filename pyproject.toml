@@ -119,3 +119,7 @@ badge-format = "svg"
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.pydocstyle]
+convention = "numpy"
+match-dir = "bgc_data_processing/*"
