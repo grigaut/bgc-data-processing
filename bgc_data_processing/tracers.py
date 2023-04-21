@@ -857,9 +857,9 @@ class EvolutionProfile(BasePlot):
         if self._verbose > 1:
             print("\tCreating figure.")
 
-        lon, lat = np.meshgrid(date_ticks, depth_ticks)
+        date, depth = np.meshgrid((date_ticks), (depth_ticks))
         # Color mesh
-        cbar = ax.pcolormesh(lon, lat, df_pivot.values, **kwargs)
+        cbar = ax.pcolormesh(date, depth, df_pivot.values, **kwargs)
 
         return ax, cbar
 
