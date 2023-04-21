@@ -46,13 +46,19 @@ line-length = 88
 line-length = 88
 target-version = "py311"
 select = [
+    # pyflakes
+    'F',
     # pycodestyle Errors (E) and Warnings (W)
     'E',
     'W',
+    # isort
+    "I",
+    # pep8-naming
+    'N',
     # pydocstyle
     'D',
-    # pyflakes
-    'F',
+    # pyupgrade
+    "UP",
     # flake8-builtins
     "A",
     # flake8-unused-arguments
@@ -73,15 +79,12 @@ select = [
     "SIM",
     # flake8-type-checking
     "TCH",
-    # pep8-naming
-    'N',
     # pylint
     "PLE",
     "PLR",
     "PLW",
     # Ruff-specific rules
     'RUF',
-    "I",
 ]
 ignore = [
     # do not assign a lambda expression, use a def
@@ -104,6 +107,8 @@ unfixable = [
     "F841",
     # Use {key} in {dict} instead of {key} in {dict}.keys()
     "SIM118",
+    # move to type-checking block
+    "TCH003",
 ]
 
 [tool.isort]
