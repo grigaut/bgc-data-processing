@@ -284,7 +284,7 @@ def save(
     )
     new_storer = Storer.from_constraints(storer=storer, constraints=constraints)
     print("Enter the name of the file (don't write the extension):")
-    filename = input() + ".txt"
+    filename = input().replace(" ", "_") + ".txt"
     if filename == ".txt":
         filename = f"output_{round(time.time())}.txt"
     new_storer.save(filepath=filename)
@@ -333,7 +333,7 @@ def save_polygon(drawers: list[ShapeDrawer], **_kwargs):
         return
     polygon = gdf["geometry"].iloc[-1]
     print("Enter the name of the file (don't write the extension):")
-    filename = input() + ".txt"
+    filename = input().replace(" ", "_") + ".txt"
     if filename == ".txt":
         filename = f"polygon_{round(time.time())}.txt"
     filepath = f"{POLYGONS_FOLDER}/" + filename
@@ -355,7 +355,7 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
         "Enter the name of file storing a polygon"
         f"(inside the '{POLYGONS_FOLDER}' folder) without its extension",
     )
-    filename = input() + ".txt"
+    filename = input().replace(" ", "_") + ".txt"
     filepath = POLYGONS_FOLDER + "/" + filename
     if not os.path.isfile(filepath):
         print(f"Loading aborted : the file {filepath} doesn't exist.")
