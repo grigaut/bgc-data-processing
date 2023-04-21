@@ -186,6 +186,7 @@ def update_from_loaded(
     profile_axes: Axes,
     profile_cbar_axes: Axes,
     constraints_base: Constraints,
+    polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]],
     **_kwargs,
 ):
     """Update the lateral maps from a loaded polygon.
@@ -206,6 +207,7 @@ def update_from_loaded(
         Base of constraint to use for the new data.
     """
     polygon = load_polygon()
+    polygons_history.append(("load", polygon))
     update_map(
         polygon=polygon,
         storer=storer,
@@ -250,9 +252,9 @@ def clear(
 
 
 def save(
-    drawers: list[ShapeDrawer],
     storer: Storer,
     constraints_base: Constraints,
+    polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]],
     **_kwargs,
 ) -> None:
     """Save the data from the polygon in a file.
@@ -266,7 +268,11 @@ def save(
     constraints_base: Constraints
         Base of constraint to use for the new data.
     """
-    polygon = get_drawer_polygon(drawers[-1])
+    last_polygon = polygons_history[-1]
+    if last_polygon[0] == "load":
+        polygon = last_polygon[1]
+    else:
+        polygon = get_drawer_polygon(last_polygon[1])
     variables = storer.variables
     latitude_field = variables.get(variables.latitude_var_name).label
     longitude_field = variables.get(variables.longitude_var_name).label
@@ -285,7 +291,12 @@ def save(
     print(f"File saved under {filename}")
 
 
-def start_drawing(drawers: list, main_map: Maps, **_kwargs) -> None:
+def start_drawing(
+    drawers: list,
+    main_map: Maps,
+    polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]],
+    **_kwargs,
+) -> None:
     """Trigger the drawing of a polygon.
 
     Parameters
@@ -301,6 +312,7 @@ def start_drawing(drawers: list, main_map: Maps, **_kwargs) -> None:
         drawers.append(drawer)
     else:
         drawers[0] = drawer
+    polygons_history.append(("draw", drawer))
 
 
 def save_polygon(drawers: list[ShapeDrawer], **_kwargs):
@@ -543,6 +555,9 @@ if __name__ == "__main__":
     # --------- Initialize Drawers
     drawers = []
 
+    # --------- Initialize polygon origin list
+    polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]] = []
+
     # --------- Callbacks
     main_map.cb.keypress.attach(
         update_from_drawer,
@@ -568,6 +583,7 @@ if __name__ == "__main__":
         drawers=drawers,
         storer=storer,
         constraints_base=constraints,
+        polygons_history=polygons_history,
     )
 
     main_map.cb.keypress.attach(
@@ -591,6 +607,7 @@ if __name__ == "__main__":
         main_map=main_map,
         zoom_map_bg=zoom_map_bg,
         rectilinear_axes=[profile_axes, profile_axes_cbar, zoom_axes_cbar],
+        polygons_history=polygons_history,
     )
     main_map.cb.keypress.attach(
         clear,
@@ -608,5 +625,6 @@ if __name__ == "__main__":
         profile_axes=profile_axes,
         profile_cbar_axes=profile_axes_cbar,
         constraints_base=constraints,
+        polygons_history=polygons_history,
     )
     plt.show()
