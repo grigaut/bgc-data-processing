@@ -7,11 +7,11 @@ import pandas as pd
 
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
-    parsers,
     data_providers,
     dateranges,
+    parsers,
 )
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 
 if __name__ == "__main__":
     # Script arguments

@@ -2,12 +2,12 @@
 
 
 import os
-from typing import Any, Callable, TYPE_CHECKING
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Callable
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
 

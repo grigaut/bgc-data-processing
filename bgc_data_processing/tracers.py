@@ -10,14 +10,14 @@ import pandas as pd
 from cartopy import crs, feature
 
 from bgc_data_processing.base import BasePlot
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
-    from matplotlib.figure import Figure
+    from cartopy.mpl.geoaxes import GeoAxes
     from matplotlib.axes import Axes
     from matplotlib.collections import Collection
-    from cartopy.mpl.geoaxes import GeoAxes
+    from matplotlib.figure import Figure
 
     from bgc_data_processing.variables import VariablesStorer
 

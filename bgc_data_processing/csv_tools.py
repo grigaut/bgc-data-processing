@@ -9,7 +9,7 @@ import pandas as pd
 from pandas.errors import EmptyDataError
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import ExistingVar, VariablesStorer

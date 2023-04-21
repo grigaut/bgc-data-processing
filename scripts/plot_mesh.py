@@ -3,7 +3,7 @@
 import datetime as dt
 
 from bgc_data_processing import PROVIDERS_CONFIG, data_providers, parsers
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":

@@ -1,19 +1,21 @@
 """Plot an interative map."""
 
-from copy import deepcopy
-import os
-from matplotlib.axes import Axes
-from bgc_data_processing.data_classes import Storer, Constraints
-from bgc_data_processing.tracers import MeshPlotter, EvolutionProfile
-from bgc_data_processing.parsers import ConfigParser
-from cartopy import crs
-import time
-from matplotlib import cm, colors
-from eomaps import Maps
-import shapely
 import datetime as dt
-from eomaps.draw import ShapeDrawer
+import os
+import time
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
+import shapely
+from cartopy import crs
+from eomaps import Maps
+from eomaps.draw import ShapeDrawer
+from matplotlib import cm, colors
+from matplotlib.axes import Axes
+
+from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.parsers import ConfigParser
+from bgc_data_processing.tracers import EvolutionProfile, MeshPlotter
 
 # Callbacks
 

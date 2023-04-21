@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:

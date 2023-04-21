@@ -81,6 +81,7 @@ select = [
     "PLW",
     # Ruff-specific rules
     'RUF',
+    "I",
 ]
 ignore = [
     # do not assign a lambda expression, use a def
@@ -95,6 +96,14 @@ ignore = [
     "PLR0913",
     # Magic number
     "PLR2004",
+]
+unfixable = [
+    # Remove unused-imports
+    "F401",
+    # Variable assigned but never used
+    "F841",
+    # Use {key} in {dict} instead of {key} in {dict}.keys()
+    "SIM118",
 ]
 
 [tool.isort]

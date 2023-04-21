@@ -3,10 +3,10 @@
 import datetime as dt
 import os
 import shutil
-from copy import deepcopy
-from typing import Any, Callable, Type
-from functools import wraps
 import tomllib
+from copy import deepcopy
+from functools import wraps
+from typing import Any, Callable, Type
 
 from bgc_data_processing.variables import TemplateVar
 

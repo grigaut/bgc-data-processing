@@ -4,16 +4,16 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_classes import Storer
-    from bgc_data_processing.variables import VariablesStorer
-    from bgc_data_processing.data_classes import Constraints
-    from matplotlib.figure import Figure
-    from matplotlib.axes import Axes
     from cartopy.mpl.geoaxes import GeoAxes
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
+
+    from bgc_data_processing.data_classes import Constraints, Storer
+    from bgc_data_processing.variables import VariablesStorer
 
 
 class BaseLoader(ABC):
