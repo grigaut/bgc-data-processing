@@ -37,7 +37,7 @@ if __name__ == "__main__":
     data_dict = {}
     for data_src in PROVIDERS:
         if VERBOSE > 0:
-            print("Loading data : {}".format(data_src))
+            print(f"Loading data : {data_src}")
         exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables

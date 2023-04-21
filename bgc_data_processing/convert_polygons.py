@@ -1,12 +1,12 @@
 """Functions to convert a shaeply Polygon to list of nodes."""
 
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from shapely import Polygon
 
 
-def polygon_to_list(polygon: "Polygon") -> Tuple[list, list]:
+def polygon_to_list(polygon: "Polygon") -> tuple[list, list]:
     """Convert polygon from shapely to list of coordinates.
 
     Parameters

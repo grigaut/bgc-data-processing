@@ -4,9 +4,10 @@ import datetime as dt
 import os
 import shutil
 import tomllib
+from collections.abc import Callable
 from copy import deepcopy
 from functools import wraps
-from typing import Any, Callable, Type
+from typing import Any
 
 from bgc_data_processing.variables import TemplateVar
 
@@ -119,7 +120,7 @@ class TomlParser:
     def _get_keys_types(
         self,
         line: str,
-    ) -> tuple[list[str], list[Type | tuple[Type, Type]]]:
+    ) -> tuple[list[str], list[type | tuple[type, type]]]:
         """Parse a type hinting line.
 
         Parameters
@@ -129,7 +130,7 @@ class TomlParser:
 
         Returns
         -------
-        tuple[list[str], list[Type | tuple[Type, Type]]]
+        tuple[list[str], list[type | tuple[type, type]]]
             List of keys: path to the variable,
             list of types/tuples: possible type for the variable.
         """
@@ -163,7 +164,7 @@ class TomlParser:
             Dictionnary with same structure as config dictionnary referring to types.
         """
         # reads config file
-        with open(filepath, "r") as file:
+        with open(filepath) as file:
             lines = [line.strip() for line in file.readlines()]
         # Select only type hinting lines
         type_hints = [line[3:].replace("\n", "") for line in lines if line[:3] == "#? "]
@@ -179,14 +180,14 @@ class TomlParser:
             dict_level[keys[-1]] = tuple(types)
         return types_dict
 
-    def _check_type(self, var: Any, var_type: Type | tuple[Type, Type]) -> bool:
+    def _check_type(self, var: Any, var_type: type | tuple[type, type]) -> bool:
         """Check if the type of the variable correspond to the required type.
 
         Parameters
         ----------
         var : Any
             Variable to check type.
-        var_type : Type | tuple[Type, Type]
+        var_type : type | tuple[type, type]
             Type for the variable, if tuple, means that the first value is an ierable
             and the second one the type of the values in the iterable.
 
@@ -200,7 +201,7 @@ class TomlParser:
             return is_correct_iterator and all(isinstance(x, var_type[1]) for x in var)
         return isinstance(var, var_type)
 
-    def _make_error_msg(self, keys: list[str], types: list[Type]) -> str:
+    def _make_error_msg(self, keys: list[str], types: list[type]) -> str:
         """Create error message for TypeErrors.
 
         Parameters
@@ -208,7 +209,7 @@ class TomlParser:
         keys : list[str]
             List path to the variable: ["VAR1", "VAR2", "VAR3"]
             is the path to the variable VAR1.VAR2.VAR3 in the toml.
-        types : list[Type]
+        types : list[type]
             Correct types for the variable.
 
         Returns
@@ -251,7 +252,7 @@ class TomlParser:
             for key in self._elements:
                 self.raise_if_wrong_type_below(keys=[*keys, key])
 
-    def _get_type(self, keys: list[str]) -> list[Type | tuple[Type, Type]]:
+    def _get_type(self, keys: list[str]) -> list[type | tuple[type, type]]:
         """Return a variable from the toml using its path.
 
         Parameters
@@ -262,7 +263,7 @@ class TomlParser:
 
         Returns
         -------
-        list[Type | tuple[Type, Type]]
+        list[type | tuple[type, type]]
             Possible types for the variable.
 
         Raises

@@ -63,7 +63,7 @@ if __name__ == "__main__":
     t0 = time()
     for data_src in PROVIDERS:
         if VERBOSE > 0:
-            print("Loading data : {}".format(data_src))
+            print(f"Loading data : {data_src}")
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables
         dset_loader.set_saving_order(
@@ -103,11 +103,11 @@ if __name__ == "__main__":
         )
         # Slicing data
         if VERBOSE > 0:
-            print("Slicing data : {}".format(data_src))
+            print(f"Slicing data : {data_src}")
         slices_index = DRNG.apply(df.slice_on_dates, axis=1)
         # Saving slices
         if VERBOSE > 0:
-            print("Saving slices : {}".format(data_src))
+            print(f"Saving slices : {data_src}")
         to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
         make_name = (
             lambda x: f"{SAVING_DIR}/{data_src}/nutrients_{data_src}_{x['dates']}.csv"

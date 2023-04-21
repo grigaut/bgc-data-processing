@@ -348,7 +348,7 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
     if not os.path.isfile(filepath):
         print(f"Loading aborted : the file {filepath} doesn't exist.")
         return None
-    with open(filepath, "r") as file:
+    with open(filepath) as file:
         first_line = file.readlines()[0]
         polygon = shapely.from_wkt(first_line)
     print(f"Successfully loaded polygon from {filepath}")

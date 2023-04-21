@@ -2,7 +2,8 @@
 
 
 import warnings
-from typing import TYPE_CHECKING, Iterable, Tuple
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -431,7 +432,7 @@ class MeshPlotter(BasePlot):
         variable_name: str,
         ax: "GeoAxes",
         **kwargs,
-    ) -> Tuple["GeoAxes", "Collection"]:
+    ) -> tuple["GeoAxes", "Collection"]:
         """Build the plot to given axes.
 
         Parameters
@@ -445,7 +446,7 @@ class MeshPlotter(BasePlot):
 
         Returns
         -------
-        Tuple[GeoAxes, Collection]
+        tuple[GeoAxes, Collection]
             Axes, Colorbar.
         """
         if self._verbose > 1:
@@ -499,7 +500,7 @@ class MeshPlotter(BasePlot):
         variable_name: str,
         ax: "GeoAxes",
         **kwargs,
-    ) -> Tuple["GeoAxes", "Collection"]:
+    ) -> tuple["GeoAxes", "Collection"]:
         """Build the plot to given axes.
 
         Parameters
@@ -513,7 +514,7 @@ class MeshPlotter(BasePlot):
 
         Returns
         -------
-        Tuple[GeoAxes, Collection]
+        tuple[GeoAxes, Collection]
             Axes, Colorbar.
         """
         return self._build_to_geoaxes(
@@ -720,7 +721,7 @@ class EvolutionProfile(BasePlot):
         self,
         column_to_cut: pd.Series,
         cut_intervals: pd.IntervalIndex,
-    ) -> Tuple[pd.IntervalIndex, np.ndarray]:
+    ) -> tuple[pd.IntervalIndex, np.ndarray]:
         """Return both the cut and the ticks values to use for the Figure.
 
         Parameters
@@ -732,7 +733,7 @@ class EvolutionProfile(BasePlot):
 
         Returns
         -------
-        Tuple[pd.IntervalIndex, np.ndarray]
+        tuple[pd.IntervalIndex, np.ndarray]
             _description_
         """
         cut = pd.cut(
@@ -795,7 +796,7 @@ class EvolutionProfile(BasePlot):
         variable_name: str,
         ax: "Axes",
         **kwargs,
-    ) -> Tuple["Axes", "Collection"]:
+    ) -> tuple["Axes", "Collection"]:
         """Build the plot to given axes.
 
         Parameters
@@ -809,7 +810,7 @@ class EvolutionProfile(BasePlot):
 
         Returns
         -------
-        Tuple[Axes, Collection]
+        tuple[Axes, Collection]
             Axes, Colorbar.
         """
         if variable_name == "all":
@@ -994,7 +995,7 @@ class EvolutionProfile(BasePlot):
         variable_name: str,
         ax: "Axes",
         **kwargs,
-    ) -> Tuple["Axes", "Collection"]:
+    ) -> tuple["Axes", "Collection"]:
         """Plot the data on a given axes.
 
         Parameters
@@ -1008,7 +1009,7 @@ class EvolutionProfile(BasePlot):
 
         Returns
         -------
-        Tuple[Axes, Collection]
+        tuple[Axes, Collection]
             Axes, colorbar
         """
         return self._build_to_axes(

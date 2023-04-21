@@ -3,7 +3,7 @@
 
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import geopandas as gpd
 import numpy as np
@@ -12,6 +12,8 @@ import pandas as pd
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from shapely import Polygon
 
 
@@ -639,7 +641,7 @@ class Constraints:
         """Initiate slicer object to slice dataframes."""
         self.boundaries: dict[str, dict[str, int | float | datetime]] = {}
         self.supersets: dict[str, list] = {}
-        self.constraints: dict[str, Callable] = {}
+        self.constraints: dict[str, "Callable"] = {}
         self.polygons: list[dict[str, str | "Polygon"]] = []
 
     def reset(self) -> None:

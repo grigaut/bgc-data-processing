@@ -1,7 +1,8 @@
 """Variable related objects."""
 
 from abc import ABC
-from typing import Any, Callable, Iterable, Iterator, Self
+from collections.abc import Callable, Iterable, Iterator
+from typing import Any, Self
 
 import numpy as np
 from _collections_abc import dict_keys
