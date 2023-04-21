@@ -75,6 +75,7 @@ def update_profile(
     profile_tmp.set_date_intervals("week")
     profile_tmp.set_depth_interval(100)
     _, cbar = profile_tmp.plot_to_axes(VARIABLE, axes)
+    axes.tick_params(axis="x", labelrotation=45)
     plt.colorbar(cbar, cax=colorbar_axes)
 
 
