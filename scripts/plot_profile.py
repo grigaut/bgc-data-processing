@@ -37,7 +37,7 @@ if __name__ == "__main__":
     data_dict = {}
     for data_src in PROVIDERS:
         if VERBOSE > 0:
-            print("Loading data : {}".format(data_src))
+            print(f"Loading data : {data_src}")
         exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         storer: Storer = sum(data)
         storer.remove_duplicates(priority_list=PRIORITY)
         variables = storer.variables
-        profile = EvolutionProfile(storer)
+        profile = EvolutionProfile(storer, constraints=constraints)
         profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
         profile.set_depth_interval(DEPTH_INTERVAL)
         if SHOW:

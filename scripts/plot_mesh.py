@@ -3,7 +3,7 @@
 import datetime as dt
 
 from bgc_data_processing import PROVIDERS_CONFIG, data_providers, parsers
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     data_dict = {}
     for data_src in PROVIDERS:
         if VERBOSE > 0:
-            print("Loading data : {}".format(data_src))
+            print(f"Loading data : {data_src}")
         exclude = PROVIDERS_CONFIG[data_src]["EXCLUDE"]
         dset_loader = data_providers.LOADERS[data_src]
         variables = dset_loader.variables
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         storer.remove_duplicates(priority_list=PRIORITY)
         date_min = DATE_MIN.strftime("%Y%m%d")
         date_max = DATE_MAX.strftime("%Y%m%d")
-        plot = MeshPlotter(storer)
+        plot = MeshPlotter(storer, constraints=constraints)
         plot.set_density_type(consider_depth=CONSIDER_DEPTH)
         plot.set_bins_size(bins_size=BIN_SIZE)
         plot.set_map_boundaries(

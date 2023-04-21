@@ -1,3 +1,5 @@
+"""Tools to load and display standardized biogeochemical data."""
+
 from bgc_data_processing import parsers
 
 __all__ = [

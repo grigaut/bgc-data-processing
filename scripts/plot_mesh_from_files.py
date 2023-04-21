@@ -1,10 +1,11 @@
 """Create a 2d Mesh Plot from files in a directory."""
 
-import os
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.data_classes import Storer, Constraints
-from bgc_data_processing.tracers import MeshPlotter
 import datetime as dt
+import os
+
+from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.parsers import ConfigParser
+from bgc_data_processing.tracers import MeshPlotter
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(

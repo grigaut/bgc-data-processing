@@ -2,13 +2,19 @@
 
 
 import os
-from typing import Any, Callable
 from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 
 from bgc_data_processing.variables import ParsedVar, VariablesStorer
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from shapely import Polygon
 
 
 class Storer:
@@ -18,6 +24,8 @@ class Storer:
     ----------
     data : pd.DataFrame
         Dataframe to store.
+    category: str
+        Data category.
     providers : list
         Names of the data providers.
     variables : VariablesStorer
@@ -34,7 +42,21 @@ class Storer:
         variables: "VariablesStorer",
         verbose: int = 0,
     ) -> None:
+        """Instanciate a storing data class, to keep track of metadata.
 
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Dataframe to store.
+        category: str
+            Data category.
+        providers : list
+            Names of the data providers.
+        variables : VariablesStorer
+            Variables storer of object to keep track of the variables in the Dataframe.
+        verbose : int, optional
+            Controls the verbosity: the higher, the more messages., by default 0
+        """
         self._data = data
         self._category = category
         self._providers = providers
@@ -97,41 +119,82 @@ class Storer:
         return self._verbose
 
     def __repr__(self) -> str:
+        """Representation of self.
+
+        Returns
+        -------
+        str
+            Representation of self.data.
+        """
         return repr(self.data)
 
     def __eq__(self, __o: object) -> bool:
+        """Test equality with other object.
+
+        Parameters
+        ----------
+        __o : object
+            Object to test equality with.
+
+        Returns
+        -------
+        bool
+            True if is same object only.
+        """
         return self is __o
 
     def __radd__(self, other: Any) -> "Storer":
+        """Perform right addition.
+
+        Parameters
+        ----------
+        other : Any
+            Object to add.
+
+        Returns
+        -------
+        Storer
+            Concatenation of both storer's dataframes.
+        """
         if other == 0:
             return self
-        else:
-            return self.__add__(other)
+        return self.__add__(other)
 
-    def __add__(self, object: object) -> "Storer":
-        if not isinstance(object, Storer):
-            raise TypeError(f"Can't add CSVStorer object to {type(object)}")
+    def __add__(self, other: object) -> "Storer":
+        """Perform left addition.
+
+        Parameters
+        ----------
+        other : Any
+            Object to add.
+
+        Returns
+        -------
+        Storer
+            Concatenation of both storer's dataframes.
+        """
+        if not isinstance(other, Storer):
+            raise TypeError(f"Can't add CSVStorer object to {type(other)}")
         # Assert variables are the same
-        if not (self.variables == object.variables):
+        if not (self.variables == other.variables):
             raise ValueError("Variables or categories are not compatible")
         # Assert categories are the same
-        if not (self.category == object.category):
+        if not (self.category == other.category):
             raise ValueError("Categories are not compatible")
 
-        concat_data = pd.concat([self._data, object._data], ignore_index=True)
-        concat_providers = list(set(self.providers + object.providers))
+        concat_data = pd.concat([self._data, other.data], ignore_index=True)
+        concat_providers = list(set(self.providers + other.providers))
         # Return Storer with similar variables
-        concat_storer = Storer(
+        return Storer(
             data=concat_data,
             category=self.category,
             providers=concat_providers,
             variables=self.variables,
-            verbose=min(self._verbose, object.verbose),
+            verbose=min(self._verbose, other.verbose),
         )
-        return concat_storer
 
     def remove_duplicates(self, priority_list: list = None) -> None:
-        """Updates self._data to remove duplicates in data.
+        """Update self._data to remove duplicates in data.
 
         Parameters
         ----------
@@ -145,7 +208,7 @@ class Storer:
         self._data = df
 
     def _remove_duplicates_among_providers(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Removes duplicates among a common providers.
+        """Remove duplicates among a common providers.
 
         Parameters
         ----------
@@ -181,15 +244,14 @@ class Storer:
         # Group duplicates and average them
         grouped = duplicates.groupby(subset_group).mean().reset_index()
         # Concatenate dataframe with droppped duplicates and duplicates averaged
-        concat = pd.concat([dropped, grouped], ignore_index=True, axis=0)
-        return concat
+        return pd.concat([dropped, grouped], ignore_index=True, axis=0)
 
     def _remove_duplicates_between_providers(
         self,
         df: pd.DataFrame,
         priority_list: list,
     ) -> pd.DataFrame:
-        """Removes duplicates among a common providers.
+        """Remove duplicates among a common providers.
 
         Parameters
         ----------
@@ -245,7 +307,7 @@ class Storer:
         return df.drop(dump_index, axis=0)
 
     def save(self, filepath: str) -> None:
-        """Saving method to save the Dataframe.
+        """Save the Dataframe.
 
         Parameters
         ----------
@@ -263,7 +325,9 @@ class Storer:
         units = [self.variables.unit_mapping[col] for col in df.columns]
         dirout = os.path.dirname(filepath)
         # make directory if needed
-        if not os.path.isdir(dirout):
+        if dirout == "":
+            pass
+        elif not os.path.isdir(dirout):
             os.mkdir(dirout)
         # Save file
         with open(filepath, "w") as file:
@@ -280,8 +344,9 @@ class Storer:
         self,
         drng: pd.Series,
     ) -> "Slice":
-        """Slices the Dataframe using the date column. \
-        Returns indexes to use for slicing.
+        """Slice the Dataframe using the date column.
+
+        Only returns indexes to use for slicing.
 
         Parameters
         ----------
@@ -301,7 +366,7 @@ class Storer:
         if self._verbose > 1:
             print(
                 "\tSlicing data for date range"
-                f" {start_date.date()} {end_date.date()}"
+                f" {start_date.date()} {end_date.date()}",
             )
         # slice
         after_start = dates_col >= start_date
@@ -331,7 +396,7 @@ class Storer:
         delim_whitespace: bool = True,
         verbose: int = 1,
     ) -> "Storer":
-        """Builds Storer reading data from csv or txt files.
+        """Build Storer reading data from csv or txt files.
 
         Parameters
         ----------
@@ -414,7 +479,7 @@ class Storer:
 
                 storers.append(reader.get_storer())
             return sum(storers)
-        elif isinstance(filepath, str):
+        if isinstance(filepath, str):
             reader = Reader(
                 filepath=filepath,
                 providers_column_label=providers_column_label,
@@ -433,8 +498,36 @@ class Storer:
                 verbose=verbose,
             )
             return reader.get_storer()
-        else:
-            raise TypeError(f"Can't read filepaths from {filepath}")
+        raise TypeError(f"Can't read filepaths from {filepath}")
+
+    @classmethod
+    def from_constraints(
+        cls,
+        storer: "Storer",
+        constraints: "Constraints",
+    ) -> "Storer":
+        """Create a new storer object from an existing storer and constraints.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to modify with constraints.
+        constraints : Constraints
+            Constraints to use to modify the storer.
+
+        Returns
+        -------
+        Storer
+            New storer respecting the constraints.
+        """
+        data = constraints.apply_constraints(df=storer.data, inplace=False)
+        return Storer(
+            data=data,
+            category=storer.category,
+            providers=storer.providers,
+            variables=storer.variables,
+            verbose=storer.verbose,
+        )
 
 
 class Slice(Storer):
@@ -453,8 +546,17 @@ class Slice(Storer):
         storer: Storer,
         slice_index: list,
     ) -> None:
-        self._slice_index = slice_index
-        self._storer = storer
+        """Slice storing object, instance of Storer to inherit of the saving method.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to slice.
+        slice_index : list
+            Indexes to keep from the Storer dataframe.
+        """
+        self.slice_index = slice_index
+        self.storer = storer
         super().__init__(
             data=storer.data,
             category=storer.category,
@@ -465,86 +567,82 @@ class Slice(Storer):
 
     @property
     def providers(self) -> list:
-        """Getter for self._storer._providers.
+        """Getter for self.storer._providers.
 
         Returns
         -------
         list
             Providers of the dataframe which the slice comes from.
         """
-        return self._storer.providers
+        return self.storer.providers
 
     @property
     def variables(self) -> list:
-        """Getter for self._storer._variables.
+        """Getter for self.storer._variables.
 
         Returns
         -------
         list
             Variables of the dataframe which the slice comes from.
         """
-        return self._storer.variables
+        return self.storer.variables
 
     @property
     def data(self) -> pd.DataFrame:
-        """Getter for self._storer._data.
+        """Getter for self.storer._data.
 
         Returns
         -------
         pd.DataFrame
             The dataframe which the slice comes from.
         """
-        return self._storer.data.loc[self._slice_index, :]
+        return self.storer.data.loc[self.slice_index, :]
 
     def __repr__(self) -> str:
-        return str(self._slice_index)
+        """Represent self as a string.
+
+        Returns
+        -------
+        str
+            str(slice.index)
+        """
+        return str(self.slice_index)
 
     def __add__(self, __o: object) -> "Slice":
-        if self._storer != __o._storer:
-            raise ValueError(
-                "Addition can only be performed with slice from same CSVStorer"
-            )
-        new_index = list(set(self._slice_index).union(set(__o._slice_index)))
-        return Slice(self._storer, new_index)
-
-    @classmethod
-    def slice_on_date(
-        drng: pd.Series,
-        storer: Storer,
-    ) -> "Slice":
-        """Class method to use to slice on dates.
+        """Perform left addition.
 
         Parameters
         ----------
-        drng : pd.Series
-            Date range for the slice
-        storer : Storer
-            Storer to slice.
+        __o : object
+            Object to add.
 
         Returns
         -------
         Slice
-            Slice object corresponding to the slice.
+            Concatenation of both slices.
 
-        Examples
-        --------
-        >>> storer = Storer(data, providers, variables, verbose)
-        >>> slice = storer.slice_on_dates(drng)
-
-        Is equivalent to :
-        >>> storer = Storer(data, providers, variables, verbose)
-        >>> slice = Slicer.slice_on_dates(drng)
+        Raises
+        ------
+        ValueError
+            Is the slices don't originate from same storer.
         """
-        return storer.slice_on_dates(drng)
+        if self.storer != __o.storer:
+            raise ValueError(
+                "Addition can only be performed with slice from same CSVStorer",
+            )
+        new_index = list(set(self.slice_index).union(set(__o.slice_index)))
+        return Slice(self.storer, new_index)
 
 
 class Constraints:
     """Slicer object to slice dataframes."""
 
     def __init__(self) -> None:
+        """Initiate slicer object to slice dataframes."""
         self.boundaries: dict[str, dict[str, int | float | datetime]] = {}
         self.supersets: dict[str, list] = {}
-        self.constraints: dict[str, Callable] = {}
+        self.constraints: dict[str, "Callable"] = {}
+        self.polygons: list[dict[str, str | "Polygon"]] = []
 
     def reset(self) -> None:
         """Reset all defined constraints."""
@@ -595,6 +693,30 @@ class Constraints:
         if values_superset:
             self.supersets[field_label] = values_superset
 
+    def add_polygon_constraint(
+        self,
+        latitude_field: str,
+        longitude_field: str,
+        polygon: "Polygon",
+    ) -> None:
+        """Add a polygon constraint.
+
+        Parameters
+        ----------
+        latitude_field : str
+            Name of the latitude-related field.
+        longitude_field : str
+            Name of the longitude-related field.
+        polygon : Polygon
+            Polygon to use as boundary.
+        """
+        constraint_dict = {
+            "latitude_field": latitude_field,
+            "longitude_field": longitude_field,
+            "polygon": polygon,
+        }
+        self.polygons.append(constraint_dict)
+
     def _apply_boundary_constraints(self, df: pd.DataFrame) -> pd.Series:
         """Evaluate all boundary constraints to a DataFrame.
 
@@ -618,7 +740,7 @@ class Constraints:
             is_max_nan = isinstance(maximum, float) and np.isnan(maximum)
             if is_min_nan and is_max_nan:
                 continue
-            elif is_max_nan:
+            if is_max_nan:
                 bool_series = label_series >= minimum
             elif is_min_nan:
                 bool_series = label_series <= maximum
@@ -649,6 +771,33 @@ class Constraints:
             series = series & bool_series
         return series
 
+    def _apply_polygon_constraints(self, df: pd.DataFrame) -> pd.Series:
+        """Evaluate all polygon constraints to a DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Datafarme to evaluate the constraints on.
+
+        Returns
+        -------
+        pd.Series
+            Boolean series of the rows verifying all constraints.
+        """
+        series = np.empty(df.iloc[:, 0].shape, dtype=bool)
+        series.fill(True)
+        for constraint in self.polygons:
+            longitude = constraint["longitude_field"]
+            latitude = constraint["latitude_field"]
+            polygon = constraint["polygon"]
+            geometry = gpd.points_from_xy(
+                x=df[longitude],
+                y=df[latitude],
+            )
+            is_in_polygon = geometry.within(polygon)
+            series = series & is_in_polygon
+        return series
+
     def apply_constraints(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
         """Apply all constraints to a DataFrame.
 
@@ -667,13 +816,18 @@ class Constraints:
         """
         bool_boundaries = self._apply_boundary_constraints(df)
         bool_supersets = self._apply_superset_constraints(df)
+        bool_polygons = self._apply_polygon_constraints(df)
+        verify_all = bool_boundaries & bool_supersets & bool_polygons
         if not inplace:
-            return df.loc[bool_boundaries & bool_supersets, :]
-        else:
-            df = df.loc[bool_boundaries & bool_supersets, :]
+            return df.loc[verify_all, :]
+        df = df.loc[verify_all, :]
+        return None
 
     def apply_specific_constraint(
-        self, field_label: str, df: pd.DataFrame, inplace: bool = False
+        self,
+        field_label: str,
+        df: pd.DataFrame,
+        inplace: bool = False,
     ) -> pd.DataFrame | None:
         """Only apply a single constraint.
 
@@ -719,8 +873,8 @@ class Constraints:
         bool
             True if the field has a constraint.
         """
-        in_boundaries = field_name in self.boundaries.keys()
-        in_supersets = field_name in self.supersets.keys()
+        in_boundaries = field_name in self.boundaries
+        in_supersets = field_name in self.supersets
         return in_boundaries or in_supersets
 
     def get_constraint_parameters(self, field_name: str) -> dict:
@@ -737,9 +891,9 @@ class Constraints:
             Dictionnary with keys 'boundary' and/or 'superset' if constraints exist.
         """
         constraint_params = {}
-        if field_name in self.boundaries.keys():
+        if field_name in self.boundaries:
             constraint_params["boundary"] = self.boundaries[field_name]
-        if field_name in self.supersets.keys():
+        if field_name in self.supersets:
             constraint_params["superset"] = self.supersets[field_name]
         return constraint_params
 
@@ -768,8 +922,8 @@ class Constraints:
         if not self.is_constrained(field_name=field_name):
             return default_min, default_max
         constraints = self.get_constraint_parameters(field_name=field_name)
-        boundary_in = "boundary" in constraints.keys()
-        superset_in = "superset" in constraints.keys()
+        boundary_in = "boundary" in constraints
+        superset_in = "superset" in constraints
         if boundary_in and superset_in and constraints["superset"]:
             b_min = constraints["boundary"]["min"]
             b_max = constraints["boundary"]["max"]
@@ -783,7 +937,7 @@ class Constraints:
         elif not superset_in:
             all_min = constraints["boundary"]["min"]
             all_max = constraints["boundary"]["max"]
-            return all_min, all_max
+        return all_min, all_max
 
 
 class Reader:
@@ -850,6 +1004,50 @@ class Reader:
         delim_whitespace: bool = True,
         verbose: int = 1,
     ):
+        """Initiate reading routine to parse csv files.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        providers_column_label : str, optional
+            Provider column in the dataframe., by default "PROVIDER"
+        expocode_column_label : str, optional
+            Expocode column in the dataframe., by default "EXPOCODE"
+        date_column_label : str, optional
+            Date column in the dataframe., by default "DATE"
+        year_column_label : str, optional
+            Year column in the dataframe., by default "YEAR"
+        month_column_label : str, optional
+            Month column in the dataframe., by default "MONTH"
+        day_column_label : str, optional
+            Day column in the dataframe., by default "DAY"
+        hour_column_label : str, optional
+            Hour column in the dataframe., by default "HOUR"
+        latitude_column_label : str, optional
+            Latitude column in the dataframe., by default "LATITUDE"
+        longitude_column_label : str, optional
+            Longitude column in the dataframe., by default "LONGITUDE"
+        depth_column_label : str, optional
+            Depth column in the dataframe., by default "DEPH"
+        category : str, optional
+            Category of the loaded file., by default "in_situ"
+        unit_row_index : int, optional
+            Index of the row with the units, None if there's no unit row., by default 1
+        delim_whitespace : bool, optional
+            Whether to use whitespace as delimiters., by default True
+        verbose : int, optional
+            Controls the verbose, by default 1
+
+        Examples
+        --------
+        Loading from a file:
+        >>> filepath = "path/to/file"
+        >>> reader = Reader(filepath, providers="providers_column_name")
+
+        Getting the storer:
+        >>> storer = reader.get_storer()
+        """
         self._verbose = verbose
 
         raw_df, unit_row = self._read(filepath, unit_row_index, delim_whitespace)
@@ -880,9 +1078,12 @@ class Reader:
         self._variables = self._get_variables(raw_df, unit_row, mandatory_vars)
 
     def _read(
-        self, filepath: str, unit_row_index: int, delim_whitespace: bool
+        self,
+        filepath: str,
+        unit_row_index: int,
+        delim_whitespace: bool,
     ) -> tuple[pd.DataFrame, pd.Series]:
-        """Method to read the filepath and extract the unit row.
+        """Read the filepath and extract the unit row.
 
         Parameters
         ----------
@@ -906,12 +1107,14 @@ class Reader:
             unit_row = pd.read_csv(
                 filepath,
                 delim_whitespace=delim_whitespace,
-                skiprows=lambda x: x not in skiprows + [0],
+                skiprows=lambda x: x not in [*skiprows, 0],
             )
         if self._verbose > 0:
             print(f"Reading data from {filepath}")
         raw_df = pd.read_csv(
-            filepath, delim_whitespace=delim_whitespace, skiprows=skiprows
+            filepath,
+            delim_whitespace=delim_whitespace,
+            skiprows=skiprows,
         )
         return raw_df, unit_row
 
@@ -921,7 +1124,7 @@ class Reader:
         unit_row: pd.Series,
         mandatory_vars: dict,
     ) -> "VariablesStorer":
-        """Parses variables from the csv data.
+        """Parse variables from the csv data.
 
         Parameters
         ----------
@@ -949,7 +1152,7 @@ class Reader:
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
             )
-            if column in mandatory_vars.keys():
+            if column in mandatory_vars:
                 variables[mandatory_vars[column]] = var
             else:
                 variables[column.lower()] = var
@@ -993,7 +1196,7 @@ class Reader:
         day_col: str,
         date_col: str,
     ) -> pd.DataFrame:
-        """Adds missing columns to the dataframe.
+        """Add missing columns to the dataframe.
 
         Parameters
         ----------
@@ -1020,7 +1223,7 @@ class Reader:
         return raw_df
 
     def get_storer(self) -> "Storer":
-        """Returns the Storer storing the data loaded.
+        """Return the Storer storing the data loaded.
 
         Returns
         -------

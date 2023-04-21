@@ -9,10 +9,13 @@ packages = [{ include = "bgc_data_processing" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 pandas = "^1.5.2"
-numpy = "^1.24.1"
+numpy = "<1.24"
 cartopy = "0.21.1"
 netcdf4 = "^1.6.2"
 pyproj = "~3.4"
+shapely = "^2.0.1"
+geopandas = "^0.12.2"
+eomaps = "^6.3"
 
 
 [tool.poetry.group.docs.dependencies]
@@ -42,7 +45,72 @@ line-length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-ignore = ["E731"]
+select = [
+    # pyflakes
+    'F',
+    # pycodestyle Errors (E) and Warnings (W)
+    'E',
+    'W',
+    # isort
+    "I",
+    # pep8-naming
+    'N',
+    # pydocstyle
+    'D',
+    # pyupgrade
+    "UP",
+    # flake8-builtins
+    "A",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-bugbear
+    'B',
+    # # flake8-commas
+    'COM',
+    # flake8-comprehensions
+    'C4',
+    # flake8-quotes
+    'Q',
+    # flake8-return
+    "RET",
+    # flake8-self
+    "SLF",
+    # flake8-simplify
+    "SIM",
+    # flake8-type-checking
+    "TCH",
+    # pylint
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    # Ruff-specific rules
+    'RUF',
+]
+ignore = [
+    # do not assign a lambda expression, use a def
+    "E731",
+    # controversial
+    "B006",
+    # controversial
+    "B008",
+    # Function definition does not bind loop variable
+    "B023",
+    # Too many arguments to function call
+    "PLR0913",
+    # Magic number
+    "PLR2004",
+]
+unfixable = [
+    # Remove unused-imports
+    "F401",
+    # Variable assigned but never used
+    "F841",
+    # Use {key} in {dict} instead of {key} in {dict}.keys()
+    "SIM118",
+    # move to type-checking block
+    "TCH003",
+]
 
 [tool.isort]
 profile = 'black'
@@ -68,22 +136,9 @@ omit-covered-files = false
 generate-badge = "docs/assets/badges"
 badge-format = "svg"
 
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
 [tool.pydocstyle]
-ignore = [
-    "D104",
-    "D105",
-    "D107",
-    "D203",
-    "D204",
-    "D213",
-    "D215",
-    "D400",
-    "D401",
-    "D404",
-    "D406",
-    "D407",
-    "D408",
-    "D409",
-    "D413",
-]
+convention = "numpy"
 match-dir = "bgc_data_processing/*"

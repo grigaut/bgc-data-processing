@@ -2,7 +2,8 @@
 
 
 import warnings
-from typing import TYPE_CHECKING, Iterable, Tuple
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,10 +11,13 @@ import pandas as pd
 from cartopy import crs, feature
 
 from bgc_data_processing.base import BasePlot
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
+    from cartopy.mpl.geoaxes import GeoAxes
+    from matplotlib.axes import Axes
+    from matplotlib.collections import Collection
     from matplotlib.figure import Figure
 
     from bgc_data_processing.variables import VariablesStorer
@@ -39,6 +43,15 @@ class MeshPlotter(BasePlot):
         storer: "Storer",
         constraints: "Constraints" = Constraints(),
     ) -> None:
+        """Instanciate base class for tracing on earthmaps.
+
+        Parameters
+        ----------
+        storer : Storer
+            Data Storer containing data to plot.
+        constraints: Constraints
+                Constraint slicer.
+        """
         super().__init__(storer=storer, constraints=constraints)
         self._lat_bin: int | float = self.__default_lat_bin
         self._lon_bin: int | float = self.__default_lon_bin
@@ -53,7 +66,7 @@ class MeshPlotter(BasePlot):
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
     def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
-        """Returns a list of columns to use when grouping the data.
+        """Return a list of columns to use when grouping the data.
 
         Parameters
         ----------
@@ -76,7 +89,7 @@ class MeshPlotter(BasePlot):
             self._variables.latitude_var_name,
             self._variables.longitude_var_name,
         ]:
-            if var_name is not None and var_name in variables.keys():
+            if var_name is not None and var_name in variables.keys():  # noqa: SIM118
                 columns.append(variables.get(var_name).label)
         return columns
 
@@ -112,7 +125,7 @@ class MeshPlotter(BasePlot):
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
-        group = data[self._grouping_columns + [var_key]].groupby(self._grouping_columns)
+        group = data[[*self._grouping_columns, var_key]].groupby(self._grouping_columns)
         if self._depth_density:
             var_series: pd.Series = group.sum()
         else:
@@ -125,7 +138,8 @@ class MeshPlotter(BasePlot):
         bin_size: float,
         cut_name: str,
     ) -> tuple[pd.Series, np.ndarray]:
-        """Generates evenly spaced points to use when creating the meshgrid. \
+        """Generate evenly spaced points to use when creating the meshgrid.
+
         Also performs a cut on the dataframe column to bin the values.
 
         Parameters
@@ -183,22 +197,10 @@ class MeshPlotter(BasePlot):
             df[lon_col].max(),
         )
 
-        if not np.isnan(self._lat_map_min):
-            lat_map_min = self._lat_map_min
-        else:
-            lat_map_min = lat_min
-        if not np.isnan(self._lat_map_max):
-            lat_map_max = self._lat_map_max
-        else:
-            lat_map_max = lat_max
-        if not np.isnan(self._lon_map_min):
-            lon_map_min = self._lon_map_min
-        else:
-            lon_map_min = lon_min
-        if not np.isnan(self._lon_map_max):
-            lon_map_max = self._lon_map_max
-        else:
-            lon_map_max = lon_max
+        lat_map_min = self._lat_map_min if not np.isnan(self._lat_map_min) else lat_min
+        lat_map_max = self._lat_map_max if not np.isnan(self._lat_map_max) else lat_max
+        lon_map_min = self._lon_map_min if not np.isnan(self._lon_map_min) else lon_min
+        lon_map_max = self._lon_map_max if not np.isnan(self._lon_map_max) else lon_max
 
         return [lon_map_min, lon_map_max, lat_map_min, lat_map_max]
 
@@ -239,7 +241,8 @@ class MeshPlotter(BasePlot):
         longitude_min: int | float = np.nan,
         longitude_max: int | float = np.nan,
     ) -> None:
-        """Define the boundaries of the map \
+        """Define the boundaries of the map.
+
         (different from the boundaries of the plotted data).
 
         Parameters
@@ -267,7 +270,7 @@ class MeshPlotter(BasePlot):
         df: pd.DataFrame,
         label: str,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Returns the X,Y and Z 2D array to use with plt.pcolormesh.
+        """Return the X,Y and Z 2D array to use with plt.pcolormesh.
 
         Parameters
         ----------
@@ -310,73 +313,12 @@ class MeshPlotter(BasePlot):
             columns="lon_cut",
             aggfunc="sum",
         )
-        all_indexes = [index for index in range(lons.shape[0])]
-        all_columns = [colum for colum in range(lats.shape[1])]
+        all_indexes = list(range(lons.shape[0]))
+        all_columns = list(range(lats.shape[1]))
         vals: pd.DataFrame = vals.reindex(all_indexes, axis=0)
         vals: pd.DataFrame = vals.reindex(all_columns, axis=1)
 
         return lons, lats, vals.values
-
-    def _build(
-        self,
-        variable_name: str,
-        **kwargs,
-    ) -> "Figure":
-        """Plots the colormesh for the given variable.
-
-        Parameters
-        ----------
-        variable_name : str
-            Name of the variable to plot.
-        **kwargs
-            Additional arguments to pass to plt.pcolor.
-        """
-        if self._verbose > 1:
-            print(f"\tMeshing {variable_name} data")
-        if variable_name == "all":
-            label = "all"
-        else:
-            label = self._variables.get(variable_name).label
-        df = self._group(
-            var_key=label,
-            lat_key=self._variables.get(self._variables.latitude_var_name).label,
-            lon_key=self._variables.get(self._variables.longitude_var_name).label,
-        )
-        if self._verbose > 1:
-            print("\tCreating figure")
-        fig = plt.figure(figsize=[10, 10])
-        provs = ", ".join(self._storer.providers)
-        suptitle = f"{variable_name} - {provs} ({self._storer.category})"
-        plt.suptitle(suptitle)
-        ax = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
-        ax.gridlines(draw_labels=True)
-        ax.add_feature(feature.LAND, zorder=4)
-        ax.add_feature(feature.OCEAN, zorder=1)
-        extent = self._get_map_extent(df)
-        ax.set_extent(extent, crs.PlateCarree())
-        if not df.empty:
-            X1, Y1, Z1 = self._mesh(
-                df=df,
-                label=label,
-            )
-            if X1.shape == (1, 1) or Y1.shape == (1, 1) or Z1.shape == (1, 1):
-                warnings.warn(
-                    "Not enough data to display, try decreasing the bin size"
-                    " or representing more data sources"
-                )
-            cbar = ax.pcolor(
-                X1,
-                Y1,
-                Z1,
-                transform=crs.PlateCarree(),
-                **kwargs,
-            )
-            fig.colorbar(cbar, label=label, shrink=0.75)
-        label = f"{variable_name} total data points count"
-
-        title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
-        plt.title(title)
-        return fig
 
     def save(
         self,
@@ -386,7 +328,7 @@ class MeshPlotter(BasePlot):
         suptitle: str = None,
         **kwargs,
     ) -> None:
-        """Plots the colormesh for the given variable.
+        """Plot the colormesh for the given variable.
 
         Parameters
         ----------
@@ -418,7 +360,7 @@ class MeshPlotter(BasePlot):
         suptitle: str = None,
         **kwargs,
     ) -> None:
-        """Plots the colormesh for the given variable.
+        """Plot the colormesh for the given variable.
 
         Parameters
         ----------
@@ -439,6 +381,193 @@ class MeshPlotter(BasePlot):
             suptitle=suptitle,
             **kwargs,
         )
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        title: str,
+        suptitle: str,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the axes of the Figure.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 10])
+        ax: "GeoAxes" = plt.subplot(1, 1, 1, projection=crs.Orthographic(0, 90))
+        if suptitle is not None:
+            ax.set_title(suptitle)
+        ax.gridlines(draw_labels=True)
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        ax, cbar = self._build_to_geoaxes(variable_name=variable_name, ax=ax, **kwargs)
+        if cbar is not None:
+            label = f"{variable_name} total data points count"
+            fig.colorbar(cbar, label=label, shrink=0.75)
+        if suptitle is None:
+            provs = ", ".join(self._storer.providers)
+            suptitle = f"{variable_name} - {provs} ({self._storer.category})"
+        if title is None:
+            title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
+        plt.suptitle(suptitle)
+        ax.set_title(title)
+        return fig
+
+    def _build_to_geoaxes(
+        self,
+        variable_name: str,
+        ax: "GeoAxes",
+        **kwargs,
+    ) -> tuple["GeoAxes", "Collection"]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        ax : GeoAxes
+            GeoAxes (from cartopy) to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        tuple[GeoAxes, Collection]
+            Axes, Colorbar.
+        """
+        if self._verbose > 1:
+            print(f"\tMeshing {variable_name} data")
+        if variable_name == "all":
+            label = "all"
+        else:
+            label = self._variables.get(variable_name).label
+        df = self._group(
+            var_key=label,
+            lat_key=self._variables.get(self._variables.latitude_var_name).label,
+            lon_key=self._variables.get(self._variables.longitude_var_name).label,
+        )
+        if self._verbose > 1:
+            print("\tCreating figure")
+        ax.gridlines(draw_labels=True)
+        ax.add_feature(feature.LAND, zorder=4)
+        ax.add_feature(feature.OCEAN, zorder=1)
+        extent = self._get_map_extent(df)
+        ax.set_extent(extent, crs.PlateCarree())
+        if not df.empty:
+            lat_2d, lon_2d, vals_2d = self._mesh(
+                df=df,
+                label=label,
+            )
+            if (
+                lat_2d.shape == (1, 1)
+                or lon_2d.shape == (1, 1)
+                or vals_2d.shape == (1, 1)
+            ):
+                warnings.warn(
+                    "Not enough data to display, try decreasing the bin size"
+                    " or representing more data sources",
+                )
+            cbar = ax.pcolormesh(
+                lat_2d,
+                lon_2d,
+                vals_2d,
+                transform=crs.PlateCarree(),
+                **kwargs,
+            )
+        else:
+            cbar = None
+
+        title = f"{self._lat_bin}° x {self._lon_bin}° grid (lat x lon)"
+        ax.set_title(title)
+        return ax, cbar
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        ax: "GeoAxes",
+        **kwargs,
+    ) -> tuple["GeoAxes", "Collection"]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        ax : GeoAxes
+            GeoAxes (from cartopy) to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        tuple[GeoAxes, Collection]
+            Axes, Colorbar.
+        """
+        return self._build_to_geoaxes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
+
+    def get_df(
+        self,
+        variable_name: str,
+    ) -> pd.DataFrame:
+        """Return the density of the given variable on the bins.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to bin.
+
+        Returns
+        -------
+        pd.Dataframe
+            Three columns dataframe : longitude, latitude and variable density.
+             The column names are the same as in the original DataFrame.
+        """
+        if self._verbose > 1:
+            print(f"\tMeshing {variable_name} data")
+        if variable_name == "all":
+            label = "all"
+        else:
+            label = self._variables.get(variable_name).label
+        lon_label = self._variables.get(self._variables.longitude_var_name).label
+        lat_label = self._variables.get(self._variables.latitude_var_name).label
+        df = self._group(
+            var_key=label,
+            lat_key=lat_label,
+            lon_key=lon_label,
+        )
+        if self._verbose > 1:
+            print("\tCreating figure")
+        if df.empty:
+            return pd.DataFrame(columns=[lon_label, lat_label, label])
+        longis_2d, latis_2d, values_2d = self._mesh(
+            df=df,
+            label=label,
+        )
+        # Ravel the arrays to concatenate them in a single dataframe
+        lons = longis_2d.ravel()
+        lats = latis_2d.ravel()
+        vals = values_2d.ravel()
+        data = {lon_label: lons, lat_label: lats, label: vals}
+        transformed_df = pd.DataFrame.from_dict(data)
+        return transformed_df[~transformed_df[label].isna()]
 
 
 class EvolutionProfile(BasePlot):
@@ -462,7 +591,15 @@ class EvolutionProfile(BasePlot):
         storer: "Storer",
         constraints: "Constraints" = Constraints(),
     ) -> None:
+        """Class to plot the evolution of data on a given area.
 
+        Parameters
+        ----------
+        storer : Storer
+            Storer to map data of.
+        constraints: Constraints
+                Constraint slicer.
+        """
         super().__init__(storer, constraints)
         self._interval: str = self.__default_interval
         self._interval_length: int = self.__default_interval_length
@@ -484,8 +621,9 @@ class EvolutionProfile(BasePlot):
         self,
         depth_interval: int | float | list[int | float] = np.nan,
     ) -> None:
-        """Set the depth interval value. This represents the vertical resolution \
-        of the final plot.
+        """Set the depth interval value.
+
+        This represents the vertical resolution of the final plot.
 
         Parameters
         ----------
@@ -497,8 +635,9 @@ class EvolutionProfile(BasePlot):
             self._depth_interval = depth_interval
 
     def set_date_intervals(self, interval: str, interval_length: int = None) -> None:
-        """Set the date interval parameters. This represent the horizontal resolution \
-        of the final plot.
+        """Set the date interval parameters.
+
+        This represent the horizontal resolution of the final plot.
 
         Parameters
         ----------
@@ -541,16 +680,15 @@ class EvolutionProfile(BasePlot):
             if depth_max not in intervals:
                 intervals = np.append(intervals, depth_max)
             intervals.sort()
-            depth_bins = pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
+            return pd.IntervalIndex.from_arrays(intervals[:-1], intervals[1:])
+
         # if only the bin value resolution is given
-        else:
-            depth_bins = pd.interval_range(
-                start=depth_min - depth_min % self._depth_interval,
-                end=depth_max,
-                freq=self._depth_interval,
-                closed="right",
-            )
-        return depth_bins
+        return pd.interval_range(
+            start=depth_min - depth_min % self._depth_interval,
+            end=depth_max,
+            freq=self._depth_interval,
+            closed="right",
+        )
 
     def _make_date_intervals(self) -> pd.IntervalIndex:
         """Create the datetime intervals to use for the cut.
@@ -573,18 +711,17 @@ class EvolutionProfile(BasePlot):
             interval_length=self._interval_length,
         )
         drng = drng_generator()
-        intervals = pd.IntervalIndex.from_arrays(
+        return pd.IntervalIndex.from_arrays(
             pd.to_datetime(drng[drng_generator.start_column_name]),
             pd.to_datetime(drng[drng_generator.end_column_name]),
             closed="both",
         )
-        return intervals
 
     def _create_cut_and_ticks(
         self,
         column_to_cut: pd.Series,
         cut_intervals: pd.IntervalIndex,
-    ) -> Tuple[pd.IntervalIndex, np.ndarray]:
+    ) -> tuple[pd.IntervalIndex, np.ndarray]:
         """Return both the cut and the ticks values to use for the Figure.
 
         Parameters
@@ -596,7 +733,7 @@ class EvolutionProfile(BasePlot):
 
         Returns
         -------
-        Tuple[pd.IntervalIndex, np.ndarray]
+        tuple[pd.IntervalIndex, np.ndarray]
             _description_
         """
         cut = pd.cut(
@@ -654,29 +791,27 @@ class EvolutionProfile(BasePlot):
         pivotted.sort_index(axis=0, inplace=True)
         return pivotted
 
-    def _build(
+    def _build_to_axes(
         self,
         variable_name: str,
+        ax: "Axes",
         **kwargs,
-    ) -> "Figure":
-        """Build the plot to display or save.
+    ) -> tuple["Axes", "Collection"]:
+        """Build the plot to given axes.
 
         Parameters
         ----------
         variable_name : str
             Name of the variable to plot.
+        ax : Axes
+            Axes to plot the data to.
         **kwargs
-            Additional arguments to pass to plt.pcolor.
+            Additional arguments to pass to plt.pcolormesh.
 
         Returns
         -------
-        Figure
-            Data evolution figure on the given area.
-
-        Raises
-        ------
-        ValueError
-            If there is not enough data to create a figure.
+        tuple[Axes, Collection]
+            Axes, Colorbar.
         """
         if variable_name == "all":
             var_label = "all"
@@ -687,6 +822,7 @@ class EvolutionProfile(BasePlot):
             df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
         var_count = (~df[var_label].isna()).astype(int)
+        var_count.reset_index(drop=True, inplace=True)
         # Make cuts
         if self._verbose > 1:
             print("\tMaking date intervals.")
@@ -721,41 +857,77 @@ class EvolutionProfile(BasePlot):
         # Figure
         if self._verbose > 1:
             print("\tCreating figure.")
-        fig = plt.figure(figsize=[10, 5])
-        lat_col = self._variables.get(self._variables.latitude_var_name).label
-        lon_col = self._variables.get(self._variables.longitude_var_name).label
-        lat_min, lat_max = self._constraints.get_extremes(
-            lat_col,
-            df[lat_col].min(),
-            df[lat_col].max(),
-        )
-        lon_min, lon_max = self._constraints.get_extremes(
-            lon_col,
-            df[lon_col].min(),
-            df[lon_col].max(),
-        )
-        suptitle = (
-            "Evolution of data in the area of latitude in "
-            f"[{round(lat_min,2)},{round(lat_max,2)}] and longitude in "
-            f"[{round(lon_min,2)},{round(lon_max,2)}]"
-        )
-        plt.suptitle(suptitle)
-        ax = plt.subplot(1, 1, 1)
-        X, Y = np.meshgrid(date_ticks, depth_ticks)
+
+        date, depth = np.meshgrid((date_ticks), (depth_ticks))
         # Color mesh
-        cbar = ax.pcolormesh(X, Y, df_pivot.values, **kwargs)
+        cbar = ax.pcolormesh(date, depth, df_pivot.values, **kwargs)
+
+        return ax, cbar
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the Figure.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 5])
+        ax = plt.subplot(1, 1, 1)
+        ax, cbar = self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
         fig.colorbar(cbar, label="Number of data points", shrink=0.75)
-        if self._interval == "custom":
-            title = (
-                f"Horizontal resolution: {self._interval_length} "
-                f"day{'s' if self._interval_length > 1 else ''}. "
-                f"Vertical resolution: {self._depth_interval} meters."
+        if title is None:
+            if self._interval == "custom":
+                title = (
+                    f"Horizontal resolution: {self._interval_length} "
+                    f"day{'s' if self._interval_length > 1 else ''}. "
+                    f"Vertical resolution: {self._depth_interval} meters."
+                )
+            else:
+                title = (
+                    f"Horizontal resolution: 1 {self._interval}. "
+                    f"Vertical resolution: {self._depth_interval} meters."
+                )
+        if suptitle is None:
+            lat_col = self._variables.get(self._variables.latitude_var_name).label
+            lon_col = self._variables.get(self._variables.longitude_var_name).label
+            lat_min, lat_max = self._constraints.get_extremes(
+                lat_col,
+                self._storer.data[lat_col].min(),
+                self._storer.data[lat_col].max(),
             )
-        else:
-            title = (
-                f"Horizontal resolution: 1 {self._interval}. "
-                f"Vertical resolution: {self._depth_interval} meters."
+            lon_min, lon_max = self._constraints.get_extremes(
+                lon_col,
+                self._storer.data[lon_col].min(),
+                self._storer.data[lon_col].max(),
             )
+            suptitle = (
+                "Evolution of data in the area of latitude in "
+                f"[{round(lat_min,2)},{round(lat_max,2)}] and longitude in "
+                f"[{round(lon_min,2)},{round(lon_max,2)}]"
+            )
+        plt.suptitle(suptitle)
         plt.title(title)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -816,5 +988,33 @@ class EvolutionProfile(BasePlot):
             variable_name=variable_name,
             title=title,
             suptitle=suptitle,
+            **kwargs,
+        )
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> tuple["Axes", "Collection"]:
+        """Plot the data on a given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot the data of.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        tuple[Axes, Collection]
+            Axes, colorbar
+        """
+        return self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
             **kwargs,
         )

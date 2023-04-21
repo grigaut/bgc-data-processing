@@ -1,7 +1,8 @@
 """Specific parameters to load CMEMS-provided data."""
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 import numpy as np
+
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="CMEMS",

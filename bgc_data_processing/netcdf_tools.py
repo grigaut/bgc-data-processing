@@ -6,12 +6,12 @@ import os
 import re
 from typing import TYPE_CHECKING
 
-import netCDF4 as nc
+import netCDF4
 import numpy as np
 import pandas as pd
 
 from bgc_data_processing.base import BaseLoader
-from bgc_data_processing.data_classes import Storer, Constraints
+from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 
 if TYPE_CHECKING:
@@ -51,6 +51,23 @@ class NetCDFLoader(BaseLoader):
         files_pattern: str,
         variables: "VariablesStorer",
     ) -> None:
+        """Loader class to use with csv files.
+
+        Parameters
+        ----------
+        provider_name : str
+            Data provider name.
+        dirin : str
+            Directory to browse for files to load.
+        category: str
+            Category provider belongs to.
+        files_pattern : str
+            Pattern to use to parse files.
+            Must contain a '{years}' in order to be completed using the .format method.
+        variables : VariablesStorer
+            Storer object containing all variables to consider for this data,
+            both the one in the data file but and the one not represented in the file.
+        """
         super().__init__(provider_name, dirin, category, files_pattern, variables)
 
     def __call__(
@@ -58,7 +75,7 @@ class NetCDFLoader(BaseLoader):
         constraints: Constraints = Constraints(),
         exclude: list = [],
     ) -> "Storer":
-        """Loads all files for the loader.
+        """Load all files for the loader.
 
         Parameters
         ----------
@@ -86,7 +103,7 @@ class NetCDFLoader(BaseLoader):
         )
 
     def _select_filepaths(self, exclude: list) -> list[str]:
-        """Selects filepaths referring to the files to load.
+        """Select filepaths referring to the files to load.
 
         exclude: list
             List of files to exclude when loading.
@@ -105,7 +122,7 @@ class NetCDFLoader(BaseLoader):
         return sorted(full_paths)
 
     def _get_id(self, filename: str) -> str:
-        """Parses the station id from the file name.
+        """Parse the station id from the file name.
 
         Notes
         -----
@@ -123,8 +140,8 @@ class NetCDFLoader(BaseLoader):
         """
         return filename.split("_")[3].split(".")[0]
 
-    def _read(self, filepath: str) -> nc.Dataset:
-        """Reads the file loacted at filepath.
+    def _read(self, filepath: str) -> netCDF4.Dataset:
+        """Read the file loacted at filepath.
 
         Parameters
         ----------
@@ -133,13 +150,13 @@ class NetCDFLoader(BaseLoader):
 
         Returns
         -------
-        nc.Dataset
+        netCDF4.Dataset
             File content stored in a netCDF4.Dataset object.
         """
-        return nc.Dataset(filepath)
+        return netCDF4.Dataset(filepath)
 
     def _get_shapes(self, data_dict: dict[str, np.ndarray]) -> tuple[int]:
-        """Returns the data shapes of the variables.
+        """Return the data shapes of the variables.
 
         Parameters
         ----------
@@ -169,18 +186,14 @@ class NetCDFLoader(BaseLoader):
         # Assert all shape (1st dimension) are the same
         if len(set(shapes0)) > 1:
             raise NetCDFLoadingError(
-                "Some variables have different size (first dimension)"
+                "Some variables have different size (first dimension)",
             )
-        elif len(set(shapes0)) == 1:
-            shape0 = shapes0[0]
-        else:
-            # if the shape list is empty => all variables have a 1st dimension of 1
-            shape0 = 1
+        shape0 = shapes0[0] if len(set(shapes0)) == 1 else 1
         if shapes1:
             # Assert all shape (2nd dimension) are the same
             if len(set(shapes1)) != 1:
                 raise NetCDFLoadingError(
-                    "Some variables have different size (second dimension)"
+                    "Some variables have different size (second dimension)",
                 )
             shape1 = shapes1[0]
         else:
@@ -188,10 +201,14 @@ class NetCDFLoader(BaseLoader):
         return shape0, shape1
 
     def _fill_missing(
-        self, data_dict: dict, missing_vars: list["ExistingVar|NotExistingVar"]
+        self,
+        data_dict: dict,
+        missing_vars: list["ExistingVar|NotExistingVar"],
     ) -> dict:
-        """Adds empty values with correct shapes for variables \
-        which aren't in the original data file but which were supposed to be.
+        """Add empty values with correct shapes for variables.
+
+        Apply to variables which aren't in the original data file
+        but which were supposed to be.
 
         Notes
         -----
@@ -229,8 +246,7 @@ class NetCDFLoader(BaseLoader):
         return data_dict
 
     def _reshape_data(self, data_dict: dict) -> dict:
-        """Reshapes the data arrays into 1 dimensionnal arrays \
-        in order to create a Dataframe.
+        """Reshape the data arrays into 1 dimensionnal arrays to create a Dataframe.
 
         Parameters
         ----------
@@ -258,15 +274,15 @@ class NetCDFLoader(BaseLoader):
 
     def _filter_flags(
         self,
-        nc_data: nc.Dataset,
+        nc_data: netCDF4.Dataset,
         variable: "ExistingVar",
     ) -> np.ndarray:
         """Filter data selecting only some flag values.
 
         Parameters
         ----------
-        nc_data : nc.Dataset
-            nc.Dataset to use to get data.
+        nc_data : netCDF4.Dataset
+            netCDF4.Dataset to use to get data.
         variable : ExistingVar
             Variable to get the values of.
 
@@ -293,16 +309,15 @@ class NetCDFLoader(BaseLoader):
                 for value in correct_flags:
                     good_flags = good_flags | (flag_values == value)
                 return np.where(good_flags, values, np.nan)
-            else:
-                return values
+            return values
         return None
 
-    def _format(self, nc_data: nc.Dataset) -> pd.DataFrame:
-        """Formats the data from netCDF4.Dataset to pd.DataFrame.
+    def _format(self, nc_data: netCDF4.Dataset) -> pd.DataFrame:
+        """Format the data from netCDF4.Dataset to pd.DataFrame.
 
         Parameters
         ----------
-        nc_data : nc.Dataset
+        nc_data : netCDF4.Dataset
             Data storer to format.
 
         Returns
@@ -327,7 +342,7 @@ class NetCDFLoader(BaseLoader):
         return pd.DataFrame(data_dict)
 
     def _set_dates(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Sets the dates (and year, month, day) columns in the dataframe.
+        """Set the dates (and year, month, day) columns in the dataframe.
 
         Parameters
         ----------
@@ -353,7 +368,7 @@ class NetCDFLoader(BaseLoader):
         return df
 
     def _set_provider(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Sets the provider column using self._provider value.
+        """Set the provider column using self._provider value.
 
         Parameters
         ----------
@@ -371,7 +386,7 @@ class NetCDFLoader(BaseLoader):
         return df
 
     def _set_expocode(self, df: pd.DataFrame, file_id: str) -> pd.DataFrame:
-        """Sets the expocode column to file_id.
+        """Set the expocode column to file_id.
 
         Parameters
         ----------
@@ -391,7 +406,7 @@ class NetCDFLoader(BaseLoader):
         return df
 
     def _add_empty_cols(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Adds the missing columns (the one supposedly not present in the dataset).
+        """Add the missing columns (the one supposedly not present in the dataset).
 
         Parameters
         ----------
@@ -409,7 +424,7 @@ class NetCDFLoader(BaseLoader):
         return df
 
     def _convert_type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Converts columns types to the types specified for the variables.
+        """Convert columns types to the types specified for the variables.
 
         Parameters
         ----------
@@ -431,7 +446,7 @@ class NetCDFLoader(BaseLoader):
         filepath: str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
-        """Loading function to load a netCDF file from filepath.
+        """Load a netCDF file from filepath.
 
         Parameters
         ----------
@@ -462,5 +477,4 @@ class NetCDFLoader(BaseLoader):
         df_types = self._convert_type(df_ecols)
         df_corr = self._correct(df_types)
         df_sliced = constraints.apply_constraints(df_corr)
-        df_rm = self.remove_nan_rows(df_sliced)
-        return df_rm
+        return self.remove_nan_rows(df_sliced)
