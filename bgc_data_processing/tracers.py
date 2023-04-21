@@ -822,6 +822,7 @@ class EvolutionProfile(BasePlot):
             df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
         var_count = (~df[var_label].isna()).astype(int)
+        var_count.reset_index(drop=True, inplace=True)
         # Make cuts
         if self._verbose > 1:
             print("\tMaking date intervals.")
