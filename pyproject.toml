@@ -80,6 +80,7 @@ select = [
     # flake8-type-checking
     "TCH",
     # pylint
+    "PLC",
     "PLE",
     "PLR",
     "PLW",
