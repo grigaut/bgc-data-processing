@@ -550,14 +550,14 @@ files = [
 
 [[package]]
 name = "eomaps"
-version = "6.3"
+version = "6.4"
 description = "A library to create interactive maps of geographical datasets."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "EOmaps-6.3-py3-none-any.whl", hash = "sha256:ef075e71346d15c61e92a4a1287bf7e134b87377edddef164bcda7a086bd1ffb"},
-    {file = "EOmaps-6.3.tar.gz", hash = "sha256:ed0bd0808e90f9e5e7ca2b27cf4a11f12b352a9e55ba8a6d675252f44063a82c"},
+    {file = "EOmaps-6.4-py3-none-any.whl", hash = "sha256:bc2ddb47a2eeca6c6d7653a386965e0e477eec2ca6e48d6b3dd491bdc3b52755"},
+    {file = "EOmaps-6.4.tar.gz", hash = "sha256:352d6059ca1d5a7773c8c21a471c29926d4054d0fd10c4bbaa74efe4caddf21a"},
 ]
 
 [package.dependencies]
@@ -717,6 +717,35 @@ colorama = ">=0.4"
 
 [package.extras]
 async = ["aiofiles (>=0.7,<1.0)"]
+
+[[package]]
+name = "gsw"
+version = "3.6.16.post1"
+description = "Gibbs Seawater Oceanographic Package of TEOS-10"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "gsw-3.6.16.post1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:7599399812a420b3eeb702e0b287554a1b0ecf71da1d79de528f4f06626aef56"},
+    {file = "gsw-3.6.16.post1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:631a0cf798150b058468abc229e69e262fb5d2ca926a24321974db7051097130"},
+    {file = "gsw-3.6.16.post1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c2ac19184f9d47f86ee53e8a1f308216e5ef30885d2275ea7e8ad73affff7c0d"},
+    {file = "gsw-3.6.16.post1-cp310-cp310-win_amd64.whl", hash = "sha256:4fcb6f29d7d146c29e9d6a8d2f8ec6e62f999bda1a0831afb3cb1fcbf0d5908f"},
+    {file = "gsw-3.6.16.post1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:b44f2be48ffa20fb26c43fe405aca041417e61fe187fa9afd1d8e6e81cbb39ff"},
+    {file = "gsw-3.6.16.post1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:965b0c4cd04baafeac4a65c5e61401347ffcd5d284499a8c20392ecf8416cf39"},
+    {file = "gsw-3.6.16.post1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:16447f8ddb962129f7676f8187116c05164e00ab6ca8e52934efaaf388f061c9"},
+    {file = "gsw-3.6.16.post1-cp311-cp311-win_amd64.whl", hash = "sha256:1c4986799024e36e06567106de3240e55c07b9cf54659a39b4de646ddd93ee89"},
+    {file = "gsw-3.6.16.post1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3f87c2cac500453f6a2a05b29d5318f756de11dbfb67f255abe8f276c695a04b"},
+    {file = "gsw-3.6.16.post1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:93a6d142e169827346e1d1c458c5d5b6f4dbc8ee5fbc9e009a860325a596be74"},
+    {file = "gsw-3.6.16.post1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bf0fbf7a691ffb0c127bbbd0330a68a3e0bdcd0ce53dd7ad9386d45564f6a560"},
+    {file = "gsw-3.6.16.post1-cp38-cp38-win_amd64.whl", hash = "sha256:4497bc8d3b3a36d2831b012016af5d864a55354cdf3630760a8e0b8e7ddc5f58"},
+    {file = "gsw-3.6.16.post1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ef0197cbb666892c05e19cd9c0a812ce1c292c83a6da71f705a243d4558be902"},
+    {file = "gsw-3.6.16.post1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:541edf16f0b54effb0c79a5e4bc86f65670c39f7b9455a69709f35eeee704bc3"},
+    {file = "gsw-3.6.16.post1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c2125c16476699142c635bb707ae06b9e419399b0b4abd73d08bd35002ef922"},
+    {file = "gsw-3.6.16.post1-cp39-cp39-win_amd64.whl", hash = "sha256:ca8635ce3889a919c3960f13c030279afd9406d6813e41edc7e7273d30d8a9d8"},
+]
+
+[package.dependencies]
+numpy = "*"
 
 [[package]]
 name = "identify"
@@ -1221,14 +1250,14 @@ mkdocs = ">=1.0.3"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.1.7"
+version = "9.1.8"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.1.7-py3-none-any.whl", hash = "sha256:4ab0e2f378bb811ca44a001a63d687403a2725f0485c41d6a2a7aed3aa34cd31"},
-    {file = "mkdocs_material-9.1.7.tar.gz", hash = "sha256:244f85d13e3aa773aaa66c74b95bb4b00d89a3a917f6f9d33704a5655bf0c423"},
+    {file = "mkdocs_material-9.1.8-py3-none-any.whl", hash = "sha256:ac76e31bf52b2742c08a9d6629d64878f32dda5c949cd371082e25106c9be7dd"},
+    {file = "mkdocs_material-9.1.8.tar.gz", hash = "sha256:616ef98fc143b3ec8c559e2fec85f32103d2093e9c88333964d93105ea2d670b"},
 ]
 
 [package.dependencies]
@@ -2115,15 +2144,29 @@ doc = ["matplotlib (>2)", "numpydoc", "pydata-sphinx-theme (==0.9.0)", "sphinx (
 test = ["asv", "gmpy2", "mpmath", "pytest", "pytest-cov", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
 
 [[package]]
+name = "seawater"
+version = "3.3.4"
+description = "Seawater Library for Python"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "seawater-3.3.4.tar.gz", hash = "sha256:1ec2c21b9fac3133d5c18ab654e3ff7c7167d9f437fcc16ee8d355e609533411"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[[package]]
 name = "setuptools"
-version = "67.7.1"
+version = "67.7.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "setuptools-67.7.1-py3-none-any.whl", hash = "sha256:6f0839fbdb7e3cfef1fc38d7954f5c1c26bf4eebb155a55c9bf8faf997b9fb67"},
-    {file = "setuptools-67.7.1.tar.gz", hash = "sha256:bb16732e8eb928922eabaa022f881ae2b7cdcfaf9993ef1f5e841a96d32b8e0c"},
+    {file = "setuptools-67.7.2-py3-none-any.whl", hash = "sha256:23aaf86b85ca52ceb801d32703f12d77517b2556af839621c641fca11287952b"},
+    {file = "setuptools-67.7.2.tar.gz", hash = "sha256:f104fa03692a2602fa0fec6c6a9e63b6c8a968de13e17c026957dd1f53d80990"},
 ]
 
 [package.extras]
@@ -2373,4 +2416,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "53d3e96b2ac3d0ac68ea5806caa24aaeaf238eb4c8e18a86b2488053ae2e4b9c"
+content-hash = "258d1f249a70a4509ae08e51040c6cfaf5bf7493e67b59c6541a5d1675aecc9c"
