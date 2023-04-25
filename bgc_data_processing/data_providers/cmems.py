@@ -23,8 +23,8 @@ loader = netcdf_tools.NetCDFLoader(
         .in_file_as("DEPH", "PRES")
         .remove_when_nan()
         .correct_with(lambda x: -np.abs(x)),
-        temperature=DEFAULT_VARS["temperature"].in_file_as("TEMP"),
-        salinity=DEFAULT_VARS["salinity"].in_file_as("PSAL"),
+        temperature=DEFAULT_VARS["temperature"].in_file_as(("TEMP", "TEMP_QC", [1])),
+        salinity=DEFAULT_VARS["salinity"].in_file_as(("PSAL", "PSL_QC", [1])),
         oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOX1"),
         phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("PHOS", "PHOS_QC", [1]))
