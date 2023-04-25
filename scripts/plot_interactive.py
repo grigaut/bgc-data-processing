@@ -308,7 +308,7 @@ def start_drawing(
         Map to draw onto.
     """
     drawer = ShapeDrawer(main_map)
-    drawer.polygon(draw_on_drag=True)
+    drawer.polygon(draw_on_drag=True, fill=False, color="red")
     if not drawers:
         drawers.append(drawer)
     else:
