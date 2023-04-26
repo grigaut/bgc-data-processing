@@ -1030,9 +1030,9 @@ class TemperatureSalinityDiagram(BasePlot):
         Storer to map data of.
     constraints: Constraints
         Constraint slicer.
-    temperature_var_name : str
+    temperature_field : str
         Name of the temperature field in storer (column name).
-    salinity_var_name : str
+    salinity_field : str
         Name of the salinity field in storer (column name).
     """
 
@@ -1040,12 +1040,12 @@ class TemperatureSalinityDiagram(BasePlot):
         self,
         storer: "Storer",
         constraints: "Constraints",
-        temperature_var_name: str,
-        salinity_var_name: str,
+        temperature_field: str,
+        salinity_field: str,
     ) -> None:
         super().__init__(storer, constraints)
-        self.temperature_field = temperature_var_name
-        self.salinity_field = salinity_var_name
+        self.temperature_field = temperature_field
+        self.salinity_field = salinity_field
 
     def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
         """Plot the figure of data density evolution in a givemn area.
