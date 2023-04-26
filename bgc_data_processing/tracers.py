@@ -1162,7 +1162,7 @@ class TemperatureSalinityDiagram(BasePlot):
         latitude_col = df[self._variables.get("LATITUDE").label]
         temperature_col = df[self.temperature_field]
         salinity_col = df[self.salinity_field]
-        pressure = eos80.pres(depth_col, latitude_col)
+        pressure = eos80.pres(np.abs(depth_col), latitude_col)
         temperature = eos80.ptmp(salinity_col, temperature_col, pressure)
         salinity_min = salinity_col.min()
         salinity_max = salinity_col.max()
