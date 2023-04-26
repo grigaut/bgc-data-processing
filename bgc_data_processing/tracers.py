@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from cartopy import crs, feature
+from seawater import eos80
 
 from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Constraints, Storer
@@ -17,7 +18,7 @@ from bgc_data_processing.dateranges import DateRangeGenerator
 if TYPE_CHECKING:
     from cartopy.mpl.geoaxes import GeoAxes
     from matplotlib.axes import Axes
-    from matplotlib.collections import Collection
+    from matplotlib.collections import Collection, PathCollection
     from matplotlib.figure import Figure
 
     from bgc_data_processing.variables import VariablesStorer
@@ -578,7 +579,7 @@ class EvolutionProfile(BasePlot):
     storer : Storer
         Storer to map data of.
     constraints: Constraints
-            Constraint slicer.
+        Constraint slicer.
     """
 
     __default_interval: str = "day"
@@ -1018,3 +1019,161 @@ class EvolutionProfile(BasePlot):
             ax=ax,
             **kwargs,
         )
+
+
+class TemperatureSalinityDiagram(BasePlot):
+    """Class to plot a Temperature-Salinity Diagram.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map data of.
+    constraints: Constraints
+        Constraint slicer.
+    temperature_var_name : str
+        Name of the temperature field in storer (column name).
+    salinity_var_name : str
+        Name of the salinity field in storer (column name).
+    """
+
+    def __init__(
+        self,
+        storer: "Storer",
+        constraints: "Constraints",
+        temperature_var_name: str,
+        salinity_var_name: str,
+    ) -> None:
+        super().__init__(storer, constraints)
+        self.temperature_field = temperature_var_name
+        self.salinity_field = salinity_var_name
+
+    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
+        """Plot the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
+        """
+        super().show(title, suptitle, **kwargs)
+
+    def save(
+        self,
+        save_path: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Save the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.scatter.
+        """
+        super().save(save_path, title, suptitle, **kwargs)
+
+    def plot_to_axes(self, ax: "Axes", **kwargs) -> tuple["Axes", "PathCollection"]:
+        """Plot the data on a given axes.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional arguments to pass to plt.scatter.
+
+        Returns
+        -------
+        tuple[Axes, Collection]
+            Axes, colorbar
+        """
+        return self._build_to_axes(
+            ax=ax,
+            **kwargs,
+        )
+
+    def _build_to_new_figure(
+        self,
+        title: str | None,
+        suptitle: str | None,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the Figure.
+
+        Parameters
+        ----------
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.scatter.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 5])
+        ax = plt.subplot(1, 1, 1)
+        ax, cbar = self._build_to_axes(
+            ax=ax,
+            **kwargs,
+        )
+        fig.colorbar(cbar, label="Depth [m]")
+        plt.xlabel("Salinity [psu]")
+        plt.ylabel("Potential Temperature [°C]")
+        if title is None:
+            title = "Temperature-Salinity Diagram"
+        plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        return fig
+
+    def _build_to_axes(self, ax: "Axes", **kwargs) -> tuple["Axes", "PathCollection"]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        tuple[Axes, OathCollection]
+            Axes, Colorbar.
+        """
+        df = self._constraints.apply_constraints(self._storer.data, inplace=False)
+        df = df[~(df[self.temperature_field].isna() | df[self.salinity_field].isna())]
+        depth_col = df[self._variables.get("DEPH").label]
+        latitude_col = df[self._variables.get("LATITUDE").label]
+        temperature_col = df[self.temperature_field]
+        salinity_col = df[self.salinity_field]
+        pressure = eos80.pres(depth_col, latitude_col)
+        temperature = eos80.ptmp(salinity_col, temperature_col, pressure)
+        salinity_min = salinity_col.min()
+        salinity_max = salinity_col.max()
+        salinitys = np.linspace(salinity_min, salinity_max, 100)
+        temperature_min = temperature.min()
+        temperature_max = temperature.max()
+        temperatures = np.linspace(temperature_max, temperature_min, 100)
+        temps_2d = np.tile(temperatures.reshape((1, -1)).T, (1, 100))
+        salis_2d = np.tile(salinitys, (100, 1))
+        density_values = eos80.dens0(salis_2d, temps_2d)
+        cbar = ax.scatter(salinity_col, temperature, c=depth_col, **kwargs)
+        label = ax.contour(salinitys, temperatures, density_values, colors="grey")
+        ax.clabel(label)
+        return ax, cbar
