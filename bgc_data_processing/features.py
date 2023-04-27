@@ -89,3 +89,42 @@ def compute_potential_temperature(
     )
     data.name = variable.label
     return variable, data
+
+
+def compute_density_p0(
+    storer: "Storer",
+    salinity_field: str,
+    temperature_field: str,
+) -> tuple[NotExistingVar, pd.Series]:
+    """Compute seawater density at atmospheric pressure.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to get the data from.
+    salinity_field : str
+        Name of the salinity field in the storer data.
+    temperature_field : str
+        Name of the temperature field in the storer data.
+
+    Returns
+    -------
+    tuple[NotExistingVar, pd.Series]
+        Potential temperature variable, potenital temperature values.
+    """
+    salinity = storer.data[salinity_field]
+    temperature = storer.data[temperature_field]
+    variable = NotExistingVar(
+        name="DENS0",
+        unit="[kg/m3]",
+        var_type=float,
+        default=np.nan,
+        name_format="%-10s",
+        value_format="%10.3f",
+    )
+    data = pd.Series(
+        eos80.dens0(salinity, temperature),
+        index=storer.data.index,
+    )
+    data.name = variable.label
+    return variable, data
