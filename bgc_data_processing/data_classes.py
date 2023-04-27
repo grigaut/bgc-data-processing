@@ -1119,7 +1119,7 @@ class Reader:
         filepath: str,
         unit_row_index: int,
         delim_whitespace: bool,
-    ) -> tuple[pd.DataFrame, pd.Series]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Read the filepath and extract the unit row.
 
         Parameters
@@ -1133,7 +1133,7 @@ class Reader:
 
         Returns
         -------
-        tuple[pd.DataFrame, pd.Series]
+        tuple[pd.DataFrame, pd.DataFrame]
             Dataframe, unit row
         """
         if unit_row_index is None:
@@ -1158,7 +1158,7 @@ class Reader:
     def _get_variables(
         self,
         raw_df: pd.DataFrame,
-        unit_row: pd.Series,
+        unit_row: pd.DataFrame,
         mandatory_vars: dict,
     ) -> "VariablesStorer":
         """Parse variables from the csv data.
@@ -1167,7 +1167,7 @@ class Reader:
         ----------
         raw_df : pd.DataFrame
             Dataframe to parse.
-        unit_row : pd.Series
+        unit_row : pd.DataFrame
             Unit row to use as reference for variables' units.
         mandatory_vars: dict
             Mapping between column name and parameter for mandatory variables.
@@ -1179,7 +1179,7 @@ class Reader:
         """
         variables = {}
         for column in raw_df.columns:
-            if unit_row is None or column not in unit_row.index:
+            if unit_row is None or column not in unit_row.columns:
                 unit = "[]"
             else:
                 unit = unit_row[column].values[0]
