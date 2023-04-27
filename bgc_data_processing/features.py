@@ -43,7 +43,7 @@ def compute_pressure(
         name_format="%-10s",
         value_format="%10.3f",
     )
-    data = pd.Series(eos80.pres(np.abs(depth), latitude))
+    data = pd.Series(eos80.pres(np.abs(depth), latitude), index=storer.data.index)
     data.name = variable.label
     return variable, data
 
@@ -83,6 +83,9 @@ def compute_potential_temperature(
         name_format="%-10s",
         value_format="%10.3f",
     )
-    data = eos80.ptmp(salinity, temperature, pressure)
+    data = pd.Series(
+        eos80.ptmp(salinity, temperature, pressure),
+        index=storer.data.index,
+    )
     data.name = variable.label
     return variable, data
