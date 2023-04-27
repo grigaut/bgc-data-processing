@@ -330,5 +330,5 @@ class CSVLoader(BaseLoader):
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)
         df_corr = self._correct(df_type)
-        df_sliced = constraints.apply_constraints(df_corr)
+        df_sliced = constraints.apply_constraints_to_dataframe(df_corr)
         return self.remove_nan_rows(df_sliced)

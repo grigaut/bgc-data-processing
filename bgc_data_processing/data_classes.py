@@ -522,7 +522,7 @@ class Storer:
         Storer
             New storer respecting the constraints.
         """
-        data = constraints.apply_constraints(df=storer.data, inplace=False)
+        data = constraints.apply_constraints_to_dataframe(df=storer.data)
         return Storer(
             data=data,
             category=storer.category,
@@ -817,30 +817,48 @@ class Constraints:
             series = series & is_in_polygon
         return series
 
-    def apply_constraints(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
+    def apply_constraints_to_storer(self, storer: Storer) -> Storer:
         """Apply all constraints to a DataFrame.
 
         Parameters
         ----------
-        df : pd.DataFrame
-            DataFrame to apply the constraints to.
-        inplace : bool, optional
-            If False, return a copy. Otherwise, do operation inplace and return None.
-            , by default False
+        storer : pd.DataFrame
+            Storer to apply the constraints to.
 
         Returns
         -------
-        pd.DataFrame | None
+        Storer
+            New storer with equivalent paramters and updated data.
+        """
+        return Storer(
+            data=self.apply_constraints_to_dataframe(storer.data),
+            category=storer.category,
+            providers=storer.providers,
+            variables=storer.variables,
+            verbose=storer.verbose,
+        )
+
+    def apply_constraints_to_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> pd.DataFrame | None:
+        """Apply all constraints to a DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            DataFrame to apply the constraints to.
+
+        Returns
+        -------
+        pd.DataFrame
             DataFrame whose rows verify all constraints or None if inplace=True.
         """
-        bool_boundaries = self._apply_boundary_constraints(df)
-        bool_supersets = self._apply_superset_constraints(df)
-        bool_polygons = self._apply_polygon_constraints(df)
+        bool_boundaries = self._apply_boundary_constraints(dataframe)
+        bool_supersets = self._apply_superset_constraints(dataframe)
+        bool_polygons = self._apply_polygon_constraints(dataframe)
         verify_all = bool_boundaries & bool_supersets & bool_polygons
-        if not inplace:
-            return df.loc[verify_all, :]
-        df = df.loc[verify_all, :]
-        return None
+        return dataframe.loc[verify_all, :]
 
     def apply_specific_constraint(
         self,

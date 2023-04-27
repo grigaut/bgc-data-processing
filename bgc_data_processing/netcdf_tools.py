@@ -476,5 +476,5 @@ class NetCDFLoader(BaseLoader):
         df_ecols = self._add_empty_cols(df_expo)
         df_types = self._convert_type(df_ecols)
         df_corr = self._correct(df_types)
-        df_sliced = constraints.apply_constraints(df_corr)
+        df_sliced = constraints.apply_constraints_to_dataframe(df_corr)
         return self.remove_nan_rows(df_sliced)
