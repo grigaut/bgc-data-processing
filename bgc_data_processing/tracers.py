@@ -1040,12 +1040,14 @@ class TemperatureSalinityDiagram(BasePlot):
         self,
         storer: "Storer",
         constraints: "Constraints",
-        temperature_field: str,
         salinity_field: str,
+        temperature_field: str,
+        ptemperature_field: str,
     ) -> None:
         super().__init__(storer, constraints)
-        self.temperature_field = temperature_field
         self.salinity_field = salinity_field
+        self.temperature_field = temperature_field
+        self.ptemperature_field = ptemperature_field
 
     def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
         """Plot the figure of data density evolution in a givemn area.
@@ -1157,23 +1159,25 @@ class TemperatureSalinityDiagram(BasePlot):
             Axes, Colorbar.
         """
         df = self._storer.data
-        df = df[~(df[self.temperature_field].isna() | df[self.salinity_field].isna())]
-        depth_col = df[self._variables.get("DEPH").label]
-        latitude_col = df[self._variables.get("LATITUDE").label]
-        temperature_col = df[self.temperature_field]
+        # Remove empty columns
+        df = df[~(df[self.ptemperature_field].isna() | df[self.salinity_field].isna())]
+        # Select relevant columns
+        depth_col = df[self._variables.get(self._variables.depth_var_name).label]
         salinity_col = df[self.salinity_field]
-        pressure = eos80.pres(np.abs(depth_col), latitude_col)
-        temperature = eos80.ptmp(salinity_col, temperature_col, pressure)
+        ptemperature_col = df[self.ptemperature_field]
+        temperature_col = df[self.temperature_field]
+        # Scatter all data points in the TS diagram
+        cbar = ax.scatter(salinity_col, ptemperature_col, c=depth_col, **kwargs)
+        # Draw the density isolines
         salinity_min = salinity_col.min()
         salinity_max = salinity_col.max()
         salinitys = np.linspace(salinity_min, salinity_max, 100)
-        temperature_min = temperature.min()
-        temperature_max = temperature.max()
+        temperature_min = temperature_col.min()
+        temperature_max = temperature_col.max()
         temperatures = np.linspace(temperature_max, temperature_min, 100)
         temps_2d = np.tile(temperatures.reshape((1, -1)).T, (1, 100))
         salis_2d = np.tile(salinitys, (100, 1))
         density_values = eos80.dens0(salis_2d, temps_2d)
-        cbar = ax.scatter(salinity_col, temperature, c=depth_col, **kwargs)
         label = ax.contour(salinitys, temperatures, density_values, colors="grey")
         ax.clabel(label)
         return ax, cbar

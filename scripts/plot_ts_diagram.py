@@ -3,6 +3,7 @@
 import datetime as dt
 from pathlib import Path
 
+from bgc_data_processing import features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import TemperatureSalinityDiagram
@@ -53,6 +54,19 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
+    # Add relevant features to the data: Pressure / potential temperature
+    depth_field = variables.get(variables.depth_var_name).label
+    latitude_field = variables.get(variables.latitude_var_name).label
+    pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
+    storer.add_feature(pres_var, pres_data)
+    ptemp_var, ptemp_data = features.compute_potential_temperature(
+        storer=storer,
+        salinity_field="PSAL",
+        temperature_field="TEMP",
+        pressure_field=pres_var.label,
+    )
+    storer.add_feature(ptemp_var, ptemp_data)
+    # Add global constraints
     constraints = Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
@@ -78,11 +92,13 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
+    # Create diagram
     plot = TemperatureSalinityDiagram(
         storer=storer,
         constraints=constraints,
-        temperature_field="TEMP",
         salinity_field="PSAL",
+        temperature_field="TEMP",
+        ptemperature_field=ptemp_var.label,
     )
     if SHOW:
         plot.show()
