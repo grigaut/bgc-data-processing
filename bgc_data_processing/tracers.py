@@ -120,7 +120,7 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        data = self._constraints.apply_constraints_to_dataframe(self._data)
+        data = self._data
         if var_key == "all":
             data.insert(0, var_key, 1)
         else:
@@ -818,7 +818,7 @@ class EvolutionProfile(BasePlot):
             var_label = "all"
         else:
             var_label = self._variables.get(variable_name).label
-        df = self._constraints.apply_constraints_to_dataframe(self._storer.data)
+        df = self._storer.data
         if var_label == "all":
             df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
@@ -1156,7 +1156,7 @@ class TemperatureSalinityDiagram(BasePlot):
         tuple[Axes, OathCollection]
             Axes, Colorbar.
         """
-        df = self._constraints.apply_constraints_to_dataframe(self._storer.data)
+        df = self._storer.data
         df = df[~(df[self.temperature_field].isna() | df[self.salinity_field].isna())]
         depth_col = df[self._variables.get("DEPH").label]
         latitude_col = df[self._variables.get("LATITUDE").label]
