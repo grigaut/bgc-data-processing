@@ -63,7 +63,7 @@ class MeshPlotter(BasePlot):
         self._lon_map_max = np.nan
         depth_var_name = self._variables.depth_var_name
         depth_var_label = self._variables.get(depth_var_name).label
-        self._data = storer.data.sort_values(depth_var_label, ascending=False)
+        self._data = self._storer.data.sort_values(depth_var_label, ascending=False)
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
     def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
