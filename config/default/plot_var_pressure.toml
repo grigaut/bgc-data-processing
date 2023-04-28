@@ -45,10 +45,10 @@ POTENTIAL_TEMPERATURE_MINS = [nan, 0.0]
 #? POTENTIAL_TEMPERATURE_MAXS: list[int] | list[float]: maximum potential temperature boundary (included)
 # Each element in the list correspond to a different water mass
 POTENTIAL_TEMPERATURE_MAXS = [8.0, 6.0]
-#? DENSITY0_MINS: list[int] | list[float]: minimum density at atmospherical pressure boundary (included)
+#? DENSITY0_MINS: list[int] | list[float]: minimum density at atmospheric pressure boundary (included)
 # Each element in the list correspond to a different water mass
 DENSITY0_MINS = [1027.0, 1027.5]
-#? DENSITY0_MAXS: list[int] | list[float]: maximum density at atmospherical pressure boundary (included)
+#? DENSITY0_MAXS: list[int] | list[float]: maximum density at atmospheric pressure boundary (included)
 # Each element in the list correspond to a different water mass
 DENSITY0_MAXS = [1028.0, nan]
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.

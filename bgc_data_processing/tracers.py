@@ -1419,7 +1419,7 @@ class WaterMassVariableComparison(BasePlot):
     salinity_var_name : str
         Salinity variable name.
     density0_var_name : str
-        Density at atmospherical pressure variable name.
+        Density at atmospheric pressure variable name.
     """
 
     def __init__(
