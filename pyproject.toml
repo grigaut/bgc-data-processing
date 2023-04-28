@@ -16,6 +16,7 @@ pyproj = "~3.4"
 shapely = "^2.0.1"
 geopandas = "^0.12.2"
 eomaps = "^6.3"
+seawater = "^3.3.4"
 
 
 [tool.poetry.group.docs.dependencies]

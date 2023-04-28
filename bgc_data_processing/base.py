@@ -243,7 +243,7 @@ class BasePlot(ABC):
         constraints: Constraints
                 Constraint slicer.
         """
-        self._storer = storer
+        self._storer = constraints.apply_constraints_to_storer(storer)
         self._variables = storer.variables
         self._constraints = constraints
         self._verbose = storer.verbose

@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
     from shapely import Polygon
 
+    from bgc_data_processing.variables import NotExistingVar
+
 
 class Storer:
     """Storing data class, to keep track of metadata.
@@ -520,7 +522,7 @@ class Storer:
         Storer
             New storer respecting the constraints.
         """
-        data = constraints.apply_constraints(df=storer.data, inplace=False)
+        data = constraints.apply_constraints_to_dataframe(df=storer.data)
         return Storer(
             data=data,
             category=storer.category,
@@ -528,6 +530,23 @@ class Storer:
             variables=storer.variables,
             verbose=storer.verbose,
         )
+
+    def add_feature(
+        self,
+        variable: "NotExistingVar",
+        data: pd.Series,
+    ) -> None:
+        """Add a new feature to the storer.
+
+        Parameters
+        ----------
+        variable : NotExistingVar
+            Variable corresponding to the feature.
+        data : pd.Series
+            Feature data.
+        """
+        self.variables.add_var(variable)
+        self._data[variable.name] = data
 
 
 class Slice(Storer):
@@ -798,30 +817,48 @@ class Constraints:
             series = series & is_in_polygon
         return series
 
-    def apply_constraints(self, df: pd.DataFrame, inplace=False) -> pd.DataFrame | None:
+    def apply_constraints_to_storer(self, storer: Storer) -> Storer:
         """Apply all constraints to a DataFrame.
 
         Parameters
         ----------
-        df : pd.DataFrame
-            DataFrame to apply the constraints to.
-        inplace : bool, optional
-            If False, return a copy. Otherwise, do operation inplace and return None.
-            , by default False
+        storer : pd.DataFrame
+            Storer to apply the constraints to.
 
         Returns
         -------
-        pd.DataFrame | None
+        Storer
+            New storer with equivalent paramters and updated data.
+        """
+        return Storer(
+            data=self.apply_constraints_to_dataframe(storer.data),
+            category=storer.category,
+            providers=storer.providers,
+            variables=storer.variables,
+            verbose=storer.verbose,
+        )
+
+    def apply_constraints_to_dataframe(
+        self,
+        dataframe: pd.DataFrame,
+    ) -> pd.DataFrame | None:
+        """Apply all constraints to a DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            DataFrame to apply the constraints to.
+
+        Returns
+        -------
+        pd.DataFrame
             DataFrame whose rows verify all constraints or None if inplace=True.
         """
-        bool_boundaries = self._apply_boundary_constraints(df)
-        bool_supersets = self._apply_superset_constraints(df)
-        bool_polygons = self._apply_polygon_constraints(df)
+        bool_boundaries = self._apply_boundary_constraints(dataframe)
+        bool_supersets = self._apply_superset_constraints(dataframe)
+        bool_polygons = self._apply_polygon_constraints(dataframe)
         verify_all = bool_boundaries & bool_supersets & bool_polygons
-        if not inplace:
-            return df.loc[verify_all, :]
-        df = df.loc[verify_all, :]
-        return None
+        return dataframe.loc[verify_all, :]
 
     def apply_specific_constraint(
         self,
@@ -1082,7 +1119,7 @@ class Reader:
         filepath: str,
         unit_row_index: int,
         delim_whitespace: bool,
-    ) -> tuple[pd.DataFrame, pd.Series]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Read the filepath and extract the unit row.
 
         Parameters
@@ -1096,7 +1133,7 @@ class Reader:
 
         Returns
         -------
-        tuple[pd.DataFrame, pd.Series]
+        tuple[pd.DataFrame, pd.DataFrame]
             Dataframe, unit row
         """
         if unit_row_index is None:
@@ -1121,7 +1158,7 @@ class Reader:
     def _get_variables(
         self,
         raw_df: pd.DataFrame,
-        unit_row: pd.Series,
+        unit_row: pd.DataFrame,
         mandatory_vars: dict,
     ) -> "VariablesStorer":
         """Parse variables from the csv data.
@@ -1130,7 +1167,7 @@ class Reader:
         ----------
         raw_df : pd.DataFrame
             Dataframe to parse.
-        unit_row : pd.Series
+        unit_row : pd.DataFrame
             Unit row to use as reference for variables' units.
         mandatory_vars: dict
             Mapping between column name and parameter for mandatory variables.
@@ -1142,7 +1179,7 @@ class Reader:
         """
         variables = {}
         for column in raw_df.columns:
-            if unit_row is None or column not in unit_row.index:
+            if unit_row is None or column not in unit_row.columns:
                 unit = "[]"
             else:
                 unit = unit_row[column].values[0]

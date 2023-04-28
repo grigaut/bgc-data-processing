@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from cartopy import crs, feature
+from seawater import eos80
 
 from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Constraints, Storer
@@ -17,7 +18,7 @@ from bgc_data_processing.dateranges import DateRangeGenerator
 if TYPE_CHECKING:
     from cartopy.mpl.geoaxes import GeoAxes
     from matplotlib.axes import Axes
-    from matplotlib.collections import Collection
+    from matplotlib.collections import Collection, PathCollection
     from matplotlib.figure import Figure
 
     from bgc_data_processing.variables import VariablesStorer
@@ -119,7 +120,7 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        data = self._constraints.apply_constraints(self._data, False)
+        data = self._data
         if var_key == "all":
             data.insert(0, var_key, 1)
         else:
@@ -578,7 +579,7 @@ class EvolutionProfile(BasePlot):
     storer : Storer
         Storer to map data of.
     constraints: Constraints
-            Constraint slicer.
+        Constraint slicer.
     """
 
     __default_interval: str = "day"
@@ -817,7 +818,7 @@ class EvolutionProfile(BasePlot):
             var_label = "all"
         else:
             var_label = self._variables.get(variable_name).label
-        df = self._constraints.apply_constraints(self._storer.data, inplace=False)
+        df = self._storer.data
         if var_label == "all":
             df.insert(0, var_label, 1)
         # Set 1 when the variable is not nan, otherwise 0
@@ -1018,3 +1019,386 @@ class EvolutionProfile(BasePlot):
             ax=ax,
             **kwargs,
         )
+
+
+class TemperatureSalinityDiagram(BasePlot):
+    """Class to plot a Temperature-Salinity Diagram.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map data of.
+    constraints: Constraints
+        Constraint slicer.
+    temperature_field : str
+        Name of the temperature field in storer (column name).
+    salinity_field : str
+        Name of the salinity field in storer (column name).
+    """
+
+    def __init__(
+        self,
+        storer: "Storer",
+        constraints: "Constraints",
+        salinity_field: str,
+        temperature_field: str,
+        ptemperature_field: str,
+    ) -> None:
+        super().__init__(storer, constraints)
+        self.salinity_field = salinity_field
+        self.temperature_field = temperature_field
+        self.ptemperature_field = ptemperature_field
+
+    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
+        """Plot the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle., by default None
+        **kwargs
+            Additional arguments to pass to plt.pcolor.
+        """
+        super().show(title=title, suptitle=suptitle, **kwargs)
+
+    def save(
+        self,
+        save_path: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Save the figure of data density evolution in a givemn area.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        **kwargs
+            Additional arguments to pass to plt.scatter.
+        """
+        super().save(save_path=save_path, title=title, suptile=suptitle, **kwargs)
+
+    def plot_to_axes(self, ax: "Axes", **kwargs) -> tuple["Axes", "PathCollection"]:
+        """Plot the data on a given axes.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional arguments to pass to plt.scatter.
+
+        Returns
+        -------
+        tuple[Axes, Collection]
+            Axes, colorbar
+        """
+        return self._build_to_axes(
+            ax=ax,
+            **kwargs,
+        )
+
+    def _build_to_new_figure(
+        self,
+        title: str | None,
+        suptitle: str | None,
+        **kwargs,
+    ) -> "Figure":
+        """Create a Figure and plot the data on the Figure.
+
+        Parameters
+        ----------
+        title : str, optional
+            Title for the Figure, automatically generated if None., by default None
+        suptitle : str, optional
+            Suptitle for the Figure, automatically generated if None., by default None
+        **kwargs
+            Additional arguments to pass to plt.scatter.
+
+        Returns
+        -------
+        Figure
+            Final Figure.
+        """
+        fig = plt.figure(figsize=[10, 5])
+        ax = plt.subplot(1, 1, 1)
+        ax, cbar = self._build_to_axes(
+            ax=ax,
+            **kwargs,
+        )
+        fig.colorbar(cbar, label="Depth [m]")
+        plt.xlabel("Salinity [psu]")
+        plt.ylabel("Potential Temperature [°C]")
+        if title is None:
+            title = "Temperature-Salinity Diagram"
+        plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        return fig
+
+    def _build_to_axes(self, ax: "Axes", **kwargs) -> tuple["Axes", "PathCollection"]:
+        """Build the plot to given axes.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes to plot the data to.
+        **kwargs
+            Additional arguments to pass to plt.pcolormesh.
+
+        Returns
+        -------
+        tuple[Axes, OathCollection]
+            Axes, Colorbar.
+        """
+        df = self._storer.data
+        # Remove empty columns
+        df = df[~(df[self.ptemperature_field].isna() | df[self.salinity_field].isna())]
+        # Select relevant columns
+        depth_col = df[self._variables.get(self._variables.depth_var_name).label]
+        salinity_col = df[self.salinity_field]
+        ptemperature_col = df[self.ptemperature_field]
+        temperature_col = df[self.temperature_field]
+        # Scatter all data points in the TS diagram
+        cbar = ax.scatter(salinity_col, ptemperature_col, c=depth_col, **kwargs)
+        # Draw the density isolines
+        salinity_min = salinity_col.min()
+        salinity_max = salinity_col.max()
+        salinitys = np.linspace(salinity_min, salinity_max, 100)
+        temperature_min = temperature_col.min()
+        temperature_max = temperature_col.max()
+        temperatures = np.linspace(temperature_max, temperature_min, 100)
+        temps_2d = np.tile(temperatures.reshape((1, -1)).T, (1, 100))
+        salis_2d = np.tile(salinitys, (100, 1))
+        density_values = eos80.dens0(salis_2d, temps_2d)
+        label = ax.contour(salinitys, temperatures, density_values, colors="grey")
+        ax.clabel(label)
+        return ax, cbar
+
+
+class VariableBoxPlot(BasePlot):
+    """Class to draw box plots for a given variable.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map the data of.
+    constraints : Constraints
+        Constraints slicer.
+    """
+
+    period_mapping: dict[str, str] = {
+        "year": "%Y",
+        "month": "%Y-%m",
+        "week": "%Y-%W",
+        "day": "%Y-%m-%d",
+    }
+
+    def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
+        super().__init__(storer, constraints)
+
+    def show(
+        self,
+        variable_name: str,
+        period: str,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Plot method.
+
+        Parameters
+        ----------
+        variable_name: str
+            Name of the variable to plot.
+        period: str
+            Period on which to plot each boxplot.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *kwargs: dict
+            Additional parameters to pass to plt.boxplot.
+        """
+        super().show(
+            variable_name=variable_name,
+            period=period,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def save(
+        self,
+        variable_name: str,
+        period: str,
+        save_path: str,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Figure saving method.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        period : str
+            Period on which to plot each boxplot.
+        save_path : str
+            Path to save the ouput image.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.boxplot.
+        """
+        return super().save(
+            save_path=save_path,
+            variable_name=variable_name,
+            period=period,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        period: str,
+        title: str | None,
+        suptitle: str | None,
+        **kwargs,
+    ) -> "Figure":
+        """Create new figure and axes and build the plot on them.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        period : str
+            Period on which to plot each boxplot.
+        save_path : str
+            Path to save the ouput image.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.boxplot.
+
+        Returns
+        -------
+        Figure
+            Figure to show or save.
+        """
+        fig = plt.figure(figsize=[10, 5], layout="tight")
+        ax = plt.subplot(1, 1, 1)
+        ax = self._build_to_axes(
+            variable_name=variable_name,
+            period=period,
+            ax=ax,
+            **kwargs,
+        )
+        variable = self._variables.get(variable_name)
+        if period != "year":
+            plt.xticks(rotation=45)
+        plt.xlabel(f"{period.capitalize()}")
+        plt.ylabel(f"{variable.name} {variable.unit}")
+        if title is None:
+            title = f"{variable.label} Box Plot"
+        plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        return fig
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        period: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Plot the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        period : str
+            Period on which to plot each boxplot.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs: dict
+            Additional parameters to pass to plt.boxplot.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+        """
+        return self._build_to_axes(
+            variable_name=variable_name,
+            period=period,
+            ax=ax,
+            **kwargs,
+        )
+
+    def _build_to_axes(
+        self,
+        variable_name: str,
+        period: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Build the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot the data of.
+        period : str
+            Period on which to plot each boxplot.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional parameters to pass to plt.boxplot.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+
+        Raises
+        ------
+        ValueError
+            If the 'period' parameters is invalid.
+        """
+        data = self._storer.data
+        variable_label = self._variables.get(variable_name).label
+        variable_data = self._storer.data[variable_label]
+        variable_data.name = "variable"
+        date_variable = self._variables.date_var_name
+        date_col = self._variables.get(date_variable).label
+        date_data = data[date_col]
+        if period in self.period_mapping:
+            period_str = self.period_mapping[period]
+        else:
+            raise ValueError(
+                f"Wrong 'period' value, accepted values: {self.period_mapping.keys()}",
+            )
+        period_data = date_data.dt.strftime(period_str)
+        period_data.name = "period"
+        concat_data = pd.concat([period_data, variable_data], axis=1)
+        pivot = concat_data.pivot(columns="period", values="variable")
+        to_plot = [pivot[col][~pivot[col].isna()] for col in pivot.columns]
+        ax.boxplot(x=to_plot, labels=pivot.columns, **kwargs)
+        return ax
