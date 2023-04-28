@@ -1286,8 +1286,6 @@ class VariableBoxPlot(BasePlot):
             Name of the variable to plot.
         period : str
             Period on which to plot each boxplot.
-        save_path : str
-            Path to save the ouput image.
         title : str | None, optional
             Specify a title to change from default., by default None
         suptitle : str | None, optional
@@ -1401,4 +1399,248 @@ class VariableBoxPlot(BasePlot):
         pivot = concat_data.pivot(columns="period", values="variable")
         to_plot = [pivot[col][~pivot[col].isna()] for col in pivot.columns]
         ax.boxplot(x=to_plot, labels=pivot.columns, **kwargs)
+        return ax
+
+
+class WaterMassVariableComparison(BasePlot):
+    """Class to draw a pressure vs variable comparison of water masses.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map the data of.
+    constraints : Constraints
+        Constraints slicer.
+    pressure_var_name : str
+        Name of the pressure variable.
+    """
+
+    def __init__(
+        self,
+        storer: "Storer",
+        constraints: "Constraints",
+        pressure_var_name: str,
+    ) -> None:
+        super().__init__(storer, constraints)
+        self.pressure_var = self._variables.get(pressure_var_name)
+
+    def show(
+        self,
+        variable_name: str,
+        wm_constraints: dict,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Plot method.
+
+        Parameters
+        ----------
+        variable_name: str
+            Name of the variable to plot.
+        wm_constraints : dict
+            Dictionnary of all water masses constraints.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *kwargs: dict
+            Additional parameters to pass to plt.scatter.
+        """
+        super().show(
+            variable_name=variable_name,
+            wm_constraints=wm_constraints,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def save(
+        self,
+        variable_name: str,
+        wm_constraints: dict,
+        save_path: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Figure saving method.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        wm_constraints : dict
+            Dictionnary of all water masses constraints.
+        save_path : str
+            Path to save the ouput image.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.scatter.
+        """
+        super().save(
+            variable_name=variable_name,
+            wm_constraints=wm_constraints,
+            save_path=save_path,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        wm_constraints: dict,
+        title: str,
+        suptitle: str,
+        **kwargs,
+    ) -> "Figure":
+        """Create new figure and axes and build the plot on them.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        wm_constraints : dict
+            Dictionnary of all water masses constraints.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.scatter.
+
+        Returns
+        -------
+        Figure
+            Figure to show or save.
+        """
+        fig = plt.figure(figsize=[10, 10], layout="tight")
+        ax = plt.subplot(1, 1, 1)
+        self._build_to_axes(
+            variable_name=variable_name,
+            wm_constraints=wm_constraints,
+            ax=ax,
+            **kwargs,
+        )
+        if title is None:
+            title = f"{variable_name} vs {self.pressure_var.name}"
+        plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        var = self._variables.get(variable_name)
+        plt.xlabel(f"{var.name} {var.unit}")
+        plt.ylabel(f"{self.pressure_var.name} {self.pressure_var.unit}")
+        plt.gca().invert_yaxis()
+        plt.legend()
+        return fig
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        wm_constraints: dict,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Plot the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        wm_constraints : dict
+            Dictionnary of all water masses constraints.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs: dict
+            Additional parameters to pass to plt.scatter.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+        """
+        return self._build_to_axes(
+            variable_name=variable_name,
+            wm_constraints=wm_constraints,
+            ax=ax,
+            **kwargs,
+        )
+
+    def _scatter_single_water_mass(
+        self,
+        variable_name: str,
+        water_mass_name: str,
+        water_mass_constraint: "Constraints",
+        ax: "Axes",
+        **kwargs,
+    ) -> None:
+        """Add a single trace to the axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            name of the variable to plot.
+        water_mass_name : str
+            Name of the water mass.
+        water_mass_constraint : Constraints
+            Constraints defining the water mass.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs: dict
+            Additional parameters to pass to plt.scatter.
+        """
+        variable_label = self._variables.get(variable_name).label
+        wm_storer = water_mass_constraint.apply_constraints_to_storer(self._storer)
+        ax.scatter(
+            wm_storer.data[variable_label],
+            wm_storer.data[self.pressure_var.label],
+            label=water_mass_name,
+            **kwargs,
+        )
+
+    def _build_to_axes(
+        self,
+        variable_name: str,
+        wm_constraints: dict,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Build the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot the data of.
+        wm_constraints : dict
+            Dictionnary of all water masses constraints.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs: dict
+            Additional parameters to pass to plt.scatter.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+        """
+        self._scatter_single_water_mass(
+            variable_name=variable_name,
+            water_mass_name="All data",
+            water_mass_constraint=Constraints(),
+            ax=ax,
+            color="grey",
+            **kwargs,
+        )
+        for wm_name, wm_constraint in wm_constraints.items():
+            self._scatter_single_water_mass(
+                variable_name=variable_name,
+                water_mass_name=wm_name,
+                water_mass_constraint=wm_constraint,
+                ax=ax,
+                **kwargs,
+            )
         return ax
