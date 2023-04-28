@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.water_masses import WaterMass
 
 
 class MeshPlotter(BasePlot):
@@ -1413,6 +1414,12 @@ class WaterMassVariableComparison(BasePlot):
         Constraints slicer.
     pressure_var_name : str
         Name of the pressure variable.
+    ptemperature_var_name : str
+        Potential temperature variable name.
+    salinity_var_name : str
+        Salinity variable name.
+    density0_var_name : str
+        Density at atmospherical pressure variable name.
     """
 
     def __init__(
@@ -1420,14 +1427,20 @@ class WaterMassVariableComparison(BasePlot):
         storer: "Storer",
         constraints: "Constraints",
         pressure_var_name: str,
+        ptemperature_var_name: str,
+        salinity_var_name: str,
+        density0_var_name: str,
     ) -> None:
         super().__init__(storer, constraints)
         self.pressure_var = self._variables.get(pressure_var_name)
+        self.ptemp_var = self._variables.get(ptemperature_var_name)
+        self.salty_var = self._variables.get(salinity_var_name)
+        self.dens0_var = self._variables.get(density0_var_name)
 
     def show(
         self,
         variable_name: str,
-        wm_constraints: dict,
+        wmasses: list["WaterMass"],
         title: str = None,
         suptitle: str = None,
         **kwargs,
@@ -1438,8 +1451,8 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name: str
             Name of the variable to plot.
-        wm_constraints : dict
-            Dictionnary of all water masses constraints.
+        wmasses : list[WaterMass]
+            List all water masses.
         title : str, optional
             Specify a title to change from default., by default None
         suptitle : str, optional
@@ -1449,7 +1462,7 @@ class WaterMassVariableComparison(BasePlot):
         """
         super().show(
             variable_name=variable_name,
-            wm_constraints=wm_constraints,
+            wmasses=wmasses,
             title=title,
             suptitle=suptitle,
             **kwargs,
@@ -1458,7 +1471,7 @@ class WaterMassVariableComparison(BasePlot):
     def save(
         self,
         variable_name: str,
-        wm_constraints: dict,
+        wmasses: list["WaterMass"],
         save_path: str,
         title: str = None,
         suptitle: str = None,
@@ -1470,8 +1483,8 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        wm_constraints : dict
-            Dictionnary of all water masses constraints.
+        wmasses : list[WaterMass]
+            List all water masses.
         save_path : str
             Path to save the ouput image.
         title : str | None, optional
@@ -1483,7 +1496,7 @@ class WaterMassVariableComparison(BasePlot):
         """
         super().save(
             variable_name=variable_name,
-            wm_constraints=wm_constraints,
+            wmasses=wmasses,
             save_path=save_path,
             title=title,
             suptitle=suptitle,
@@ -1493,7 +1506,7 @@ class WaterMassVariableComparison(BasePlot):
     def _build_to_new_figure(
         self,
         variable_name: str,
-        wm_constraints: dict,
+        wmasses: list["WaterMass"],
         title: str,
         suptitle: str,
         **kwargs,
@@ -1504,8 +1517,8 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        wm_constraints : dict
-            Dictionnary of all water masses constraints.
+        wmasses : list[WaterMass]
+            List all water masses.
         title : str | None, optional
             Specify a title to change from default., by default None
         suptitle : str | None, optional
@@ -1522,7 +1535,7 @@ class WaterMassVariableComparison(BasePlot):
         ax = plt.subplot(1, 1, 1)
         self._build_to_axes(
             variable_name=variable_name,
-            wm_constraints=wm_constraints,
+            wmasses=wmasses,
             ax=ax,
             **kwargs,
         )
@@ -1541,7 +1554,7 @@ class WaterMassVariableComparison(BasePlot):
     def plot_to_axes(
         self,
         variable_name: str,
-        wm_constraints: dict,
+        wmasses: list["WaterMass"],
         ax: "Axes",
         **kwargs,
     ) -> "Axes":
@@ -1551,8 +1564,8 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot.
-        wm_constraints : dict
-            Dictionnary of all water masses constraints.
+        wmasses : list[WaterMass]
+            List all water masses.
         ax : Axes
             Axes to plot the data on.
         **kwargs: dict
@@ -1565,7 +1578,7 @@ class WaterMassVariableComparison(BasePlot):
         """
         return self._build_to_axes(
             variable_name=variable_name,
-            wm_constraints=wm_constraints,
+            wmasses=wmasses,
             ax=ax,
             **kwargs,
         )
@@ -1573,8 +1586,7 @@ class WaterMassVariableComparison(BasePlot):
     def _scatter_single_water_mass(
         self,
         variable_name: str,
-        water_mass_name: str,
-        water_mass_constraint: "Constraints",
+        water_mass: "WaterMass",
         ax: "Axes",
         **kwargs,
     ) -> None:
@@ -1584,28 +1596,31 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name : str
             name of the variable to plot.
-        water_mass_name : str
-            Name of the water mass.
-        water_mass_constraint : Constraints
-            Constraints defining the water mass.
+        water_mass : WaterMass
+            Water mass.
         ax : Axes
             Axes to plot the data on.
         **kwargs: dict
             Additional parameters to pass to plt.scatter.
         """
         variable_label = self._variables.get(variable_name).label
-        wm_storer = water_mass_constraint.apply_constraints_to_storer(self._storer)
+        wm_storer = water_mass.extract_from_storer(
+            storer=self._storer,
+            ptemperature_name=self.ptemp_var.name,
+            salinity_name=self.salty_var.name,
+            density0_name=self.dens0_var.name,
+        )
         ax.scatter(
             wm_storer.data[variable_label],
             wm_storer.data[self.pressure_var.label],
-            label=water_mass_name,
+            label=water_mass.name,
             **kwargs,
         )
 
     def _build_to_axes(
         self,
         variable_name: str,
-        wm_constraints: dict,
+        wmasses: list["WaterMass"],
         ax: "Axes",
         **kwargs,
     ) -> "Axes":
@@ -1615,8 +1630,8 @@ class WaterMassVariableComparison(BasePlot):
         ----------
         variable_name : str
             Name of the variable to plot the data of.
-        wm_constraints : dict
-            Dictionnary of all water masses constraints.
+        wmasses : list[WaterMass]
+            List all water masses.
         ax : Axes
             Axes to plot the data on.
         **kwargs: dict
@@ -1627,19 +1642,17 @@ class WaterMassVariableComparison(BasePlot):
         Axes
             Axes where the data is plotted on.
         """
-        self._scatter_single_water_mass(
-            variable_name=variable_name,
-            water_mass_name="All data",
-            water_mass_constraint=Constraints(),
-            ax=ax,
+        ax.scatter(
+            self._storer.data[self._variables.get(variable_name).label],
+            self._storer.data[self.pressure_var.label],
+            label="All data",
             color="grey",
             **kwargs,
         )
-        for wm_name, wm_constraint in wm_constraints.items():
+        for wm in wmasses:
             self._scatter_single_water_mass(
                 variable_name=variable_name,
-                water_mass_name=wm_name,
-                water_mass_constraint=wm_constraint,
+                water_mass=wm,
                 ax=ax,
                 **kwargs,
             )

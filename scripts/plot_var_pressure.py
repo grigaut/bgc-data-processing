@@ -7,6 +7,7 @@ from bgc_data_processing import features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import WaterMassVariableComparison
+from bgc_data_processing.water_masses import WaterMass
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(
@@ -108,32 +109,24 @@ if __name__ == "__main__":
         maximal_value=DEPTH_MAX,
     )
 
-    wm_constraints = {}
+    wmasses = []
     for i, wm in enumerate(WATER_MASSES):
-        specific_constraint = Constraints()
-        specific_constraint.add_boundary_constraint(
-            field_label="PSAL",
-            minimal_value=SALINITY_MINS[i],
-            maximal_value=SALINITY_MAXS[i],
+        wmass = WaterMass(
+            wm,
+            (POTENTIAL_TEMPERATURE_MINS[i], POTENTIAL_TEMPERATURE_MAXS[i]),
+            (SALINITY_MINS[i], SALINITY_MAXS[i]),
+            (DENSITY0_MINS[i], DENSITY0_MAXS[i]),
         )
-        specific_constraint.add_boundary_constraint(
-            field_label=ptemp_var.label,
-            minimal_value=POTENTIAL_TEMPERATURE_MINS[i],
-            maximal_value=POTENTIAL_TEMPERATURE_MAXS[i],
-        )
-        specific_constraint.add_boundary_constraint(
-            field_label=dens0_var.label,
-            minimal_value=DENSITY0_MINS[i],
-            maximal_value=DENSITY0_MAXS[i],
-        )
-        wm_constraints[wm] = specific_constraint
-
+        wmasses.append(wmass)
     plot = WaterMassVariableComparison(
         storer,
         constraints,
         pres_var.name,
+        ptemp_var.name,
+        "PSAL",
+        dens0_var.name,
     )
     plot.show(
         variable_name=PLOT_VARIABLE,
-        wm_constraints=wm_constraints,
+        wmasses=wmasses,
     )
