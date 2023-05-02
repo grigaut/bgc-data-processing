@@ -6,9 +6,9 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
-for path in sorted(Path("bgc_data_processing").rglob("*.py")):
-    module_path = path.relative_to(".").with_suffix("")
-    doc_path = path.relative_to("bgc_data_processing").with_suffix(".md")
+for path in sorted(Path("src/bgc_data_processing").rglob("*.py")):
+    module_path = path.relative_to("src").with_suffix("")
+    doc_path = path.relative_to("src/bgc_data_processing").with_suffix(".md")
     full_doc_path = Path("reference", doc_path)
 
     parts = list(module_path.parts)
