@@ -4,7 +4,6 @@ import datetime as dt
 from time import time
 
 import pandas as pd
-
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
     data_providers,
