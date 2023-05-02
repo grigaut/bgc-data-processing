@@ -10,7 +10,7 @@ from bgc_data_processing.tracers import VariableBoxPlot
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(
-        filepath="config/select_watermass.toml",
+        filepath="config/plot_var_boxplot.toml",
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
