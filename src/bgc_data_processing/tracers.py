@@ -121,7 +121,7 @@ class MeshPlotter(BasePlot):
             Grouped dataframe with 3 columns: latitude, longitude and variable to keep.
             Column names are the same as in self._data.
         """
-        data = self._data
+        data = self._data.copy()
         if var_key == "all":
             data.insert(0, var_key, 1)
         else:

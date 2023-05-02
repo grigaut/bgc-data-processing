@@ -7,15 +7,14 @@ from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import shapely
+from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.parsers import ConfigParser
+from bgc_data_processing.tracers import EvolutionProfile, MeshPlotter
 from cartopy import crs
 from eomaps import Maps
 from eomaps.draw import ShapeDrawer
 from matplotlib import cm, colors
 from matplotlib.axes import Axes
-
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import EvolutionProfile, MeshPlotter
 
 # Callbacks
 
