@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from cartopy import crs, feature
+from scipy.stats import norm
 from seawater import eos80
 
 from bgc_data_processing.base import BasePlot
@@ -1656,4 +1657,185 @@ class WaterMassVariableComparison(BasePlot):
                 ax=ax,
                 **kwargs,
             )
+        return ax
+
+
+class VariableHistogram(BasePlot):
+    """Class to draw histogram for a given variable.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to map the data of.
+    constraints : Constraints
+        Constraints slicer.
+    """
+
+    bin_number: int = 100
+
+    def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
+        super().__init__(storer, constraints)
+
+    def show(
+        self,
+        variable_name: str,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Plot method.
+
+        Parameters
+        ----------
+        variable_name: str
+            Name of the variable to plot.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *kwargs: dict
+            Additional parameters to pass to plt.hist.
+        """
+        super().show(
+            variable_name=variable_name,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def save(
+        self,
+        variable_name: str,
+        save_path: str,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
+        """Figure saving method.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        save_path : str
+            Path to save the ouput image.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.hist.
+        """
+        return super().save(
+            save_path=save_path,
+            variable_name=variable_name,
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+
+    def _build_to_new_figure(
+        self,
+        variable_name: str,
+        title: str | None,
+        suptitle: str | None,
+        **kwargs,
+    ) -> "Figure":
+        """Create new figure and axes and build the plot on them.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        title : str | None, optional
+            Specify a title to change from default., by default None
+        suptitle : str | None, optional
+            Add a suptitle to the figure., by default None
+        **kwargs: dict
+            Addictional parameters to pass to plt.hist.
+
+        Returns
+        -------
+        Figure
+            Figure to show or save.
+        """
+        fig = plt.figure(figsize=[10, 5], layout="tight")
+        ax = plt.subplot(1, 1, 1)
+        ax = self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
+        variable = self._variables.get(variable_name)
+        plt.ylabel(f"{variable.name} {variable.unit}")
+        if title is None:
+            title = f"{variable.label} Histogram"
+        plt.title(title)
+        if suptitle is not None:
+            plt.suptitle(suptitle)
+        return fig
+
+    def plot_to_axes(
+        self,
+        variable_name: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Plot the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs: dict
+            Additional parameters to pass to plt.hist.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+        """
+        return self._build_to_axes(
+            variable_name=variable_name,
+            ax=ax,
+            **kwargs,
+        )
+
+    def _build_to_axes(
+        self,
+        variable_name: str,
+        ax: "Axes",
+        **kwargs,
+    ) -> "Axes":
+        """Build the data to the given axes.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to plot the data of.
+        ax : Axes
+            Axes to plot the data on.
+        **kwargs:
+            Additional parameters to pass to plt.hist.
+
+        Returns
+        -------
+        Axes
+            Axes where the data is plotted on.
+        """
+        variable_label = self._variables.get(variable_name).label
+        variable_data = self._storer.data[variable_label]
+        variable_data = variable_data[~variable_data.isna()]
+        min_value = variable_data.min()
+        max_value = variable_data.max()
+        mean_value = variable_data.mean()
+        std_value = variable_data.std()
+        ax.hist(variable_data, bins=self.bin_number, **kwargs)
+        x = np.linspace(min_value, max_value, 1000)
+        ax2 = ax.twinx()
+        ax2.plot(x, norm.pdf(x, mean_value, std_value), color="red")
+        ax2.get_yaxis().set_visible(False)
+        ax.set_xlabel(f"{round(mean_value,2)} \u00B1 {round(std_value,2)}")
         return ax
