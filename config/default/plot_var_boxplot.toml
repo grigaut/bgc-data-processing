@@ -26,22 +26,8 @@ LATITUDE_MAX = 90
 LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 180
-#? SALINITY_MIN: int | float: minimum salinity boundary (included)
-SALINITY_MIN = nan
-#? SALINITY_MAX: int | float: maximum salinity boundary (included)
-SALINITY_MAX = 35
-#? POTENTIAL_TEMPERATURE_MIN: int | float: minimum potential temperature boundary (included)
-POTENTIAL_TEMPERATURE_MIN = 0
-#? POTENTIAL_TEMPERATURE_MAX: int | float: maximum potential temperature boundary (included)
-POTENTIAL_TEMPERATURE_MAX = nan
-#? SIGMAT_MIN: int | float: minimum sigma-t boundary (included)
-SIGMAT_MIN = nan
-#? SIGMAT_MAX: int | float: maximum sigma-t boundary (included)
-SIGMAT_MAX = nan
-#? DEPTH_MIN: int | float: minimum depth boundary (included)
-DEPTH_MIN = nan
-#? DEPTH_MAX: int | float: maximum depth boundary (included)
-DEPTH_MAX = 0
+#? WATER_MASS_ACRONYM: str: acronym of the water mass to load
+WATER_MASS_ACRONYM = "AW"
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
 # If empty, no discrimination on expocode will be conducted
 EXPOCODES_TO_LOAD = []

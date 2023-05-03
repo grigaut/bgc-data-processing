@@ -3,10 +3,11 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import features
+from bgc_data_processing import DEFAULT_WATER_MASSES, features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import VariableBoxPlot
+from bgc_data_processing.water_masses import WaterMass
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(
@@ -27,14 +28,7 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
-    SALINITY_MIN: int | float = CONFIG["SALINITY_MIN"]
-    SALINITY_MAX: int | float = CONFIG["SALINITY_MAX"]
-    POTENTIAL_TEMPERATURE_MIN: int | float = CONFIG["POTENTIAL_TEMPERATURE_MIN"]
-    POTENTIAL_TEMPERATURE_MAX: int | float = CONFIG["POTENTIAL_TEMPERATURE_MAX"]
-    SIGMAT_MIN: int | float = CONFIG["SIGMAT_MIN"]
-    SIGMAT_MAX: int | float = CONFIG["SIGMAT_MAX"]
-    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    WATER_MASS: WaterMass = DEFAULT_WATER_MASSES[CONFIG["WATER_MASS_ACRONYM"]]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
@@ -80,55 +74,46 @@ if __name__ == "__main__":
         temperature_field="TEMP",
     )
     storer.add_feature(sigt_var, sigt_data)
+    storer_wm = WATER_MASS.extract_from_storer(
+        storer=storer,
+        ptemperature_name=ptemp_var.label,
+        salinity_name="PSAL",
+        sigma_t_name=sigt_var.label,
+    )
+    variables_wm = storer_wm.variables
     constraints = Constraints()
     constraints.add_superset_constraint(
-        field_label=variables.get(variables.expocode_var_name).label,
+        field_label=variables_wm.get(variables_wm.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.date_var_name).label,
+        field_label=variables_wm.get(variables_wm.date_var_name).label,
         minimal_value=DATE_MIN,
         maximal_value=DATE_MAX,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.latitude_var_name).label,
+        field_label=variables_wm.get(variables_wm.latitude_var_name).label,
         minimal_value=LATITUDE_MIN,
         maximal_value=LATITUDE_MAX,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.longitude_var_name).label,
+        field_label=variables_wm.get(variables_wm.longitude_var_name).label,
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
     )
-    constraints.add_boundary_constraint(
-        field_label=variables.get(variables.depth_var_name).label,
-        minimal_value=DEPTH_MIN,
-        maximal_value=DEPTH_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label="PSAL",
-        minimal_value=SALINITY_MIN,
-        maximal_value=SALINITY_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label=ptemp_var.label,
-        minimal_value=POTENTIAL_TEMPERATURE_MIN,
-        maximal_value=POTENTIAL_TEMPERATURE_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label=sigt_var.label,
-        minimal_value=SIGMAT_MIN,
-        maximal_value=SIGMAT_MAX,
-    )
 
     plot = VariableBoxPlot(
-        storer=storer,
+        storer=storer_wm,
         constraints=constraints,
     )
+    suptitle = f"{PLOT_VARIABLE} Box Plot"
+    title = f"Water Mass: '{WATER_MASS.name}' ({WATER_MASS.acronym})"
     if SHOW:
         plot.show(
             variable_name=PLOT_VARIABLE,
             period=BOXPLOT_PERIOD,
+            title=title,
+            suptitle=suptitle,
         )
     if SAVE:
         filename = f"{PLOT_VARIABLE.lower()}_{BOXPLOT_PERIOD}ly_boxplot.png"
@@ -137,4 +122,6 @@ if __name__ == "__main__":
             variable_name=PLOT_VARIABLE,
             period=BOXPLOT_PERIOD,
             save_path=filepath,
+            title=title,
+            suptitle=suptitle,
         )
