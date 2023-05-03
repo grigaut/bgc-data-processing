@@ -1643,13 +1643,6 @@ class WaterMassVariableComparison(BasePlot):
         Axes
             Axes where the data is plotted on.
         """
-        ax.scatter(
-            self._storer.data[self._variables.get(variable_name).label],
-            self._storer.data[self.pressure_var.label],
-            label="All data",
-            color="grey",
-            **kwargs,
-        )
         for wm in wmasses:
             self._scatter_single_water_mass(
                 variable_name=variable_name,

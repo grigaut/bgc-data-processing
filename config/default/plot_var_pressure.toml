@@ -28,7 +28,7 @@ LONGITUDE_MIN = -180
 LONGITUDE_MAX = 180
 #? WATER_MASS_ACRONYMS: list[str]: list of water masses names
 # Each element in the list correspond to a different water mass
-WATER_MASS_ACRONYMS = ["AW", "MAW"]
+WATER_MASS_ACRONYMS = ["ALL", "AW", "MAW"]
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
 # If empty, no discrimination on expocode will be conducted
 EXPOCODES_TO_LOAD = []

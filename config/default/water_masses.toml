@@ -2,6 +2,24 @@
 # Type hints lines are structured the following way:
 # Variable keys: possible types: additionnal comment
 
+[ALL]
+#? ALL.ACRONYM: str: variable acronym
+ACRONYM = "ALL"
+#? ALL.NAME: str: variable name
+NAME = "All Points"
+#? ALL.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = 0
+#? ALL.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? ALL.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? ALL.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? ALL.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = nan
+#? ALL.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.7
+
 [PSWw]
 #? PSWw.ACRONYM: str: variable acronym
 ACRONYM = "PSWw"
