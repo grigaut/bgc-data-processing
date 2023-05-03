@@ -10,6 +10,7 @@ from functools import wraps
 from typing import Any
 
 from bgc_data_processing.variables import TemplateVar
+from bgc_data_processing.water_masses import WaterMass
 
 
 class TomlParser:
@@ -536,3 +537,64 @@ class DefaultTemplatesParser(TomlParser):
             value = self._elements.get(key)
             variables[key] = self._make_template_from_args(value)
         return variables
+
+
+class WaterMassesParser(TomlParser):
+    """Parser for water_masses.toml to create WaterMass objects."""
+
+    @property
+    def variables(self) -> dict[str, WaterMass]:
+        """Return the dictionnary with all created WaterMass.
+
+        Returns
+        -------
+        dict[str, WaterMass]
+            Dictionnary mapping WaterMass acronyms to WaterMass.
+        """
+        variables = {}
+        for key in self._elements:
+            value = self._elements.get(key)
+            variables[key] = self._make_water_mass_from_args(value)
+        return variables
+
+    def __getitem__(self, __k: str) -> WaterMass:
+        """Return self.variables[__k].
+
+        Parameters
+        ----------
+        __k : str
+            WaterMass acronym as defined in water_masses.toml.
+
+        Returns
+        -------
+        WaterMass
+            WaterMass associated to __k.
+        """
+        return self.variables[__k]
+
+    def _make_water_mass_from_args(self, var_args: dict[str, Any]) -> WaterMass:
+        """Create WaterMass from the required parameters.
+
+        Parameters
+        ----------
+        var_args : dict[str, Any]
+            Dictionnary with all parameters to build a WaterMass.
+
+        Returns
+        -------
+        WaterMass
+            Resulting WaterMass.
+        """
+        ptemp_min = var_args["POTENTIAL_TEMPERATURE_MIN"]
+        ptemp_max = var_args["POTENTIAL_TEMPERATURE_MAX"]
+        salinity_min = var_args["SALINITY_MIN"]
+        salinity_max = var_args["SALINITY_MAX"]
+        sigma_t_min = var_args["SIGMAT_MIN"]
+        sigma_t_max = var_args["SIGMAT_MAX"]
+        return WaterMass(
+            name=var_args["NAME"],
+            acronym=var_args["ACRONYM"],
+            ptemperature_range=(ptemp_min, ptemp_max),
+            salinity_range=(salinity_min, salinity_max),
+            sigma_t_range=(sigma_t_min, sigma_t_max),
+        )

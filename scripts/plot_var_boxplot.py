@@ -1,12 +1,15 @@
 """Plot Variable boxplot."""
 
 import datetime as dt
+from math import ceil
 from pathlib import Path
 
-from bgc_data_processing import features
+import matplotlib.pyplot as plt
+from bgc_data_processing import DEFAULT_WATER_MASSES, features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import VariableBoxPlot
+from bgc_data_processing.water_masses import WaterMass
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(
@@ -27,14 +30,8 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
-    SALINITY_MIN: int | float = CONFIG["SALINITY_MIN"]
-    SALINITY_MAX: int | float = CONFIG["SALINITY_MAX"]
-    POTENTIAL_TEMPERATURE_MIN: int | float = CONFIG["POTENTIAL_TEMPERATURE_MIN"]
-    POTENTIAL_TEMPERATURE_MAX: int | float = CONFIG["POTENTIAL_TEMPERATURE_MAX"]
-    SIGMAT_MIN: int | float = CONFIG["SIGMAT_MIN"]
-    SIGMAT_MAX: int | float = CONFIG["SIGMAT_MAX"]
-    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    ACRONYMS: list[str] = CONFIG["WATER_MASS_ACRONYMS"]
+    WATER_MASSES: list[WaterMass] = [DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
@@ -100,41 +97,48 @@ if __name__ == "__main__":
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
     )
-    constraints.add_boundary_constraint(
-        field_label=variables.get(variables.depth_var_name).label,
-        minimal_value=DEPTH_MIN,
-        maximal_value=DEPTH_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label="PSAL",
-        minimal_value=SALINITY_MIN,
-        maximal_value=SALINITY_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label=ptemp_var.label,
-        minimal_value=POTENTIAL_TEMPERATURE_MIN,
-        maximal_value=POTENTIAL_TEMPERATURE_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label=sigt_var.label,
-        minimal_value=SIGMAT_MIN,
-        maximal_value=SIGMAT_MAX,
-    )
 
-    plot = VariableBoxPlot(
-        storer=storer,
-        constraints=constraints,
-    )
-    if SHOW:
-        plot.show(
-            variable_name=PLOT_VARIABLE,
-            period=BOXPLOT_PERIOD,
+    # plot = VariableBoxPlot(
+    #     storer=storer_wm,
+    #     constraints=constraints,
+    # )
+    # suptitle = f"{PLOT_VARIABLE} Box Plot"
+    # title = f"Water Mass: '{WATER_MASS.name}' ({WATER_MASS.acronym})"
+    # if SHOW:
+    #     plot.show(
+    #         variable_name=PLOT_VARIABLE,
+    #         period=BOXPLOT_PERIOD,
+    #         title=title,
+    #         suptitle=suptitle,
+    #     )
+    # if SAVE:
+    #     filename = f"{PLOT_VARIABLE.lower()}_{BOXPLOT_PERIOD}ly_boxplot.png"
+    #     filepath = SAVING_DIR.joinpath(filename)
+    #     plot.save(
+    #         variable_name=PLOT_VARIABLE,
+    #         period=BOXPLOT_PERIOD,
+    #         save_path=filepath,
+    #         title=title,
+    #         suptitle=suptitle,
+    #     )
+
+    nb_wmasses = len(WATER_MASSES)
+    figure = plt.figure(figsize=(15, 15), layout="tight")
+    for i, watermass in enumerate(WATER_MASSES):
+        placement = f"{ceil(nb_wmasses/min(nb_wmasses,3))}{min(nb_wmasses,3)}{i+1}"
+        axes = figure.add_subplot(int(placement))
+        storer_wm = watermass.extract_from_storer(
+            storer=storer,
+            ptemperature_name=ptemp_var.label,
+            salinity_name="PSAL",
+            sigma_t_name=sigt_var.label,
         )
+        plot = VariableBoxPlot(storer_wm, constraints)
+        plot.plot_to_axes(PLOT_VARIABLE, period=BOXPLOT_PERIOD, ax=axes)
+        axes.set_title(f"{watermass.name} ({watermass.acronym})")
+    plt.suptitle(f"{PLOT_VARIABLE} Box Plots")
     if SAVE:
-        filename = f"{PLOT_VARIABLE.lower()}_{BOXPLOT_PERIOD}ly_boxplot.png"
-        filepath = SAVING_DIR.joinpath(filename)
-        plot.save(
-            variable_name=PLOT_VARIABLE,
-            period=BOXPLOT_PERIOD,
-            save_path=filepath,
-        )
+        filename = f"{PLOT_VARIABLE}_boxplots.png"
+        plt.savefig(SAVING_DIR.joinpath(filename))
+    if SHOW:
+        plt.show()

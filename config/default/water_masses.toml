@@ -1,0 +1,147 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
+[ALL]
+#? ALL.ACRONYM: str: variable acronym
+ACRONYM = "ALL"
+#? ALL.NAME: str: variable name
+NAME = "All Points"
+#? ALL.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = 0
+#? ALL.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? ALL.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? ALL.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? ALL.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = nan
+#? ALL.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.7
+
+[PSWw]
+#? PSWw.ACRONYM: str: variable acronym
+ACRONYM = "PSWw"
+#? PSWw.NAME: str: variable name
+NAME = "Warm Polar Surface Water"
+#? PSWw.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = 0
+#? PSWw.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? PSWw.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? PSWw.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? PSWw.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = nan
+#? PSWw.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.7
+
+[PSW]
+#? PSW.ACRONYM: str: variable acronym
+ACRONYM = "PSW"
+#? PSW.NAME: str: variable name
+NAME = "Polar Surface Water"
+#? PSW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = nan
+#? PSW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = 0
+#? PSW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? PSW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? PSW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = nan
+#? PSW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.7
+
+[AW]
+#? AW.ACRONYM: str: variable acronym
+ACRONYM = "AW"
+#? AW.NAME: str: variable name
+NAME = "Atlantic Water"
+#? AW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = 2
+#? AW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? AW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? AW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? AW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = 27.7
+#? AW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.97
+
+[MAW]
+#? MAW.ACRONYM: str: variable acronym
+ACRONYM = "MAW"
+#? MAW.NAME: str: variable name
+NAME = "Modified Atlantic Water"
+#? MAW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = nan
+#? MAW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = 2
+#? MAW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? MAW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? MAW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = 27.7
+#? MAW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 27.97
+
+[AW_MAW]
+#? AW_MAW.ACRONYM: str: variable acronym
+ACRONYM = "AW_MAW"
+#? AW_MAW.NAME: str: variable name
+NAME = "Atlantic Water or Modified Atlantic Water"
+#? AW_MAW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = 0
+#? AW_MAW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? AW_MAW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? AW_MAW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? AW_MAW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = 27.97
+#? AW_MAW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 28.05
+
+[IW]
+#? IW.ACRONYM: str: variable acronym
+ACRONYM = "IW"
+#? IW.NAME: str: variable name
+NAME = "Intermediate Water"
+#? IW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = nan
+#? IW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = 0
+#? IW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? IW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? IW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = 27.97
+#? IW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = 28.05
+
+[NDW]
+#? NDW.ACRONYM: str: variable acronym
+ACRONYM = "NDW"
+#? NDW.NAME: str: variable name
+NAME = "Nordic Deep Water"
+#? NDW.POTENTIAL_TEMPERATURE_MIN: int | float: potential temperature minimum boundary
+POTENTIAL_TEMPERATURE_MIN = nan
+#? NDW.POTENTIAL_TEMPERATURE_MAX: int | float: potential temperature maximum boundary
+POTENTIAL_TEMPERATURE_MAX = nan
+#? NDW.SALINITY_MIN: int | float: salinity minimum boundary
+SALINITY_MIN = nan
+#? NDW.SALINITY_MAX: int | float: salinity maximum boundary
+SALINITY_MAX = nan
+#? NDW.SIGMAT_MIN: int | float: sigma-t minimum boundary
+SIGMAT_MIN = 28.05
+#? NDW.SIGMAT_MAX: int | float: sigma-t maximum boundary
+SIGMAT_MAX = nan

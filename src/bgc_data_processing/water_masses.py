@@ -26,17 +26,35 @@ class WaterMass:
     def __init__(
         self,
         name: str,
+        acronym: str | None = None,
         ptemperature_range: Iterable[float, float] = (np.nan, np.nan),
         salinity_range: Iterable[float, float] = (np.nan, np.nan),
         sigma_t_range: Iterable[float, float] = (np.nan, np.nan),
     ) -> None:
         self.name = name
+        if acronym is None:
+            acronym = "".join(word[0].upper() for word in name.split(" "))
+        self.acronym = acronym
         self.ptemperature_min = ptemperature_range[0]
         self.ptemperature_max = ptemperature_range[1]
         self.salinity_min = salinity_range[0]
         self.salinity_max = salinity_range[1]
         self.sigma_t_min = sigma_t_range[0]
         self.sigma_t_max = sigma_t_range[1]
+
+    def __repr__(self) -> str:
+        """Represent self as a string.
+
+        Returns
+        -------
+        str
+            Name and boundaries.
+        """
+        name_txt = f"{self.name} ({self.acronym})"
+        temp_txt = f"PTemperature in [{self.ptemperature_min},{self.ptemperature_max}]"
+        saln_txt = f"Salinity in [{self.salinity_min},{self.salinity_max}]"
+        sigt_txt = f"Sigma-t in [{self.sigma_t_min},{self.sigma_t_max}]"
+        return f"{name_txt}\n{temp_txt}\n{saln_txt}\n{sigt_txt}"
 
     def make_constraints(
         self,
