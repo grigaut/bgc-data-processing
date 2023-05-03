@@ -31,8 +31,8 @@ if __name__ == "__main__":
     SALINITY_MAX: int | float = CONFIG["SALINITY_MAX"]
     POTENTIAL_TEMPERATURE_MIN: int | float = CONFIG["POTENTIAL_TEMPERATURE_MIN"]
     POTENTIAL_TEMPERATURE_MAX: int | float = CONFIG["POTENTIAL_TEMPERATURE_MAX"]
-    DENSITY0_MIN: int | float = CONFIG["DENSITY0_MIN"]
-    DENSITY0_MAX: int | float = CONFIG["DENSITY0_MAX"]
+    SIGMAT_MIN: int | float = CONFIG["SIGMAT_MIN"]
+    SIGMAT_MAX: int | float = CONFIG["SIGMAT_MAX"]
     DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    # Add relevant features to the data: Pressure / potential temperature /density0
+    # Add relevant features to the data: Pressure / potential temperature /sigmat
     depth_field = variables.get(variables.depth_var_name).label
     latitude_field = variables.get(variables.latitude_var_name).label
     pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
@@ -74,12 +74,12 @@ if __name__ == "__main__":
         pressure_field=pres_var.label,
     )
     storer.add_feature(ptemp_var, ptemp_data)
-    dens0_var, dens0_data = features.compute_density_p0(
+    sigt_var, sigt_data = features.compute_sigma_t(
         storer=storer,
         salinity_field="PSAL",
         temperature_field="TEMP",
     )
-    storer.add_feature(dens0_var, dens0_data)
+    storer.add_feature(sigt_var, sigt_data)
     constraints = Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
@@ -116,9 +116,9 @@ if __name__ == "__main__":
         maximal_value=POTENTIAL_TEMPERATURE_MAX,
     )
     constraints.add_boundary_constraint(
-        field_label=dens0_var.label,
-        minimal_value=DENSITY0_MIN,
-        maximal_value=DENSITY0_MAX,
+        field_label=sigt_var.label,
+        minimal_value=SIGMAT_MIN,
+        maximal_value=SIGMAT_MAX,
     )
 
     plot = VariableBoxPlot(

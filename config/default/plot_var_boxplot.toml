@@ -34,10 +34,10 @@ SALINITY_MAX = 35
 POTENTIAL_TEMPERATURE_MIN = 0
 #? POTENTIAL_TEMPERATURE_MAX: int | float: maximum potential temperature boundary (included)
 POTENTIAL_TEMPERATURE_MAX = nan
-#? DENSITY0_MIN: int | float: minimum density at atmospheric pressure boundary (included)
-DENSITY0_MIN = nan
-#? DENSITY0_MAX: int | float: maximum density at atmospheric pressure boundary (included)
-DENSITY0_MAX = nan
+#? SIGMAT_MIN: int | float: minimum sigma-t boundary (included)
+SIGMAT_MIN = nan
+#? SIGMAT_MAX: int | float: maximum sigma-t boundary (included)
+SIGMAT_MAX = nan
 #? DEPTH_MIN: int | float: minimum depth boundary (included)
 DEPTH_MIN = nan
 #? DEPTH_MAX: int | float: maximum depth boundary (included)

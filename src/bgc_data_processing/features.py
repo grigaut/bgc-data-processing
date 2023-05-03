@@ -91,12 +91,12 @@ def compute_potential_temperature(
     return variable, data
 
 
-def compute_density_p0(
+def compute_sigma_t(
     storer: "Storer",
     salinity_field: str,
     temperature_field: str,
 ) -> tuple[NotExistingVar, pd.Series]:
-    """Compute seawater density at atmospheric pressure.
+    """Compute seawater's sigma-t value.
 
     Parameters
     ----------
@@ -110,12 +110,12 @@ def compute_density_p0(
     Returns
     -------
     tuple[NotExistingVar, pd.Series]
-        Potential temperature variable, potenital temperature values.
+        Sigma-t variable, sigma-t values.
     """
     salinity = storer.data[salinity_field]
     temperature = storer.data[temperature_field]
     variable = NotExistingVar(
-        name="DENS0",
+        name="SIGT",
         unit="[kg/m3]",
         var_type=float,
         default=np.nan,
@@ -123,7 +123,7 @@ def compute_density_p0(
         value_format="%10.3f",
     )
     data = pd.Series(
-        eos80.dens0(salinity, temperature),
+        eos80.dens0(salinity, temperature) - 1000,
         index=storer.data.index,
     )
     data.name = variable.label

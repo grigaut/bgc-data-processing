@@ -19,8 +19,8 @@ class WaterMass:
         Potential temperature range: (minimum, maximum), by default (np.nan, np.nan)
     salinity_range : Iterable[float, float], optional
         Salinity range: (minimum, maximum), by default (np.nan, np.nan)
-    density0_range : Iterable[float, float], optional
-        Density at pressure 0 range: (minimum, maximum), by default (np.nan, np.nan)
+    sigma_t_range : Iterable[float, float], optional
+        Sigma-t range: (minimum, maximum), by default (np.nan, np.nan)
     """
 
     def __init__(
@@ -28,21 +28,21 @@ class WaterMass:
         name: str,
         ptemperature_range: Iterable[float, float] = (np.nan, np.nan),
         salinity_range: Iterable[float, float] = (np.nan, np.nan),
-        density0_range: Iterable[float, float] = (np.nan, np.nan),
+        sigma_t_range: Iterable[float, float] = (np.nan, np.nan),
     ) -> None:
         self.name = name
         self.ptemperature_min = ptemperature_range[0]
         self.ptemperature_max = ptemperature_range[1]
         self.salinity_min = salinity_range[0]
         self.salinity_max = salinity_range[1]
-        self.density0_min = density0_range[0]
-        self.density0_max = density0_range[1]
+        self.sigma_t_min = sigma_t_range[0]
+        self.sigma_t_max = sigma_t_range[1]
 
     def make_constraints(
         self,
         ptemperature_label: str,
         salinity_label: str,
-        density0_label: str,
+        sigma_t_label: str,
     ) -> Constraints:
         """Create the constraint for the water mass.
 
@@ -52,8 +52,8 @@ class WaterMass:
             Potential temperature label.
         salinity_label : str
             Salinity label.
-        density0_label : str
-            Density 0 label.
+        sigma_t_label : str
+            Sigma-t label.
 
         Returns
         -------
@@ -72,9 +72,9 @@ class WaterMass:
             maximal_value=self.salinity_max,
         )
         constraints.add_boundary_constraint(
-            field_label=density0_label,
-            minimal_value=self.density0_min,
-            maximal_value=self.density0_max,
+            field_label=sigma_t_label,
+            minimal_value=self.sigma_t_min,
+            maximal_value=self.sigma_t_max,
         )
         return constraints
 
@@ -83,7 +83,7 @@ class WaterMass:
         storer: "Storer",
         ptemperature_name: str,
         salinity_name: str,
-        density0_name: str,
+        sigma_t_name: str,
     ) -> "Storer":
         """Extract a the storer whose values are in the water mass.
 
@@ -95,8 +95,8 @@ class WaterMass:
             Potenital temperature variable name.
         salinity_name : str
             Salinity Variable name.
-        density0_name : str
-            Density at pressure 0 variable name.
+        sigma_t_name : str
+            Sigma-t variable name.
 
         Returns
         -------
@@ -106,7 +106,7 @@ class WaterMass:
         constraints = self.make_constraints(
             ptemperature_label=storer.variables.get(ptemperature_name).label,
             salinity_label=storer.variables.get(salinity_name).label,
-            density0_label=storer.variables.get(density0_name).label,
+            sigma_t_label=storer.variables.get(sigma_t_name).label,
         )
         return constraints.apply_constraints_to_storer(storer)
 
@@ -116,7 +116,7 @@ class WaterMass:
         water_mass_variable_name: str,
         ptemperature_name: str,
         salinity_name: str,
-        density0_name: str,
+        sigma_t_name: str,
         create_var_if_missing: bool = True,
     ) -> "Storer":
         """Flag the.
@@ -131,8 +131,8 @@ class WaterMass:
             Potential temperature variable name.
         salinity_name : str
             Salinity Variable name.
-        density0_name : str
-            Density at pressure 0 variable name.
+        sigma_t_name : str
+            Sigma-t at pressure 0 variable name.
         create_var_if_missing : bool, optional
             Wehtehr to create the water mass variable in the storer., by default True
 
@@ -149,7 +149,7 @@ class WaterMass:
         constraints = self.make_constraints(
             ptemperature_label=original_storer.variables.get(ptemperature_name).label,
             salinity_label=original_storer.variables.get(salinity_name).label,
-            density0_label=original_storer.variables.get(density0_name).label,
+            sigma_t_label=original_storer.variables.get(sigma_t_name).label,
         )
         full_data = original_storer.data
         compliant = constraints.apply_constraints_to_dataframe(full_data).index
