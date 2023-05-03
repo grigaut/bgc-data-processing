@@ -32,7 +32,7 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    ACRONYMS: list[str] = CONFIG["WATER_MASSES_ACRONYMS"]
+    ACRONYMS: list[str] = CONFIG["WATER_MASS_ACRONYMS"]
     WATER_MASSES: list[WaterMass] = [DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS]
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))

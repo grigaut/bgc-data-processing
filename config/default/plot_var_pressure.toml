@@ -26,9 +26,9 @@ LATITUDE_MAX = 90
 LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 180
-#? WATER_MASSES_ACRONYMS: list[str]: list of water masses names
+#? WATER_MASS_ACRONYMS: list[str]: list of water masses names
 # Each element in the list correspond to a different water mass
-WATER_MASSES_ACRONYMS = ["AW", "MAW"]
+WATER_MASS_ACRONYMS = ["AW", "MAW"]
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
 # If empty, no discrimination on expocode will be conducted
 EXPOCODES_TO_LOAD = []
