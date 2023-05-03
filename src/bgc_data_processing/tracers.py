@@ -1052,7 +1052,7 @@ class TemperatureSalinityDiagram(BasePlot):
         self.ptemperature_field = ptemperature_field
 
     def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
-        """Plot the figure of data density evolution in a givemn area.
+        """Plot the Temperature-Salinity diagram.
 
         Parameters
         ----------
@@ -1072,7 +1072,7 @@ class TemperatureSalinityDiagram(BasePlot):
         suptitle: str = None,
         **kwargs,
     ) -> None:
-        """Save the figure of data density evolution in a givemn area.
+        """Save the figure of Temperature-Salinity Diagram.
 
         Parameters
         ----------
@@ -1170,7 +1170,7 @@ class TemperatureSalinityDiagram(BasePlot):
         temperature_col = df[self.temperature_field]
         # Scatter all data points in the TS diagram
         cbar = ax.scatter(salinity_col, ptemperature_col, c=depth_col, **kwargs)
-        # Draw the density isolines
+        # Draw the sigma-t isolines
         salinity_min = salinity_col.min()
         salinity_max = salinity_col.max()
         salinitys = np.linspace(salinity_min, salinity_max, 100)
@@ -1179,8 +1179,8 @@ class TemperatureSalinityDiagram(BasePlot):
         temperatures = np.linspace(temperature_max, temperature_min, 100)
         temps_2d = np.tile(temperatures.reshape((1, -1)).T, (1, 100))
         salis_2d = np.tile(salinitys, (100, 1))
-        density_values = eos80.dens0(salis_2d, temps_2d)
-        label = ax.contour(salinitys, temperatures, density_values, colors="grey")
+        sigma_t_values = eos80.dens0(salis_2d, temps_2d) - 1000
+        label = ax.contour(salinitys, temperatures, sigma_t_values, colors="grey")
         ax.clabel(label)
         return ax, cbar
 
@@ -1419,8 +1419,8 @@ class WaterMassVariableComparison(BasePlot):
         Potential temperature variable name.
     salinity_var_name : str
         Salinity variable name.
-    density0_var_name : str
-        Density at atmospheric pressure variable name.
+    sigma_t_var_name : str
+        Sigma-t variable name.
     """
 
     def __init__(
@@ -1430,13 +1430,13 @@ class WaterMassVariableComparison(BasePlot):
         pressure_var_name: str,
         ptemperature_var_name: str,
         salinity_var_name: str,
-        density0_var_name: str,
+        sigma_t_var_name: str,
     ) -> None:
         super().__init__(storer, constraints)
         self.pressure_var = self._variables.get(pressure_var_name)
         self.ptemp_var = self._variables.get(ptemperature_var_name)
         self.salty_var = self._variables.get(salinity_var_name)
-        self.dens0_var = self._variables.get(density0_var_name)
+        self.sigma_t_var = self._variables.get(sigma_t_var_name)
 
     def show(
         self,
@@ -1609,7 +1609,7 @@ class WaterMassVariableComparison(BasePlot):
             storer=self._storer,
             ptemperature_name=self.ptemp_var.name,
             salinity_name=self.salty_var.name,
-            density0_name=self.dens0_var.name,
+            sigma_t_name=self.sigma_t_var.name,
         )
         ax.scatter(
             wm_storer.data[variable_label],

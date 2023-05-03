@@ -39,8 +39,8 @@ if __name__ == "__main__":
     SALINITY_MAXS: list[int | float] = CONFIG["SALINITY_MAXS"]
     POTENTIAL_TEMPERATURE_MINS: list[int | float] = CONFIG["POTENTIAL_TEMPERATURE_MINS"]
     POTENTIAL_TEMPERATURE_MAXS: list[int | float] = CONFIG["POTENTIAL_TEMPERATURE_MAXS"]
-    DENSITY0_MINS: list[int | float] = CONFIG["DENSITY0_MINS"]
-    DENSITY0_MAXS: list[int | float] = CONFIG["DENSITY0_MAXS"]
+    SIGMAT_MINS: list[int | float] = CONFIG["SIGMAT_MINS"]
+    SIGMAT_MAXS: list[int | float] = CONFIG["SIGMAT_MAXS"]
 
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    # Add relevant features to the data: Pressure / potential temperature /density0
+    # Add relevant features to the data: Pressure / potential temperature /sigma-t
     depth_field = variables.get(variables.depth_var_name).label
     latitude_field = variables.get(variables.latitude_var_name).label
     pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
@@ -77,12 +77,12 @@ if __name__ == "__main__":
         pressure_field=pres_var.label,
     )
     storer.add_feature(ptemp_var, ptemp_data)
-    dens0_var, dens0_data = features.compute_density_p0(
+    sigt_var, sigt_data = features.compute_sigma_t(
         storer=storer,
         salinity_field="PSAL",
         temperature_field="TEMP",
     )
-    storer.add_feature(dens0_var, dens0_data)
+    storer.add_feature(sigt_var, sigt_data)
     constraints = Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             wm,
             (POTENTIAL_TEMPERATURE_MINS[i], POTENTIAL_TEMPERATURE_MAXS[i]),
             (SALINITY_MINS[i], SALINITY_MAXS[i]),
-            (DENSITY0_MINS[i], DENSITY0_MAXS[i]),
+            (SIGMAT_MINS[i], SIGMAT_MAXS[i]),
         )
         wmasses.append(wmass)
     plot = WaterMassVariableComparison(
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         pres_var.name,
         ptemp_var.name,
         "PSAL",
-        dens0_var.name,
+        sigt_var.name,
     )
     plot.show(
         variable_name=PLOT_VARIABLE,
