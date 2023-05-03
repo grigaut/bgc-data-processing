@@ -1,6 +1,10 @@
 """Tools to load and display standardized biogeochemical data."""
 
+from pathlib import Path
+
 from bgc_data_processing import parsers
+
+BASE_DIR = Path(__file__).parent.resolve()
 
 __all__ = [
     "PROVIDERS_CONFIG",
