@@ -3,7 +3,7 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import features
+from bgc_data_processing import DEFAULT_WATER_MASSES, features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import WaterMassVariableComparison
@@ -34,14 +34,8 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    WATER_MASSES: list[str] = CONFIG["WATER_MASSES"]
-    SALINITY_MINS: list[int | float] = CONFIG["SALINITY_MINS"]
-    SALINITY_MAXS: list[int | float] = CONFIG["SALINITY_MAXS"]
-    POTENTIAL_TEMPERATURE_MINS: list[int | float] = CONFIG["POTENTIAL_TEMPERATURE_MINS"]
-    POTENTIAL_TEMPERATURE_MAXS: list[int | float] = CONFIG["POTENTIAL_TEMPERATURE_MAXS"]
-    SIGMAT_MINS: list[int | float] = CONFIG["SIGMAT_MINS"]
-    SIGMAT_MAXS: list[int | float] = CONFIG["SIGMAT_MAXS"]
-
+    ACRONYMS: list[str] = CONFIG["WATER_MASSES_ACRONYMS"]
+    WATER_MASSES: list[WaterMass] = [DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS]
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
@@ -108,16 +102,6 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
-
-    wmasses = []
-    for i, wm in enumerate(WATER_MASSES):
-        wmass = WaterMass(
-            wm,
-            (POTENTIAL_TEMPERATURE_MINS[i], POTENTIAL_TEMPERATURE_MAXS[i]),
-            (SALINITY_MINS[i], SALINITY_MAXS[i]),
-            (SIGMAT_MINS[i], SIGMAT_MAXS[i]),
-        )
-        wmasses.append(wmass)
     plot = WaterMassVariableComparison(
         storer,
         constraints,
@@ -128,5 +112,5 @@ if __name__ == "__main__":
     )
     plot.show(
         variable_name=PLOT_VARIABLE,
-        wmasses=wmasses,
+        wmasses=WATER_MASSES,
     )
