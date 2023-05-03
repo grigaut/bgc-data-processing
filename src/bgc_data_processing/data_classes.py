@@ -864,7 +864,6 @@ class Constraints:
         self,
         field_label: str,
         df: pd.DataFrame,
-        inplace: bool = False,
     ) -> pd.DataFrame | None:
         """Only apply a single constraint.
 
@@ -874,9 +873,6 @@ class Constraints:
             Label of the field to apply the constraint to.
         df : pd.DataFrame
             DataFrame to apply the constraints to.
-        inplace : bool, optional
-            If False, return a copy. Otherwise, do operation inplace and return None.
-            , by default False
 
         Returns
         -------
@@ -895,7 +891,7 @@ class Constraints:
                 field_label=field_label,
                 value_superset=self.supersets[field_label],
             )
-        return constraint.apply_constraints(df=df, inplace=inplace)
+        return constraint.apply_constraints_to_dataframe(dataframe=df)
 
     def is_constrained(self, field_name: str) -> bool:
         """Return True if 'field_name' is constrained.

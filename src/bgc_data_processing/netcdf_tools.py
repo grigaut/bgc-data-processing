@@ -469,7 +469,6 @@ class NetCDFLoader(BaseLoader):
         df_dates_sliced = constraints.apply_specific_constraint(
             field_label=self._variables.get(self._variables.date_var_name).label,
             df=df_dates,
-            inplace=False,
         )
         df_prov = self._set_provider(df_dates_sliced)
         df_expo = self._set_expocode(df_prov, file_id)
