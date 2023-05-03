@@ -9,7 +9,7 @@ SHOW = true
 #? SAVE: bool: whether to save the Figure or not
 SAVE = false
 #? PLOT_VARIABLE: str: Variable to plot the box-whisker figure of
-PLOT_VARIABLE = "PSAL"
+PLOT_VARIABLE = "TEMP"
 #? SAVING_DIR: str: directory in which to save the Figure
 SAVING_DIR = "bgc_figs"
 #? DATE_MIN: str: first date to map
@@ -24,10 +24,8 @@ LATITUDE_MAX = 90
 LONGITUDE_MIN = -180
 #? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 180
-#? DEPTH_MIN: int | float: minimum depth boundary (included)
-DEPTH_MIN = nan
-#? DEPTH_MAX: int | float: maximum depth boundary (included)
-DEPTH_MAX = 0
+#? WATER_MASS_ACRONYM: str: acronym of the water mass to load
+WATER_MASS_ACRONYM = "AW"
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
 # If empty, no discrimination on expocode will be conducted
 EXPOCODES_TO_LOAD = []

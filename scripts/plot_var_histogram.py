@@ -3,9 +3,11 @@
 import datetime as dt
 from pathlib import Path
 
+from bgc_data_processing import DEFAULT_WATER_MASSES, features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import VariableHistogram
+from bgc_data_processing.water_masses import WaterMass
 
 if __name__ == "__main__":
     CONFIG = ConfigParser(
@@ -25,8 +27,7 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
-    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
+    WATER_MASS: WaterMass = DEFAULT_WATER_MASSES[CONFIG["WATER_MASS_ACRONYM"]]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
@@ -54,33 +55,53 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
+    # Add relevant features to the data: Pressure / potential temperature /sigmat
+    depth_field = variables.get(variables.depth_var_name).label
+    latitude_field = variables.get(variables.latitude_var_name).label
+    pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
+    storer.add_feature(pres_var, pres_data)
+    ptemp_var, ptemp_data = features.compute_potential_temperature(
+        storer=storer,
+        salinity_field="PSAL",
+        temperature_field="TEMP",
+        pressure_field=pres_var.label,
+    )
+    storer.add_feature(ptemp_var, ptemp_data)
+    sigt_var, sigt_data = features.compute_sigma_t(
+        storer=storer,
+        salinity_field="PSAL",
+        temperature_field="TEMP",
+    )
+    storer.add_feature(sigt_var, sigt_data)
+    storer_wm = WATER_MASS.extract_from_storer(
+        storer=storer,
+        ptemperature_name=ptemp_var.label,
+        salinity_name="PSAL",
+        sigma_t_name=sigt_var.label,
+    )
+    variables_wm = storer_wm.variables
     constraints = Constraints()
     constraints.add_superset_constraint(
-        field_label=variables.get(variables.expocode_var_name).label,
+        field_label=variables_wm.get(variables_wm.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.date_var_name).label,
+        field_label=variables_wm.get(variables_wm.date_var_name).label,
         minimal_value=DATE_MIN,
         maximal_value=DATE_MAX,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.latitude_var_name).label,
+        field_label=variables_wm.get(variables_wm.latitude_var_name).label,
         minimal_value=LATITUDE_MIN,
         maximal_value=LATITUDE_MAX,
     )
     constraints.add_boundary_constraint(
-        field_label=variables.get(variables.longitude_var_name).label,
+        field_label=variables_wm.get(variables_wm.longitude_var_name).label,
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
     )
-    constraints.add_boundary_constraint(
-        field_label=variables.get(variables.depth_var_name).label,
-        minimal_value=DEPTH_MIN,
-        maximal_value=DEPTH_MAX,
-    )
 
-    plot = VariableHistogram(storer, constraints)
+    plot = VariableHistogram(storer_wm, constraints)
     if SHOW:
         plot.show(PLOT_VARIABLE)
     if SAVE:
