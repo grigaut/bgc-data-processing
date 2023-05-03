@@ -28,8 +28,6 @@ if __name__ == "__main__":
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
-    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
@@ -96,11 +94,6 @@ if __name__ == "__main__":
         field_label=variables.get(variables.longitude_var_name).label,
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
-    )
-    constraints.add_boundary_constraint(
-        field_label=variables.get(variables.depth_var_name).label,
-        minimal_value=DEPTH_MIN,
-        maximal_value=DEPTH_MAX,
     )
     plot = WaterMassVariableComparison(
         storer,
