@@ -1,4 +1,4 @@
-"""Select Water Mass based on salinity / potential temperature and density0 values."""
+"""Plot Variable boxplot."""
 
 import datetime as dt
 from pathlib import Path
