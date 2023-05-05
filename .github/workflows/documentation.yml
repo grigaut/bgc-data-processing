@@ -27,10 +27,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install --only docs
-      - name: Set up Git
-        run: |
-          git config user.name ${{ github.actor }}
-          git config user.email ${{ github.actor }}@users.noreply.github.com
       - name: Deploy Mkdocs
         run: |
           python -m poetry run mkdocs gh-deploy --force --clean --verbose
