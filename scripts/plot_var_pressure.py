@@ -21,7 +21,6 @@ if __name__ == "__main__":
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     PLOT_VARIABLE: str = CONFIG["PLOT_VARIABLE"]
-    BOXPLOT_PERIOD: str = CONFIG["BOXPLOT_PERIOD"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
     LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]

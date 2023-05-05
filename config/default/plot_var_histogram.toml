@@ -8,7 +8,7 @@ LOADING_DIR = "bgc_data"
 SHOW = true
 #? SAVE: bool: whether to save the Figure or not
 SAVE = false
-#? PLOT_VARIABLE: str: Variable to plot the box-whisker figure of
+#? PLOT_VARIABLE: str: Variable to plot the histogram of
 PLOT_VARIABLE = "TEMP"
 #? SAVING_DIR: str: directory in which to save the Figure
 SAVING_DIR = "bgc_figs"

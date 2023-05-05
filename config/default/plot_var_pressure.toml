@@ -8,10 +8,8 @@ LOADING_DIR = "bgc_data"
 SHOW = true
 #? SAVE: bool: whether to save the Figure or not
 SAVE = false
-#? PLOT_VARIABLE: str: Variable to plot the box-whisker figure of
+#? PLOT_VARIABLE: str: Variable to plot the value of
 PLOT_VARIABLE = "NTRA"
-#? BOXPLOT_PERIOD: str: Period to use for each boxplot.
-BOXPLOT_PERIOD = "year"
 #? SAVING_DIR: str: directory in which to save the Figure
 SAVING_DIR = "bgc_figs"
 #? DATE_MIN: str: first date to map
