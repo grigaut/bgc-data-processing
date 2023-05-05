@@ -24,6 +24,16 @@ theme:
 nav:
   - Getting Started:
     - index.md
+  - Scripts:
+    - scripts/index.md
+    - scripts/save_data.md
+    - scripts/plot_mesh.md
+    - scripts/plot_profile.md
+    - scripts/plot_interactive.md
+    - scripts/plot_ts_diagram.md
+    - scripts/plot_var_boxplot.md
+    - scripts/plot_var_histogram.md
+    - scripts/plot_var_pressure.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
@@ -46,7 +56,7 @@ plugins:
       nav_file: SUMMARY.md          # To auto-generate paths
   - gen-files:
       scripts:
-        - docs/scripts/pages_generator.py   # To auto generate 'Code Reference' Section
+        - docs/automation/pages_generator.py   # To auto generate 'Code Reference' Section
   - mkdocstrings:
       handlers:
         python:
