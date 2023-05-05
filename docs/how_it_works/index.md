@@ -139,3 +139,6 @@ mesher.save(
 7. Name of the variable to plot on the map.
 8. Title for the plot.
 9. Suptitle for the plot.
+
+!!! note ""
+    [More informations on plotting](/how_it_works/plotting)

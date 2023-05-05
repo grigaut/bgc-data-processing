@@ -28,6 +28,7 @@ nav:
     - how_it_works/index.md
     - how_it_works/variables.md
     - how_it_works/loading.md
+    - how_it_works/plotting.md
   - Examples:
     - examples/index.md
     - examples/boundaries.md
@@ -68,3 +69,5 @@ markdown_extensions:
   - footnotes
   - toc:
       permalink: true
+  - attr_list
+  - md_in_html
