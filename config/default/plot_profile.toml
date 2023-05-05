@@ -2,8 +2,8 @@
 # Type hints lines are structured the following way:
 # Variable keys: possible types: additionnal comment
 
-#? PROVIDERS: list[str]: providers to use data from
-PROVIDERS = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+#? LOADING_DIR: str: directory from which to load data
+LOADING_DIR = "bgc_data"
 #? VARIABLE: str: variable to map
 # If 'all': will map density of datapoints, regardless of their variables.
 VARIABLE = "NTRA"
@@ -16,7 +16,7 @@ SHOW = true
 #? DATE_MIN: str: first date to map
 DATE_MIN = "20070101"
 #? DATE_MAX: str: last date to map
-DATE_MAX = "20200131"
+DATE_MAX = "20201231"
 #? INTERVAL: str: horizontal resolution of the plot
 # If set to 'day': will group datapoint by day
 # If set to 'week': will group datapoints by their week number
@@ -24,7 +24,7 @@ DATE_MAX = "20200131"
 # If set to 'year': will grou datapoints by year
 # If set to 'custom': will group datapoints based on a custom interval
 INTERVAL = "month"
-#? CUSTOM_INTERVAL: int
+#? CUSTOM_INTERVAL: int: if INTERVAL is 'custom', length of the custom interval (in days)
 CUSTOM_INTERVAL = 8
 #? LATITUDE_MIN: int | float: minimum latitude boundary (included)
 LATITUDE_MIN = 50
