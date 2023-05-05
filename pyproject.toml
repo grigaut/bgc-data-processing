@@ -18,6 +18,7 @@ geopandas = "^0.12.2"
 eomaps = "^6.3"
 seawater = "^3.3.4"
 scipy = "^1.10.1"
+urllib3 = "<2.0.0"
 
 
 [tool.poetry.group.docs.dependencies]
