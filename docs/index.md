@@ -44,7 +44,7 @@ Having **GNU Make** installed can also simplify the project's setup.
     [More details on the virtual environment](/virtual_env/)
 
 ## Configuration files
-Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default](/config/default/). If these copy don't exist, the following command will create the file:
+Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default](/config/default/). If these copies don't exist, the following command will create the files:
 
 === "With make"
     ``` bash
@@ -72,7 +72,7 @@ To run a script from the [scripts](/scripts/) folder and named `script_1.py`, on
     *These rules are created dynamically so if a new script is added, there is no modification to apply to [Makefile](/Makefile) to use the corresponding rule*
 
 === "Without make"
-    *Virtual environment must have been installed*
+    *Virtual environment must have been built, see [here](#building-the-virtual-environment)*
     ``` bash
     conda activate ./.venv  # (1)!
     ```

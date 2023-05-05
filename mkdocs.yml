@@ -66,3 +66,5 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true   # Tabs
   - footnotes
+  - toc:
+      permalink: true
