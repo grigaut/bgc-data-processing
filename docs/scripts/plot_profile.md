@@ -7,21 +7,13 @@ This scripts reads data from a folder and plot the density profile (depth as ver
 
 ## Configuration
 
-The configuration file for this script is `config/plot_profile.toml`. All the parameters and their functionality are listed below:
-
+The configuration file for this script is `config/plot_profile.toml` (based on [`config/default_plot_profile.toml`]({{repo_blob}}/config/default/plot_profile.toml)). All the parameters and their functionality are listed below:
+### **Input/Output**
 ??? question "LOADING_DIR"
 
     Directory from which to load data.
 
     **default**: `"bgc_data"`
-
-    Expected type: `str`
-
-??? question "VARIABLE"
-
-    Variable to map. If 'all': will map density of datapoints, regardless of their variables.
-
-    **default**: `"NTRA"`
 
     Expected type: `str`
 
@@ -48,6 +40,14 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
     **default**: `true`
 
     Expected type: `bool`
+### **Data Selection**
+??? question "VARIABLE"
+
+    Variable to map. If 'all': will map density of datapoints, regardless of their variables.
+
+    **default**: `"NTRA"`
+
+    Expected type: `str`
 
 ??? question "DATE_MIN"
 
@@ -64,22 +64,6 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
     **default**: `"20201231"`
 
     Expected type: `str` (must match the `YYYYMMDD` format)
-
-??? question "INTERVAL"
-
-    Horizontal resolution of the plot. If set to `day`: will group datapoint by day. If set to `week`: will group datapoints by their week number. If set to `month`: will group datapoints by month. If set to `year`: will grou datapoints by year. If set to `custom`: will group datapoints based on a custom interval.
-
-    **default**: `"month"`
-
-    Expected type: `str`
-
-??? question "CUSTOM_INTERVAL"
-
-    If interval is 'custom', length of the custom interval (in days).
-
-    **default**: `8`
-
-    Expected type: `int`
 
 ??? question "LATITUDE_MIN"
 
@@ -129,14 +113,6 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
 
     Expected type: `int or float`
 
-??? question "DEPTH_INTERVAL"
-
-    Vertical resolution of the figure. If of type int: vertical axis will be divided in equally sized bins of size depth_interval. If of type list[int]: vertical axis will be divided according to the given levels (levls value ar supposed to negative).
-
-    **default**: `10`
-
-    Expected type: `int or list[int]`
-
 ??? question "EXPOCODES_TO_LOAD"
 
     Precise expocode to load alone. If empty, no discrimination on expocode will be conducted.
@@ -152,7 +128,31 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
     **default**: `["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]`
 
     Expected type: `list[str]`
+### **Plotting Options**
+??? question "INTERVAL"
 
+    Horizontal resolution of the plot. If set to `day`: will group datapoint by day. If set to `week`: will group datapoints by their week number. If set to `month`: will group datapoints by month. If set to `year`: will grou datapoints by year. If set to `custom`: will group datapoints based on a custom interval.
+
+    **default**: `"month"`
+
+    Expected type: `str`
+
+??? question "CUSTOM_INTERVAL"
+
+    If interval is 'custom', length of the custom interval (in days).
+
+    **default**: `8`
+
+    Expected type: `int`
+
+??? question "DEPTH_INTERVAL"
+
+    Vertical resolution of the figure. If of type int: vertical axis will be divided in equally sized bins of size depth_interval. If of type list[int]: vertical axis will be divided according to the given levels (levls value ar supposed to negative).
+
+    **default**: `10`
+
+    Expected type: `int or list[int]`
+### **Others**
 ??? question "VERBOSE"
 
     Verbose value, the higher, the more informations. If set to 0 or below: no information displayed. If set to 1: minimal informations displayed. If set to 2: very complete informations displayed. If set to 3 or higher: exhaustive informations displayed.
@@ -160,3 +160,11 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
     **default**: `2`
 
     Expected type: `int`
+## Script Output
+When executed, this script displays a density profile plot. This plot shows the depth vs date density of the data.
+
+This is an example of what this plot could look like:
+
+![profile plot output example](../assets/plots/profile.png){width=750px}
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_profile.py)

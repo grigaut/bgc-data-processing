@@ -44,22 +44,22 @@ Having **GNU Make** installed can also simplify the project's setup.
     [More details on the virtual environment](/virtual_env/)
 
 ## Configuration files
-Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default](/config/default/). If these copies don't exist, the following command will create the files:
+Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default]({{repo_tree}}/config/default/). If these copies don't exist, the following command will create the files:
 
 === "With make"
     ``` bash
     make copy-default-config
     ```
 === "Without make"
-    Manually copy/paste all scripts from [config/default](/config/default/) into [config](/config/). Or use the following command:
+    Manually copy/paste all scripts from [config/default]({{repo_tree}}/config/default/) into [config]({{repo_tree}}/config/). Or use the following command:
     ``` bash
     for name in config/default/*.toml; do cp config/default/$(basename ${name}) config/_$(basename ${name}) ; done
     ```
 
-Before running any script, one has to verify that all parameters indicated in the configuration are relevant. For example, one has to fill in all `PATH` parameters in the [`providers.toml`](/config/default/providers.toml) configuration file to indicate where the providers data can be find.
+Before running any script, one has to verify that all parameters indicated in the configuration are relevant. For example, one has to fill in all `PATH` parameters in the [`providers.toml`]({{repo_blob}}/config/default/providers.toml) configuration file to indicate where the providers data can be find.
 ## Running the Scripts
 
-To run a script from the [scripts](/scripts/) folder and named `script_1.py`, one can use the following command:
+To run a script from the folder [`scripts`]({{repo_tree}}/scripts/) and named `script_1.py`, one can use the following command:
 
 === "With make"
     ``` bash
@@ -68,8 +68,8 @@ To run a script from the [scripts](/scripts/) folder and named `script_1.py`, on
 
     1. make will install the correct environment and run the script
 
-    Any `.py` file loctaed in the [scripts](/scripts/) folder can be run with a make rule starting by `run-` and ending with the name of the file (without the `.py` extension) and where all underscores ('_') ar replaced by hyphens ('-').
-    *These rules are created dynamically so if a new script is added, there is no modification to apply to [Makefile](/Makefile) to use the corresponding rule*
+    Any `.py` file located in the folder `./scripts/` can be run with a make rule starting by `run-` and ending with the name of the file (without the `.py` extension) and where all underscores ('_') ar replaced by hyphens ('-').
+    *These rules are created dynamically so if a new script is added, there is no modification to apply to the Makefile to use the corresponding rule*
 
 === "Without make"
     *Virtual environment must have been built, see [here](#building-the-virtual-environment)*
@@ -90,6 +90,8 @@ To run a script from the [scripts](/scripts/) folder and named `script_1.py`, on
     ```
 
     1. Run script.
+
+All the details about the scripts, their execution, their input parameters and their output can be found in the [Scripts](/scripts/) section of this documentation.
 
 ## Make rules cheatsheet
 
@@ -152,11 +154,11 @@ Create the environment, install documentation-related libraries and deploy docum
 <details close>
 <summary> <code>make run-any-script</code> </summary>
 Create the environment, install scripts-running-related libraries and runs the <code>scripts/any_script.py</code> python script. 'any-script' can be replaced by anything in order to run a script. For example, calling <code>make run-another-script</code> will run the <code>scripts/another_script.py</code> python script (if it exists). To make this rule work, the following syntax must be respected:
-
-- script must be a python script
-- script must be in the `scripts/` folder
-- underscores ('_') must be replaced by hyphens ('-') in the script name
-- extension ('.py') must be removed from the script's name
-- rule must start with the `run-` prefix
-
+<ol>
+    <li>script must be a python script</li>
+    <li>script must be in the folder <code>scripts</code></li>
+    <li>underscores ('_') must be replaced by hyphens ('-') in the script name</li>
+    <li>extension ('.py') must be removed from the script's name</li>
+    <li>rule must start with the `run-` prefix</li>
+</ol>
 </details>

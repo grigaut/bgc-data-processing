@@ -7,8 +7,8 @@ This scripts reads data from a folder and show the box plots of a given variable
 
 ## Configuration
 
-The configuration file for this script is `config/plot_var_boxplot.toml`. All the parameters and their functionality are listed below:
-
+The configuration file for this script is `config/plot_var_boxplot.toml` (based on [`config/default_plot_var_boxplot.toml`]({{repo_blob}}/config/default/plot_var_boxplot.toml)). All the parameters and their functionality are listed below:
+### **Input/Output**
 ??? question "LOADING_DIR"
 
     Directory from which to load data.
@@ -33,27 +33,19 @@ The configuration file for this script is `config/plot_var_boxplot.toml`. All th
 
     Expected type: `bool`
 
-??? question "PLOT_VARIABLE"
-
-    Variable to plot the box-whisker figure of.
-
-    **default**: `"NTRA"`
-
-    Expected type: `str`
-
-??? question "BOXPLOT_PERIOD"
-
-    Period to use for each boxplot. Can be one of `year`, `month`, `week` or `day`.
-
-    **default**: `"year"`
-
-    Expected type: `str`
-
 ??? question "SAVING_DIR"
 
     Directory in which to save the figure.
 
     **default**: `"bgc_figs"`
+
+    Expected type: `str`
+### **Data Selection**
+??? question "PLOT_VARIABLE"
+
+    Variable to plot the box-whisker figure of.
+
+    **default**: `"NTRA"`
 
     Expected type: `str`
 
@@ -128,7 +120,16 @@ The configuration file for this script is `config/plot_var_boxplot.toml`. All th
     **default**: `["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]`
 
     Expected type: `list[str]`
+### **Plotting Options**
 
+??? question "BOXPLOT_PERIOD"
+
+    Period to use for each boxplot. Can be one of `year`, `month`, `week` or `day`.
+
+    **default**: `"year"`
+
+    Expected type: `str`
+### **Others**
 ??? question "VERBOSE"
 
     Verbose value, the higher, the more informations. If set to 0 or below: no information displayed. If set to 1: minimal informations displayed. If set to 2: very complete informations displayed. If set to 3 or higher: exhaustive informations displayed.
@@ -136,3 +137,11 @@ The configuration file for this script is `config/plot_var_boxplot.toml`. All th
     **default**: `2`
 
     Expected type: `int`
+## Script output
+When executed, this script displays Box plots for a given variable, on multiple given water masses.
+
+This is an example of what this plot could look like:
+
+![box plot output example](../assets/plots/boxplot.png){width=750px}
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_boxplot.py)

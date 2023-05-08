@@ -51,17 +51,18 @@ nav:
 
 plugins:
   - autorefs
-  - search                          # Search bar
+  - search                                      # Search bar
+  - macros                                      # Use variables in documentation
   - literate-nav:
-      nav_file: SUMMARY.md          # To auto-generate paths
+      nav_file: SUMMARY.md                      # To auto-generate paths
   - gen-files:
       scripts:
-        - docs/automation/pages_generator.py   # To auto generate 'Code Reference' Section
+        - docs/automation/pages_generator.py    # To auto generate 'Code Reference' Section
   - mkdocstrings:
       handlers:
         python:
           options:
-            docstring_style: numpy  # To parse docstrings
+            docstring_style: numpy              # To parse docstrings
             docstring_section_style: spacy
             heading_level: 3
             show_root_toc_entry: false
@@ -81,3 +82,11 @@ markdown_extensions:
       permalink: true
   - attr_list
   - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+
+extra:
+  repo_tree: https://github.com/grigaut/bgc-data-processing/tree/main
+  repo_blob: https://github.com/grigaut/bgc-data-processing/blob/main

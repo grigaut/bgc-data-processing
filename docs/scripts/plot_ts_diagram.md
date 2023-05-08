@@ -7,8 +7,8 @@ This scripts reads data from a folder and plot the Temperature-Salinity Diagram 
 
 ## Configuration
 
-The configuration file for this script is `config/plot_ts_diagram.toml`. All the parameters and their functionality are listed below:
-
+The configuration file for this script is `config/plot_ts_diagram.toml` (based on [`config/default_plot_ts_diagram.toml`]({{repo_blob}}/config/default/plot_ts_diagram.toml)). All the parameters and their functionality are listed below:
+### **Input/Output**
 ??? question "LOADING_DIR"
 
     Directory from which to load data.
@@ -40,7 +40,7 @@ The configuration file for this script is `config/plot_ts_diagram.toml`. All the
     **default**: `"bgc_figs"`
 
     Expected type: `str`
-
+### **Data Selection**
 ??? question "DATE_MIN"
 
     First date to map (included).
@@ -120,7 +120,7 @@ The configuration file for this script is `config/plot_ts_diagram.toml`. All the
     **default**: `["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]`
 
     Expected type: `list[str]`
-
+### **Others**
 ??? question "VERBOSE"
 
     Verbose value, the higher, the more informations. If set to 0 or below: no information displayed. If set to 1: minimal informations displayed. If set to 2: very complete informations displayed. If set to 3 or higher: exhaustive informations displayed.
@@ -128,3 +128,13 @@ The configuration file for this script is `config/plot_ts_diagram.toml`. All the
     **default**: `2`
 
     Expected type: `int`
+
+## Script Output
+
+When executed, this script displays the Temperature-Salinity diagram for the selected data.
+
+This is an example of what this diagram could look like:
+
+![ts diagram output example](../assets/plots/TS_diagram.png){width=750px}
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_ts_diagram.py)
