@@ -8,14 +8,7 @@ This scripts loads data from differents providers, aggregate the data to a stand
 ## Configuration
 
 The configuration file for this script is `config/save_data.toml` (based on [`config/default_save_data.toml`]({{repo_blob}}/config/default/save_data.toml)). All the parameters and their functionality are listed below:
-
-??? question "PROVIDERS"
-
-    List of providers to use data from
-
-    **default**: ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
-
-    Expected type: `list[str]`
+### **Input/Output**
 
 ??? question "SAVING_DIR"
 
@@ -24,7 +17,14 @@ The configuration file for this script is `config/save_data.toml` (based on [`co
     **default**: "bgc_data"
 
     Expected type: `str`
+### **Data Selection**
+??? question "PROVIDERS"
 
+    List of providers to use data from
+
+    **default**: ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
+
+    Expected type: `list[str]`
 ??? question "VARIABLES"
 
     Variables to include in the output file. The name or the variables are the ones defined in `config/variables.toml`, in the `NAME` field.
@@ -91,13 +91,13 @@ The configuration file for this script is `config/save_data.toml` (based on [`co
 
 ??? question "EXPOCODES_TO_LOAD"
     : list[str]: precise expocode to load alone.
-    # If empty, no discrimination on expocode will be conducted
+    If empty, no discrimination on expocode will be conducted
     **default**: []
 
 ??? question "PRIORITY"
     : list[str]: providers priority list to use when removing duplicates
     **default**: ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
-
+### **Others**
 ??? question "VERBOSE"
     : int: verbose value, the higher, the more informations.
     # If set to 0 or below: no information displayed
