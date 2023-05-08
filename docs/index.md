@@ -68,7 +68,7 @@ To run a script from the [scripts](/scripts/) folder and named `script_1.py`, on
 
     1. make will install the correct environment and run the script
 
-    Any `.py` file loctaed in the [scripts](/scripts/) folder can be run with a make rule starting by `run-` and ending with the name of the file (without the `.py` extension) and where all underscores ('_') ar replaced by hyphens ('-').
+    Any `.py` file located in the [scripts](/scripts/) folder can be run with a make rule starting by `run-` and ending with the name of the file (without the `.py` extension) and where all underscores ('_') ar replaced by hyphens ('-').
     *These rules are created dynamically so if a new script is added, there is no modification to apply to [Makefile](/Makefile) to use the corresponding rule*
 
 === "Without make"
@@ -90,6 +90,8 @@ To run a script from the [scripts](/scripts/) folder and named `script_1.py`, on
     ```
 
     1. Run script.
+
+All the details about the scripts, their execution, their input parameters and their output can be found in the [Scripts](/scripts/) section of this documentation.
 
 ## Make rules cheatsheet
 
