@@ -7,7 +7,7 @@ This scripts reads data from a folder and show the box plots of a given variable
 
 ## Configuration
 
-The configuration file for this script is `config/plot_var_boxplot.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_var_boxplot.toml` (based on [`config/default_plot_var_boxplot.toml`]({{repo_blob}}/config/default/plot_var_boxplot.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

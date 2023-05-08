@@ -7,7 +7,7 @@ This scripts reads data from a folder and plot the Temperature-Salinity Diagram 
 
 ## Configuration
 
-The configuration file for this script is `config/plot_ts_diagram.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_ts_diagram.toml` (based on [`config/default_plot_ts_diagram.toml`]({{repo_blob}}/config/default/plot_ts_diagram.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

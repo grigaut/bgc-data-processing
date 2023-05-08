@@ -18,7 +18,7 @@ The following keys are used to interact with this map:
 
 ## Configuration
 
-The configuration file for this script is `config/plot_interactive.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_interactive.toml` (based on [`config/default_plot_interactive.toml`]({{repo_blob}}/config/default/plot_interactive.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

@@ -7,7 +7,7 @@ This scripts reads data from a folder and show the histograms of a given variabl
 
 ## Configuration
 
-The configuration file for this script is `config/plot_var_histogram.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_var_histogram.toml` (based on [`config/default_plot_var_histogram.toml`]({{repo_blob}}/config/default/plot_var_histogram.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

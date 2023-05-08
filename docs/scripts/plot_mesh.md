@@ -7,7 +7,7 @@ This scripts reads data from a folder and displays the data density on a map.
 
 ## Configuration
 
-The configuration file for this script is `config/plot_mesh.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_mesh.toml` (based on [`config/default_plot_mesh.toml`]({{repo_blob}}/config/default/plot_mesh.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

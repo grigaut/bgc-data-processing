@@ -7,7 +7,7 @@ This scripts reads data from a folder and show a given variable value against pr
 
 ## Configuration
 
-The configuration file for this script is `config/plot_var_pressure.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_var_pressure.toml` (based on [`config/default_plot_var_pressure.toml`]({{repo_blob}}/config/default/plot_var_pressure.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 

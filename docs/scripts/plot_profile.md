@@ -7,7 +7,7 @@ This scripts reads data from a folder and plot the density profile (depth as ver
 
 ## Configuration
 
-The configuration file for this script is `config/plot_profile.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_profile.toml` (based on [`config/default_plot_profile.toml`]({{repo_blob}}/config/default/plot_profile.toml)). All the parameters and their functionality are listed below:
 
 ??? question "LOADING_DIR"
 
