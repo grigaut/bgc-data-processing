@@ -7,7 +7,7 @@ This scripts loads data from differents providers, aggregate the data to a stand
 
 ## Configuration
 
-The configuration file for this script is `config/save_data.toml`. All the parameters and their functionality are listed below:
+The configuration file for this script is `config/save_data.toml` (based on [`config/default_save_data.toml`]({{repo_blob}}/config/default/save_data.toml)). All the parameters and their functionality are listed below:
 
 ??? question "PROVIDERS"
 
@@ -105,3 +105,5 @@ The configuration file for this script is `config/save_data.toml`. All the param
     # If set to 2: very complete informations displayed
     # if set to 3 or higher: exhaustive informations displayed
     **default**: 2
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/save_data.py)

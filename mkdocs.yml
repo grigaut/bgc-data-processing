@@ -82,3 +82,11 @@ markdown_extensions:
       permalink: true
   - attr_list
   - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+
+extra:
+  repo_tree: https://github.com/grigaut/bgc-data-processing/tree/main
+  repo_blob: https://github.com/grigaut/bgc-data-processing/blob/main

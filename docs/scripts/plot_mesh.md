@@ -184,3 +184,5 @@ The configuration file for this script is `config/plot_mesh.toml`. All the param
     **default**: `2`
 
     Expected type: `int`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_mesh.py)

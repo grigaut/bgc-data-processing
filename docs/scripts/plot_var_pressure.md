@@ -128,3 +128,5 @@ The configuration file for this script is `config/plot_var_pressure.toml`. All t
     **default**: `2`
 
     Expected type: `int`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_pressure.py)

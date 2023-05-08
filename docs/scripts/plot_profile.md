@@ -160,3 +160,5 @@ The configuration file for this script is `config/plot_profile.toml`. All the pa
     **default**: `2`
 
     Expected type: `int`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_profile.py)

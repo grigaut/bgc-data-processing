@@ -136,3 +136,5 @@ The configuration file for this script is `config/plot_var_boxplot.toml`. All th
     **default**: `2`
 
     Expected type: `int`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_boxplot.py)

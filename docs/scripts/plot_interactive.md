@@ -171,3 +171,5 @@ The configuration file for this script is `config/plot_interactive.toml`. All th
     **default**: `["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]`
 
     Expected type: `list[str]`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_interactive.py)

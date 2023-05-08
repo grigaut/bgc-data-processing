@@ -128,3 +128,5 @@ The configuration file for this script is `config/plot_ts_diagram.toml`. All the
     **default**: `2`
 
     Expected type: `int`
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_ts_diagram.py)
