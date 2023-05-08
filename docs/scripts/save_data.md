@@ -129,5 +129,11 @@ The configuration file for this script is `config/save_data.toml` (based on [`co
     **default**: `2`
 
     Expected type: `int`
+## Script Output
+When executed, this script will create files in the `SAVING_DIR` folder with the data from all sources specified in `PROVIDERS` with a standardized format.
+
+This is an example of what this data could look like:
+
+![saving data output example](../assets/plots/saved_data.png){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/save_data.py)

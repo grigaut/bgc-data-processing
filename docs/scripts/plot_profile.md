@@ -160,5 +160,11 @@ The configuration file for this script is `config/plot_profile.toml` (based on [
     **default**: `2`
 
     Expected type: `int`
+## Script Output
+When executed, this script displays a density profile plot. This plot shows the depth vs date density of the data.
+
+This is an example of what this plot could look like:
+
+![profile plot output example](../assets/plots/profile.png){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_profile.py)

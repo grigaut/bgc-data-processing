@@ -137,5 +137,11 @@ The configuration file for this script is `config/plot_var_boxplot.toml` (based 
     **default**: `2`
 
     Expected type: `int`
+## Script output
+When executed, this script displays Box plots for a given variable, on multiple given water masses.
+
+This is an example of what this plot could look like:
+
+![box plot output example](../assets/plots/boxplot.png){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_boxplot.py)

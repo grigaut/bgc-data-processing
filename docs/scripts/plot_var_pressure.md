@@ -128,5 +128,11 @@ The configuration file for this script is `config/plot_var_pressure.toml` (based
     **default**: `2`
 
     Expected type: `int`
+## Script Output
+When executed, this script display a value vs pressure view of a given variable, for different given water masses.
+
+This is an example of what this plot could look like:
+
+![var vs pressure output example](../assets/plots/wm_comparison.png){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_pressure.py)

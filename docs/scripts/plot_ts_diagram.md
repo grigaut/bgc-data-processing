@@ -129,4 +129,12 @@ The configuration file for this script is `config/plot_ts_diagram.toml` (based o
 
     Expected type: `int`
 
+## Script Output
+
+When executed, this script displays the Temperature-Salinity diagram for the selected data.
+
+This is an example of what this diagram could look like:
+
+![ts diagram output example](../assets/plots/TS_diagram.png){width=750px}
+
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_ts_diagram.py)

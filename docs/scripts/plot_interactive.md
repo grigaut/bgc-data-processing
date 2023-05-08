@@ -171,5 +171,15 @@ The configuration file for this script is `config/plot_interactive.toml` (based 
     **default**: ``true``
 
     Expected type: `bool`
+## Script Output
+When executed, this script will display an interactive map with three panels:
+
+1. The general map of the loaded data, on the left panel.
+2. A zoomed view of any selected data, on the top right panel.
+3. A depth vs date density view of any selected data, on the bottom right panel.
+
+This is an example of what the displayed figure could look like:
+
+![interactive map output example](../assets/plots/interactive_map.png){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_interactive.py)
