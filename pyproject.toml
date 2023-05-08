@@ -28,6 +28,7 @@ mkdocs-literate-nav = "^0.6.0"
 mkdocs-autorefs = "^0.4.1"
 mkdocs-material = "^9.0.6"
 mkdocstrings = { extras = ["python"], version = "^0.20.0" }
+mkdocs-macros-plugin = "^0.7.0"
 
 
 [tool.poetry.group.dev.dependencies]
