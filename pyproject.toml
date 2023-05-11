@@ -39,7 +39,6 @@ black = "^22.12.0"
 python-git-info = "^0.8.2"
 pre-commit = "^3.1.1"
 ruff = "^0.0.254"
-interrogate = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -122,27 +121,6 @@ unfixable = [
 
 [tool.isort]
 profile = 'black'
-
-[tool.interrogate]
-ignore-init-method = true
-ignore-init-module = true
-ignore-magic = true
-ignore-semiprivate = false
-ignore-private = false
-ignore-property-decorators = false
-ignore-module = true
-ignore-nested-functions = true
-ignore-nested-classes = true
-ignore-setters = false
-fail-under = 100
-exclude = ["setup.py", "docs", "build", "tests", "sandbox", "src/abfile"]
-verbose = 1
-quiet = false
-whitelist-regex = []
-color = true
-omit-covered-files = false
-generate-badge = "docs/assets/badges"
-badge-format = "svg"
 
 [tool.ruff.pydocstyle]
 convention = "numpy"

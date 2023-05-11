@@ -20,12 +20,6 @@ repos:
     rev: 22.3.0
     hooks:
       - id: black
-  - repo: https://github.com/econchick/interrogate
-    rev: 1.5.0
-    hooks:
-      - id: interrogate
-        args: ["--config=pyproject.toml"]
-        pass_filenames: false
   - repo: https://github.com/python-poetry/poetry
     rev: 1.4.0
     hooks:
