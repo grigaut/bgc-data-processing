@@ -1,4 +1,3 @@
-[![Docstrings](./docs/assets/badges/interrogate_badge.svg)](https://github.com/grigaut/bgc-data-processing)
 # bgc-data-processing
 bgc_data_processing is a set of scripts to prepare csv files with BGC variables for EnKF prepobs.
 ## Getting started

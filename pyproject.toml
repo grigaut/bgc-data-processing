@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Set of scripts to prepare csv files with BGC variables for EnKF prepobs"
 authors = ["Gaétan Rigaut <gaetanrigaut.s@gmail.com>"]
 readme = "README.md"
-packages = [{ include = "bgc_data_processing", from = "src" }]
+packages = [
+    { include = "bgc_data_processing", from = "src" },
+    { include = "abfile", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
@@ -36,8 +39,6 @@ black = "^22.12.0"
 python-git-info = "^0.8.2"
 pre-commit = "^3.1.1"
 ruff = "^0.0.254"
-interrogate = "^1.5.0"
-pydocstyle = "^6.3.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -45,10 +46,12 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
+force-exclude = "src/abfile"
 
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+exclude = ["src/abfile/*"]
 select = [
     # pyflakes
     'F',
@@ -119,30 +122,5 @@ unfixable = [
 [tool.isort]
 profile = 'black'
 
-[tool.interrogate]
-ignore-init-method = true
-ignore-init-module = true
-ignore-magic = true
-ignore-semiprivate = false
-ignore-private = false
-ignore-property-decorators = false
-ignore-module = true
-ignore-nested-functions = true
-ignore-nested-classes = true
-ignore-setters = false
-fail-under = 100
-exclude = ["setup.py", "docs", "build", "tests", "sandbox"]
-verbose = 1
-quiet = false
-whitelist-regex = []
-color = true
-omit-covered-files = false
-generate-badge = "docs/assets/badges"
-badge-format = "svg"
-
 [tool.ruff.pydocstyle]
 convention = "numpy"
-
-[tool.pydocstyle]
-convention = "numpy"
-match-dir = "bgc_data_processing/*"
