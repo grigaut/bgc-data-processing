@@ -195,8 +195,14 @@ class BaseLoader(ABC):
         vars_to_remove_when_any_nan = self._variables.to_remove_if_any_nan
         vars_to_remove_when_all_nan = self._variables.to_remove_if_all_nan
         # Check for nans
-        any_nans = df[vars_to_remove_when_any_nan].isna().any(axis=1)
-        all_nans = df[vars_to_remove_when_all_nan].isna().all(axis=1)
+        if vars_to_remove_when_any_nan:
+            any_nans = df[vars_to_remove_when_any_nan].isna().any(axis=1)
+        else:
+            any_nans = pd.Series(False, index=df.index)
+        if vars_to_remove_when_all_nan:
+            all_nans = df[vars_to_remove_when_all_nan].isna().all(axis=1)
+        else:
+            all_nans = pd.Series(False, index=df.index)
         # Get indexes to drop
         indexes_to_drop = df[any_nans | all_nans].index
         return df.drop(index=indexes_to_drop)
