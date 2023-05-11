@@ -28,7 +28,7 @@ PATH = "path/to/file/directory"
 #? CLIVAR.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
 #? CLIVAR.EXCLUDE: list[str]: files to exclude from loading
-EXCLUDE = []
+EXCLUDE = ["clivar_20040310_06MT.csv"]
 [GLODAPv2]
 #? GLODAPv2.PATH: str: path to the folder containing the data
 PATH = "path/to/file/directory"
@@ -77,4 +77,13 @@ PATH = "path/to/file/directory"
 #? CMEMS.CATEGORY: str: data category, either 'float' or 'in_situ'
 CATEGORY = "in_situ"
 #? CMEMS.EXCLUDE: list[str]: files to exclude from loading
+EXCLUDE = []
+[HYCOM]
+#? HYCOM.PATH: str: path to the folder containing the data
+PATH = "path/to/file/directory"
+#? HYCOM.REGIONAL_GRID_BASENAME: str: basename of the regional grid abfiles
+REGIONAL_GRID_BASENAME = "path/to/file_basename"
+#? HYCOM.CATEGORY: str: data category, either 'float' or 'in_situ'
+CATEGORY = "model"
+#? HYCOM.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
