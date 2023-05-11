@@ -334,7 +334,7 @@ class NotExistingVar(BaseVar):
         Self
             Self.
         """
-        self._default = default
+        self.default = default
         return self
 
     def remove_when_all_nan(self) -> Self:
