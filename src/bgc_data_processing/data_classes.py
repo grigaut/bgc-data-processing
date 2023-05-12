@@ -522,7 +522,7 @@ class Storer:
         Storer
             New storer respecting the constraints.
         """
-        data = constraints.apply_constraints_to_dataframe(df=storer.data)
+        data = constraints.apply_constraints_to_dataframe(dataframe=storer.data)
         return Storer(
             data=data,
             category=storer.category,
