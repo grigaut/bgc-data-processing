@@ -340,7 +340,7 @@ def directory_check(get_variable: Callable) -> Callable:
         ):
             directory = Path(get_variable(self, keys))
             if directory.is_dir():
-                if directory.glob("*.*"):
+                if list(directory.glob("*.*")):
                     if self.existing_dir_behavior == "raise":
                         raise IsADirectoryError(
                             f"Directory {directory} already exists and is not empty.",
