@@ -1,8 +1,8 @@
 """Data storing objects."""
 
 
-import os
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import geopandas as gpd
@@ -308,31 +308,31 @@ class Storer:
         dump_index = duplicates[to_dump].index
         return df.drop(dump_index, axis=0)
 
-    def save(self, filepath: str) -> None:
+    def save(self, filepath: Path) -> None:
         """Save the Dataframe.
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Where to save the output.
         """
         # Verbose
         if self._verbose > 1:
-            print(f"\tSaving data in {filepath.split('/')[-1]}")
+            print(f"\tSaving data in {filepath.name}")
         # Parameters
         name_format = self.variables.name_save_format
         value_format = self.variables.value_save_format
         df = self.data.loc[:, self.variables.save_labels]
         # Get unit rows' values
         units = [self.variables.unit_mapping[col] for col in df.columns]
-        dirout = os.path.dirname(filepath)
+        dirout = filepath.parent
         # make directory if needed
         if dirout == "":
             pass
-        elif not os.path.isdir(dirout):
-            os.mkdir(dirout)
+        elif not dirout.is_dir():
+            dirout.mkdir()
         # Save file
-        with open(filepath, "w") as file:
+        with filepath.open("w") as file:
             # Write variables row
             file.write(name_format % tuple(df.columns) + "\n")
             # Write unit row
