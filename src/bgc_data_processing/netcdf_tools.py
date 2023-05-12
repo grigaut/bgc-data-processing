@@ -2,8 +2,8 @@
 
 
 import datetime as dt
-import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import netCDF4
@@ -29,7 +29,7 @@ class NetCDFLoader(BaseLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : str
+    dirin : Path
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
@@ -46,7 +46,7 @@ class NetCDFLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: str,
+        dirin: Path,
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
@@ -57,7 +57,7 @@ class NetCDFLoader(BaseLoader):
         ----------
         provider_name : str
             Data provider name.
-        dirin : str
+        dirin : Path
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
@@ -102,7 +102,7 @@ class NetCDFLoader(BaseLoader):
             verbose=self.verbose,
         )
 
-    def _select_filepaths(self, exclude: list) -> list[str]:
+    def _select_filepaths(self, exclude: list) -> list[Path]:
         """Select filepaths referring to the files to load.
 
         exclude: list
@@ -110,15 +110,15 @@ class NetCDFLoader(BaseLoader):
 
         Returns
         -------
-        list[str]
+        list[Path]
             List of the filepaths to the files to load.
         """
         regex = re.compile(self._files_pattern)
-        files = filter(regex.match, os.listdir(self._dirin))
+        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
         full_paths = []
         for filename in files:
             if filename not in exclude:
-                full_paths.append(f"{self._dirin}/{filename}")
+                full_paths.append(self._dirin.joinpath(filename))
         return sorted(full_paths)
 
     def _get_id(self, filename: str) -> str:
@@ -140,7 +140,7 @@ class NetCDFLoader(BaseLoader):
         """
         return filename.split("_")[3].split(".")[0]
 
-    def _read(self, filepath: str) -> netCDF4.Dataset:
+    def _read(self, filepath: Path) -> netCDF4.Dataset:
         """Read the file loacted at filepath.
 
         Parameters
@@ -443,14 +443,14 @@ class NetCDFLoader(BaseLoader):
 
     def load(
         self,
-        filepath: str,
+        filepath: Path,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a netCDF file from filepath.
 
         Parameters
         ----------
-        filepath: str
+        filepath: Path
             Path to the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -461,8 +461,8 @@ class NetCDFLoader(BaseLoader):
             DataFrame corresponding to the file.
         """
         if self._verbose > 1:
-            print("\tLoading data from {}".format(filepath.split("/")[-1]))
-        file_id = self._get_id(filepath.split("/")[-1])
+            print(f"\tLoading data from {filepath.name}")
+        file_id = self._get_id(filepath.name)
         nc_data = self._read(filepath=filepath)
         df_format = self._format(nc_data)
         df_dates = self._set_dates(df_format)
