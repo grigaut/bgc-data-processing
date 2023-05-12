@@ -134,6 +134,6 @@ When executed, this script will create files in the `SAVING_DIR` folder with the
 
 This is an example of what this data could look like:
 
-![saving data output example](../assets/plots/saved_data.png){width=750px}
+![saving data output example]({{fix_url("assets/plots/saved_data.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/save_data.py)

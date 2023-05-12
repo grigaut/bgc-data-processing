@@ -165,6 +165,6 @@ When executed, this script displays a density profile plot. This plot shows the 
 
 This is an example of what this plot could look like:
 
-![profile plot output example](../assets/plots/profile.png){width=750px}
+![profile plot output example]({{fix_url("assets/plots/profile.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_profile.py)

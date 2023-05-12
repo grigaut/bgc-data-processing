@@ -41,7 +41,7 @@ Having **GNU Make** installed can also simplify the project's setup.
     ```
 
 !!! info ""
-    [More details on the virtual environment](/virtual_env/)
+    [More details on the virtual environment]({{fix_url("virtual_env/")}})
 
 ## Configuration files
 Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default]({{repo_tree}}/config/default/). If these copies don't exist, the following command will create the files:
@@ -91,7 +91,7 @@ To run a script from the folder [`scripts`]({{repo_tree}}/scripts/) and named `s
 
     1. Run script.
 
-All the details about the scripts, their execution, their input parameters and their output can be found in the [Scripts](/scripts/) section of this documentation.
+All the details about the scripts, their execution, their input parameters and their output can be found in the [Scripts]({{fix_url("scripts/")}}) section of this documentation.
 
 ## Make rules cheatsheet
 

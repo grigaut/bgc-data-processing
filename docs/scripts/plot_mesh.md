@@ -190,6 +190,6 @@ When executed, this script display a map with the density of the data points (re
 
 This is an example of what this map could look like:
 
-![plot mesh output example](../assets/plots/mesh.png){width=750px}
+![plot mesh output example]({{fix_url("assets/plots/mesh.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_mesh.py)

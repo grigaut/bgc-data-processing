@@ -8,7 +8,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-save-data`
 
-    More informations there: [Data Saving script](/scripts/save_data)
+    More informations there: [Data Saving script]({{fix_url("scripts/save_data.md")}})
 
     ([Source]({{repo_blob}}/scripts/save_data.py))
 
@@ -18,7 +18,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-interactive`
 
-    More informations there: [Interactive Map Script](/scripts/plot_interactive)
+    More informations there: [Interactive Map Script]({{fix_url("scripts/plot_interactive.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_interactive.py))
 
@@ -26,7 +26,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-mesh`
 
-    More informations there: [Mesh Plotting Script](/scripts/plot_mesh)
+    More informations there: [Mesh Plotting Script]({{fix_url("scripts/plot_mesh.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_mesh.py))
 
@@ -34,7 +34,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-profile`
 
-    More informations there: [Profile Plotting Script](/scripts/plot_profile)
+    More informations there: [Profile Plotting Script]({{fix_url("scripts/plot_profile.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_profile.py))
 
@@ -44,7 +44,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-ts-diagram`
 
-    More informations there: [Temperature-Salinity Diagram Script](/scripts/plot_ts_diagram)
+    More informations there: [Temperature-Salinity Diagram Script]({{fix_url("scripts/plot_ts_diagram.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_ts_diagram.py))
 
@@ -52,7 +52,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-var-boxplot`
 
-    More informations there: [Variable Boxplot Plotting Script](/scripts/plot_var_boxplot)
+    More informations there: [Variable Boxplot Plotting Script]({{fix_url("scripts/plot_var_boxplot.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_var_boxplot.py))
 
@@ -60,7 +60,7 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-var-histogram`
 
-    More informations there: [Variable Histogram Plotting Script](/scripts/plot_var_histogram)
+    More informations there: [Variable Histogram Plotting Script]({{fix_url("scripts/plot_var_histogram.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_var_histogram.py))
 
@@ -68,6 +68,6 @@ The following sections all relate to the python scripts defined [here]({{config.
 
     Command: `make run-plot-var-pressure`
 
-    More informations there: [Variable vs Pressure Plotting Script](/scripts/plot_var_pressure)
+    More informations there: [Variable vs Pressure Plotting Script]({{fix_url("scripts/plot_var_pressure.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_var_pressure.py))

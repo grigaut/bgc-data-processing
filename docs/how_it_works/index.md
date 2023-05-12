@@ -36,12 +36,12 @@ variable = ExistingVar(
     - flag correct value: list of values to keep from the flag column
 
 !!! note ""
-    [More informations on variables](/how_it_works/variables)
+    [More informations on variables]({{fix_url("how_it_works/variables.md")}})
 
 ## Loading the data
 
-In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV](/reference/csv_tools/#bgc_data_processing.csv_tools.CSVLoader) of [NetCDF](/reference/netcdf_tools/#bgc_data_processing.netcdf_tools.NetCDFLoader)). <br/>
-This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object](/reference/variables/#bgc_data_processing.variables.VariablesStorer)).
+In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("../reference/csv_tools/#bgc_data_processing.csv_tools.CSVLoader")}}) of [NetCDF]({{fix_url("../reference/netcdf_tools/#bgc_data_processing.netcdf_tools.NetCDFLoader")}})). <br/>
+This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("../reference/variables/#bgc_data_processing.variables.VariablesStorer")}})).
 
 Defining a loader for GLODAPv2.2022 :
 
@@ -77,15 +77,15 @@ storer = loader()                       # (9)!
 if the pattern is "glodap_({years}).csv" and the years to load are 2007 and 2008, only the files matching the regex "glodap_(2007|2008).csv" will be loaded.
 7. Variables to load (if the variables are not in the data source, the column will still be created)
 8. Additionnal parameter passed to pd.read_csv
-9. The \__call__ method from the loader will then load the data and return a [storer](/reference/data_classes/#bgc_data_processing.data_classes.Storer) containing the resulting dataframe.
+9. The \__call__ method from the loader will then load the data and return a [storer]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer")}}) containing the resulting dataframe.
 
 !!! note ""
-    [More informations on loading](/how_it_works/loading)
+    [More informations on loading]({{fix_url("how_it_works/loading.md")}})
 
 ## Aggregating the data
 
 Once data has been loaded from some providers, the aggregation of the resulting storers can be done using the `+` operator. However, in order for the aggregation to work, all storer must have similar variables (to concatenates the data) and same category ('in_situ' and 'float' can't be aggregated). <br/>
-Then, in order to save a storer, one only has to call the [.save](/reference/data_classes/#bgc_data_processing.data_classes.Storer.save) method of the object.
+Then, in order to save a storer, one only has to call the [.save]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.save")}}) method of the object.
 
 ``` py
 storer_glodap = loader_glodap()                 # (1)!
@@ -103,8 +103,8 @@ aggregated_storer.save("path/to/save/file")     # (4)!
 
 ## Plotting the data
 
-To plot the data, one has to create a [MeshPlotter](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter) (to create 2D Mesh) and then call its [.plot](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.plot) method.
-To save the data, one has to use the [.save_fig](/reference/tracers/#bgc_data_processing.tracers.MeshPlotter.save_fig) method.
+To plot the data, one has to create a [MeshPlotter]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.MeshPlotter")}}) (to create 2D Mesh) and then call its [.show]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.MeshPlotter.show")}}) method.
+To save the data, one has to use the [.save]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.MeshPlotter.save")}}) method.
 
 ``` py
 from bgc_data_processing.tracers import MeshPlotter
@@ -141,4 +141,4 @@ mesher.save(
 9. Suptitle for the plot.
 
 !!! note ""
-    [More informations on plotting](/how_it_works/plotting)
+    [More informations on plotting]({{fix_url("how_it_works/plotting.md")}})

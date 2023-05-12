@@ -133,6 +133,6 @@ When executed, this script displays histograms for a given variable, on multiple
 
 This is an example of what this plot could look like:
 
-![histogram output example](../assets/plots/histogram.png){width=750px}
+![histogram output example]({{fix_url("assets/plots/histogram.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_histogram.py)

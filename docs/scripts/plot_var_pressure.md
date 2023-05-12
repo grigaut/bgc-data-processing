@@ -133,6 +133,6 @@ When executed, this script display a value vs pressure view of a given variable,
 
 This is an example of what this plot could look like:
 
-![var vs pressure output example](../assets/plots/wm_comparison.png){width=750px}
+![var vs pressure output example]({{fix_url("assets/plots/wm_comparison.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_var_pressure.py)
