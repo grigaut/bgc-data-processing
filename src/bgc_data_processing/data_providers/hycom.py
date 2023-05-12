@@ -1,11 +1,13 @@
 """Specific parameters to load Argo-provided data."""
 
 
+from pathlib import Path
+
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, abfiles_tools, variables
 
 loader = abfiles_tools.ABFileLoader(
     provider_name="HYCOM",
-    dirin=PROVIDERS_CONFIG["HYCOM"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
     category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
     files_pattern="archm.{years}_[0-9]*_[0-9]*.a",
     variables=variables.VariablesStorer(

@@ -2,6 +2,7 @@
 
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
@@ -23,7 +24,7 @@ class BaseLoader(ABC):
     ----------
     provider_name : str
         Data provider name.
-    dirin : str
+    dirin : Path
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
@@ -40,7 +41,7 @@ class BaseLoader(ABC):
     def __init__(
         self,
         provider_name: str,
-        dirin: str,
+        dirin: Path,
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
@@ -51,7 +52,7 @@ class BaseLoader(ABC):
         ----------
         provider_name : str
             Data provider name.
-        dirin : str
+        dirin : Path
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
