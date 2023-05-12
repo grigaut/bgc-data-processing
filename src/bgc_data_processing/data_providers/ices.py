@@ -1,11 +1,12 @@
 """Specific parameters to load ICES-provided data."""
 
+from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="ICES",
-    dirin=PROVIDERS_CONFIG["ICES"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["ICES"]["PATH"]),
     category=PROVIDERS_CONFIG["ICES"]["CATEGORY"],
     files_pattern="ices_({years}).csv",
     variables=variables.VariablesStorer(

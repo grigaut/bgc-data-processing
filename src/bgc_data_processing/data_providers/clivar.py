@@ -1,11 +1,12 @@
 """Specific parameters to load CLIVAR-provided data."""
 
+from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="CLIVAR",
-    dirin=PROVIDERS_CONFIG["CLIVAR"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["CLIVAR"]["PATH"]),
     category=PROVIDERS_CONFIG["CLIVAR"]["CATEGORY"],
     files_pattern="clivar_({years})[0-9][0-9][0-9][0-9]_.*.csv",
     variables=variables.VariablesStorer(
