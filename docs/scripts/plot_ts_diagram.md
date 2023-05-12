@@ -135,6 +135,6 @@ When executed, this script displays the Temperature-Salinity diagram for the sel
 
 This is an example of what this diagram could look like:
 
-![ts diagram output example](../assets/plots/TS_diagram.png){width=750px}
+![ts diagram output example]({{fix_url("assets/plots/TS_diagram.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_ts_diagram.py)

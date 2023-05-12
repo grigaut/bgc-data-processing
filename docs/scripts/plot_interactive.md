@@ -180,6 +180,6 @@ When executed, this script will display an interactive map with three panels:
 
 This is an example of what the displayed figure could look like:
 
-![interactive map output example](../assets/plots/interactive_map.png){width=750px}
+![interactive map output example]({{fix_url("assets/plots/interactive_map.png")}}){width=750px}
 
 Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_interactive.py)

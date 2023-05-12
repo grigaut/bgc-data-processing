@@ -32,7 +32,7 @@ Different types of variables exist :
     ```
 
     !!! tip "Usecase of TemplateVar"
-        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [.not_in_file](/reference/variables/#bgc_data_processing.variables.TemplateVar.not_in_file) and [.in_file_as](/reference/variables/#bgc_data_processing.variables.TemplateVar.in_file_as) methods.
+        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [.not_in_file]({{fix_url("../reference/variables/#bgc_data_processing.variables.TemplateVar.not_in_file")}}) and [.in_file_as]({{fix_url("../reference/variables/#bgc_data_processing.variables.TemplateVar.in_file_as")}}) methods.
 
 === "NotExistingVar"
     Variable which is known to not exist in the dataset. If needed, the corresponding column in the dataframe can be filled later or it will remain as nan.
@@ -108,7 +108,7 @@ Different types of variables exist :
     ```
 
 === "ParsedVar"
-    Variable partially reconstructed from a csv file saved through the [.save](/reference/data_classes/#bgc_data_processing.data_classes.Storer.save) method of a Storer.
+    Variable partially reconstructed from a csv file saved through the [.save]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.save")}}) method of a Storer.
 
     They can be created from scratch but usually it useless to manually use them.
 
@@ -119,7 +119,7 @@ Different types of variables exist :
 
 ## Corrections
 
-It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [.correct_with](/reference/variables/#bgc_data_processing.variables.ExistingVar.correct_with) method. The function given to the method will then be applied to the column once the data loaded.
+It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [.correct_with]({{fix_url("../reference/variables/#bgc_data_processing.variables.ExistingVar.correct_with")}}) method. The function given to the method will then be applied to the column once the data loaded.
 
 ```py
 from bgc_data_processing import TemplateVar
@@ -146,7 +146,7 @@ existing = template.in_file_as(
 It possible to specify settings for ExistingVar and NotExistingVar to remove the rows where the variable is NaN or where specific variable ar all NaN
 
 === "When a particular variable is NaN"
-    It can be done using the [.remove_when_nan](/reference/variables/#bgc_data_processing.variables.ExistingVar.remove_when_nan) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
+    It can be done using the [.remove_when_nan]({{fix_url("../reference/variables/#bgc_data_processing.variables.ExistingVar.remove_when_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
 
     ```py
     from bgc_data_processing import TemplateVar
@@ -167,7 +167,7 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
     1. If latitude value is NaN, the row is dropped.
 
 === "When many variables are Nan"
-    It can be done using the [.remove_when_all_nan](/reference/variables/#bgc_data_processing.variables.ExistingVar.remove_when_all_nan) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
+    It can be done using the [.remove_when_all_nan]({{fix_url("../reference/variables/#bgc_data_processing.variables.ExistingVar.remove_when_all_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
 
     ```py
     from bgc_data_processing import TemplateVar
@@ -199,7 +199,7 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
 
 ## Variables Storer
 
-All variables can then be stored in a [VariablesStorer](/reference/variables/#bgc_data_processing.variables.VariablesStorer) object so that loaders can easily interact with them.
+All variables can then be stored in a [VariablesStorer]({{fix_url("../reference/variables/#bgc_data_processing.variables.VariablesStorer")}}) object so that loaders can easily interact with them.
 
 ``` py
 from bgc_data_processing import TemplateVar, VariablesStorer
@@ -235,7 +235,7 @@ By default, some variables are alreadey defined in `variables.toml` as TemplateV
 
 One variable definition example can be found here:
 ``` toml
---8<-- "variables.toml::13"
+--8<-- "config/default/variables.toml::13"
 ```
 
 To add a new variable, one simply has to create and edit a new set of rows, following the pattern of the already defined variables, creating for example the variable `var`:
