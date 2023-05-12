@@ -1,6 +1,7 @@
 """Data aggregation and saving script."""
 
 import datetime as dt
+from pathlib import Path
 from time import time
 
 import pandas as pd
@@ -14,8 +15,9 @@ from bgc_data_processing.data_classes import Constraints, Storer
 
 if __name__ == "__main__":
     # Script arguments
+    config_filepath = Path("config/save_data.toml")
     CONFIG = parsers.ConfigParser(
-        "config/save_data.toml",
+        filepath=config_filepath,
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],

@@ -1,12 +1,12 @@
 """Parsing tools to determine date ranges."""
 
 import datetime as dt
-import os
 import shutil
 import tomllib
 from collections.abc import Callable
 from copy import deepcopy
 from functools import wraps
+from pathlib import Path
 from typing import Any
 
 from bgc_data_processing.variables import TemplateVar
@@ -18,7 +18,7 @@ class TomlParser:
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path
         Path to the config file.
     check_types : bool, optional
         Whether to check types or not., by default True
@@ -34,22 +34,22 @@ class TomlParser:
         "datetime64[ns]": "datetime64[ns]",
     }
 
-    def __init__(self, filepath: str, check_types: bool = True) -> None:
+    def __init__(self, filepath: Path, check_types: bool = True) -> None:
         """Instanciate a parsing class for config.toml.
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the config file.
         check_types : bool, optional
             Whether to check types or not., by default True
         """
         self.filepath = filepath
         self._check = check_types
-        with open(filepath, "rb") as f:
+        with self.filepath.open("rb") as f:
             self._elements = tomllib.load(f)
         if check_types:
-            self._parsed_types = self._parse_types(filepath=filepath)
+            self._parsed_types = self._parse_types(filepath=self.filepath)
 
     def _get(self, keys: list[str]) -> Any:
         """Return a variable from the toml using its path.
@@ -151,12 +151,12 @@ class TomlParser:
             types.append(final_type)
         return keys, types
 
-    def _parse_types(self, filepath: str) -> dict:
+    def _parse_types(self, filepath: Path) -> dict:
         """Parse the variables types from the type-hinting rows in config.toml.
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the config.toml file.
 
         Returns
@@ -165,7 +165,7 @@ class TomlParser:
             Dictionnary with same structure as config dictionnary referring to types.
         """
         # reads config file
-        with open(filepath) as file:
+        with filepath.open() as file:
             lines = [line.strip() for line in file.readlines()]
         # Select only type hinting lines
         type_hints = [line[3:].replace("\n", "") for line in lines if line[:3] == "#? "]
@@ -338,9 +338,9 @@ def directory_check(get_variable: Callable) -> Callable:
             keys_dirs in self.dirs_vars_keys
             and not self._dir_created["-".join(keys_dirs)]
         ):
-            directory = get_variable(self, keys)
-            if os.path.isdir(directory):
-                if os.listdir(directory):
+            directory = Path(get_variable(self, keys))
+            if directory.is_dir():
+                if directory.glob("*.*"):
                     if self.existing_dir_behavior == "raise":
                         raise IsADirectoryError(
                             f"Directory {directory} already exists and is not empty.",
@@ -349,9 +349,9 @@ def directory_check(get_variable: Callable) -> Callable:
                         pass
                     elif self.existing_dir_behavior == "clean":
                         shutil.rmtree(directory)
-                        os.mkdir(directory)
+                        directory.mkdir()
             else:
-                os.mkdir(directory)
+                directory.mkdir()
             self._dir_created["-".join(keys_dirs)] = True
             return directory
         return get_variable(self, keys)
@@ -364,7 +364,7 @@ class ConfigParser(TomlParser):
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path
         Path to the file.
     check_types : bool, optional
         Whether to check types or not., by default True
@@ -380,7 +380,7 @@ class ConfigParser(TomlParser):
 
     def __init__(
         self,
-        filepath: str,
+        filepath: Path,
         check_types: bool = True,
         dates_vars_keys: list[str | list[str]] = [],
         dirs_vars_keys: list[str | list[str]] = [],
@@ -390,7 +390,7 @@ class ConfigParser(TomlParser):
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the file.
         check_types : bool, optional
             Whether to check types or not., by default True

@@ -11,13 +11,13 @@ __all__ = [
     "DEFAULT_VARS",
     "DEFAULT_WATER_MASSES",
 ]
-PROVIDERS_CONFIG = parsers.ConfigParser("config/providers.toml", True)
+PROVIDERS_CONFIG = parsers.ConfigParser(Path("config/providers.toml"), True)
 
 DEFAULT_VARS = parsers.DefaultTemplatesParser(
-    filepath="config/variables.toml",
+    filepath=Path("config/variables.toml"),
     check_types=True,
 )
 DEFAULT_WATER_MASSES = parsers.WaterMassesParser(
-    filepath="config/water_masses.toml",
+    filepath=Path("config/water_masses.toml"),
     check_types=True,
 )

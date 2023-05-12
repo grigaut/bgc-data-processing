@@ -4,6 +4,7 @@ import datetime as dt
 import os
 import time
 from copy import deepcopy
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import shapely
@@ -368,8 +369,9 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
 
 
 if __name__ == "__main__":
+    config_filepath = Path("config/plot_interactive.toml")
     CONFIG = ConfigParser(
-        filepath="config/plot_interactive.toml",
+        filepath=config_filepath,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=[],
         existing_directory="raise",
