@@ -1,7 +1,6 @@
 """Plot an interative map."""
 
 import datetime as dt
-import os
 import time
 from copy import deepcopy
 from pathlib import Path
@@ -285,9 +284,9 @@ def save(
     )
     new_storer = Storer.from_constraints(storer=storer, constraints=constraints)
     print("Enter the name of the file (don't write the extension):")
-    filename = input().replace(" ", "_") + ".txt"
+    filename = Path(input().replace(" ", "_") + ".txt")
     if filename == ".txt":
-        filename = f"output_{round(time.time())}.txt"
+        filename = Path(f"output_{round(time.time())}.txt")
     new_storer.save(filepath=filename)
     print(f"File saved under {filename}")
 
@@ -334,12 +333,12 @@ def save_polygon(drawers: list[ShapeDrawer], **_kwargs):
         return
     polygon = gdf["geometry"].iloc[-1]
     print("Enter the name of the file (don't write the extension):")
-    filename = input().replace(" ", "_") + ".txt"
+    filename = Path(input().replace(" ", "_") + ".txt")
     if filename == ".txt":
         filename = f"polygon_{round(time.time())}.txt"
-    filepath = f"{POLYGONS_FOLDER}/" + filename
+    filepath = POLYGONS_FOLDER.joinpath(filename)
     polygon_wkt = shapely.to_wkt(polygon)
-    with open(filepath, "w") as file:
+    with filepath.open("w") as file:
         file.write(polygon_wkt)
     print(f"Polygon saved under {filepath}")
 
@@ -351,18 +350,23 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
     -------
     shapely.Polygon
         The loaded polygon.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file doesn't exist.
     """
     print(
         "Enter the name of file storing a polygon"
         f"(inside the '{POLYGONS_FOLDER}' folder) without its extension",
     )
-    filename = input().replace(" ", "_") + ".txt"
-    filepath = POLYGONS_FOLDER + "/" + filename
-    if not os.path.isfile(filepath):
-        print(f"Loading aborted : the file {filepath} doesn't exist.")
-        return None
-    with open(filepath) as file:
+    filename = Path(input().replace(" ", "_") + ".txt")
+    filepath = POLYGONS_FOLDER.joinpath(filename)
+    if not filepath.is_file():
+        raise FileNotFoundError(f"Loading aborted : the file {filepath} doesn't exist.")
+    with filepath.open() as file:
         first_line = file.readlines()[0]
+        print(first_line)
         polygon = shapely.from_wkt(first_line)
     print(f"Successfully loaded polygon from {filepath}")
     return polygon
@@ -376,7 +380,7 @@ if __name__ == "__main__":
         dirs_vars_keys=[],
         existing_directory="raise",
     )
-    LOADING_DIR: str = CONFIG["LOADING_DIR"]
+    LOADING_DIR = Path(CONFIG["LOADING_DIR"])
     VARIABLE: str = CONFIG["VARIABLE"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
@@ -394,13 +398,9 @@ if __name__ == "__main__":
     LONGITUDE_MAP_MIN: int | float = CONFIG["LONGITUDE_MAP_MIN"]
     LONGITUDE_MAP_MAX: int | float = CONFIG["LONGITUDE_MAP_MAX"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
-    POLYGONS_FOLDER: str = CONFIG["POLYGONS_FOLDER"]
+    POLYGONS_FOLDER = Path(CONFIG["POLYGONS_FOLDER"])
 
-    filepaths = [
-        f"{LOADING_DIR}/{file}"
-        for file in os.listdir(LOADING_DIR)
-        if file[-4:] in [".csv", ".txt"]
-    ]
+    filepaths = [f for f in LOADING_DIR.glob("*.*") if f.suffix in [".csv", ".txt"]]
 
     storer = Storer.from_files(
         filepath=filepaths,
