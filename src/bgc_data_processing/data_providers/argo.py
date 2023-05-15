@@ -1,12 +1,14 @@
 """Specific parameters to load Argo-provided data."""
 
+from pathlib import Path
+
 import numpy as np
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
 
 loader = netcdf_tools.NetCDFLoader(
     provider_name="ARGO",
-    dirin=PROVIDERS_CONFIG["ARGO"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["ARGO"]["PATH"]),
     category=PROVIDERS_CONFIG["ARGO"]["CATEGORY"],
     files_pattern=".*.nc",
     variables=variables.VariablesStorer(

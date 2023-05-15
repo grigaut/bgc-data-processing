@@ -1,11 +1,12 @@
 """Specific parameters to load IMR-provided data."""
 
+from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="IMR",
-    dirin=PROVIDERS_CONFIG["IMR"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["IMR"]["PATH"]),
     category=PROVIDERS_CONFIG["IMR"]["CATEGORY"],
     files_pattern="imr_({years}).csv",
     variables=variables.VariablesStorer(

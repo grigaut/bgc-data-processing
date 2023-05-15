@@ -1,7 +1,7 @@
 """CSV-related objects."""
 
-import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -22,7 +22,7 @@ class CSVLoader(BaseLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : str
+    dirin : Path
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
@@ -39,7 +39,7 @@ class CSVLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: str,
+        dirin: Path,
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
@@ -51,7 +51,7 @@ class CSVLoader(BaseLoader):
         ----------
         provider_name : str
             Data provider name.
-        dirin : str
+        dirin : Path
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
@@ -141,7 +141,11 @@ class CSVLoader(BaseLoader):
                 raise KeyError("Date constraint dictionnary has invalid keys")
         return self._files_pattern.format(years=years_str)
 
-    def _select_filepaths(self, exclude: list, date_constraint: dict = {}) -> list[str]:
+    def _select_filepaths(
+        self,
+        exclude: list,
+        date_constraint: dict = {},
+    ) -> list[Path]:
         """Select filepaths to use when loading the data.
 
         exclude: list
@@ -151,23 +155,23 @@ class CSVLoader(BaseLoader):
 
         Returns
         -------
-        list[str]
+        list[Path]
             List of filepath to use when loading the data.
         """
         regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, os.listdir(self._dirin))
+        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
         full_paths = []
         for filename in files:
             if filename not in exclude:
-                full_paths.append(f"{self._dirin}/{filename}")
+                full_paths.append(self._dirin.joinpath(filename))
         return sorted(full_paths)
 
-    def _read(self, filepath: str) -> pd.DataFrame:
+    def _read(self, filepath: Path) -> pd.DataFrame:
         """Read csv files, using self._read_params when loading files.
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             CSV filepath.
 
         Returns
@@ -307,14 +311,14 @@ class CSVLoader(BaseLoader):
 
     def load(
         self,
-        filepath: str,
+        filepath: Path,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a csv file from filepath.
 
         Parameters
         ----------
-        filepath: str
+        filepath: Path
             Path to the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -325,7 +329,7 @@ class CSVLoader(BaseLoader):
             DataFrame corresponding to the file.
         """
         if self._verbose > 1:
-            print("\tLoading data from {}".format(filepath.split("/")[-1]))
+            print(f"\tLoading data from {filepath.name}")
         df_raw = self._read(filepath)
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)

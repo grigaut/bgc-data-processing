@@ -1,6 +1,7 @@
 """Data aggregation and saving script."""
 
 import datetime as dt
+from pathlib import Path
 from time import time
 
 import pandas as pd
@@ -14,8 +15,9 @@ from bgc_data_processing.data_classes import Constraints, Storer
 
 if __name__ == "__main__":
     # Script arguments
+    config_filepath = Path("config/save_data.toml")
     CONFIG = parsers.ConfigParser(
-        "config/save_data.toml",
+        filepath=config_filepath,
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -34,7 +36,7 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
-    SAVING_DIR = CONFIG["SAVING_DIR"]
+    SAVING_DIR = Path(CONFIG["SAVING_DIR"])
     PRIORITY = CONFIG["PRIORITY"]
     VERBOSE = CONFIG["VERBOSE"]
 
@@ -108,9 +110,11 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print(f"Saving slices : {data_src}")
         to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
-        make_name = (
-            lambda x: f"{SAVING_DIR}/{data_src}/nutrients_{data_src}_{x['dates']}.csv"
+
+        make_name = lambda x: SAVING_DIR.joinpath(
+            Path(f"{data_src}/nutrients_{data_src}_{x['dates']}.csv"),
         )
+
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
         if VERBOSE > 0:
             print(
@@ -135,7 +139,9 @@ if __name__ == "__main__":
         if VERBOSE > 0:
             print("Saving aggregated data")
         to_save = pd.concat([str_start, slices_index], keys=["dates", "slice"], axis=1)
-        make_name = lambda x: f"{SAVING_DIR}/bgc_{category}_{x['dates']}.txt"
+        make_name = lambda x: SAVING_DIR.joinpath(
+            Path(f"bgc_{category}_{x['dates']}.txt"),
+        )
         to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
     if VERBOSE > 0:
         print("\n" + "\t" + "-" * len(txt))

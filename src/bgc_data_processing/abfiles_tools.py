@@ -1,7 +1,7 @@
 """ABFiles-related objects."""
 import datetime as dt
-import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -44,7 +44,7 @@ class ABFileLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: str,
+        dirin: Path,
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
@@ -56,7 +56,7 @@ class ABFileLoader(BaseLoader):
         ----------
         provider_name : str
             Data provider name.
-        dirin : str
+        dirin : Path
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
@@ -229,14 +229,14 @@ class ABFileLoader(BaseLoader):
 
     def load(
         self,
-        basename: str,
+        basename: Path,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a abfiles from basename.
 
         Parameters
         ----------
-        basename: str
+        basename: Path
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -246,7 +246,7 @@ class ABFileLoader(BaseLoader):
         pd.DataFrame
             DataFrame corresponding to the file.
         """
-        raw_data = self._read(basename=basename)
+        raw_data = self._read(basename=str(basename))
         # transform thickness in depth
         with_depth = self._create_depth_column(raw_data)
         # create date columns
@@ -486,7 +486,7 @@ class ABFileLoader(BaseLoader):
         self,
         exclude: list,
         date_constraint: Constraints,
-    ) -> list[str]:
+    ) -> list[Path]:
         """Select filepaths to use when loading the data.
 
         exclude: list
@@ -496,26 +496,26 @@ class ABFileLoader(BaseLoader):
 
         Returns
         -------
-        list[str]
+        list[Path]
             List of filepath to use when loading the data.
         """
         regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, os.listdir(self._dirin))
+        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
         full_paths = []
         for filename in files:
             basename = filename[:-2]
             keep_filename = filename not in exclude
             keep_basename = basename not in exclude
-            path_basename = f"{self._dirin}/{basename}"
-            afile_exists = os.path.isfile(path_basename + ".a")
-            bfile_exists = os.path.isfile(path_basename + ".b")
-            if not afile_exists:
+            path_basename = self._dirin.joinpath(basename)
+            afile_path = Path(f"{path_basename}.a")
+            bfile_path = Path(f"{path_basename}.b")
+            if not afile_path.is_file():
                 raise FileNotFoundError(
-                    f"afile doesn't exists for basename {path_basename}",
+                    f"{afile_path} does not exist.",
                 )
-            if not bfile_exists:
+            if not bfile_path.is_file():
                 raise FileNotFoundError(
-                    f"bfile doesn't exists for basename {path_basename}",
+                    f"{bfile_path} does not exist.",
                 )
             if keep_basename and keep_filename:
                 full_paths.append(path_basename)
@@ -545,7 +545,7 @@ class ABFileLoader(BaseLoader):
     def _set_date_related_columns(
         self,
         without_dates: pd.DataFrame,
-        basename: str,
+        basename: Path,
     ) -> pd.Series:
         """Set up the date, year, month, day and hour columns.
 
@@ -553,7 +553,7 @@ class ABFileLoader(BaseLoader):
         ----------
         without_dates : pd.DataFrame
             DataFrame with improper dates related columns.
-        basename : str
+        basename : Path
             Basename of the file (no extension). For example, for abfiles
             'folder/file.2000_11_12.a' and 'folder/file.2000_11_12.b', basename is
             'folder/file.2000_11_12'.
@@ -563,7 +563,7 @@ class ABFileLoader(BaseLoader):
         pd.Series
             DataFrame with correct dates related columns.
         """
-        date_part_basename = basename.split(".")[-1]
+        date_part_basename = basename.name.split(".")[-1]
 
         year, day_month, hour = date_part_basename.split("_")
         day = day_month[:2]

@@ -1,11 +1,12 @@
 """Specific parameters to load GLODAPv2.2019-provided data."""
 
+from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
 
 loader = csv_tools.CSVLoader(
     provider_name="GLODAP_2019",
-    dirin=PROVIDERS_CONFIG["GLODAP_2019"]["PATH"],
+    dirin=Path(PROVIDERS_CONFIG["GLODAP_2019"]["PATH"]),
     category=PROVIDERS_CONFIG["GLODAP_2019"]["CATEGORY"],
     files_pattern="glodapv2_({years}).csv",
     variables=variables.VariablesStorer(

@@ -10,8 +10,9 @@ from bgc_data_processing.tracers import WaterMassVariableComparison
 from bgc_data_processing.water_masses import WaterMass
 
 if __name__ == "__main__":
+    config_filepath = Path("config/plot_var_pressure.toml")
     CONFIG = ConfigParser(
-        filepath="config/plot_var_pressure.toml",
+        filepath=config_filepath,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
