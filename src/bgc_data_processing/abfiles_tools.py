@@ -38,8 +38,8 @@ class ABFileLoader(BaseLoader):
     level_column: str = "LEVEL"
     level_key_bfile: str = "k"
     field_key_bfile: str = "field"
-    # https://en.wikipedia.org/wiki/Metre_sea_water#Conversions
-    pascal_by_seawater_meter: int = 9869.23
+    # https://github.com/nansencenter/NERSC-HYCOM-CICE/blob/master/pythonlibs/modeltools/modeltools/hycom/_constants.py#LL1C1-L1C11
+    pascal_by_seawater_meter: int = 9806
 
     def __init__(
         self,
