@@ -38,8 +38,8 @@ class ABFileLoader(BaseLoader):
     level_column: str = "LEVEL"
     level_key_bfile: str = "k"
     field_key_bfile: str = "field"
-    # https://en.wikipedia.org/wiki/Metre_sea_water#Conversions
-    pascal_by_seawater_meter: int = 9869.23
+    # https://github.com/nansencenter/NERSC-HYCOM-CICE/blob/master/pythonlibs/modeltools/modeltools/hycom/_constants.py#LL1C1-L1C11
+    pascal_by_seawater_meter: int = 9806
 
     def __init__(
         self,
@@ -443,7 +443,9 @@ class ABFileLoader(BaseLoader):
         depth_var = self._variables.get(self._variables.depth_var_name)
         group = thickness_df[[longitude_var.label, latitude_var.label, depth_var.label]]
         pres_pascal = group.groupby([longitude_var.label, latitude_var.label]).cumsum()
-        depth_meters = (pres_pascal / 2) / self.pascal_by_seawater_meter
+        pres_sum = pres_pascal[depth_var.label]
+        half_thickness = thickness_df[depth_var.label] / 2
+        depth_meters = (pres_sum - half_thickness) / self.pascal_by_seawater_meter
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
