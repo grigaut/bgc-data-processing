@@ -443,7 +443,7 @@ class ABFileLoader(BaseLoader):
         depth_var = self._variables.get(self._variables.depth_var_name)
         group = thickness_df[[longitude_var.label, latitude_var.label, depth_var.label]]
         pres_pascal = group.groupby([longitude_var.label, latitude_var.label]).cumsum()
-        depth_meters = pres_pascal / self.pascal_by_seawater_meter
+        depth_meters = (pres_pascal / 2) / self.pascal_by_seawater_meter
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
