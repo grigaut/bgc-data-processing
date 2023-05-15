@@ -113,6 +113,28 @@ class BaseLoader(ABC):
         """
         return self._variables
 
+    @property
+    def dirin(self) -> str:
+        """Input directory.
+
+        Returns
+        -------
+        str
+            Input directory
+        """
+        return self._dirin
+
+    @property
+    def files_pattern(self) -> str:
+        """Files pattern.
+
+        Returns
+        -------
+        str
+            Files pattern.
+        """
+        return self._files_pattern
+
     @abstractmethod
     def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
         """Load all files for the loader.
