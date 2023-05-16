@@ -118,7 +118,7 @@ class ABFileLoader(BaseLoader):
         for level in file.fieldlevels:
             level_slice = self._load_one_level(file, level=level)
             all_levels.append(level_slice)
-        return pd.concat(all_levels, axis=0, ignore_index=True)
+        return pd.concat(all_levels, axis=0)
 
     def _get_grid_field(self, variable_name: str) -> pd.Series:
         """Retrieve a field from the grid adfiles.
