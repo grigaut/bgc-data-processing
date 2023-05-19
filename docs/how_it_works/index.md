@@ -40,13 +40,13 @@ variable = ExistingVar(
 
 ## Loading the data
 
-In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/csv_tools/#bgc_data_processing.csv_tools.CSVLoader")}}) of [NetCDF]({{fix_url("reference/netcdf_tools/#bgc_data_processing.netcdf_tools.NetCDFLoader")}})). <br/>
+In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/loaders/#bgc_data_processing.loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/loaders/#bgc_data_processing.loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/loaders/#bgc_data_processing.loaders.ABFileLoader")}})). <br/>
 This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("reference/variables/#bgc_data_processing.variables.VariablesStorer")}})).
 
 Defining a loader for GLODAPv2.2022 :
 
 ``` py
-from bgc_data_processing.csv_tools import CSVLoader
+from bgc_data_processing.loaders import CSVLoader
 from bgc_data_processing.variables import VariablesStorer
 
 variables = VariablesStorer(
