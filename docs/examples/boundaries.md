@@ -2,12 +2,12 @@
 
 Loading script to load year, latitude, longitude, phosphate and nitrate variables from 2 providers, 'provider1' and 'provider2'. Phosphate variable is not measured by provider1 and nitrate is not measured by provider2. <br />
 Therefore, template are created to store basic informations on variables and are then instanciated in order to create relevant ExistingVar or NotExistingVar depending on provider. <br />
-Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [Constraints]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Constraints")}}) objects. Passing a Constraints object to the loader's [\__call__]({{fix_url("../reference/csv_tools/#bgc_data_processing.csv_tools.CSVLoader.__call__")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
+Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [Constraints]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Constraints")}}) objects. Passing a Constraints object to the loader's [\__call__]({{fix_url("../reference/loaders/#bgc_data_processing.loaders.CSVLoader.__call__")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
 
 ``` py
 import datetime as dt
 
-from bgc_data_processing import variables, csv_tools, data_classes
+from bgc_data_processing import variables, loaders, data_classes
 
 # Boundaries definition
 latitude_min = 50
@@ -51,7 +51,7 @@ ntra_var = TemplateVar(
     value_format="%10.3f",
 )
 # loaders definition
-loader_prov1 = csv_tools.CSVLoader(
+loader_prov1 = loaders.from_csv(
     provider_name="provider1",
     dirin="~/provider1/data",
     category="in_situ",
@@ -65,7 +65,7 @@ loader_prov1 = csv_tools.CSVLoader(
         nitrate=ntra_var.in_file_as(("ntra",None,None)),
     )
 )
-loader_prov2 = csv_tools.CSVLoader(
+loader_prov2 = loaders.from_csv(
     provider_name="provider2",
     dirin="~/provider2/data",
     category="in_situ",

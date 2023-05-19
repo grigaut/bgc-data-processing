@@ -10,9 +10,9 @@ Once the variable is created, one must manually add this variable to all the loa
 CMEMS's orginal loader's definition:
 ``` python title="bgc_data_processing/data_providers/cmems.py"
 """Specific parameters to load CMEMS-provided data."""
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = netcdf_tools.NetCDFLoader(
+loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=PROVIDERS_CONFIG["CMEMS"]["PATH"],
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
@@ -72,9 +72,9 @@ Updating the loader by adding the variable (supposedly not in the file here):
 
 ``` python hl_lines="38" title="bgc_data_processing/data_providers/cmems.py"
 """Specific parameters to load CMEMS-provided data."""
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = netcdf_tools.NetCDFLoader(
+loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=PROVIDERS_CONFIG["CMEMS"]["PATH"],
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
@@ -141,9 +141,9 @@ Creating a new file in [data_providers]({{repo_tree}}/src/bgc_data_processing/da
 ``` py title="bgc_data_processing/data_providers/bgc_provider.py"
 """Specific parameters to load BGC_PROVIDER-provided data."""
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = netcdf_tools.NetCDFLoader(
+loader = loaders.from_netcdf(
     provider_name="BGC_PROVIDER",
     dirin=PROVIDERS_CONFIG["BGC_PROVIDER"]["PATH"],
     category=PROVIDERS_CONFIG["BGC_PROVIDER"]["CATEGORY"],
