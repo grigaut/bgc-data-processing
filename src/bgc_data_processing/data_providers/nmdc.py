@@ -1,8 +1,8 @@
 """Specific parameters to load NMDC-provided data."""
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = csv_tools.CSVLoader(
+loader = loaders.from_csv(
     provider_name="NMDC",
     dirin=PROVIDERS_CONFIG["NMDC"]["PATH"],
     category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],

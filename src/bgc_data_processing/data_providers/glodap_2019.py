@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = csv_tools.CSVLoader(
+loader = loaders.from_csv(
     provider_name="GLODAP_2019",
     dirin=Path(PROVIDERS_CONFIG["GLODAP_2019"]["PATH"]),
     category=PROVIDERS_CONFIG["GLODAP_2019"]["CATEGORY"],

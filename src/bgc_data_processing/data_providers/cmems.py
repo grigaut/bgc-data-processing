@@ -4,9 +4,9 @@ from pathlib import Path
 
 import numpy as np
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, netcdf_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = netcdf_tools.NetCDFLoader(
+loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=Path(PROVIDERS_CONFIG["CMEMS"]["PATH"]),
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
