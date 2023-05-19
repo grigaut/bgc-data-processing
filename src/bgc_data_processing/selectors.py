@@ -1,12 +1,170 @@
 """Data selectors objects."""
 
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
+from abfile import ABFileArchv
 from sklearn.neighbors import NearestNeighbors
 
-from bgc_data_processing.abfiles_tools import ABFileLoader, SelectiveABFileLoader
 from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.loaders import ABFileLoader
+
+if TYPE_CHECKING:
+    from bgc_data_processing.variables import VariablesStorer
+
+
+class SelectiveABFileLoader(ABFileLoader):
+    """Load ABFile only on given points.
+
+    Parameters
+    ----------
+    provider_name : str
+        Data provider name.
+    dirin : str
+        Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
+    files_pattern : str
+        Pattern to use to parse files.
+        Must contain a '{years}' in order to be completed using the .format method.
+    variables : VariablesStorer
+        Storer object containing all variables to consider for this data,
+        both the one in the data file but and the one not represented in the file.
+    selection_mask : np.ndarray
+        2d mask to use to load data.
+    grid_basename: str
+        Basename of the ab grid grid file for the loader.
+        => files are considered to be loaded over the same grid.
+    """
+
+    def __init__(
+        self,
+        provider_name: str,
+        dirin: Path,
+        category: str,
+        files_pattern: str,
+        variables: "VariablesStorer",
+        selection_mask: "Mask",
+        grid_basename: str,
+    ) -> None:
+
+        self.mask = selection_mask
+        super().__init__(
+            provider_name,
+            dirin,
+            category,
+            files_pattern,
+            variables,
+            grid_basename,
+        )
+
+    def _get_grid_field(self, variable_name: str) -> pd.Series:
+        """Retrieve a field from the grid adfiles.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to retrieve.
+
+        Returns
+        -------
+        pd.Series
+            Values for this variable.
+
+        Raises
+        ------
+        KeyError
+            If the variable does not exist in the dataset.
+        """
+        variable = self._variables.get(var_name=variable_name)
+        data = None
+        for alias in variable.aliases:
+            name, flag_name, flag_values = alias
+            if name in self.grid_file.fieldnames:
+                # load data
+                mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
+                data_2d: np.ndarray = mask_2d.filled(np.nan)
+                data = self.mask(data_2d, name=variable.label)
+                # data = self._set_index(pd.Series(data_1d, name=variable.label))
+                # load flag
+                if flag_name is None or flag_values is None:
+                    is_valid = self._set_index(pd.Series(True, index=data.index))
+                else:
+                    mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
+                    flag_2d: np.ndarray = mask_2d.filled(np.nan)
+                    flag_1d = flag_2d[self.mask]
+                    flag = pd.Series(flag_1d, name=variable.label)
+                    is_valid = flag.isin(flag_values)
+                # check flag
+                data[~is_valid] = variable.default
+                break
+        if data is None:
+            raise KeyError(
+                f"Grid File doesn't have data for the variable {variable_name}",
+            )
+        return data
+
+    def _load_field(self, file: ABFileArchv, field_name: str, level: int) -> pd.Series:
+        """Load a field from an abfile.
+
+        Parameters
+        ----------
+        file : ABFileArchv
+            File to load dat from.
+        field_name : str
+            Name of the field to load.
+        level : int
+            Number of the level to load data from.
+
+        Returns
+        -------
+        pd.Series
+            Flatten values from the field.
+        """
+        mask_2d: np.ma.masked_array = file.read_field(fieldname=field_name, level=level)
+        data_2d: np.ndarray = mask_2d.filled(np.nan)
+        return self.mask(data_2d)
+
+    def _read(self, basename: str) -> pd.DataFrame:
+        file = ABFileArchv(basename=basename, action="r")
+        all_levels = []
+        # Load levels one by one
+        for level in file.fieldlevels:
+            level_slice = self._load_one_level(file, level=level)
+            all_levels.append(level_slice)
+        return pd.concat(all_levels, axis=0)
+
+    @classmethod
+    def from_abloader(
+        cls,
+        loader: ABFileLoader,
+        mask: "Mask",
+    ) -> "SelectiveABFileLoader":
+        """Create a Selective loader based on an existing loader.
+
+        Parameters
+        ----------
+        loader : ABFileLoader
+            Loader to use as reference.
+        mask : np.ndarray
+            Data mask to use for data selection.
+
+        Returns
+        -------
+        SelectiveABFileLoader
+            Selective Loader.
+        """
+        return SelectiveABFileLoader(
+            provider_name=loader.provider,
+            dirin=loader.dirin,
+            category=loader.category,
+            files_pattern=loader.files_pattern,
+            variables=loader.variables,
+            selection_mask=mask,
+            grid_basename=loader.grid_basename,
+        )
 
 
 class NearestNeighborStrategy:
