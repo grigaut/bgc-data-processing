@@ -13,6 +13,7 @@ from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.variables import ExistingVar, NotExistingVar
 
 if TYPE_CHECKING:
+    from bgc_data_processing.selectors import Mask
     from bgc_data_processing.variables import VariablesStorer
 
 
@@ -624,7 +625,7 @@ class SelectiveABFileLoader(ABFileLoader):
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
-        selection_mask: np.ndarray,
+        selection_mask: "Mask",
         grid_basename: str,
     ) -> None:
 
@@ -664,8 +665,8 @@ class SelectiveABFileLoader(ABFileLoader):
                 # load data
                 mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
                 data_2d: np.ndarray = mask_2d.filled(np.nan)
-                data_1d = data_2d[self.mask]
-                data = self._set_index(pd.Series(data_1d, name=variable.label))
+                data = self.mask(data_2d, name=variable.label)
+                # data = self._set_index(pd.Series(data_1d, name=variable.label))
                 # load flag
                 if flag_name is None or flag_values is None:
                     is_valid = self._set_index(pd.Series(True, index=data.index))
@@ -703,36 +704,22 @@ class SelectiveABFileLoader(ABFileLoader):
         """
         mask_2d: np.ma.masked_array = file.read_field(fieldname=field_name, level=level)
         data_2d: np.ndarray = mask_2d.filled(np.nan)
-        data_1d = data_2d[self.mask]
-        return self._set_index(pd.Series(data_1d))
+        return self.mask(data_2d)
 
-    def _load_field(self, file: ABFileArchv, field_name: str, level: int) -> pd.Series:
-        """Load a field from an abfile.
-
-        Parameters
-        ----------
-        file : ABFileArchv
-            File to load dat from.
-        field_name : str
-            Name of the field to load.
-        level : int
-            Number of the level to load data from.
-
-        Returns
-        -------
-        pd.Series
-            Flatten values from the field.
-        """
-        mask_2d: np.ma.masked_array = file.read_field(fieldname=field_name, level=level)
-        data_2d: np.ndarray = mask_2d.filled(np.nan)
-        data_1d = data_2d[self.mask]
-        return self._set_index(pd.Series(data_1d))
+    def _read(self, basename: str) -> pd.DataFrame:
+        file = ABFileArchv(basename=basename, action="r")
+        all_levels = []
+        # Load levels one by one
+        for level in file.fieldlevels:
+            level_slice = self._load_one_level(file, level=level)
+            all_levels.append(level_slice)
+        return pd.concat(all_levels, axis=0)
 
     @classmethod
     def from_abloader(
         cls,
         loader: ABFileLoader,
-        mask: np.ndarray,
+        mask: "Mask",
     ) -> "SelectiveABFileLoader":
         """Create a Selective loader based on an existing loader.
 
