@@ -201,9 +201,12 @@ class NearestNeighborStrategy:
             Index of closest point for every observation point.
         """
         model = NearestNeighbors(**self.model_kwargs)
-        model.fit(X=simulations_lat_lon)
+        # Transforming to radian for haversine metric compatibility
+        sim_radians = simulations_lat_lon * np.pi / 180
+        obs_radians = observations_lat_lon * np.pi / 180
+        model.fit(X=sim_radians)
         closest = model.kneighbors(
-            observations_lat_lon,
+            obs_radians,
             return_distance=False,
         )
         return pd.Series(closest.flatten(), index=observations_lat_lon.index)
