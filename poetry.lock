@@ -550,14 +550,14 @@ files = [
 
 [[package]]
 name = "eomaps"
-version = "6.4.1"
+version = "6.5"
 description = "A library to create interactive maps of geographical datasets."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "EOmaps-6.4.1-py3-none-any.whl", hash = "sha256:c7977213aa7b27e8533118e98316ebdcb78fd2bca3bec26a328793b8659c9b8d"},
-    {file = "EOmaps-6.4.1.tar.gz", hash = "sha256:79137a2de3c74b475f1e34b8f3d821a18b173717b096c81dfb9c6b9a7a96c3d4"},
+    {file = "EOmaps-6.5-py3-none-any.whl", hash = "sha256:7db0b7361757e304d25137e44a4930bb94ada31f239816424cad116ad8f85a31"},
+    {file = "EOmaps-6.5.tar.gz", hash = "sha256:2ad54f09553b29812ea1f544f7eb3da6717eaa7cc994cd0025ff389175cc73d6"},
 ]
 
 [package.dependencies]
@@ -1214,14 +1214,14 @@ test = ["mkdocs-include-markdown-plugin", "mkdocs-macros-test", "mkdocs-material
 
 [[package]]
 name = "mkdocs-material"
-version = "9.1.13"
+version = "9.1.14"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.1.13-py3-none-any.whl", hash = "sha256:5705cf8cb6c47c747606bd914bb6c01993ff141295cd259475559a1f09f07d5d"},
-    {file = "mkdocs_material-9.1.13.tar.gz", hash = "sha256:9102e7604d73e507021847601b0a8b4fe9035422788390183f464fa3b30dd508"},
+    {file = "mkdocs_material-9.1.14-py3-none-any.whl", hash = "sha256:b56a9f955ed32d38333715cbbf68ce38f683bf38610c65094fa4ef2db9f08bcd"},
+    {file = "mkdocs_material-9.1.14.tar.gz", hash = "sha256:1ae74cc5464ef2f64574d4884512efed7f4db386fb9bc6af20fd427d7a702f49"},
 ]
 
 [package.dependencies]
@@ -1416,14 +1416,14 @@ files = [
 
 [[package]]
 name = "owslib"
-version = "0.29.1"
+version = "0.29.2"
 description = "OGC Web Service utility library"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "OWSLib-0.29.1-py2.py3-none-any.whl", hash = "sha256:6870c958520744b5f5bf8bd2f6c18d33895ab77e9d91c27f1d67899ec89038b2"},
-    {file = "OWSLib-0.29.1.tar.gz", hash = "sha256:034bf2bb539645ea6a417eae7f956d2b23af5913d8e50d062fe8cf8cf398db1d"},
+    {file = "OWSLib-0.29.2-py2.py3-none-any.whl", hash = "sha256:07a597f3d0029ee41eb159dcf784672ce6b3968b61bb39ad93ca9b29a4f4a2b7"},
+    {file = "OWSLib-0.29.2.tar.gz", hash = "sha256:6c03924747e802466c7b4f5873ed555f16aa51806c9be85dc84af95bbe75466c"},
 ]
 
 [package.dependencies]
@@ -2102,19 +2102,19 @@ numpy = "*"
 
 [[package]]
 name = "setuptools"
-version = "67.7.2"
+version = "67.8.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "setuptools-67.7.2-py3-none-any.whl", hash = "sha256:23aaf86b85ca52ceb801d32703f12d77517b2556af839621c641fca11287952b"},
-    {file = "setuptools-67.7.2.tar.gz", hash = "sha256:f104fa03692a2602fa0fec6c6a9e63b6c8a968de13e17c026957dd1f53d80990"},
+    {file = "setuptools-67.8.0-py3-none-any.whl", hash = "sha256:5df61bf30bb10c6f756eb19e7c9f3b473051f48db77fddbe06ff2ca307df9a6f"},
+    {file = "setuptools-67.8.0.tar.gz", hash = "sha256:62642358adc77ffa87233bc4d2354c4b2682d214048f500964dbe760ccedf102"},
 ]
 
 [package.extras]
 docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-hoverxref (<2)", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (==0.8.3)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
-testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8 (<5)", "flake8-2020", "ini2toml[lite] (>=0.9)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pip (>=19.1)", "pip-run (>=8.8)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)", "pytest-perf", "pytest-timeout", "pytest-xdist", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
+testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8-2020", "ini2toml[lite] (>=0.9)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pip (>=19.1)", "pip-run (>=8.8)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-mypy (>=0.9.1)", "pytest-perf", "pytest-ruff", "pytest-timeout", "pytest-xdist", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
 testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pytest", "pytest-enabler", "pytest-xdist", "tomli", "virtualenv (>=13.0.0)", "wheel"]
 
 [[package]]
