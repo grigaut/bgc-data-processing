@@ -1655,23 +1655,20 @@ class ABFileLoader(BaseLoader):
         """
         date_part_basename = basename.name.split(".")[-1]
 
-        year, day_month, hour = date_part_basename.split("_")
-        day = day_month[:2]
-        month = day_month[2:]
-        date = dt.date(int(year), int(month), int(day))
+        date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
 
         date_var = self._variables.get(self._variables.date_var_name)
         year_var = self._variables.get(self._variables.year_var_name)
         month_var = self._variables.get(self._variables.month_var_name)
         day_var = self._variables.get(self._variables.day_var_name)
 
-        without_dates[date_var.label] = date
-        without_dates[year_var.label] = int(year)
-        without_dates[month_var.label] = int(month)
-        without_dates[day_var.label] = int(day)
+        without_dates[date_var.label] = date.date()
+        without_dates[year_var.label] = date.year
+        without_dates[month_var.label] = date.month
+        without_dates[day_var.label] = date.day
 
         hour_var = self._variables.get(self._variables.hour_var_name)
         if hour_var is not None:
-            without_dates[hour_var.label] = int(hour)
+            without_dates[hour_var.label] = date.hour
 
         return without_dates
