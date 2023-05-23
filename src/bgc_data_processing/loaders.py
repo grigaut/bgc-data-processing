@@ -240,7 +240,7 @@ class BaseLoader(ABC):
         return self._variables
 
     @property
-    def dirin(self) -> str:
+    def dirin(self) -> Path:
         """Input directory.
 
         Returns
