@@ -25,10 +25,12 @@ class Interpolator:
         self,
         base: pd.DataFrame,
         x_column_name: str,
+        y_columns_name: list[str],
         kind: str = "linear",
     ) -> None:
         self._base = base
         self._x = x_column_name
+        self._ys = y_columns_name
         self.kind = kind
 
     def _handle_outbound_max(
@@ -53,8 +55,10 @@ class Interpolator:
         pd.Series
             Result for outbound observation.
         """
-        max_loc = ref_slice[self._x] == ref_slice[self._x].max()
-        max_series: pd.Series = ref_slice[max_loc].iloc[0, :]
+        if isinstance(ref_slice, pd.Series):
+            max_series = ref_slice
+        else:
+            max_series: pd.Series = ref_slice.iloc[ref_slice[self._x].argmax()]
         max_series[self._x] = obs_depth
         max_series.name = name
         return max_series
@@ -81,14 +85,15 @@ class Interpolator:
         pd.Series
             Result for outbound observation.
         """
-        min_loc = ref_slice[self._x] == ref_slice[self._x].min()
-        min_series: pd.Series = ref_slice[min_loc].iloc[0, :]
+        if isinstance(ref_slice, pd.Series):
+            min_series = ref_slice
+        else:
+            min_series: pd.Series = ref_slice.iloc[ref_slice[self._x].argmin()]
         min_series[self._x] = obs_depth
         min_series.name = name
         return min_series
 
-    @staticmethod
-    def _get_columns_to_interp(dataframe: pd.DataFrame) -> pd.DataFrame:
+    def _get_columns_to_interp(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         """Return columns to interpolate (non constant columns).
 
         Parameters
@@ -101,10 +106,9 @@ class Interpolator:
         pd.DataFrame
             Dataframe slice (on columns).
         """
-        return dataframe.loc[:, dataframe.nunique() > 1]
+        return dataframe.loc[:, dataframe.columns.isin(self._ys)]
 
-    @staticmethod
-    def _get_constant_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
+    def _get_constant_columns(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         """Return columns not to interpolate (single valued columns).
 
         Parameters
@@ -117,7 +121,7 @@ class Interpolator:
         pd.DataFrame
             Dataframe slice (on columns).
         """
-        return dataframe.loc[:, dataframe.nunique() <= 1]
+        return dataframe.loc[:, ~dataframe.columns.isin(self._ys)]
 
     def _handle_nan_depth(
         self,
@@ -141,8 +145,8 @@ class Interpolator:
         pd.Series
             NaN series.
         """
-        to_interp = Interpolator._get_columns_to_interp(ref_slice)
-        constant_columns = Interpolator._get_constant_columns(ref_slice)
+        to_interp = self._get_columns_to_interp(ref_slice)
+        constant_columns = self._get_constant_columns(ref_slice)
         constant_values = constant_columns.iloc[0, :]
         non_constant_values = pd.Series(
             np.nan,
@@ -175,8 +179,8 @@ class Interpolator:
         pd.Series
             Interpolated series.
         """
-        non_constant = Interpolator._get_columns_to_interp(ref_slice)
-        constant_columns = Interpolator._get_constant_columns(ref_slice)
+        non_constant = self._get_columns_to_interp(ref_slice)
+        constant_columns = self._get_constant_columns(ref_slice)
         constant_values = constant_columns.iloc[0, :]
         interpolation = interpolate.interp1d(
             x=ref_slice[self._x],

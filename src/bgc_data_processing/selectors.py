@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-from abfile import ABFileArchv
+from abfile import ABFileArchv, ABFileGrid
 from sklearn.neighbors import NearestNeighbors
 
 from bgc_data_processing.data_classes import Constraints, Storer
@@ -46,11 +46,8 @@ class SelectiveABFileLoader(ABFileLoader):
         category: str,
         files_pattern: str,
         variables: "VariablesStorer",
-        selection_mask: "Mask",
         grid_basename: str,
     ) -> None:
-
-        self.mask = selection_mask
         super().__init__(
             provider_name,
             dirin,
@@ -60,7 +57,7 @@ class SelectiveABFileLoader(ABFileLoader):
             grid_basename,
         )
 
-    def _get_grid_field(self, variable_name: str) -> pd.Series:
+    def _get_grid_field(self, variable_name: str, mask: "Mask") -> pd.Series:
         """Retrieve a field from the grid adfiles.
 
         Parameters
@@ -86,15 +83,15 @@ class SelectiveABFileLoader(ABFileLoader):
                 # load data
                 mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
                 data_2d: np.ndarray = mask_2d.filled(np.nan)
-                data = self.mask(data_2d, name=variable.label)
+                data = mask(data_2d, name=variable.label)
                 # data = self._set_index(pd.Series(data_1d, name=variable.label))
                 # load flag
                 if flag_name is None or flag_values is None:
-                    is_valid = self._set_index(pd.Series(True, index=data.index))
+                    is_valid = self._set_index(pd.Series(True, index=mask.index))
                 else:
                     mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
                     flag_2d: np.ndarray = mask_2d.filled(np.nan)
-                    flag_1d = flag_2d[self.mask]
+                    flag_1d = mask(flag_2d, name=flag_name)
                     flag = pd.Series(flag_1d, name=variable.label)
                     is_valid = flag.isin(flag_values)
                 # check flag
@@ -106,7 +103,13 @@ class SelectiveABFileLoader(ABFileLoader):
             )
         return data
 
-    def _load_field(self, file: ABFileArchv, field_name: str, level: int) -> pd.Series:
+    def _load_field(
+        self,
+        file: ABFileArchv,
+        field_name: str,
+        level: int,
+        mask: "Mask",
+    ) -> pd.Series:
         """Load a field from an abfile.
 
         Parameters
@@ -125,22 +128,204 @@ class SelectiveABFileLoader(ABFileLoader):
         """
         mask_2d: np.ma.masked_array = file.read_field(fieldname=field_name, level=level)
         data_2d: np.ndarray = mask_2d.filled(np.nan)
-        return self.mask(data_2d)
+        return mask(data_2d)
 
-    def _read(self, basename: str) -> pd.DataFrame:
+    def _load_one_level(
+        self,
+        file: ABFileArchv,
+        level: int,
+        lon: pd.Series,
+        lat: pd.Series,
+        mask: "Mask",
+    ) -> pd.DataFrame:
+        """Load data on a single level.
+
+        Parameters
+        ----------
+        file : ABFileArchv
+            File to load dat from.
+        level : int
+            Number of the level to load data from.
+        lon: pd.Series
+            Longitude values series
+        lat: pd.Series
+            Latitude values series
+
+        Returns
+        -------
+        pd.DataFrame
+            Raw data from the level, for all variables of interest.
+        """
+        # already existing columns, from grid abfiles
+        columns = [lon, lat]
+        in_dset = self._variables.in_dset
+        not_in_dset = [var for var in self._variables if var not in in_dset]
+        for variable in in_dset:
+            if variable.name == self._variables.longitude_var_name:
+                continue
+            if variable.name == self._variables.latitude_var_name:
+                continue
+            found = False
+            for alias in variable.aliases:
+                name, flag_name, flag_values = alias
+                if name in self._get_fields_by_level(file, level):
+                    # load data
+                    field_df = self._load_field(
+                        file=file,
+                        field_name=name,
+                        level=level,
+                        mask=mask,
+                    )
+                    field_df = field_df.rename(variable.label)
+                    # load valid indicator
+                    field_valid = self._load_valid(file, level, flag_name, flag_values)
+                    if field_valid is not None:
+                        # select valid data
+                        field_df[~field_valid] = variable.default
+                    columns.append(field_df)
+                    found = True
+                    break
+            if not found:
+                not_in_dset.append(variable)
+        # create missing columns
+        for missing in not_in_dset:
+            columns.append(self._create_missing_column(missing))
+        return pd.concat(columns, axis=1)
+
+    def load(
+        self,
+        basename: Path,
+        constraints: Constraints,
+        mask: "Mask",
+    ) -> pd.DataFrame:
+        """Load a abfiles from basename.
+
+        Parameters
+        ----------
+        basename: Path
+            Path to the basename of the file to load.
+        constraints : Constraints, optional
+            Constraints slicer.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame corresponding to the file.
+        """
+        self._index = mask.index
+        raw_data = self._read(basename=str(basename), mask=mask)
+        # transform thickness in depth
+        with_depth = self._create_depth_column(raw_data)
+        # create date columns
+        with_dates = self._set_date_related_columns(with_depth, basename)
+        # converts types
+        typed = self._convert_types(with_dates)
+        # apply corrections
+        corrected = self._correct(typed)
+        # apply constraints
+        constrained = constraints.apply_constraints_to_dataframe(corrected)
+        return self.remove_nan_rows(constrained)
+
+    def _read(self, basename: str, mask: "Mask") -> pd.DataFrame:
+        """Read the ABfile using abfiles tools.
+
+        Parameters
+        ----------
+        basename : str
+            Basename of the file (no extension). For example, for abfiles
+            'folder/file.2000_11_12.a' and 'folder/file.2000_11_12.b', basename is
+            'folder/file.2000_11_12'.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns for all variables (whether it is in the
+            dataset or not).
+        """
         file = ABFileArchv(basename=basename, action="r")
+        lon = self._get_grid_field(self._variables.longitude_var_name, mask=mask)
+        lat = self._get_grid_field(self._variables.latitude_var_name, mask=mask)
         all_levels = []
         # Load levels one by one
         for level in file.fieldlevels:
-            level_slice = self._load_one_level(file, level=level)
+            level_slice = self._load_one_level(
+                file,
+                level=level,
+                lon=lon,
+                lat=lat,
+                mask=mask,
+            )
             all_levels.append(level_slice)
-        return pd.concat(all_levels, axis=0)
+        return pd.concat(all_levels, axis=0, ignore_index=False)
+
+    def __call__(
+        self,
+        constraints: "Constraints" = Constraints(),
+        exclude: list = [],
+    ) -> "Storer":
+        """Load all files for the loader.
+
+        Parameters
+        ----------
+        constraints : Constraints, optional
+            Constraints slicer., by default Constraints()
+        exclude : list, optional
+            Files not to load., by default []
+
+        Returns
+        -------
+        Storer
+            Storer for the loaded data.
+        """
+        # load date constraint
+        date_label = self._variables.get(self._variables.date_var_name).label
+        basenames = self._select_filepaths(
+            exclude=exclude,
+            date_constraint=constraints.get_constraint_parameters(date_label),
+        )
+        # load all files
+        data_slices = []
+
+        mask = Mask.make_empty(self.grid_file)
+        for basename in basenames:
+            data_slices.append(self.load(basename, constraints, mask))
+        if data_slices:
+            data = pd.concat(data_slices, axis=0)
+        else:
+            data = pd.DataFrame(columns=list(self._variables.labels.values()))
+        return Storer(
+            data=data,
+            category=self.category,
+            providers=[self.provider],
+            variables=self.variables,
+            verbose=self.verbose,
+        )
+
+    def get_basenames(self, exclude: list, constraints: "Constraints") -> list[Path]:
+        """Return basenames of files matching constraints.
+
+        Parameters
+        ----------
+        exclude : list
+            List of basename to exclude.
+        constraints : Constraints
+            Data constraints, only year constraint is used.
+
+        Returns
+        -------
+        list[Path]
+            List of basenames matching constraints.
+        """
+        date_label = self._variables.get(self._variables.date_var_name).label
+        return self._select_filepaths(
+            exclude=exclude,
+            date_constraint=constraints.get_constraint_parameters(date_label),
+        )
 
     @classmethod
     def from_abloader(
         cls,
         loader: ABFileLoader,
-        mask: "Mask",
     ) -> "SelectiveABFileLoader":
         """Create a Selective loader based on an existing loader.
 
@@ -148,8 +333,6 @@ class SelectiveABFileLoader(ABFileLoader):
         ----------
         loader : ABFileLoader
             Loader to use as reference.
-        mask : np.ndarray
-            Data mask to use for data selection.
 
         Returns
         -------
@@ -162,7 +345,6 @@ class SelectiveABFileLoader(ABFileLoader):
             category=loader.category,
             files_pattern=loader.files_pattern,
             variables=loader.variables,
-            selection_mask=mask,
             grid_basename=loader.grid_basename,
         )
 
@@ -263,6 +445,25 @@ class Mask:
         """
         kwargs["index"] = self._index
         return pd.Series(data_2d[self.mask].flatten(), **kwargs)
+
+    @classmethod
+    def make_empty(cls, grid: ABFileGrid) -> "Mask":
+        """Create a Mask with all values True with grid size.
+
+        Parameters
+        ----------
+        grid : ABFileGrid
+            ABFileGrid to use to have the grid size.
+
+        Returns
+        -------
+        Mask
+            Mask with only True values.
+        """
+        return Mask(
+            mask_2d=np.full((grid.jdm, grid.idm), True),
+            index_2d=np.array(range(grid.jdm * grid.idm)),
+        )
 
 
 class Match:
@@ -386,8 +587,14 @@ class Selector:
 
     def select(
         self,
+        data_slice: pd.DataFrame,
     ) -> tuple["Mask", "Match"]:
         """Select closest points in an abfile using self.strategy.
+
+        Parameters
+        ----------
+        data_slice: pd.DataFrame
+            Sice of data to select from.
 
         Returns
         -------
@@ -400,15 +607,60 @@ class Selector:
         x_coords_series, y_coords_series = self.get_x_y_indexes()
         index = self.strategy.get_closest_indexes(
             simulations_lat_lon=sims,
-            observations_lat_lon=self.reference[sims.columns],
+            observations_lat_lon=data_slice[sims.columns],
         )
+        indexes = np.array(range(self.grid.jdm * self.grid.idm))
+        indexes_2d = indexes.reshape((self.grid.jdm, self.grid.idm))
         selected_xs = x_coords_series.loc[index.values]
         selected_ys = y_coords_series.loc[index.values]
         to_keep = np.full(shape=(self.grid.jdm, self.grid.idm), fill_value=False)
         to_keep[selected_xs, selected_ys] = True
-        indexes = np.array(range(self.grid.jdm * self.grid.idm))
-        indexes_2d = indexes.reshape((self.grid.jdm, self.grid.idm))
         return Mask(to_keep, indexes_2d), Match(index)
+
+    def select_files_from_date(
+        self,
+        date: np.datetime64,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Find files based on a date.
+
+        Parameters
+        ----------
+        date : np.datetime64
+            Expected date of the files.
+        exclude : list[str]
+            Files to exclude from research.
+
+        Returns
+        -------
+        list[Path]
+            List of paths to the files.
+
+        Raises
+        ------
+        FileNotFoundError
+            If one of the afile or the bfile doesn't exist.
+        """
+        date_str = pd.to_datetime(date).strftime("%Y_%j")
+        full_paths = []
+        for filepath in self.loader.dirin.glob(f"*{date_str}_*.a"):
+            basename = str(filepath.name[:-2])
+            keep_filename = str(filepath.name) not in exclude
+            keep_basename = basename not in exclude
+            path_basename = self.loader.dirin.joinpath(basename)
+            afile_path = Path(f"{path_basename}.a")
+            bfile_path = Path(f"{path_basename}.b")
+            if not afile_path.is_file():
+                raise FileNotFoundError(
+                    f"{afile_path} does not exist.",
+                )
+            if not bfile_path.is_file():
+                raise FileNotFoundError(
+                    f"{bfile_path} does not exist.",
+                )
+            if keep_basename and keep_filename:
+                full_paths.append(path_basename)
+        return full_paths
 
     def __call__(
         self,
@@ -429,13 +681,26 @@ class Selector:
         Storer
             Storer for the loaded data.
         """
-        mask, match = self.select()
-        loader = SelectiveABFileLoader.from_abloader(loader=self.loader, mask=mask)
-        sims = loader(constraints=constraints, exclude=exclude)
+        loader = SelectiveABFileLoader.from_abloader(loader=self.loader)
+        date_var_name = loader.variables.date_var_name
+        date_var_label = loader.variables.get(date_var_name).label
+        basenames = loader.get_basenames(exclude, constraints)
+        datas: list[pd.DataFrame] = []
+        for date in self.reference[date_var_label].unique():
+            data_slice = self.reference[self.reference[date_var_label] == date]
+            basenames = self.select_files_from_date(date, exclude)
+            mask, match = self.select(data_slice)
+            for basename in basenames:
+                sim_data = loader.load(
+                    basename,
+                    constraints=constraints,
+                    mask=mask,
+                )
+            datas.append(match.match(sim_data))
         return Storer(
-            data=match.match(sims.data),
-            category=sims.category,
-            providers=sims.providers,
-            variables=sims.variables,
-            verbose=sims.verbose,
+            data=pd.concat(datas, axis=0),
+            category=loader.category,
+            providers=[loader.provider],
+            variables=loader.variables,
+            verbose=loader.verbose,
         )
