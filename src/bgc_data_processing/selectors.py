@@ -411,10 +411,20 @@ class Mask:
     """
 
     def __init__(self, mask_2d: np.ndarray, index_2d: np.ndarray) -> None:
-        if mask_2d.shape != index_2d.shape:
-            raise ValueError("Both mask and index must have similar shapes.")
+        self._index_2d = index_2d
         self.mask = mask_2d
-        self._index = pd.Index(index_2d[self.mask].flatten())
+
+    @property
+    def mask(self) -> np.ndarray:
+        """2D boolean mask."""
+        return self._mask
+
+    @mask.setter
+    def mask(self, mask_2d: np.ndarray) -> None:
+        if mask_2d.shape != self._index_2d.shape:
+            raise ValueError("Both mask and index must have similar shapes.")
+        self._mask = mask_2d
+        self._index = pd.Index(self._index_2d[self._mask].flatten())
 
     @property
     def index(self) -> pd.Index:
@@ -444,7 +454,32 @@ class Mask:
             Masked data as a pd.Series with self._index as index.
         """
         kwargs["index"] = self._index
-        return pd.Series(data_2d[self.mask].flatten(), **kwargs)
+        return pd.Series(data_2d[self._mask].flatten(), **kwargs)
+
+    def intersect(self, mask_array: np.ndarray) -> "Mask":
+        """Intersect the mask with another (same-shaped) boolean array.
+
+        Parameters
+        ----------
+        mask_array : np.ndarray
+            Array to intersect with.
+
+        Returns
+        -------
+        Mask
+            New mask whith self._mask & mask_array as mask array.
+
+        Raises
+        ------
+        ValueError
+            If mask_array has the wrong shape.
+        """
+        if mask_array.shape != self.mask.shape:
+            raise ValueError("New mask array has incorrect shape.")
+        return Mask(
+            mask_2d=self._mask & mask_array,
+            index_2d=self._index_2d,
+        )
 
     @classmethod
     def make_empty(cls, grid: ABFileGrid) -> "Mask":
