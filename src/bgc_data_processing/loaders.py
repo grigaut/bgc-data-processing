@@ -1162,8 +1162,6 @@ class ABFileLoader(BaseLoader):
         self.grid_basename = grid_basename
         self.grid_file = ABFileGrid(basename=grid_basename, action="r")
         self._index = None
-        self.longitude_series = self._get_grid_field(self._variables.longitude_var_name)
-        self.latitude_series = self._get_grid_field(self._variables.latitude_var_name)
 
     @overload
     def _set_index(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -1197,10 +1195,12 @@ class ABFileLoader(BaseLoader):
             dataset or not).
         """
         file = ABFileArchv(basename=basename, action="r")
+        lon = self._get_grid_field(self._variables.longitude_var_name)
+        lat = self._get_grid_field(self._variables.latitude_var_name)
         all_levels = []
         # Load levels one by one
         for level in file.fieldlevels:
-            level_slice = self._load_one_level(file, level=level)
+            level_slice = self._load_one_level(file, level=level, lon=lon, lat=lat)
             all_levels.append(level_slice)
         return pd.concat(all_levels, axis=0, ignore_index=True)
 
@@ -1347,7 +1347,13 @@ class ABFileLoader(BaseLoader):
         constrained = constraints.apply_constraints_to_dataframe(corrected)
         return self.remove_nan_rows(constrained)
 
-    def _load_one_level(self, file: ABFileArchv, level: int) -> pd.DataFrame:
+    def _load_one_level(
+        self,
+        file: ABFileArchv,
+        level: int,
+        lon: pd.Series,
+        lat: pd.Series,
+    ) -> pd.DataFrame:
         """Load data on a single level.
 
         Parameters
@@ -1356,6 +1362,10 @@ class ABFileLoader(BaseLoader):
             File to load dat from.
         level : int
             Number of the level to load data from.
+        lon: pd.Series
+            Longitude values series
+        lat: pd.Series
+            Latitude values series
 
         Returns
         -------
@@ -1363,7 +1373,7 @@ class ABFileLoader(BaseLoader):
             Raw data from the level, for all variables of interest.
         """
         # already existing columns, from grid abfiles
-        columns = [self.longitude_series, self.latitude_series]
+        columns = [lon, lat]
         in_dset = self._variables.in_dset
         not_in_dset = [var for var in self._variables if var not in in_dset]
         for variable in in_dset:
