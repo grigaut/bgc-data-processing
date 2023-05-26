@@ -216,7 +216,7 @@ class Interpolator:
         pd.Series
             Interpolated series with same depth as row.
         """
-        ref_slice: pd.DataFrame = self._base.loc[row.name, :]
+        ref_slice: pd.DataFrame = self._storer.data.loc[row.name, :]
         obs_depth = row[self._x]
         ref_depths = ref_slice[self._x]
         if np.isnan(obs_depth):
