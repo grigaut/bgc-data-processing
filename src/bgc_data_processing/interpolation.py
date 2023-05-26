@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
+from bgc_data_processing.data_classes import Storer
+
 
 class Interpolator:
     """Interpolate slices with common index from a reference dataframe.
@@ -23,12 +25,12 @@ class Interpolator:
 
     def __init__(
         self,
-        base: pd.DataFrame,
+        base: Storer,
         x_column_name: str,
         y_columns_name: list[str],
         kind: str = "linear",
     ) -> None:
-        self._base = base
+        self._storer = base
         self._columns_order = base.data.columns
         self._x = x_column_name
         self._ys = y_columns_name
@@ -226,3 +228,29 @@ class Interpolator:
         if obs_depth < ref_depths.min():
             return self._handle_outbound_min(ref_slice, obs_depth, row.name)
         return self._interpolate(ref_slice, obs_depth, row.name)
+
+    def interpolate_storer(
+        self,
+        observations_storer: Storer,
+    ) -> Storer:
+        """Interpolate over all rows a Store's dataframe.
+
+        Parameters
+        ----------
+        observations_storer : Storer
+            Storer to interpolate on each row.
+
+        Returns
+        -------
+        Storer
+            Storer with interpolated rows to match observations_storer's x values.
+        """
+        obs_data = observations_storer.data
+        interpolated_df = obs_data.apply(self.interpolate, axis=1)
+        return Storer(
+            data=interpolated_df,
+            category=self._storer.category,
+            providers=self._storer.providers,
+            variables=self._storer.variables,
+            verbose=self._storer.verbose,
+        )

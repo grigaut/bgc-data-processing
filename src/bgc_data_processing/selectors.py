@@ -568,11 +568,11 @@ class Selector:
 
     def __init__(
         self,
-        reference: pd.DataFrame,
+        reference: Storer,
         strategy: NearestNeighborStrategy,
         loader: "ABFileLoader",
     ) -> None:
-        self.reference = reference
+        self.reference = reference.data
         self.loader = loader
         self.strategy = strategy
         self.grid = self.loader.grid_file
@@ -732,8 +732,9 @@ class Selector:
                     mask=mask,
                 )
             datas.append(match.match(sim_data))
+        concatenated = pd.concat(datas, axis=0)
         return Storer(
-            data=pd.concat(datas, axis=0),
+            data=concatenated[self.reference.columns],
             category=loader.category,
             providers=[loader.provider],
             variables=loader.variables,
