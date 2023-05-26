@@ -29,6 +29,7 @@ class Interpolator:
         kind: str = "linear",
     ) -> None:
         self._base = base
+        self._columns_order = base.data.columns
         self._x = x_column_name
         self._ys = y_columns_name
         self.kind = kind
@@ -61,7 +62,7 @@ class Interpolator:
             max_series: pd.Series = ref_slice.iloc[ref_slice[self._x].argmax()]
         max_series[self._x] = obs_depth
         max_series.name = name
-        return max_series
+        return max_series[self._columns_order]
 
     def _handle_outbound_min(
         self,
@@ -91,7 +92,7 @@ class Interpolator:
             min_series: pd.Series = ref_slice.iloc[ref_slice[self._x].argmin()]
         min_series[self._x] = obs_depth
         min_series.name = name
-        return min_series
+        return min_series[self._columns_order]
 
     def _get_columns_to_interp(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         """Return columns to interpolate (non constant columns).
@@ -155,7 +156,7 @@ class Interpolator:
         result = pd.concat([constant_values, non_constant_values])
         result.name = name
         result[self._x] = obs_depth
-        return result
+        return result[self._columns_order]
 
     def _interpolate(
         self,
@@ -194,7 +195,8 @@ class Interpolator:
             index=non_constant.columns,
             name=name,
         )
-        return pd.concat([constant_values, non_constant_values])
+        concatenated = pd.concat([constant_values, non_constant_values])
+        return concatenated[self._columns_order]
 
     def interpolate(
         self,
