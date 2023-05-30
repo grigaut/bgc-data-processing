@@ -724,6 +724,8 @@ class Selector:
         for date in self.reference[date_var_label].unique():
             data_slice = self.reference[self.reference[date_var_label] == date]
             basenames = self.select_files_from_date(date, exclude)
+            if not basenames:
+                continue
             mask, match = self.select(data_slice)
             for basename in basenames:
                 sim_data = loader.load(
