@@ -548,6 +548,27 @@ class Storer:
             verbose=storer.verbose,
         )
 
+    def slice_using_index(self, index: pd.Index) -> "Storer":
+        """Slice Storer using.
+
+        Parameters
+        ----------
+        index : pd.Index
+            Index values to keep.
+
+        Returns
+        -------
+        Storer
+            Corresponding storer.
+        """
+        return Storer(
+            data=self._data.loc[index, :],
+            category=self._category,
+            providers=self._providers,
+            variables=self._variables,
+            verbose=self._verbose,
+        )
+
 
 class Slice(Storer):
     """Slice storing object, instance of Storer to inherit of the saving method.
