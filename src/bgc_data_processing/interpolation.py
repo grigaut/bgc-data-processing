@@ -247,7 +247,8 @@ class Interpolator:
             Storer with interpolated rows to match observations_storer's x values.
         """
         obs_data = observations_storer.data
-        interpolated_df = obs_data.apply(self.interpolate, axis=1)
+        matching_index = obs_data.loc[self._storer.data.index.unique(), :]
+        interpolated_df = matching_index.apply(self.interpolate, axis=1)
         return Storer(
             data=interpolated_df,
             category=self._storer.category,
