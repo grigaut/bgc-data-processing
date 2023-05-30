@@ -382,7 +382,7 @@ class Storer:
     @classmethod
     def from_files(
         cls,
-        filepath: str | list,
+        filepath: Path | list[Path],
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -402,7 +402,7 @@ class Storer:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path | list[Path]
             Path to the file to read.
         providers_column_label : str, optional
             Provider column in the dataframe., by default "PROVIDER"
@@ -481,7 +481,7 @@ class Storer:
 
                 storers.append(reader.get_storer())
             return sum(storers)
-        if isinstance(filepath, str):
+        if isinstance(filepath, Path):
             reader = Reader(
                 filepath=filepath,
                 providers_column_label=providers_column_label,
@@ -978,7 +978,7 @@ class Reader:
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path | list[Path]
         Path to the file to read.
     providers_column_label : str, optional
         Provider column in the dataframe., by default "PROVIDER"
@@ -1021,7 +1021,7 @@ class Reader:
 
     def __init__(
         self,
-        filepath: str,
+        filepath: Path,
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -1041,7 +1041,7 @@ class Reader:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the file to read.
         providers_column_label : str, optional
             Provider column in the dataframe., by default "PROVIDER"
@@ -1112,7 +1112,7 @@ class Reader:
 
     def _read(
         self,
-        filepath: str,
+        filepath: Path,
         unit_row_index: int,
         delim_whitespace: bool,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -1120,7 +1120,7 @@ class Reader:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the file to read.
         unit_row_index : int
             Index of the row with the units, None if there's no unit row.
