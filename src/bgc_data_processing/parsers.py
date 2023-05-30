@@ -340,7 +340,7 @@ def directory_check(get_variable: Callable) -> Callable:
         ):
             directory = Path(get_variable(self, keys))
             if directory.is_dir():
-                if list(directory.glob("*.*")):
+                if list(directory.glob("*.*[!*.gitignore]")):
                     if self.existing_dir_behavior == "raise":
                         raise IsADirectoryError(
                             f"Directory {directory} already exists and is not empty.",
@@ -352,6 +352,9 @@ def directory_check(get_variable: Callable) -> Callable:
                         directory.mkdir()
             else:
                 directory.mkdir()
+                gitignore = directory.joinpath(".gitignore")
+                with gitignore.open("w") as file:
+                    file.write("*")
             self._dir_created["-".join(keys_dirs)] = True
             return directory
         return get_variable(self, keys)
