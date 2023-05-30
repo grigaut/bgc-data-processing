@@ -379,6 +379,23 @@ class Storer:
             slice_index=slice_index,
         )
 
+    def add_feature(
+        self,
+        variable: "NotExistingVar",
+        data: pd.Series,
+    ) -> None:
+        """Add a new feature to the storer.
+
+        Parameters
+        ----------
+        variable : NotExistingVar
+            Variable corresponding to the feature.
+        data : pd.Series
+            Feature data.
+        """
+        self.variables.add_var(variable)
+        self._data[variable.name] = data
+
     @classmethod
     def from_files(
         cls,
@@ -530,23 +547,6 @@ class Storer:
             variables=storer.variables,
             verbose=storer.verbose,
         )
-
-    def add_feature(
-        self,
-        variable: "NotExistingVar",
-        data: pd.Series,
-    ) -> None:
-        """Add a new feature to the storer.
-
-        Parameters
-        ----------
-        variable : NotExistingVar
-            Variable corresponding to the feature.
-        data : pd.Series
-            Feature data.
-        """
-        self.variables.add_var(variable)
-        self._data[variable.name] = data
 
 
 class Slice(Storer):
