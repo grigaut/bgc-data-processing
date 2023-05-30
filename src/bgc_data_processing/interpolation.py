@@ -198,6 +198,7 @@ class Interpolator:
             name=name,
         )
         concatenated = pd.concat([constant_values, non_constant_values])
+        concatenated[self._x] = obs_depth
         return concatenated[self._columns_order]
 
     def interpolate(
