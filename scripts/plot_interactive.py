@@ -400,7 +400,9 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     POLYGONS_FOLDER = Path(CONFIG["POLYGONS_FOLDER"])
 
-    filepaths = [f for f in LOADING_DIR.glob("*.*") if f.suffix in [".csv", ".txt"]]
+    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
+    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
+    filepaths = filepaths_txt + filepaths_csv
 
     storer = Storer.from_files(
         filepath=filepaths,

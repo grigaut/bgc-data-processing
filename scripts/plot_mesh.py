@@ -1,7 +1,6 @@
 """Create a 2d Mesh Plot from files in a directory."""
 
 import datetime as dt
-import os
 from pathlib import Path
 
 from bgc_data_processing.data_classes import Constraints, Storer
@@ -38,11 +37,9 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    filepaths = [
-        f"{LOADING_DIR}/{file}"
-        for file in os.listdir(LOADING_DIR)
-        if file[-4:] in [".csv", ".txt"]
-    ]
+    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
+    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
+    filepaths = filepaths_txt + filepaths_csv
 
     storer = Storer.from_files(
         filepath=filepaths,
