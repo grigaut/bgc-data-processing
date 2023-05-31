@@ -85,7 +85,6 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
-    print(storer)
     plot = MeshPlotter(storer, constraints=constraints)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
