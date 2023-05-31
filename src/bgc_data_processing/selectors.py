@@ -1,5 +1,6 @@
 """Data selectors objects."""
 
+import datetime as dt
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -652,50 +653,23 @@ class Selector:
         to_keep[selected_xs, selected_ys] = True
         return Mask(to_keep, indexes_2d), Match(index)
 
-    def select_files_from_date(
-        self,
-        date: np.datetime64,
-        exclude: list[str],
-    ) -> list[Path]:
-        """Find files based on a date.
+    @staticmethod
+    def parse_date_from_basename(basename: Path) -> dt.date:
+        """Parse date from abfile basename.
 
         Parameters
         ----------
-        date : np.datetime64
-            Expected date of the files.
-        exclude : list[str]
-            Files to exclude from research.
+        basename : Path
+            File basename.
 
         Returns
         -------
-        list[Path]
-            List of paths to the files.
-
-        Raises
-        ------
-        FileNotFoundError
-            If one of the afile or the bfile doesn't exist.
+        dt.date
+            Corresponding date.
         """
-        date_str = pd.to_datetime(date).strftime("%Y_%j")
-        full_paths = []
-        for filepath in self.loader.dirin.glob(f"*{date_str}_*.a"):
-            basename = str(filepath.name[:-2])
-            keep_filename = str(filepath.name) not in exclude
-            keep_basename = basename not in exclude
-            path_basename = self.loader.dirin.joinpath(basename)
-            afile_path = Path(f"{path_basename}.a")
-            bfile_path = Path(f"{path_basename}.b")
-            if not afile_path.is_file():
-                raise FileNotFoundError(
-                    f"{afile_path} does not exist.",
-                )
-            if not bfile_path.is_file():
-                raise FileNotFoundError(
-                    f"{bfile_path} does not exist.",
-                )
-            if keep_basename and keep_filename:
-                full_paths.append(path_basename)
-        return full_paths
+        date_part_basename = basename.name.split(".")[-1]
+        date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
+        return date.date()
 
     def __call__(
         self,
@@ -721,18 +695,17 @@ class Selector:
         date_var_label = loader.variables.get(date_var_name).label
         basenames = loader.get_basenames(exclude, constraints)
         datas: list[pd.DataFrame] = []
-        for date in self.reference[date_var_label].unique():
-            data_slice = self.reference[self.reference[date_var_label] == date]
-            basenames = self.select_files_from_date(date, exclude)
-            if not basenames:
+        for basename in basenames:
+            date = Selector.parse_date_from_basename(basename)
+            data_slice = self.reference[self.reference[date_var_label].dt.date == date]
+            if data_slice.empty:
                 continue
             mask, match = self.select(data_slice)
-            for basename in basenames:
-                sim_data = loader.load(
-                    basename,
-                    constraints=constraints,
-                    mask=mask,
-                )
+            sim_data = loader.load(
+                basename,
+                constraints=constraints,
+                mask=mask,
+            )
             datas.append(match.match(sim_data))
         concatenated = pd.concat(datas, axis=0)
         return Storer(
