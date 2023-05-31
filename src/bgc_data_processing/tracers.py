@@ -2,6 +2,7 @@
 
 
 import warnings
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -12,7 +13,6 @@ from cartopy import crs, feature
 from scipy.stats import norm
 from seawater import eos80
 
-from bgc_data_processing.base import BasePlot
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.dateranges import DateRangeGenerator
 
@@ -24,6 +24,124 @@ if TYPE_CHECKING:
 
     from bgc_data_processing.variables import VariablesStorer
     from bgc_data_processing.water_masses import WaterMass
+
+
+class BasePlot(ABC):
+    """Base class to plot data from a storer.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to plot data of.
+    constraints: Constraints
+            Constraint slicer.
+    """
+
+    def __init__(self, storer: "Storer", constraints: "Constraints") -> None:
+        """Initiate Base class to plot data from a storer.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to plot data of.
+        constraints: Constraints
+                Constraint slicer.
+        """
+        self._storer = constraints.apply_constraints_to_storer(storer)
+        self._variables = storer.variables
+        self._constraints = constraints
+        self._verbose = storer.verbose
+
+    @abstractmethod
+    def _build_to_new_figure(self, *args, **kwargs) -> "Figure":
+        """Create the figure.
+
+        Parameters
+        ----------
+        *args: list
+            Parameters to build the figure.
+        *kwargs: dict
+            Parameters to build the figure.
+
+        Returns
+        -------
+        Figure
+            Figure to show or save.
+        """
+        ...
+
+    @abstractmethod
+    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
+        """Plot method.
+
+        Parameters
+        ----------
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *kwargs: dict
+            Additional parameters to pass to self._build_to_new_figure.
+        """
+        self._build_to_new_figure(
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+        plt.show()
+        plt.close()
+
+    @abstractmethod
+    def save(
+        self,
+        save_path: str,
+        title: str = None,
+        suptitle: str = None,
+        **kwargs,
+    ) -> None:
+        """Figure saving method.
+
+        Parameters
+        ----------
+        save_path : str
+            Path to save the output image.
+        title : str, optional
+            Specify a title to change from default., by default None
+        suptitle : str, optional
+            Specify a suptitle to change from default., by default None
+        *kwargs: dict
+            Additional parameters to pass to self._build_to_new_figure.
+        """
+        self._build_to_new_figure(
+            title=title,
+            suptitle=suptitle,
+            **kwargs,
+        )
+        plt.savefig(save_path)
+
+    @abstractmethod
+    def plot_to_axes(
+        self,
+        ax: "Axes | GeoAxes",
+        *args,
+        **kwargs,
+    ) -> "Axes | GeoAxes":
+        """Plot data to the given axes.
+
+        Parameters
+        ----------
+        ax : Axes | GeoAxes
+            Axes to plot the data on.
+        *args: list
+            Additional parameters for the axes plotting method.
+        *kwargs: dict
+            Additional parameters for the axes plotting method.
+
+        Returns
+        -------
+        Axes | GeoAxes
+            Axes were the data is plotted on.
+        """
 
 
 class MeshPlotter(BasePlot):
@@ -128,7 +246,10 @@ class MeshPlotter(BasePlot):
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
-        group = data[[*self._grouping_columns, var_key]].groupby(self._grouping_columns)
+        group = data[[*self._grouping_columns, var_key]].groupby(
+            self._grouping_columns,
+            dropna=False,
+        )
         if self._depth_density:
             var_series: pd.Series = group.sum()
         else:
@@ -463,6 +584,7 @@ class MeshPlotter(BasePlot):
             lat_key=self._variables.get(self._variables.latitude_var_name).label,
             lon_key=self._variables.get(self._variables.longitude_var_name).label,
         )
+        print(df)
         if self._verbose > 1:
             print("\tCreating figure")
         ax.gridlines(draw_labels=True)

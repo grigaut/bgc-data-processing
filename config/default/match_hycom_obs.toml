@@ -1,0 +1,14 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
+#? LOADING_DIR: str: directory from which to load observation data
+LOADING_DIR = "data_2015"
+#? SIM_PROVIDER: str: Name of the data provider for the simulated data
+SIM_PROVIDER = "HYCOM"
+#? TO_INTERPOLATE: list[str]: variables to interpolate
+TO_INTERPOLATE = ["TEMP", "PSAL"]
+#? INTERPOLATION_KIND: str: kind of interpolation for scipy.interpolate.interp1d
+INTERPOLATION_KIND = "linear"
+#? SAVING_DIR: str: directory in which to save the data
+SAVING_DIR = "output"

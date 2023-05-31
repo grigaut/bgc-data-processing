@@ -244,7 +244,7 @@ class Storer:
         # Drop dupliacted rows from dataframe
         dropped = df.drop(df[is_duplicated].index, axis=0)
         # Group duplicates and average them
-        grouped = duplicates.groupby(subset_group).mean().reset_index()
+        grouped = duplicates.groupby(subset_group, dropna=False).mean().reset_index()
         # Concatenate dataframe with droppped duplicates and duplicates averaged
         return pd.concat([dropped, grouped], ignore_index=True, axis=0)
 
@@ -379,10 +379,27 @@ class Storer:
             slice_index=slice_index,
         )
 
+    def add_feature(
+        self,
+        variable: "NotExistingVar",
+        data: pd.Series,
+    ) -> None:
+        """Add a new feature to the storer.
+
+        Parameters
+        ----------
+        variable : NotExistingVar
+            Variable corresponding to the feature.
+        data : pd.Series
+            Feature data.
+        """
+        self.variables.add_var(variable)
+        self._data[variable.name] = data
+
     @classmethod
     def from_files(
         cls,
-        filepath: str | list,
+        filepath: Path | str | list[Path] | list[str],
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -402,7 +419,7 @@ class Storer:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path | str | list[Path] | list[str]
             Path to the file to read.
         providers_column_label : str, optional
             Provider column in the dataframe., by default "PROVIDER"
@@ -461,7 +478,7 @@ class Storer:
         if isinstance(filepath, list):
             storers = []
             for path in filepath:
-                reader = Reader(
+                storer = Storer.from_files(
                     filepath=path,
                     providers_column_label=providers_column_label,
                     expocode_column_label=expocode_column_label,
@@ -479,28 +496,32 @@ class Storer:
                     verbose=verbose,
                 )
 
-                storers.append(reader.get_storer())
+                storers.append(storer)
             return sum(storers)
-        if isinstance(filepath, str):
-            reader = Reader(
-                filepath=filepath,
-                providers_column_label=providers_column_label,
-                expocode_column_label=expocode_column_label,
-                date_column_label=date_column_label,
-                year_column_label=year_column_label,
-                month_column_label=month_column_label,
-                day_column_label=day_column_label,
-                hour_column_label=hour_column_label,
-                latitude_column_label=latitude_column_label,
-                longitude_column_label=longitude_column_label,
-                depth_column_label=depth_column_label,
-                category=category,
-                unit_row_index=unit_row_index,
-                delim_whitespace=delim_whitespace,
-                verbose=verbose,
-            )
-            return reader.get_storer()
-        raise TypeError(f"Can't read filepaths from {filepath}")
+        if isinstance(filepath, Path):
+            path = filepath
+        elif isinstance(filepath, str):
+            path = Path(filepath)
+        else:
+            raise TypeError(f"Can't read filepaths from {filepath}")
+        reader = Reader(
+            filepath=path,
+            providers_column_label=providers_column_label,
+            expocode_column_label=expocode_column_label,
+            date_column_label=date_column_label,
+            year_column_label=year_column_label,
+            month_column_label=month_column_label,
+            day_column_label=day_column_label,
+            hour_column_label=hour_column_label,
+            latitude_column_label=latitude_column_label,
+            longitude_column_label=longitude_column_label,
+            depth_column_label=depth_column_label,
+            category=category,
+            unit_row_index=unit_row_index,
+            delim_whitespace=delim_whitespace,
+            verbose=verbose,
+        )
+        return reader.get_storer()
 
     @classmethod
     def from_constraints(
@@ -531,22 +552,26 @@ class Storer:
             verbose=storer.verbose,
         )
 
-    def add_feature(
-        self,
-        variable: "NotExistingVar",
-        data: pd.Series,
-    ) -> None:
-        """Add a new feature to the storer.
+    def slice_using_index(self, index: pd.Index) -> "Storer":
+        """Slice Storer using.
 
         Parameters
         ----------
-        variable : NotExistingVar
-            Variable corresponding to the feature.
-        data : pd.Series
-            Feature data.
+        index : pd.Index
+            Index values to keep.
+
+        Returns
+        -------
+        Storer
+            Corresponding storer.
         """
-        self.variables.add_var(variable)
-        self._data[variable.name] = data
+        return Storer(
+            data=self._data.loc[index, :],
+            category=self._category,
+            providers=self._providers,
+            variables=self._variables,
+            verbose=self._verbose,
+        )
 
 
 class Slice(Storer):
@@ -978,7 +1003,7 @@ class Reader:
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path | list[Path]
         Path to the file to read.
     providers_column_label : str, optional
         Provider column in the dataframe., by default "PROVIDER"
@@ -1021,7 +1046,7 @@ class Reader:
 
     def __init__(
         self,
-        filepath: str,
+        filepath: Path,
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -1041,7 +1066,7 @@ class Reader:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the file to read.
         providers_column_label : str, optional
             Provider column in the dataframe., by default "PROVIDER"
@@ -1112,7 +1137,7 @@ class Reader:
 
     def _read(
         self,
-        filepath: str,
+        filepath: Path,
         unit_row_index: int,
         delim_whitespace: bool,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -1120,7 +1145,7 @@ class Reader:
 
         Parameters
         ----------
-        filepath : str
+        filepath : Path
             Path to the file to read.
         unit_row_index : int
             Index of the row with the units, None if there's no unit row.

@@ -1,10 +1,10 @@
 # Plotting
 
-All plotting object derive from the same class: [BasePlot]({{fix_url("../reference/base/#bgc_data_processing.base.BasePlot")}}). Therefore, these classes all share the same public methods:
+All plotting object derive from the same class: [BasePlot]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.BasePlot")}}). Therefore, these classes all share the same public methods:
 
-- [show]({{fix_url("../reference/base/#bgc_data_processing.base.BasePlot.show")}}): Show the figure in a new [Figure](https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure).
-- [save]({{fix_url("../reference/base/#bgc_data_processing.base.BasePlot.save")}}): Save the figure in a file (file suffix must be `.png`)
-- [plot_to_axes]({{fix_url("../reference/base/#bgc_data_processing.base.BasePlot.plot_to_axes")}}): Add the figure to an already existing [Axes](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes) instance.
+- [show]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.BasePlot.show")}}): Show the figure in a new [Figure](https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure).
+- [save]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.BasePlot.save")}}): Save the figure in a file (file suffix must be `.png`)
+- [plot_to_axes]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.BasePlot.plot_to_axes")}}): Add the figure to an already existing [Axes](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes) instance.
 
 ## Overview:
 

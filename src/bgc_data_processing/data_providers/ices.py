@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, csv_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = csv_tools.CSVLoader(
+loader = loaders.from_csv(
     provider_name="ICES",
     dirin=Path(PROVIDERS_CONFIG["ICES"]["PATH"]),
     category=PROVIDERS_CONFIG["ICES"]["CATEGORY"],

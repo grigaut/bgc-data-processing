@@ -3,9 +3,9 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, abfiles_tools, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
-loader = abfiles_tools.ABFileLoader(
+loader = loaders.from_abfile(
     provider_name="HYCOM",
     dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
     category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],

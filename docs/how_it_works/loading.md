@@ -16,7 +16,7 @@ When loading from a procider, the following arguments must be given to the loade
     Loader for CSV files, uses the `read_params` additional argument to pass specific argument to [pandas.read_csv](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
 
     ``` py
-    from bgc_data_processing.csv_tools import CSVLoader
+    from bgc_data_processing.loaders import CSVLoader
 
     loader = CSVLoader(
         provider_name="GLODAP_2022",
@@ -39,9 +39,9 @@ When loading from a procider, the following arguments must be given to the loade
     Loader for NetCDF files.
 
     ``` py
-    from bgc_data_processing.netcdf_tools import NetCDFLoader
+    from bgc_data_processing.loaders import NetCDFLoader
 
-    loader = netcdf_tools.NetCDFLoader(
+    loader = loaders.from_netcdf(
         provider_name="ARGO",
         dirin="path/to/files/directory",
         category="float",

@@ -1,22 +1,24 @@
 """Create an Evolution Profile from files in a directory."""
 
 import datetime as dt
-import os
 from pathlib import Path
 
+from bgc_data_processing import DEFAULT_VARS
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import EvolutionProfile
 
+CONFIG_FOLDER = Path("config")
+
 if __name__ == "__main__":
-    config_filepath = Path("config/plot_profile.toml")
+    config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
     CONFIG = ConfigParser(
-        filepath=config_filepath,
+        filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
     )
-    LOADING_DIR: str = CONFIG["LOADING_DIR"]
+    LOADING_DIR: Path = CONFIG["LOADING_DIR"]
     VARIABLE: str = CONFIG["VARIABLE"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
@@ -35,24 +37,22 @@ if __name__ == "__main__":
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    filepaths = [
-        f"{LOADING_DIR}/{file}"
-        for file in os.listdir(LOADING_DIR)
-        if file[-4:] in [".csv", ".txt"]
-    ]
+    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
+    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
+    filepaths = filepaths_txt + filepaths_csv
 
     storer = Storer.from_files(
         filepath=filepaths,
-        providers_column_label="PROVIDER",
-        expocode_column_label="EXPOCODE",
-        date_column_label="DATE",
-        year_column_label="YEAR",
-        month_column_label="MONTH",
-        day_column_label="DAY",
-        hour_column_label="HOUR",
-        latitude_column_label="LATITUDE",
-        longitude_column_label="LONGITUDE",
-        depth_column_label="DEPH",
+        providers_column_label=DEFAULT_VARS["provider"].label,
+        expocode_column_label=DEFAULT_VARS["expocode"].label,
+        date_column_label=DEFAULT_VARS["date"].label,
+        year_column_label=DEFAULT_VARS["year"].label,
+        month_column_label=DEFAULT_VARS["month"].label,
+        day_column_label=DEFAULT_VARS["day"].label,
+        hour_column_label=DEFAULT_VARS["hour"].label,
+        latitude_column_label=DEFAULT_VARS["latitude"].label,
+        longitude_column_label=DEFAULT_VARS["longitude"].label,
+        depth_column_label=DEFAULT_VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
