@@ -3,7 +3,7 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_WATER_MASSES, features
+from bgc_data_processing import DEFAULT_VARS, DEFAULT_WATER_MASSES, features
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import WaterMassVariableComparison
@@ -34,22 +34,26 @@ if __name__ == "__main__":
 
     ACRONYMS: list[str] = CONFIG["WATER_MASS_ACRONYMS"]
     WATER_MASSES: list[WaterMass] = [DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS]
+
+    SALINITY_DEFAULT = DEFAULT_VARS["salinity"]
+    TEMPERATURE_DEFAULT = DEFAULT_VARS["temperature"]
+
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
     storer = Storer.from_files(
-        filepath=filepaths,
-        providers_column_label="PROVIDER",
-        expocode_column_label="EXPOCODE",
-        date_column_label="DATE",
-        year_column_label="YEAR",
-        month_column_label="MONTH",
-        day_column_label="DAY",
-        hour_column_label="HOUR",
-        latitude_column_label="LATITUDE",
-        longitude_column_label="LONGITUDE",
-        depth_column_label="DEPH",
+        filepaths,
+        providers_column_label=DEFAULT_VARS["provider"].label,
+        expocode_column_label=DEFAULT_VARS["expocode"].label,
+        date_column_label=DEFAULT_VARS["date"].label,
+        year_column_label=DEFAULT_VARS["year"].label,
+        month_column_label=DEFAULT_VARS["month"].label,
+        day_column_label=DEFAULT_VARS["day"].label,
+        hour_column_label=DEFAULT_VARS["hour"].label,
+        latitude_column_label=DEFAULT_VARS["latitude"].label,
+        longitude_column_label=DEFAULT_VARS["longitude"].label,
+        depth_column_label=DEFAULT_VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -64,15 +68,15 @@ if __name__ == "__main__":
     storer.add_feature(pres_var, pres_data)
     ptemp_var, ptemp_data = features.compute_potential_temperature(
         storer=storer,
-        salinity_field="PSAL",
-        temperature_field="TEMP",
+        salinity_field=SALINITY_DEFAULT.label,
+        temperature_field=TEMPERATURE_DEFAULT.label,
         pressure_field=pres_var.label,
     )
     storer.add_feature(ptemp_var, ptemp_data)
     sigt_var, sigt_data = features.compute_sigma_t(
         storer=storer,
-        salinity_field="PSAL",
-        temperature_field="TEMP",
+        salinity_field=SALINITY_DEFAULT.label,
+        temperature_field=TEMPERATURE_DEFAULT.label,
     )
     storer.add_feature(sigt_var, sigt_data)
     constraints = Constraints()
@@ -100,7 +104,7 @@ if __name__ == "__main__":
         constraints,
         pres_var.name,
         ptemp_var.name,
-        "PSAL",
+        SALINITY_DEFAULT.label,
         sigt_var.name,
     )
     plot.show(
