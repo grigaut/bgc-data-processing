@@ -340,7 +340,7 @@ def directory_check(get_variable: Callable) -> Callable:
         ):
             directory = Path(get_variable(self, keys))
             if directory.is_dir():
-                if list(directory.glob("*.*[!*.gitignore]")):
+                if [p for p in directory.glob("*.*") if p.name != ".gitignore"]:
                     if self.existing_dir_behavior == "raise":
                         raise IsADirectoryError(
                             f"Directory {directory} already exists and is not empty.",
