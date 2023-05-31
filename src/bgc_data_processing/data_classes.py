@@ -399,7 +399,7 @@ class Storer:
     @classmethod
     def from_files(
         cls,
-        filepath: Path | list[Path],
+        filepath: Path | str | list[Path] | list[str],
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -419,7 +419,7 @@ class Storer:
 
         Parameters
         ----------
-        filepath : Path | list[Path]
+        filepath : Path | str | list[Path] | list[str]
             Path to the file to read.
         providers_column_label : str, optional
             Provider column in the dataframe., by default "PROVIDER"
@@ -478,7 +478,7 @@ class Storer:
         if isinstance(filepath, list):
             storers = []
             for path in filepath:
-                reader = Reader(
+                storer = Storer.from_files(
                     filepath=path,
                     providers_column_label=providers_column_label,
                     expocode_column_label=expocode_column_label,
@@ -496,28 +496,32 @@ class Storer:
                     verbose=verbose,
                 )
 
-                storers.append(reader.get_storer())
+                storers.append(storer)
             return sum(storers)
         if isinstance(filepath, Path):
-            reader = Reader(
-                filepath=filepath,
-                providers_column_label=providers_column_label,
-                expocode_column_label=expocode_column_label,
-                date_column_label=date_column_label,
-                year_column_label=year_column_label,
-                month_column_label=month_column_label,
-                day_column_label=day_column_label,
-                hour_column_label=hour_column_label,
-                latitude_column_label=latitude_column_label,
-                longitude_column_label=longitude_column_label,
-                depth_column_label=depth_column_label,
-                category=category,
-                unit_row_index=unit_row_index,
-                delim_whitespace=delim_whitespace,
-                verbose=verbose,
-            )
-            return reader.get_storer()
-        raise TypeError(f"Can't read filepaths from {filepath}")
+            path = filepath
+        elif isinstance(filepath, str):
+            path = Path(filepath)
+        else:
+            raise TypeError(f"Can't read filepaths from {filepath}")
+        reader = Reader(
+            filepath=path,
+            providers_column_label=providers_column_label,
+            expocode_column_label=expocode_column_label,
+            date_column_label=date_column_label,
+            year_column_label=year_column_label,
+            month_column_label=month_column_label,
+            day_column_label=day_column_label,
+            hour_column_label=hour_column_label,
+            latitude_column_label=latitude_column_label,
+            longitude_column_label=longitude_column_label,
+            depth_column_label=depth_column_label,
+            category=category,
+            unit_row_index=unit_row_index,
+            delim_whitespace=delim_whitespace,
+            verbose=verbose,
+        )
+        return reader.get_storer()
 
     @classmethod
     def from_constraints(
