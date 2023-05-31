@@ -59,7 +59,7 @@ if __name__ == "__main__":
         print("\n\t" + "-" * len(txt))
         print("\t" + txt)
         print("\t" + "-" * len(txt) + "\n")
-    data_dict = {}
+    data_dict: dict[str, list[Storer]] = {}
     # Iterate over data sources
     t0 = time()
     for data_src in PROVIDERS:
