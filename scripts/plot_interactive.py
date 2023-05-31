@@ -17,6 +17,8 @@ from eomaps.draw import ShapeDrawer
 from matplotlib import cm, colors
 from matplotlib.axes import Axes
 
+CONFIG_FOLDER = Path("config")
+
 # Callbacks
 
 
@@ -374,9 +376,9 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
 
 
 if __name__ == "__main__":
-    config_filepath = Path("config/plot_interactive.toml")
+    config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
     CONFIG = ConfigParser(
-        filepath=config_filepath,
+        filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=[],
         existing_directory="raise",

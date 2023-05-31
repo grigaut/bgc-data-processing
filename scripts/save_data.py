@@ -13,11 +13,12 @@ from bgc_data_processing import (
 )
 from bgc_data_processing.data_classes import Constraints, Storer
 
+CONFIG_FOLDER = Path("config")
+
 if __name__ == "__main__":
-    # Script arguments
-    config_filepath = Path("config/save_data.toml")
+    config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
     CONFIG = parsers.ConfigParser(
-        filepath=config_filepath,
+        filepath=config_filepath.with_suffix(".toml"),
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],

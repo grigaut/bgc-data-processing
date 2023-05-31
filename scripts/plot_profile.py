@@ -8,10 +8,12 @@ from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import EvolutionProfile
 
+CONFIG_FOLDER = Path("config")
+
 if __name__ == "__main__":
-    config_filepath = Path("config/plot_profile.toml")
+    config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
     CONFIG = ConfigParser(
-        filepath=config_filepath,
+        filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
