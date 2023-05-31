@@ -246,7 +246,10 @@ class MeshPlotter(BasePlot):
         else:
             data[var_key] = (~data[var_key].isna()).astype(int)
         data = data[data[var_key] == 1]
-        group = data[[*self._grouping_columns, var_key]].groupby(self._grouping_columns)
+        group = data[[*self._grouping_columns, var_key]].groupby(
+            self._grouping_columns,
+            dropna=False,
+        )
         if self._depth_density:
             var_series: pd.Series = group.sum()
         else:
@@ -581,6 +584,7 @@ class MeshPlotter(BasePlot):
             lat_key=self._variables.get(self._variables.latitude_var_name).label,
             lon_key=self._variables.get(self._variables.longitude_var_name).label,
         )
+        print(df)
         if self._verbose > 1:
             print("\tCreating figure")
         ax.gridlines(draw_labels=True)
