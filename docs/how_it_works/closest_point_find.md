@@ -18,3 +18,12 @@ Simulation Data (from HYCOM model) is provided on a 3D grid. The observation dat
     Instead of finding the closest depth value within the avalaible levels, the simulated point values are interpolated from water profile.
 
 Therefore, in the end, the "closest point" is the point which latitude and longitude are the closest to the observation (relative to the Haversine metric) and values have been interpolated to match the observation's depth.
+
+## Illustration
+
+Closest points selected from a set of points (grey points on the figure), match with their corresponding 'observation'.
+Observations are triangles facing the right while simulations are triangles facing the left.
+
+Same color observations and simulations are supposed to represent a simulation-observation pair. However, since the amount of color is finite for a better visual interpretation, some colors might be duplicated.
+
+![ClosestMap]({{fix_url("assets/how_it_works/closest_points.png")}}){width=750px}
