@@ -701,6 +701,7 @@ class NetCDFLoader(BaseLoader):
     """
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
+    _date_reference_format: str = "days since %Y-%m-%dT%H:%M:%SZ"
 
     def __init__(
         self,
@@ -938,9 +939,12 @@ class NetCDFLoader(BaseLoader):
             if alias not in file_keys:
                 continue
             # Get data from file
-            values = nc_data.variables[alias][:]
-            # Convert masked_array to ndarray
-            values: np.ndarray = values.filled(np.nan)
+            if variable == self.variables.get(self.variables.date_var_name):
+                values = self._adjust_offset(nc_data.variables[alias])
+            else:
+                values = nc_data.variables[alias][:]
+                # Convert masked_array to ndarray
+                values: np.ndarray = values.filled(np.nan)
             if (flag is not None) and (flag in file_keys):
                 # get flag values from file
                 flag_values = nc_data.variables[flag][:]
@@ -973,15 +977,35 @@ class NetCDFLoader(BaseLoader):
             values = self._filter_flags(nc_data=nc_data, variable=var)
             if values is None:
                 missing_vars.append(var)
-            else:
-                values[np.isnan(values)] = var.default
-                data_dict[var.label] = values
-                # data_dict[var.label].fill(var.default)
+                continue
+            values[np.isnan(values)] = var.default
+            data_dict[var.label] = values
         # Add missing columns
         data_dict = self._fill_missing(data_dict, missing_vars)
         # Reshape all variables's data to 1D
         data_dict = self._reshape_data(data_dict)
         return pd.DataFrame(data_dict)
+
+    def _adjust_offset(self, variable: netCDF4.Variable) -> np.ndarray:
+        """Adjust the time offset for all files.
+
+        Parameters
+        ----------
+        variable : netCDF4.Variable
+            Date variable.
+
+        Returns
+        -------
+        np.ndarray
+            Adjusted values
+        """
+        date_start = dt.datetime.strptime(variable.units, self._date_reference_format)
+        data: np.ma.MaskedArray = variable[:]
+        values: np.ndarray = data.filled(np.nan)
+        offset_diff = date_start - self._date_start
+        nans = np.isnan(values)
+        values[~nans] = values[~nans] + offset_diff.total_seconds() / 86400
+        return values
 
     def _set_dates(self, df: pd.DataFrame) -> pd.DataFrame:
         """Set the dates (and year, month, day) columns in the dataframe.
