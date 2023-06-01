@@ -34,11 +34,13 @@ nav:
     - scripts/plot_var_boxplot.md
     - scripts/plot_var_histogram.md
     - scripts/plot_var_pressure.md
+    - scripts/match_hycom_obs.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
     - how_it_works/loading.md
     - how_it_works/plotting.md
+    - how_it_works/closest_point_find.md
   - Examples:
     - examples/index.md
     - examples/boundaries.md
