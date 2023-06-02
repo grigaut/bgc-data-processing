@@ -27,7 +27,7 @@ nav:
   - Scripts:
     - scripts/index.md
     - scripts/save_data.md
-    - scripts/plot_mesh.md
+    - scripts/plot_data_density.md
     - scripts/plot_profile.md
     - scripts/plot_interactive.md
     - scripts/plot_ts_diagram.md
