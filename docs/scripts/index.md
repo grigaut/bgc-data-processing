@@ -71,3 +71,13 @@ The following sections all relate to the python scripts defined [here]({{config.
     More informations there: [Variable vs Pressure Plotting Script]({{fix_url("scripts/plot_var_pressure.md")}})
 
     ([Source]({{repo_blob}}/scripts/plot_var_pressure.py))
+
+## Compare Simulations to Observations
+
+??? question "How to find closest simulated points from given observations?"
+
+    Command: `make run-match-hycom-obs`
+
+    More informations there: [Simulation-Observation Matching Script]({{fix_url("scripts/match_hycom_obs.md")}})
+
+    ([Source]({{repo_blob}}/scripts/match_hycom_obs.py))
