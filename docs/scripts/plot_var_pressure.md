@@ -43,7 +43,7 @@ The configuration file for this script is `config/plot_var_pressure.toml` (based
 ### **Data Selection**
 ??? question "PLOT_VARIABLE"
 
-    Variable to plot the value of.
+    Name of the variable to plot the value of. The names are supposed to be the ones defined in `config/variables.toml` ([`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml)) by default.)
 
     **default**: `"NTRA"`
 
