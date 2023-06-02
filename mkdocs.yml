@@ -8,7 +8,7 @@ theme:
   logo: assets/logo/NERSC.png
   favicon: assets/logo/NERSC.png
   palette:
-    primary: red
+    primary: blue
   features:
     - navigation.tabs               # Tabs
     - navigation.tabs.sticky        # Above tabs stay displayed
