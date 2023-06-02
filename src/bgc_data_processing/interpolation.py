@@ -38,7 +38,7 @@ class Interpolator:
 
     def _handle_outbound_max(
         self,
-        ref_slice: pd.DataFrame,
+        ref_slice: pd.DataFrame | pd.Series,
         obs_depth: float,
         name: Hashable | None,
     ) -> pd.Series:
@@ -46,7 +46,7 @@ class Interpolator:
 
         Parameters
         ----------
-        ref_slice : pd.DataFrame
+        ref_slice : pd.DataFrame | pd.Series
             Slice of the reference Dataframe to use.
         obs_depth : float
             Depth of the observation.
@@ -68,7 +68,7 @@ class Interpolator:
 
     def _handle_outbound_min(
         self,
-        ref_slice: pd.DataFrame,
+        ref_slice: pd.DataFrame | pd.Series,
         obs_depth: float,
         name: Hashable | None,
     ) -> pd.Series:
@@ -76,7 +76,7 @@ class Interpolator:
 
         Parameters
         ----------
-        ref_slice : pd.DataFrame
+        ref_slice : pd.DataFrame | pd.Series
             Slice of the reference Dataframe to use.
         obs_depth : float
             Depth of the observation.
