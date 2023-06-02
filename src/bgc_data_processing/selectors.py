@@ -33,8 +33,6 @@ class SelectiveABFileLoader(ABFileLoader):
     variables : VariablesStorer
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
-    selection_mask : np.ndarray
-        2d mask to use to load data.
     grid_basename: str
         Basename of the ab grid grid file for the loader.
         => files are considered to be loaded over the same grid.
