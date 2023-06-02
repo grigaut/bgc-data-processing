@@ -43,7 +43,7 @@ The configuration file for this script is `config/plot_mesh.toml` (based on [`co
 
 ??? question "VARIABLE"
 
-    Variable to map. If 'all': will map density of datapoints, regardless of their variables.
+    Name of the variable to map. The names are supposed to be the ones defined in `config/variables.toml` ([`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml)) by default.). If 'all': will map density of datapoints, regardless of their variables.
 
     **default**: `"all"`
 
