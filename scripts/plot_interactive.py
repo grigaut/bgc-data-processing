@@ -10,7 +10,7 @@ import shapely
 from bgc_data_processing import DEFAULT_VARS
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import EvolutionProfile, MeshPlotter
+from bgc_data_processing.tracers import DensityPlotter, EvolutionProfile
 from cartopy import crs
 from eomaps import Maps
 from eomaps.draw import ShapeDrawer
@@ -113,7 +113,7 @@ def update_map(
         polygon=polygon,
     )
     lon_bin = (polygon.bounds[2] - polygon.bounds[0]) / 100
-    plot_tmp = MeshPlotter(storer, constraints)
+    plot_tmp = DensityPlotter(storer, constraints)
     plot_tmp.set_density_type(consider_depth=True)
     plot_tmp.set_bins_size(bins_size=[lon_bin, lon_bin * 3])
     df = plot_tmp.get_df(VARIABLE)
@@ -520,7 +520,7 @@ if __name__ == "__main__":
     main_map.add_feature.preset.land(zorder=1)
     main_map.add_feature.preset.ocean()
     # Plotter for the map
-    plot = MeshPlotter(storer=storer, constraints=constraints_copy)
+    plot = DensityPlotter(storer=storer, constraints=constraints_copy)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
     plot.set_map_boundaries(

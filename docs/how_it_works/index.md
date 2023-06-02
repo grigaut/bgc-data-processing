@@ -103,13 +103,13 @@ aggregated_storer.save("path/to/save/file")     # (4)!
 
 ## Plotting the data
 
-To plot the data, one has to create a [MeshPlotter]({{fix_url("reference/tracers/#bgc_data_processing.tracers.MeshPlotter")}}) (to create 2D Mesh) and then call its [.show]({{fix_url("reference/tracers/#bgc_data_processing.tracers.MeshPlotter.show")}}) method.
-To save the data, one has to use the [.save]({{fix_url("reference/tracers/#bgc_data_processing.tracers.MeshPlotter.save")}}) method.
+To plot the data, one has to create a [DensityPlotter]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}) (to create 2D Mesh) and then call its [.show]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.show")}}) method.
+To save the data, one has to use the [.save]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.save")}}) method.
 
 ``` py
-from bgc_data_processing.tracers import MeshPlotter
+from bgc_data_processing.tracers import DensityPlotter
 
-mesher = MeshPlotter(storer)                # (1)!
+mesher = DensityPlotter(storer)                # (1)!
 mesher.set_bins_soze(bins_size=[0.1, 0.2])  # (2)!
 mesher.set-geographic_boundaries(
     latitude_min = 50,

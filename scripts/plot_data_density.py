@@ -6,7 +6,7 @@ from pathlib import Path
 from bgc_data_processing import DEFAULT_VARS
 from bgc_data_processing.data_classes import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import MeshPlotter
+from bgc_data_processing.tracers import DensityPlotter
 
 CONFIG_FOLDER = Path("config")
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
-    plot = MeshPlotter(storer, constraints=constraints)
+    plot = DensityPlotter(storer, constraints=constraints)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
     plot.set_map_boundaries(

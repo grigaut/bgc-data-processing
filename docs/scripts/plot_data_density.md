@@ -1,13 +1,13 @@
 # Density Plotting
 
-`make run-plot-mesh`
+`make run-plot-data-density`
 ## Summary
 
 This scripts reads data from a folder and displays the data density on a map.
 
 ## Configuration
 
-The configuration file for this script is `config/plot_mesh.toml` (based on [`config/default_plot_mesh.toml`]({{repo_blob}}/config/default/plot_mesh.toml)). All the parameters and their functionality are listed below:
+The configuration file for this script is `config/plot_data_density.toml` (based on [`config/default_plot_data_density.toml`]({{repo_blob}}/config/default/plot_data_density.toml)). All the parameters and their functionality are listed below:
 ### **Input/output**
 ??? question "LOADING_DIR"
 
@@ -192,4 +192,4 @@ This is an example of what this map could look like:
 
 ![plot mesh output example]({{fix_url("assets/plots/mesh.png")}}){width=750px}
 
-Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_mesh.py)
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/plot_data_density.py)

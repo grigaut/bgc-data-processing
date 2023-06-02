@@ -471,7 +471,7 @@ class Storer:
         ...     "path/to/file1",
         ...     "path/to/file2",
         ... ]
-        >>> storer = MeshPlotter.from_files(
+        >>> storer = DensityPlotter.from_files(
         ...     filepaths,
         ... )
         """

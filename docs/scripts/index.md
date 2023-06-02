@@ -24,11 +24,11 @@ The following sections all relate to the python scripts defined [here]({{config.
 
 ??? question "How to show the data density on a map?"
 
-    Command: `make run-plot-mesh`
+    Command: `make run-plot-data-density`
 
-    More informations there: [Mesh Plotting Script]({{fix_url("scripts/plot_mesh.md")}})
+    More informations there: [Mesh Plotting Script]({{fix_url("scripts/plot_data_density.md")}})
 
-    ([Source]({{repo_blob}}/scripts/plot_mesh.py))
+    ([Source]({{repo_blob}}/scripts/plot_data_density.py))
 
 ??? question "How to show a profile with data density evolution?"
 
