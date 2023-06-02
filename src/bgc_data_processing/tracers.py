@@ -584,7 +584,6 @@ class MeshPlotter(BasePlot):
             lat_key=self._variables.get(self._variables.latitude_var_name).label,
             lon_key=self._variables.get(self._variables.longitude_var_name).label,
         )
-        print(df)
         if self._verbose > 1:
             print("\tCreating figure")
         ax.gridlines(draw_labels=True)
