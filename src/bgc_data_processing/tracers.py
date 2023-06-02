@@ -144,7 +144,7 @@ class BasePlot(ABC):
         """
 
 
-class MeshPlotter(BasePlot):
+class DensityPlotter(BasePlot):
     """Base class for tracing on earthmaps.
 
     Parameters
