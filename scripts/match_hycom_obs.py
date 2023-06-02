@@ -20,7 +20,7 @@ if __name__ == "__main__":
         check_types=False,
         dates_vars_keys=[],
         dirs_vars_keys=["SAVING_DIR"],
-        existing_directory="ignore",
+        existing_directory="raise",
     )
     # Configuration parameters
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])

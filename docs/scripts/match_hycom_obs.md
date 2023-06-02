@@ -35,7 +35,7 @@ The configuration file for this script is `config/match_hycom_obs.toml` (based o
 
 ??? question "TO_INTERPOLATE"
 
-    Labels of the variables to interpolate.
+    Names of the variables to interpolate. The names are supposed to be the ones defined in `config/variables.toml` ([`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml)) by default.)
 
     **default**: `["TEMP","PSAL"]`
 

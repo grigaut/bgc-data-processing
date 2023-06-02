@@ -32,13 +32,13 @@ class Interpolator:
     ) -> None:
         self._storer = base
         self._columns_order = base.data.columns
-        self._x = x_column_name
-        self._ys = y_columns_name
+        self._x = base.variables.get(x_column_name).label
+        self._ys = [base.variables.get(name).label for name in y_columns_name]
         self.kind = kind
 
     def _handle_outbound_max(
         self,
-        ref_slice: pd.DataFrame,
+        ref_slice: pd.DataFrame | pd.Series,
         obs_depth: float,
         name: Hashable | None,
     ) -> pd.Series:
@@ -46,7 +46,7 @@ class Interpolator:
 
         Parameters
         ----------
-        ref_slice : pd.DataFrame
+        ref_slice : pd.DataFrame | pd.Series
             Slice of the reference Dataframe to use.
         obs_depth : float
             Depth of the observation.
@@ -68,7 +68,7 @@ class Interpolator:
 
     def _handle_outbound_min(
         self,
-        ref_slice: pd.DataFrame,
+        ref_slice: pd.DataFrame | pd.Series,
         obs_depth: float,
         name: Hashable | None,
     ) -> pd.Series:
@@ -76,7 +76,7 @@ class Interpolator:
 
         Parameters
         ----------
-        ref_slice : pd.DataFrame
+        ref_slice : pd.DataFrame | pd.Series
             Slice of the reference Dataframe to use.
         obs_depth : float
             Depth of the observation.
