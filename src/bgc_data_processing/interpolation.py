@@ -32,8 +32,8 @@ class Interpolator:
     ) -> None:
         self._storer = base
         self._columns_order = base.data.columns
-        self._x = x_column_name
-        self._ys = y_columns_name
+        self._x = base.variables.get(x_column_name).label
+        self._ys = [base.variables.get(name).label for name in y_columns_name]
         self.kind = kind
 
     def _handle_outbound_max(
