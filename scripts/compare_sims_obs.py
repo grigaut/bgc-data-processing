@@ -64,8 +64,12 @@ if __name__ == "__main__":
         verbose=1,
     )
 
-    selected_obs = obs.data[VARIABLES_TO_COMPARE]
-    selected_sims = sims.data[VARIABLES_TO_COMPARE]
+    selected_obs = obs.data[
+        [obs.variables.get(name).label for name in VARIABLES_TO_COMPARE]
+    ]
+    selected_sims = sims.data[
+        [sims.variables.get(name).label for name in VARIABLES_TO_COMPARE]
+    ]
 
     nan_sim = selected_sims.isna().all(axis=1)
 
