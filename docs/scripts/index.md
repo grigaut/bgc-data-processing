@@ -81,3 +81,11 @@ The following sections all relate to the python scripts defined [here]({{config.
     More informations there: [Simulation-Observation Matching Script]({{fix_url("scripts/match_hycom_obs.md")}})
 
     ([Source]({{repo_blob}}/scripts/match_hycom_obs.py))
+
+??? question "How to compare simulations to observations?"
+
+    Command: `make run-compare-sims-obs`
+
+    More informations there: [Simulation-Observation Comparison Script]({{fix_url("scripts/compare_sims_obs.md")}})
+
+    ([Source]({{repo_blob}}/scripts/compare_sims_obs.py))
