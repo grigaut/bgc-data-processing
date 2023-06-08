@@ -1,0 +1,12 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
+#? OBSERVATIONS_FILE: str: path to the file with the observations values.
+OBSERVATIONS_FILE = "output/observations.txt"
+#? SIMULATIONS_FILE: str: path to the file with the simulations values.
+SIMULATIONS_FILE = "output/simulations.txt"
+#? VARIABLES_TO_COMPARE: list[str]: names of the variables to compare.
+VARIABLES_TO_COMPARE = ["TEMP", "PSAL", "PTEMP"]
+#? SHOW_MAP: whether to show the map of all compared points or not
+SHOW_MAP = true
