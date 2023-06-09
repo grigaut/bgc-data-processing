@@ -27,7 +27,6 @@ if __name__ == "__main__":
     SIM_PROVIDER: str = CONFIG["SIM_PROVIDER"]
     TO_INTERPOLATE: list[str] = CONFIG["TO_INTERPOLATE"]
     INTERPOLATION_KIND: str = CONFIG["INTERPOLATION_KIND"]
-    SAVING_DIR = Path(CONFIG["SAVING_DIR"])
     # Default variables
     LATITUDE_TEMPLATE = DEFAULT_VARS["latitude"]
     SALINITY_TEMPLATE = DEFAULT_VARS["salinity"]
@@ -109,6 +108,8 @@ if __name__ == "__main__":
         var_names=save_vars,
     )
     observations_save = observations.slice_using_index(interpolated.data.index)
+
+    SAVING_DIR = Path(CONFIG["SAVING_DIR"])
 
     observations_save.save(SAVING_DIR.joinpath("observations.txt"))
     interpolated.save(SAVING_DIR.joinpath("simulations.txt"))

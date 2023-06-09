@@ -37,7 +37,6 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
-    SAVING_DIR = Path(CONFIG["SAVING_DIR"])
     PRIORITY = CONFIG["PRIORITY"]
     VERBOSE = CONFIG["VERBOSE"]
 
@@ -112,6 +111,7 @@ if __name__ == "__main__":
             print(f"Saving slices : {data_src}")
         to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
 
+        SAVING_DIR = Path(CONFIG["SAVING_DIR"])
         make_name = lambda x: SAVING_DIR.joinpath(
             Path(f"{data_src}/nutrients_{data_src}_{x['dates']}.csv"),
         )

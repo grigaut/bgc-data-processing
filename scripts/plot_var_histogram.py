@@ -22,7 +22,6 @@ if __name__ == "__main__":
         existing_directory="raise",
     )
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
-    SAVING_DIR: Path = Path(CONFIG["SAVING_DIR"])
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     PLOT_VARIABLE: str = CONFIG["PLOT_VARIABLE"]
@@ -120,6 +119,6 @@ if __name__ == "__main__":
     plt.suptitle(f"{PLOT_VARIABLE} Histogram")
     if SAVE:
         filename = f"{PLOT_VARIABLE}_histogram.png"
-        plt.savefig(SAVING_DIR.joinpath(filename))
+        plt.savefig(Path(CONFIG["SAVING_DIR"]).joinpath(filename))
     if SHOW:
         plt.show()

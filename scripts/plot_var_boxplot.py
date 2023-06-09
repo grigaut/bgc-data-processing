@@ -22,7 +22,6 @@ if __name__ == "__main__":
         existing_directory="raise",
     )
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
-    SAVING_DIR: Path = Path(CONFIG["SAVING_DIR"])
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     PLOT_VARIABLE: str = CONFIG["PLOT_VARIABLE"]
@@ -104,30 +103,6 @@ if __name__ == "__main__":
         maximal_value=LONGITUDE_MAX,
     )
 
-    # plot = VariableBoxPlot(
-    #     storer=storer_wm,
-    #     constraints=constraints,
-    # )
-    # suptitle = f"{PLOT_VARIABLE} Box Plot"
-    # title = f"Water Mass: '{WATER_MASS.name}' ({WATER_MASS.acronym})"
-    # if SHOW:
-    #     plot.show(
-    #         variable_name=PLOT_VARIABLE,
-    #         period=BOXPLOT_PERIOD,
-    #         title=title,
-    #         suptitle=suptitle,
-    #     )
-    # if SAVE:
-    #     filename = f"{PLOT_VARIABLE.lower()}_{BOXPLOT_PERIOD}ly_boxplot.png"
-    #     filepath = SAVING_DIR.joinpath(filename)
-    #     plot.save(
-    #         variable_name=PLOT_VARIABLE,
-    #         period=BOXPLOT_PERIOD,
-    #         save_path=filepath,
-    #         title=title,
-    #         suptitle=suptitle,
-    #     )
-
     nb_wmasses = len(WATER_MASSES)
     figure = plt.figure(figsize=(15, 15), layout="tight")
     for i, watermass in enumerate(WATER_MASSES):
@@ -145,6 +120,6 @@ if __name__ == "__main__":
     plt.suptitle(f"{PLOT_VARIABLE} Box Plots")
     if SAVE:
         filename = f"{PLOT_VARIABLE}_boxplots.png"
-        plt.savefig(SAVING_DIR.joinpath(filename))
+        plt.savefig(Path(CONFIG["SAVING_DIR"]).joinpath(filename))
     if SHOW:
         plt.show()

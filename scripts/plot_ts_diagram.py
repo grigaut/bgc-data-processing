@@ -19,7 +19,6 @@ if __name__ == "__main__":
         existing_directory="raise",
     )
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
-    SAVING_DIR: Path = Path(CONFIG["SAVING_DIR"])
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
@@ -109,5 +108,5 @@ if __name__ == "__main__":
     if SHOW:
         plot.show()
     if SAVE:
-        filepath = SAVING_DIR / "ts_diagram.png"
+        filepath = Path(CONFIG["SAVING_DIR"]) / "ts_diagram.png"
         plot.save(filepath)
