@@ -604,6 +604,7 @@ class DensityPlotter(BasePlot):
                 warnings.warn(
                     "Not enough data to display, try decreasing the bin size"
                     " or representing more data sources",
+                    stacklevel=2,
                 )
             cbar = ax.pcolormesh(
                 lat_2d,
