@@ -24,6 +24,7 @@ if __name__ == "__main__":
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
     )
+    SAVING_DIR = Path(CONFIG["SAVING_DIR"])
     VARIABLES: list[str] = CONFIG["VARIABLES"]
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
@@ -111,7 +112,6 @@ if __name__ == "__main__":
             print(f"Saving slices : {data_src}")
         to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
 
-        SAVING_DIR = Path(CONFIG["SAVING_DIR"])
         make_name = lambda x: SAVING_DIR.joinpath(
             Path(f"{data_src}/nutrients_{data_src}_{x['dates']}.csv"),
         )
