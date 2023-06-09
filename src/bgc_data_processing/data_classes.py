@@ -327,7 +327,7 @@ class Storer:
         units = [self.variables.unit_mapping[col] for col in df.columns]
         dirout = filepath.parent
         # make directory if needed
-        if dirout == "":
+        if not dirout:
             pass
         elif not dirout.is_dir():
             dirout.mkdir()
