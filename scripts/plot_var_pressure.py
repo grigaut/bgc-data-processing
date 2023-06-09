@@ -20,7 +20,6 @@ if __name__ == "__main__":
         existing_directory="raise",
     )
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
-    SAVING_DIR: Path = Path(CONFIG["SAVING_DIR"])
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
     PLOT_VARIABLE: str = CONFIG["PLOT_VARIABLE"]
@@ -109,7 +108,15 @@ if __name__ == "__main__":
         SALINITY_DEFAULT.label,
         sigt_var.name,
     )
-    plot.show(
-        variable_name=PLOT_VARIABLE,
-        wmasses=WATER_MASSES,
-    )
+    if SHOW:
+        plot.show(
+            variable_name=PLOT_VARIABLE,
+            wmasses=WATER_MASSES,
+        )
+    if SAVE:
+        filename = f"{PLOT_VARIABLE}_pressure.png"
+        plot.save(
+            variable_name=PLOT_VARIABLE,
+            wmasses=WATER_MASSES,
+            save_path=Path(CONFIG["SAVING_DIR"]).joinpath(filename),
+        )
