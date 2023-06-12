@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    PROVIDERS_CONFIG,
+    loaders,
+    units,
+    variables,
+)
 
 loader = loaders.from_csv(
     provider_name="ICES",
@@ -25,7 +31,9 @@ loader = loaders.from_csv(
         .correct_with(lambda x: -x),
         temperature=DEFAULT_VARS["temperature"].in_file_as("CTDTMP"),
         salinity=DEFAULT_VARS["salinity"].in_file_as("CTDSAL"),
-        oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOXY"),
+        oxygen=DEFAULT_VARS["oxygen"]
+        .in_file_as("DOXY")
+        .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"].in_file_as("PHOS").remove_when_all_nan(),
         nitrate=DEFAULT_VARS["nitrate"].in_file_as("NTRA").remove_when_all_nan(),
         silicate=DEFAULT_VARS["silicate"].in_file_as("SLCA").remove_when_all_nan(),
