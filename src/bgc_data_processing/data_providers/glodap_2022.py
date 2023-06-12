@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    PROVIDERS_CONFIG,
+    loaders,
+    units,
+    variables,
+)
 
 loader = loaders.from_csv(
     provider_name="GLODAP_2022",
@@ -31,7 +37,7 @@ loader = loaders.from_csv(
         ),
         oxygen=DEFAULT_VARS["oxygen"]
         .in_file_as(("G2oxygen", "G2oxygenf", [2]))
-        .correct_with(lambda x: x / 32),
+        .correct_with(units.convert_umol_by_kg_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("G2phosphate", "G2phosphatef", [2]))
         .remove_when_all_nan(),
