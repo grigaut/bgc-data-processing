@@ -244,7 +244,11 @@ class Storer:
         # Drop dupliacted rows from dataframe
         dropped = df.drop(df[is_duplicated].index, axis=0)
         # Group duplicates and average them
-        grouped = duplicates.groupby(subset_group, dropna=False).mean().reset_index()
+        grouped = (
+            duplicates.groupby(subset_group, dropna=False)
+            .mean(numeric_only=True)
+            .reset_index()
+        )
         # Concatenate dataframe with droppped duplicates and duplicates averaged
         return pd.concat([dropped, grouped], ignore_index=True, axis=0)
 
