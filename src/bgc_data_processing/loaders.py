@@ -1,6 +1,7 @@
 """Module contains tools for loading fron differents files."""
 
 import datetime as dt
+import itertools
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -279,21 +280,111 @@ class BaseLoader(ABC):
         """
         ...
 
-    @abstractmethod
-    def _select_filepaths(self, exclude: list) -> list[str]:
-        """Select filepaths matching the file pattern.
-
-        Parameters
-        ----------
-        exclude : list
-            Files to exclude even if their name matches the pattern.
+    def _pattern(self, date_constraint: dict) -> str:
+        """Return files pattern for given years for this provider.
 
         Returns
         -------
-        list[str]
-            List of the filepaths to use for loading.
+        str
+            Pattern.
+        date_constraint: dict
+            Date-related constraint dictionnary.
         """
-        ...
+        if not date_constraint:
+            years_str = "...."
+        else:
+            boundary_in = "boundary" in date_constraint
+            superset_in = "superset" in date_constraint
+            if boundary_in and superset_in and date_constraint["superset"]:
+                b_min = date_constraint["boundary"]["min"]
+                b_max = date_constraint["boundary"]["max"]
+                s_min = min(date_constraint["superset"])
+                s_max = max(date_constraint["superset"])
+                year_min = min(b_min, s_min).year
+                year_max = max(b_max, s_max).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not boundary_in:
+                year_min = min(date_constraint["superset"]).year
+                year_max = max(date_constraint["superset"]).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not superset_in:
+                year_min = date_constraint["boundary"]["min"].year
+                year_max = date_constraint["boundary"]["max"].year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            else:
+                raise KeyError("Date constraint dictionnary has invalid keys")
+        return self._files_pattern.format(years=years_str)
+
+    def _select_filepaths(
+        self,
+        research_dir: Path,
+        pattern: str,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Recursive function to apply pattern on folders and file names.
+
+        Parameters
+        ----------
+        research_dir : Path
+            Directory on which to search for folders/files respecting pattern.
+        pattern : str
+            Pattern to respect (from the level of research_dir)
+        exclude : list[str]
+            Filenames to exclude.
+
+        Returns
+        -------
+        list[Path]
+            Files matching the pattern.
+        """
+        if "/" not in pattern:
+            # Search pattern on file names
+            regex = re.compile(pattern)
+            files = filter(regex.match, [x.name for x in research_dir.glob("*.*")])
+            fulls_paths = map(research_dir.joinpath, files)
+
+            def valid(filepath: Path) -> bool:
+                return self._is_file_valid(filepath=filepath, exclude=exclude)
+
+            return sorted(filter(valid, fulls_paths))
+
+        # recursion: Search pattern on folder names
+        pattern_split = pattern.split("/")
+        folder_regex = re.compile(pattern_split[0])
+        matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
+
+        # Prepare next recursive call
+        def recursive_call(folder: str) -> list[Path]:
+            return self._select_filepaths(
+                research_dir=research_dir.joinpath(folder),
+                pattern="/".join(pattern_split[1:]),
+                exclude=exclude,
+            )
+
+        # apply recursive function to selected folders
+        recursion_results = map(recursive_call, matches)
+        # return list of all results
+        return list(itertools.chain(*recursion_results))
+
+    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+        """Indicate whether a file is valid to be kept or not.
+
+        Parameters
+        ----------
+        filepath : Path
+            Name of the file
+        exclude : list[str]
+            List of filenames to exclude
+
+        Returns
+        -------
+        bool
+            True if the name is not to be excluded.
+        """
+        keep_path = str(filepath) not in exclude
+        keep_name = filepath.name not in exclude
+
+        return keep_name and keep_path
 
     @abstractmethod
     def load(self, filepath: str) -> pd.DataFrame:
@@ -430,9 +521,11 @@ class CSVLoader(BaseLoader):
             Storer for the loaded data.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
         filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(date_constraint=date_constraint),
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
         data_list = []
         for filepath in filepaths:
@@ -448,66 +541,6 @@ class CSVLoader(BaseLoader):
             variables=self.variables,
             verbose=self.verbose,
         )
-
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
-
-    def _select_filepaths(
-        self,
-        exclude: list,
-        date_constraint: dict = {},
-    ) -> list[Path]:
-        """Select filepaths to use when loading the data.
-
-        exclude: list
-            List of files to exclude when loading.
-        date_constraint: dict, optionnal
-            Date-related constraint dictionnary., by default {}
-
-        Returns
-        -------
-        list[Path]
-            List of filepath to use when loading the data.
-        """
-        regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            if filename not in exclude:
-                full_paths.append(self._dirin.joinpath(filename))
-        return sorted(full_paths)
 
     def _read(self, filepath: Path) -> pd.DataFrame:
         """Read csv files, using self._read_params when loading files.
@@ -732,7 +765,14 @@ class NetCDFLoader(BaseLoader):
         Storer
             Storer for the loaded data.
         """
-        filepaths = self._select_filepaths(exclude=exclude)
+        date_label = self._variables.get(self._variables.date_var_name).label
+        filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(
+                date_constraint=constraints.get_constraint_parameters(date_label),
+            ),
+            exclude=exclude,
+        )
         data_list = []
         for filepath in filepaths:
             data_list.append(self.load(filepath=filepath, constraints=constraints))
@@ -744,25 +784,6 @@ class NetCDFLoader(BaseLoader):
             variables=self.variables,
             verbose=self.verbose,
         )
-
-    def _select_filepaths(self, exclude: list) -> list[Path]:
-        """Select filepaths referring to the files to load.
-
-        exclude: list
-            List of files to exclude when loading.
-
-        Returns
-        -------
-        list[Path]
-            List of the filepaths to the files to load.
-        """
-        regex = re.compile(self._files_pattern)
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            if filename not in exclude:
-                full_paths.append(self._dirin.joinpath(filename))
-        return sorted(full_paths)
 
     def _get_id(self, filename: str) -> str:
         """Parse the station id from the file name.
@@ -1575,80 +1596,25 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
-
-    def _select_filepaths(
-        self,
-        exclude: list,
-        date_constraint: Constraints,
-    ) -> list[Path]:
-        """Select filepaths to use when loading the data.
-
-        exclude: list
-            List of files to exclude when loading.
-        date_constraint: dict, optionnal
-            Date-related constraint dictionnary., by default {}
-
-        Returns
-        -------
-        list[Path]
-            List of filepath to use when loading the data.
-        """
-        regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            basename = filename[:-2]
-            keep_filename = filename not in exclude
-            keep_basename = basename not in exclude
-            path_basename = self._dirin.joinpath(basename)
-            afile_path = Path(f"{path_basename}.a")
-            bfile_path = Path(f"{path_basename}.b")
-            if not afile_path.is_file():
-                raise FileNotFoundError(
-                    f"{afile_path} does not exist.",
-                )
-            if not bfile_path.is_file():
-                raise FileNotFoundError(
-                    f"{bfile_path} does not exist.",
-                )
-            if keep_basename and keep_filename:
-                full_paths.append(path_basename)
-
-        return full_paths
+    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+        basepath = filepath.parent / filepath.name[:-2]
+        keep_filepath = str(filepath) not in exclude
+        keep_filename = filepath.name not in exclude
+        keep_file = keep_filename and keep_filepath
+        keep_basepath = str(basepath) not in exclude
+        keep_basename = basepath.name not in exclude
+        keep_base = keep_basename and keep_basepath
+        afile_path = Path(f"{basepath}.a")
+        bfile_path = Path(f"{basepath}.b")
+        if not afile_path.is_file():
+            raise FileNotFoundError(
+                f"{afile_path} does not exist.",
+            )
+        if not bfile_path.is_file():
+            raise FileNotFoundError(
+                f"{bfile_path} does not exist.",
+            )
+        return keep_base and keep_file
 
     def _create_missing_column(
         self,
