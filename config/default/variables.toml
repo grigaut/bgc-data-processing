@@ -162,7 +162,7 @@ VALUE_FORMAT = "%10.3f"
 #? oxygen.NAME: str: variable name
 NAME = "DOXY"
 #? oxygen.UNIT: str: variable unit
-UNIT = "[ml/l]"
+UNIT = "[mmol/m3]"
 #? oxygen.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
 TYPE = "float"
 #? oxygen.DEFAULT: str | int | float: default variable value if nan or not existing

@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    PROVIDERS_CONFIG,
+    loaders,
+    units,
+    variables,
+)
 
 loader = loaders.from_csv(
     provider_name="NMDC",
@@ -25,7 +31,9 @@ loader = loaders.from_csv(
         .correct_with(lambda x: -x),
         temperature=DEFAULT_VARS["temperature"].not_in_file(),
         salinity=DEFAULT_VARS["salinity"].not_in_file(),
-        oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOW"),
+        oxygen=DEFAULT_VARS["oxygen"]
+        .in_file_as("DOW")
+        .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("Phosphate", "Phosphate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),

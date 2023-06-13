@@ -1,7 +1,7 @@
 site_name: BGC-DATA-PROCESSING
 # Add repository metadate for more integration and ease-of-use
 repo_name: bgc-data-processing
-repo_url: repo_url
+# repo_url: repo_url
 
 theme:
   name: "material"

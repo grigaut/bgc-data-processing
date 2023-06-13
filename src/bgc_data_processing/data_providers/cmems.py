@@ -4,7 +4,13 @@ from pathlib import Path
 
 import numpy as np
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    PROVIDERS_CONFIG,
+    loaders,
+    units,
+    variables,
+)
 
 loader = loaders.from_netcdf(
     provider_name="CMEMS",
@@ -27,7 +33,9 @@ loader = loaders.from_netcdf(
         .correct_with(lambda x: -np.abs(x)),
         temperature=DEFAULT_VARS["temperature"].in_file_as(("TEMP", "TEMP_QC", [1])),
         salinity=DEFAULT_VARS["salinity"].in_file_as(("PSAL", "PSL_QC", [1])),
-        oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOX1"),
+        oxygen=DEFAULT_VARS["oxygen"]
+        .in_file_as("DOX1")
+        .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as(("PHOS", "PHOS_QC", [1]))
         .remove_when_all_nan(),

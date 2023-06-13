@@ -8,6 +8,7 @@ from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
     loaders,
+    units,
     variables,
 )
 
@@ -38,7 +39,9 @@ loader = loaders.from_netcdf(
             ("PSAL_ADJUSTED", "PSAL_ADJUSTED_QC", [1]),
             ("PSAl", "PSAl_QC", [1]),
         ),
-        oxygen=DEFAULT_VARS["oxygen"].in_file_as("DOX2_ADJUSTED", "DOX2"),
+        oxygen=DEFAULT_VARS["oxygen"]
+        .in_file_as("DOX2_ADJUSTED", "DOX2")
+        .correct_with(units.convert_umol_by_kg_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"].not_in_file(),
         nitrate=DEFAULT_VARS["nitrate"].not_in_file(),
         silicate=DEFAULT_VARS["silicate"].not_in_file(),

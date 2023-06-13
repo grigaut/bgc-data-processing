@@ -2,7 +2,13 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    PROVIDERS_CONFIG,
+    loaders,
+    units,
+    variables,
+)
 
 loader = loaders.from_csv(
     provider_name="IMR",
@@ -22,7 +28,9 @@ loader = loaders.from_csv(
         depth=DEFAULT_VARS["depth"].in_file_as("Depth").remove_when_nan(),
         temperature=DEFAULT_VARS["temperature"].in_file_as("Temp"),
         salinity=DEFAULT_VARS["salinity"].in_file_as("Saln."),
-        oxygen=DEFAULT_VARS["oxygen"].in_file_as("Oxygen", "Doxy"),
+        oxygen=DEFAULT_VARS["oxygen"]
+        .in_file_as("Oxygen", "Doxy")
+        .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
         phosphate=DEFAULT_VARS["phosphate"]
         .in_file_as("Phosphate")
         .remove_when_all_nan(),
