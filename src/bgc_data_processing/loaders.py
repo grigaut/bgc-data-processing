@@ -735,6 +735,7 @@ class NetCDFLoader(BaseLoader):
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
     _date_reference_format: str = "days since %Y-%m-%dT%H:%M:%SZ"
+    _satellite_reference_format: str = "days since %Y-%m-%d %H:%M:%S"
 
     def __init__(
         self,
@@ -1021,7 +1022,16 @@ class NetCDFLoader(BaseLoader):
         np.ndarray
             Adjusted values
         """
-        date_start = dt.datetime.strptime(variable.units, self._date_reference_format)
+        try:
+            date_start = dt.datetime.strptime(
+                variable.units,
+                self._date_reference_format,
+            )
+        except ValueError:
+            date_start = dt.datetime.strptime(
+                variable.units,
+                self._satellite_reference_format,
+            )
         data: np.ma.MaskedArray = variable[:]
         values: np.ndarray = data.filled(np.nan)
         offset_diff = date_start - self._date_start
