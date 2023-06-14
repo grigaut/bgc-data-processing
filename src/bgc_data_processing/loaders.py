@@ -734,8 +734,11 @@ class NetCDFLoader(BaseLoader):
     """
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
-    _date_reference_format: str = "days since %Y-%m-%dT%H:%M:%SZ"
-    _satellite_reference_format: str = "days since %Y-%m-%d %H:%M:%S"
+    _date_regex: str = "[0-9][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9]"
+    _time_regex: str = "[0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
+    _date_format: str = "%Y-%m-%d"
+    _time_format: str = "%H:%M:%S"
+    _default_time: str = "00:00:00"
 
     def __init__(
         self,
@@ -1022,16 +1025,21 @@ class NetCDFLoader(BaseLoader):
         np.ndarray
             Adjusted values
         """
-        try:
-            date_start = dt.datetime.strptime(
-                variable.units,
-                self._date_reference_format,
-            )
-        except ValueError:
-            date_start = dt.datetime.strptime(
-                variable.units,
-                self._satellite_reference_format,
-            )
+        units = variable.units
+        date_search = re.search(self._date_regex, units)
+        time_search = re.search(self._time_regex, units)
+
+        if date_search is None:
+            raise NetCDFLoadingError(f"Impossible to find date from time unit: {units}")
+        date_slice = date_search.group(0)
+
+        time_slice = self._default_time if time_search is None else time_search.group(0)
+
+        date_start = dt.datetime.strptime(
+            f"{date_slice} {time_slice}",
+            f"{self._date_format} {self._time_format}",
+        )
+
         data: np.ma.MaskedArray = variable[:]
         values: np.ndarray = data.filled(np.nan)
         offset_diff = date_start - self._date_start
