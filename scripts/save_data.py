@@ -7,9 +7,9 @@ from time import time
 import pandas as pd
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
-    data_providers,
     dateranges,
     parsers,
+    providers,
 )
 from bgc_data_processing.data_classes import Constraints, Storer
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print(f"Loading data : {data_src}")
-        dset_loader = data_providers.LOADERS[data_src]
+        dset_loader = providers.LOADERS[data_src]
         variables = dset_loader.variables
         dset_loader.set_saving_order(
             var_names=VARIABLES,

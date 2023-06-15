@@ -8,8 +8,8 @@ from bgc_data_processing import (
     interpolation,
     selectors,
 )
-from bgc_data_processing.data_providers import hycom
 from bgc_data_processing.parsers import ConfigParser
+from bgc_data_processing.providers import hycom
 
 CONFIG_FOLDER = Path("config")
 
