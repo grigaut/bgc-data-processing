@@ -2,7 +2,7 @@
 
 Loading script to load year, latitude, longitude, phosphate and nitrate variables from 2 providers, 'provider1' and 'provider2'. Phosphate variable is not measured by provider1 and nitrate is not measured by provider2. <br />
 Therefore, template are created to store basic informations on variables and are then instanciated in order to create relevant ExistingVar or NotExistingVar depending on provider. <br />
-Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [Constraints]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Constraints")}}) objects. Passing a Constraints object to the loader's [\__call__]({{fix_url("../reference/loaders/#bgc_data_processing.loaders.CSVLoader.__call__")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
+Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [Constraints]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Constraints")}}) objects. Passing a Constraints object to the loader's [\__call__]({{fix_url("../reference/loaders/#bgc_data_processing.loaders.csv_loaders.CSVLoader.__call__")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
 
 ``` py
 import datetime as dt
