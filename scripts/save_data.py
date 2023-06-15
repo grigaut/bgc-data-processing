@@ -9,9 +9,9 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     parsers,
     providers,
+    utils,
 )
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.utils import dateranges
+from bgc_data_processing.data_structures import Constraints, Storer
 
 CONFIG_FOLDER = Path("config")
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     VERBOSE = CONFIG["VERBOSE"]
 
     # Dates parsing
-    dates_generator = dateranges.DateRangeGenerator(
+    dates_generator = utils.dateranges.DateRangeGenerator(
         start=DATE_MIN,
         end=DATE_MAX,
         interval=INTERVAL,

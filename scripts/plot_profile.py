@@ -3,16 +3,13 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import EvolutionProfile
+from bgc_data_processing import DEFAULT_VARS, data_structures, parsers, tracers
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = ConfigParser(
+    CONFIG = parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -41,7 +38,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = Storer.from_files(
+    storer = data_structures.read_file(
         filepath=filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -61,7 +58,7 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     storer.remove_duplicates(priority_list=PRIORITY)
     variables = storer.variables
-    constraints = Constraints()
+    constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -86,7 +83,7 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
-    profile = EvolutionProfile(storer, constraints=constraints)
+    profile = tracers.EvolutionProfile(storer, constraints=constraints)
     profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
     profile.set_depth_interval(DEPTH_INTERVAL)
     if SHOW:

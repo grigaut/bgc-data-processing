@@ -4,7 +4,7 @@ import datetime as dt
 from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS
-from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.data_structures import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import DensityPlotter
 

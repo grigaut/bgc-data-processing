@@ -7,15 +7,15 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     loaders,
     units,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_csv(
     provider_name="IMR",
     dirin=Path(PROVIDERS_CONFIG["IMR"]["PATH"]),
     category=PROVIDERS_CONFIG["IMR"]["CATEGORY"],
     files_pattern="imr_({years}).csv",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].not_in_file(),

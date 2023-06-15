@@ -10,8 +10,9 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_classes import Constraints, Storer
-    from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.data_structures.filtering import Constraints
+    from bgc_data_processing.data_structures.storers import Storer
+    from bgc_data_processing.data_structures.variables import VariablesStorer
 
 
 class BaseLoader(ABC):

@@ -3,14 +3,15 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_abfile(
     provider_name="HYCOM",
     dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
     category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
     files_pattern="archm.{years}_[0-9]*_[0-9]*.a",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file().set_default("HYCOM"),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].not_in_file(),

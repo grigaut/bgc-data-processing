@@ -9,12 +9,13 @@ import netCDF4
 import numpy as np
 import pandas as pd
 
-from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import (
+    from bgc_data_processing.data_structures.variables import (
         ExistingVar,
         NotExistingVar,
         VariablesStorer,

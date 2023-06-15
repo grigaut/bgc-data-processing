@@ -9,15 +9,15 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     loaders,
     units,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=Path(PROVIDERS_CONFIG["CMEMS"]["PATH"]),
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
     files_pattern=".*.nc",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("TIME"),

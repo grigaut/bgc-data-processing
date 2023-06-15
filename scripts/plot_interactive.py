@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import shapely
 from bgc_data_processing import DEFAULT_VARS
-from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.data_structures import Constraints, Storer
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import DensityPlotter, EvolutionProfile
 from cartopy import crs

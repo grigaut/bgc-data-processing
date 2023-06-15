@@ -4,17 +4,17 @@ from pathlib import Path
 from bgc_data_processing import (
     DEFAULT_VARS,
     comparison,
-    data_classes,
+    data_structures,
     features,
+    parsers,
+    providers,
 )
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.providers import hycom
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = ConfigParser(
+    CONFIG = parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         check_types=False,
         dates_vars_keys=[],
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    observations = data_classes.Storer.from_files(
+    observations = data_structures.read_file(
         filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     selector = comparison.Selector(
         reference=observations,
         strategy=comparison.NearestNeighborStrategy(metric="haversine"),
-        loader=hycom.loader,
+        loader=providers.LOADERS["HYCOM"],
     )
 
     simulations = selector()

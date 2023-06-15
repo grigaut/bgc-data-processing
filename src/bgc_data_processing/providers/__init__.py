@@ -1,12 +1,14 @@
 """Contain all loaders for given providers."""
 
 from importlib import import_module
+from pathlib import Path
 from typing import TYPE_CHECKING
-
-from bgc_data_processing import BASE_DIR
 
 if TYPE_CHECKING:
     from bgc_data_processing.loaders.base import BaseLoader
+
+BASE_DIR = Path(__file__).parent.parent.resolve()
+
 __all__ = [
     "LOADERS",
 ]

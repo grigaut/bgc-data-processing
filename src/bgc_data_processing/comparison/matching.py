@@ -9,11 +9,12 @@ import pandas as pd
 from abfile import ABFileArchv, ABFileGrid
 from sklearn.neighbors import NearestNeighbors
 
-from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.data_structures.variables import VariablesStorer
 
 
 class SelectiveABFileLoader(ABFileLoader):

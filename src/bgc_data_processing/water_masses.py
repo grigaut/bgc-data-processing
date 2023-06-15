@@ -4,8 +4,9 @@ from collections.abc import Iterable
 import numpy as np
 import pandas as pd
 
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.variables import NotExistingVar
+from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.data_structures.storers import Storer
+from bgc_data_processing.data_structures.variables import NotExistingVar
 
 
 class WaterMass:

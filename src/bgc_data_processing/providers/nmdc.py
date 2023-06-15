@@ -7,15 +7,15 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     loaders,
     units,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_csv(
     provider_name="NMDC",
     dirin=Path(PROVIDERS_CONFIG["NMDC"]["PATH"]),
     category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
     files_pattern="NMDC_1990-2019_all.csv",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),
         date=DEFAULT_VARS["date"].in_file_as("Time"),

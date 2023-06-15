@@ -3,17 +3,21 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, DEFAULT_WATER_MASSES, features
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import WaterMassVariableComparison
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    DEFAULT_WATER_MASSES,
+    data_structures,
+    features,
+    parsers,
+    tracers,
+)
 from bgc_data_processing.water_masses import WaterMass
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = ConfigParser(
+    CONFIG = parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -43,7 +47,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = Storer.from_files(
+    storer = data_structures.read_file(
         filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -65,7 +69,11 @@ if __name__ == "__main__":
     # Add relevant features to the data: Pressure / potential temperature /sigma-t
     depth_field = variables.get(variables.depth_var_name).label
     latitude_field = variables.get(variables.latitude_var_name).label
-    pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
+    pres_var, pres_data = features.compute_pressure(
+        storer,
+        depth_field,
+        latitude_field,
+    )
     storer.add_feature(pres_var, pres_data)
     ptemp_var, ptemp_data = features.compute_potential_temperature(
         storer=storer,
@@ -80,7 +88,7 @@ if __name__ == "__main__":
         temperature_field=TEMPERATURE_DEFAULT.label,
     )
     storer.add_feature(sigt_var, sigt_data)
-    constraints = Constraints()
+    constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -100,7 +108,7 @@ if __name__ == "__main__":
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
     )
-    plot = WaterMassVariableComparison(
+    plot = tracers.WaterMassVariableComparison(
         storer,
         constraints,
         pres_var.name,

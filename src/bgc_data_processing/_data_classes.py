@@ -9,14 +9,14 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from bgc_data_processing.variables import ParsedVar, VariablesStorer
+from bgc_data_processing.data_structures.variables import ParsedVar, VariablesStorer
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from shapely import Polygon
 
-    from bgc_data_processing.variables import NotExistingVar
+    from bgc_data_processing.data_structures.variables import NotExistingVar
 
 
 class Storer:
