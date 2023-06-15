@@ -74,21 +74,21 @@ def read_file(
     --------
     Loading from a single file:
     >>> filepath = "path/to/file"
-    >>> storer = DStorer.from_files(filepath, providers="providers_column_name")
+    >>> storer = read_file(filepath, providers="providers_column_name")
 
     Loading from multiple files:
     >>> filepaths = [
     ...     "path/to/file1",
     ...     "path/to/file2",
     ... ]
-    >>> storer = DensityPlotter.from_files(
+    >>> storer = read_file(
     ...     filepaths,
     ... )
     """
     if isinstance(filepath, list):
         storers = []
         for path in filepath:
-            storer = Storer.from_files(
+            storer = read_file(
                 filepath=path,
                 providers_column_label=providers_column_label,
                 expocode_column_label=expocode_column_label,
