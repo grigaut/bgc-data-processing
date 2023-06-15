@@ -317,8 +317,9 @@ class SelectiveABFileLoader(ABFileLoader):
         """
         date_label = self._variables.get(self._variables.date_var_name).label
         return self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(constraints.get_constraint_parameters(date_label)),
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
 
     @classmethod
