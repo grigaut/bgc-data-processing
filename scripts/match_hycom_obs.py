@@ -3,10 +3,9 @@ from pathlib import Path
 
 from bgc_data_processing import (
     DEFAULT_VARS,
+    comparison,
     data_classes,
     features,
-    interpolation,
-    selectors,
 )
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.providers import hycom
@@ -54,15 +53,15 @@ if __name__ == "__main__":
         delim_whitespace=True,
         verbose=1,
     )
-    selector = selectors.Selector(
+    selector = comparison.Selector(
         reference=observations,
-        strategy=selectors.NearestNeighborStrategy(metric="haversine"),
+        strategy=comparison.NearestNeighborStrategy(metric="haversine"),
         loader=hycom.loader,
     )
 
     simulations = selector()
 
-    interpolator = interpolation.Interpolator(
+    interpolator = comparison.Interpolator(
         base=simulations,
         x_column_name=DEPTH_TEMPLATE.label,
         y_columns_name=TO_INTERPOLATE,
