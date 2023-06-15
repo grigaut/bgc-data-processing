@@ -50,6 +50,14 @@ def from_netcdf(
     NetCDFLoader
         _description_
     """
+    if category == "satellite":
+        return SatelliteNetCDFLoader(
+            provider_name=provider_name,
+            dirin=dirin,
+            category=category,
+            files_pattern=files_pattern,
+            variables=variables,
+        )
     return NetCDFLoader(
         provider_name=provider_name,
         dirin=dirin,
@@ -1183,6 +1191,132 @@ class NetCDFLoader(BaseLoader):
         df_corr = self._correct(df_types)
         df_sliced = constraints.apply_constraints_to_dataframe(df_corr)
         return self.remove_nan_rows(df_sliced)
+
+
+class SatelliteNetCDFLoader(NetCDFLoader):
+    """Loader class to use with NetCDF files related to Satellite data.
+
+    Parameters
+    ----------
+    provider_name : str
+        Data provider name.
+    dirin : Path
+        Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
+    files_pattern : str
+        Pattern to use to parse files.
+        It must contain a '{years}' in order to be completed using the .format method.
+    variables : VariablesStorer
+        Storer object containing all variables to consider for this data,
+        both the one in the data file but and the one not represented in the file.
+    """
+
+    def _load_dimensions_vars(
+        self,
+        nc_data: netCDF4.Dataset,
+    ) -> np.ndarray:
+        """Load dimension (latitude/longitude/time) related values.
+
+        Parameters
+        ----------
+        nc_data : netCDF4.Dataset
+            netCDF4.Dataset to use to get data.
+
+        Returns
+        -------
+        np.ndarray
+            Time, Latitude, Longitude as 3d arrays.
+        """
+        variables = self.variables
+        latitude = variables.get(variables.latitude_var_name)
+        longitude = variables.get(variables.longitude_var_name)
+        date = variables.get(variables.date_var_name)
+
+        lat_values = self._filter_flags(nc_data, latitude)
+        lon_values = self._filter_flags(nc_data, longitude)
+        dat_values = self._filter_flags(nc_data, date)
+
+        dat_3d = dat_values.reshape((dat_values.shape[0], 1, 1))
+        lat_3d = lat_values.reshape((1, lat_values.shape[0], 1))
+        lon_3d = lon_values.reshape((1, 1, lon_values.shape[0]))
+
+        return dat_3d, lat_3d, lon_3d
+
+    def _set_expocode(
+        self,
+        df: pd.DataFrame,
+        file_id: str,  # noqa: ARG002 : For compatinility only
+    ) -> pd.DataFrame:
+        """Set the expocode column to file_id.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Dataframe with wrong expocode column.
+        file_id : str
+            File id, only for compatibility.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with expocode column properly filled.
+        """
+        expocode_var_name = self._variables.expocode_var_name
+        df.insert(
+            0,
+            self._variables.get(expocode_var_name).label,
+            self._variables.get(expocode_var_name).default,
+        )
+        return df
+
+    def _format(self, nc_data: netCDF4.Dataset) -> pd.DataFrame:
+        """Format the data from netCDF4.Dataset to pd.DataFrame.
+
+        Parameters
+        ----------
+        nc_data : netCDF4.Dataset
+            Data storer to format.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with the proper columns.
+        """
+        data_dict = {}
+        variables = self.variables
+        dim_vars = [
+            variables.latitude_var_name,
+            variables.longitude_var_name,
+            variables.date_var_name,
+        ]
+        dims_included = False
+        missing_vars = []
+        for var in variables.in_dset:
+            if var.name in dim_vars:
+                continue
+            values = self._filter_flags(nc_data=nc_data, variable=var)
+            if values is None:
+                missing_vars.append(var)
+                continue
+            if not dims_included:
+                dat_3d, lat_3d, lon_3d = self._load_dimensions_vars(nc_data=nc_data)
+                dat_label = variables.get(variables.date_var_name).label
+                data_dict[dat_label] = np.broadcast_to(dat_3d, values.shape).ravel()
+                lat_label = variables.get(variables.latitude_var_name).label
+                data_dict[lat_label] = np.broadcast_to(lat_3d, values.shape).ravel()
+                lon_label = variables.get(variables.longitude_var_name).label
+                data_dict[lon_label] = np.broadcast_to(lon_3d, values.shape).ravel()
+                dims_included = True
+            values = values.ravel()
+            values[np.isnan(values)] = var.default
+            data_dict[var.label] = values
+        nc_data.close()
+        # Add missing columns
+        data_dict = self._fill_missing(data_dict, missing_vars)
+        # Reshape all variables's data to 1D
+        data_dict = self._reshape_data(data_dict)
+        return pd.DataFrame(data_dict)
 
 
 class ABFileLoader(BaseLoader):
