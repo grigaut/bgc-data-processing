@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from bgc_data_processing import BASE_DIR
 
 if TYPE_CHECKING:
-    from bgc_data_processing.loaders import BaseLoader
+    from bgc_data_processing.loaders.base import BaseLoader
 __all__ = [
     "LOADERS",
 ]

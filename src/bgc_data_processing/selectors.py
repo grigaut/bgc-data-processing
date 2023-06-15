@@ -10,7 +10,7 @@ from abfile import ABFileArchv, ABFileGrid
 from sklearn.neighbors import NearestNeighbors
 
 from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.loaders import ABFileLoader
+from bgc_data_processing.loaders.abfiles_loaders import ABFileLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.variables import VariablesStorer
