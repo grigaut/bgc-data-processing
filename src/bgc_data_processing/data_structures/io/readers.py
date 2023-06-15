@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from bgc_data_processing._data_classes import Storer
+from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.data_structures.variables import ParsedVar, VariablesStorer
 
 
