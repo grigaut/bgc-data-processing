@@ -224,3 +224,10 @@ REGIONAL_GRID_BASENAME = "path/to/file_basename"
 CATEGORY = "model"
 #? HYCOM.EXCLUDE: list[str]: files to exclude from loading
 EXCLUDE = []
+[ESACCI-OC]
+#? ESACCI-OC.PATH: str: path to the folder containing the data
+PATH = "path/to/file/directory"
+#? ESACCI-OC.CATEGORY: str: data category, either 'float' or 'in_situ'
+CATEGORY = "satellite"
+#? ESACCI-OC.EXCLUDE: list[str]: files to exclude from loading
+EXCLUDE = []

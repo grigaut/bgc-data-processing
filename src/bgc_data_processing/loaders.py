@@ -1,6 +1,7 @@
 """Module contains tools for loading fron differents files."""
 
 import datetime as dt
+import itertools
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -49,6 +50,14 @@ def from_netcdf(
     NetCDFLoader
         _description_
     """
+    if category == "satellite":
+        return SatelliteNetCDFLoader(
+            provider_name=provider_name,
+            dirin=dirin,
+            category=category,
+            files_pattern=files_pattern,
+            variables=variables,
+        )
     return NetCDFLoader(
         provider_name=provider_name,
         dirin=dirin,
@@ -279,21 +288,111 @@ class BaseLoader(ABC):
         """
         ...
 
-    @abstractmethod
-    def _select_filepaths(self, exclude: list) -> list[str]:
-        """Select filepaths matching the file pattern.
-
-        Parameters
-        ----------
-        exclude : list
-            Files to exclude even if their name matches the pattern.
+    def _pattern(self, date_constraint: dict) -> str:
+        """Return files pattern for given years for this provider.
 
         Returns
         -------
-        list[str]
-            List of the filepaths to use for loading.
+        str
+            Pattern.
+        date_constraint: dict
+            Date-related constraint dictionnary.
         """
-        ...
+        if not date_constraint:
+            years_str = "...."
+        else:
+            boundary_in = "boundary" in date_constraint
+            superset_in = "superset" in date_constraint
+            if boundary_in and superset_in and date_constraint["superset"]:
+                b_min = date_constraint["boundary"]["min"]
+                b_max = date_constraint["boundary"]["max"]
+                s_min = min(date_constraint["superset"])
+                s_max = max(date_constraint["superset"])
+                year_min = min(b_min, s_min).year
+                year_max = max(b_max, s_max).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not boundary_in:
+                year_min = min(date_constraint["superset"]).year
+                year_max = max(date_constraint["superset"]).year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            elif not superset_in:
+                year_min = date_constraint["boundary"]["min"].year
+                year_max = date_constraint["boundary"]["max"].year
+                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
+            else:
+                raise KeyError("Date constraint dictionnary has invalid keys")
+        return self._files_pattern.format(years=years_str)
+
+    def _select_filepaths(
+        self,
+        research_dir: Path,
+        pattern: str,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Recursive function to apply pattern on folders and file names.
+
+        Parameters
+        ----------
+        research_dir : Path
+            Directory on which to search for folders/files respecting pattern.
+        pattern : str
+            Pattern to respect (from the level of research_dir)
+        exclude : list[str]
+            Filenames to exclude.
+
+        Returns
+        -------
+        list[Path]
+            Files matching the pattern.
+        """
+        if "/" not in pattern:
+            # Search pattern on file names
+            regex = re.compile(pattern)
+            files = filter(regex.match, [x.name for x in research_dir.glob("*.*")])
+            fulls_paths = map(research_dir.joinpath, files)
+
+            def valid(filepath: Path) -> bool:
+                return self._is_file_valid(filepath=filepath, exclude=exclude)
+
+            return sorted(filter(valid, fulls_paths))
+
+        # recursion: Search pattern on folder names
+        pattern_split = pattern.split("/")
+        folder_regex = re.compile(pattern_split[0])
+        matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
+
+        # Prepare next recursive call
+        def recursive_call(folder: str) -> list[Path]:
+            return self._select_filepaths(
+                research_dir=research_dir.joinpath(folder),
+                pattern="/".join(pattern_split[1:]),
+                exclude=exclude,
+            )
+
+        # apply recursive function to selected folders
+        recursion_results = map(recursive_call, matches)
+        # return list of all results
+        return list(itertools.chain(*recursion_results))
+
+    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+        """Indicate whether a file is valid to be kept or not.
+
+        Parameters
+        ----------
+        filepath : Path
+            Name of the file
+        exclude : list[str]
+            List of filenames to exclude
+
+        Returns
+        -------
+        bool
+            True if the name is not to be excluded.
+        """
+        keep_path = str(filepath) not in exclude
+        keep_name = filepath.name not in exclude
+
+        return keep_name and keep_path
 
     @abstractmethod
     def load(self, filepath: str) -> pd.DataFrame:
@@ -430,9 +529,11 @@ class CSVLoader(BaseLoader):
             Storer for the loaded data.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
         filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(date_constraint=date_constraint),
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
         data_list = []
         for filepath in filepaths:
@@ -448,66 +549,6 @@ class CSVLoader(BaseLoader):
             variables=self.variables,
             verbose=self.verbose,
         )
-
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
-
-    def _select_filepaths(
-        self,
-        exclude: list,
-        date_constraint: dict = {},
-    ) -> list[Path]:
-        """Select filepaths to use when loading the data.
-
-        exclude: list
-            List of files to exclude when loading.
-        date_constraint: dict, optionnal
-            Date-related constraint dictionnary., by default {}
-
-        Returns
-        -------
-        list[Path]
-            List of filepath to use when loading the data.
-        """
-        regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            if filename not in exclude:
-                full_paths.append(self._dirin.joinpath(filename))
-        return sorted(full_paths)
 
     def _read(self, filepath: Path) -> pd.DataFrame:
         """Read csv files, using self._read_params when loading files.
@@ -701,7 +742,11 @@ class NetCDFLoader(BaseLoader):
     """
 
     _date_start: dt.datetime = dt.datetime(1950, 1, 1, 0, 0, 0)
-    _date_reference_format: str = "days since %Y-%m-%dT%H:%M:%SZ"
+    _date_regex: str = "[0-9][0-9][0-9][0-9]-[01][0-9]-[0-3][0-9]"
+    _time_regex: str = "[0-2][0-9]:[0-5][0-9]:[0-5][0-9]"
+    _date_format: str = "%Y-%m-%d"
+    _time_format: str = "%H:%M:%S"
+    _default_time: str = "00:00:00"
 
     def __init__(
         self,
@@ -732,7 +777,14 @@ class NetCDFLoader(BaseLoader):
         Storer
             Storer for the loaded data.
         """
-        filepaths = self._select_filepaths(exclude=exclude)
+        date_label = self._variables.get(self._variables.date_var_name).label
+        filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(
+                date_constraint=constraints.get_constraint_parameters(date_label),
+            ),
+            exclude=exclude,
+        )
         data_list = []
         for filepath in filepaths:
             data_list.append(self.load(filepath=filepath, constraints=constraints))
@@ -744,25 +796,6 @@ class NetCDFLoader(BaseLoader):
             variables=self.variables,
             verbose=self.verbose,
         )
-
-    def _select_filepaths(self, exclude: list) -> list[Path]:
-        """Select filepaths referring to the files to load.
-
-        exclude: list
-            List of files to exclude when loading.
-
-        Returns
-        -------
-        list[Path]
-            List of the filepaths to the files to load.
-        """
-        regex = re.compile(self._files_pattern)
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            if filename not in exclude:
-                full_paths.append(self._dirin.joinpath(filename))
-        return sorted(full_paths)
 
     def _get_id(self, filename: str) -> str:
         """Parse the station id from the file name.
@@ -1000,7 +1033,21 @@ class NetCDFLoader(BaseLoader):
         np.ndarray
             Adjusted values
         """
-        date_start = dt.datetime.strptime(variable.units, self._date_reference_format)
+        units = variable.units
+        date_search = re.search(self._date_regex, units)
+        time_search = re.search(self._time_regex, units)
+
+        if date_search is None:
+            raise NetCDFLoadingError(f"Impossible to find date from time unit: {units}")
+        date_slice = date_search.group(0)
+
+        time_slice = self._default_time if time_search is None else time_search.group(0)
+
+        date_start = dt.datetime.strptime(
+            f"{date_slice} {time_slice}",
+            f"{self._date_format} {self._time_format}",
+        )
+
         data: np.ma.MaskedArray = variable[:]
         values: np.ndarray = data.filled(np.nan)
         offset_diff = date_start - self._date_start
@@ -1144,6 +1191,132 @@ class NetCDFLoader(BaseLoader):
         df_corr = self._correct(df_types)
         df_sliced = constraints.apply_constraints_to_dataframe(df_corr)
         return self.remove_nan_rows(df_sliced)
+
+
+class SatelliteNetCDFLoader(NetCDFLoader):
+    """Loader class to use with NetCDF files related to Satellite data.
+
+    Parameters
+    ----------
+    provider_name : str
+        Data provider name.
+    dirin : Path
+        Directory to browse for files to load.
+    category: str
+        Category provider belongs to.
+    files_pattern : str
+        Pattern to use to parse files.
+        It must contain a '{years}' in order to be completed using the .format method.
+    variables : VariablesStorer
+        Storer object containing all variables to consider for this data,
+        both the one in the data file but and the one not represented in the file.
+    """
+
+    def _load_dimensions_vars(
+        self,
+        nc_data: netCDF4.Dataset,
+    ) -> np.ndarray:
+        """Load dimension (latitude/longitude/time) related values.
+
+        Parameters
+        ----------
+        nc_data : netCDF4.Dataset
+            netCDF4.Dataset to use to get data.
+
+        Returns
+        -------
+        np.ndarray
+            Time, Latitude, Longitude as 3d arrays.
+        """
+        variables = self.variables
+        latitude = variables.get(variables.latitude_var_name)
+        longitude = variables.get(variables.longitude_var_name)
+        date = variables.get(variables.date_var_name)
+
+        lat_values = self._filter_flags(nc_data, latitude)
+        lon_values = self._filter_flags(nc_data, longitude)
+        dat_values = self._filter_flags(nc_data, date)
+
+        dat_3d = dat_values.reshape((dat_values.shape[0], 1, 1))
+        lat_3d = lat_values.reshape((1, lat_values.shape[0], 1))
+        lon_3d = lon_values.reshape((1, 1, lon_values.shape[0]))
+
+        return dat_3d, lat_3d, lon_3d
+
+    def _set_expocode(
+        self,
+        df: pd.DataFrame,
+        file_id: str,  # noqa: ARG002 : For compatinility only
+    ) -> pd.DataFrame:
+        """Set the expocode column to file_id.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Dataframe with wrong expocode column.
+        file_id : str
+            File id, only for compatibility.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with expocode column properly filled.
+        """
+        expocode_var_name = self._variables.expocode_var_name
+        df.insert(
+            0,
+            self._variables.get(expocode_var_name).label,
+            self._variables.get(expocode_var_name).default,
+        )
+        return df
+
+    def _format(self, nc_data: netCDF4.Dataset) -> pd.DataFrame:
+        """Format the data from netCDF4.Dataset to pd.DataFrame.
+
+        Parameters
+        ----------
+        nc_data : netCDF4.Dataset
+            Data storer to format.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with the proper columns.
+        """
+        data_dict = {}
+        variables = self.variables
+        dim_vars = [
+            variables.latitude_var_name,
+            variables.longitude_var_name,
+            variables.date_var_name,
+        ]
+        dims_included = False
+        missing_vars = []
+        for var in variables.in_dset:
+            if var.name in dim_vars:
+                continue
+            values = self._filter_flags(nc_data=nc_data, variable=var)
+            if values is None:
+                missing_vars.append(var)
+                continue
+            if not dims_included:
+                dat_3d, lat_3d, lon_3d = self._load_dimensions_vars(nc_data=nc_data)
+                dat_label = variables.get(variables.date_var_name).label
+                data_dict[dat_label] = np.broadcast_to(dat_3d, values.shape).ravel()
+                lat_label = variables.get(variables.latitude_var_name).label
+                data_dict[lat_label] = np.broadcast_to(lat_3d, values.shape).ravel()
+                lon_label = variables.get(variables.longitude_var_name).label
+                data_dict[lon_label] = np.broadcast_to(lon_3d, values.shape).ravel()
+                dims_included = True
+            values = values.ravel()
+            values[np.isnan(values)] = var.default
+            data_dict[var.label] = values
+        nc_data.close()
+        # Add missing columns
+        data_dict = self._fill_missing(data_dict, missing_vars)
+        # Reshape all variables's data to 1D
+        data_dict = self._reshape_data(data_dict)
+        return pd.DataFrame(data_dict)
 
 
 class ABFileLoader(BaseLoader):
@@ -1575,80 +1748,25 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
-
-    def _select_filepaths(
-        self,
-        exclude: list,
-        date_constraint: Constraints,
-    ) -> list[Path]:
-        """Select filepaths to use when loading the data.
-
-        exclude: list
-            List of files to exclude when loading.
-        date_constraint: dict, optionnal
-            Date-related constraint dictionnary., by default {}
-
-        Returns
-        -------
-        list[Path]
-            List of filepath to use when loading the data.
-        """
-        regex = re.compile(self._pattern(date_constraint=date_constraint))
-        files = filter(regex.match, [x.name for x in self._dirin.glob("*.*")])
-        full_paths = []
-        for filename in files:
-            basename = filename[:-2]
-            keep_filename = filename not in exclude
-            keep_basename = basename not in exclude
-            path_basename = self._dirin.joinpath(basename)
-            afile_path = Path(f"{path_basename}.a")
-            bfile_path = Path(f"{path_basename}.b")
-            if not afile_path.is_file():
-                raise FileNotFoundError(
-                    f"{afile_path} does not exist.",
-                )
-            if not bfile_path.is_file():
-                raise FileNotFoundError(
-                    f"{bfile_path} does not exist.",
-                )
-            if keep_basename and keep_filename:
-                full_paths.append(path_basename)
-
-        return full_paths
+    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+        basepath = filepath.parent / filepath.name[:-2]
+        keep_filepath = str(filepath) not in exclude
+        keep_filename = filepath.name not in exclude
+        keep_file = keep_filename and keep_filepath
+        keep_basepath = str(basepath) not in exclude
+        keep_basename = basepath.name not in exclude
+        keep_base = keep_basename and keep_basepath
+        afile_path = Path(f"{basepath}.a")
+        bfile_path = Path(f"{basepath}.b")
+        if not afile_path.is_file():
+            raise FileNotFoundError(
+                f"{afile_path} does not exist.",
+            )
+        if not bfile_path.is_file():
+            raise FileNotFoundError(
+                f"{bfile_path} does not exist.",
+            )
+        return keep_base and keep_file
 
     def _create_missing_column(
         self,
