@@ -3,7 +3,7 @@
 Example script to create a density map of the data. The data has previously been saved in the files "data1.csv", "data2.csv", "data3.csv", "data4.csv" and "data5.csv" and can be loaded from these files.
 
 ``` py
-from bgc_data_processing.data_classes import Storer
+from bgc_data_processing.data_structures import read_file
 from bgc_data_processing.tracers import DensityPlotter
 
 files = [
@@ -14,7 +14,7 @@ files = [
     "path/to/data5.csv",
 ]
 # Files Loading
-storer = Storer.from_files(
+storer = read_file(
     filepath=files,
     providers_column_label = "PROVIDER",
     expocode_column_label = "EXPOCODE",
