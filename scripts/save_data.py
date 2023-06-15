@@ -7,11 +7,11 @@ from time import time
 import pandas as pd
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
-    dateranges,
     parsers,
     providers,
 )
 from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.utils import dateranges
 
 CONFIG_FOLDER = Path("config")
 

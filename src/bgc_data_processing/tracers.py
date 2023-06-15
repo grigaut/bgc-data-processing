@@ -14,7 +14,7 @@ from scipy.stats import norm
 from seawater import eos80
 
 from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.dateranges import DateRangeGenerator
+from bgc_data_processing.utils.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
     from cartopy.mpl.geoaxes import GeoAxes
