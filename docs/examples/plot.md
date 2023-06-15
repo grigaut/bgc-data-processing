@@ -31,7 +31,7 @@ storer = Storer.from_files(
     delim_whitespace=False,
 )
 # Constraints
-constraints = data_classes.Constraints()            # (1)!
+constraints = data_structures.Constraints()            # (1)!
 # Mapping
 mesh = DensityPlotter(storer, constraints=constraints)
 mesh.set_bin_size(bins_size=[0.5,1.5])
