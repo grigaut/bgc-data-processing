@@ -59,15 +59,15 @@ storer = loader()
 ```
 ## Loading from already processed file
 
-It is also possible to load data from files which have saved using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method using the read_file function:
+It is also possible to load data from files which have saved using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method using the read_files function:
 
 ```py
-from bgc_data_processing.data_structures import read_file
+from bgc_data_processing.data_structures import read_files
 files = [
     "file1.csv",
     "file2.csv",
 ]
-storer = read_file(
+storer = read_files(
     filepath = [ "file1.csv","file2.csv"],  # (1)!
     providers_column_label = "PROVIDER",    # (2)!
     expocode_column_label = "EXPOCODE",     # (3)!

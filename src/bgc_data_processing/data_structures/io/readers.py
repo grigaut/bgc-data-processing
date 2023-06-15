@@ -8,7 +8,7 @@ from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.data_structures.variables import ParsedVar, VariablesStorer
 
 
-def read_file(
+def read_files(
     filepath: Path | str | list[Path] | list[str],
     providers_column_label: str = "PROVIDER",
     expocode_column_label: str = "EXPOCODE",
@@ -74,21 +74,21 @@ def read_file(
     --------
     Loading from a single file:
     >>> filepath = "path/to/file"
-    >>> storer = read_file(filepath, providers="providers_column_name")
+    >>> storer = read_files(filepath, providers="providers_column_name")
 
     Loading from multiple files:
     >>> filepaths = [
     ...     "path/to/file1",
     ...     "path/to/file2",
     ... ]
-    >>> storer = read_file(
+    >>> storer = read_files(
     ...     filepaths,
     ... )
     """
     if isinstance(filepath, list):
         storers = []
         for path in filepath:
-            storer = read_file(
+            storer = read_files(
                 filepath=path,
                 providers_column_label=providers_column_label,
                 expocode_column_label=expocode_column_label,

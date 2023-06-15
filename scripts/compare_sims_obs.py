@@ -26,7 +26,7 @@ if __name__ == "__main__":
     VARIABLES_TO_COMPARE: list[str] = CONFIG["VARIABLES_TO_COMPARE"]
     SHOW_MAP: bool = CONFIG["SHOW_MAP"]
 
-    obs = data_structures.read_file(
+    obs = data_structures.read_files(
         OBSERVATIONS_FILE,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         verbose=1,
     )
 
-    sims = data_structures.read_file(
+    sims = data_structures.read_files(
         SIMULATIONS_FILE,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
