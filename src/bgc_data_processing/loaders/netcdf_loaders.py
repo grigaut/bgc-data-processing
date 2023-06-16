@@ -558,6 +558,16 @@ class SatelliteNetCDFLoader(NetCDFLoader):
         both the one in the data file but and the one not represented in the file.
     """
 
+    def __init__(
+        self,
+        provider_name: str,
+        dirin: Path,
+        category: str,
+        files_pattern: str,
+        variables: "VariablesStorer",
+    ) -> None:
+        super().__init__(provider_name, dirin, category, files_pattern, variables)
+
     def _load_dimensions_vars(
         self,
         nc_data: netCDF4.Dataset,

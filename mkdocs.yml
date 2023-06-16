@@ -1,7 +1,7 @@
 site_name: BGC-DATA-PROCESSING
 # Add repository metadate for more integration and ease-of-use
 repo_name: bgc-data-processing
-# repo_url: repo_url
+repo_url: https://github.com/grigaut/bgc-data-processing
 
 theme:
   name: "material"
@@ -91,5 +91,5 @@ markdown_extensions:
 
 
 extra:
-  repo_tree: repo_url/tree/main
-  repo_blob: repo_url/blob/main
+  repo_tree: https://github.com/grigaut/bgc-data-processing/tree/refactor/no-ref/refactor-data-classes
+  repo_blob: https://github.com/grigaut/bgc-data-processing/blob/refactor/no-ref/refactor-data-classes

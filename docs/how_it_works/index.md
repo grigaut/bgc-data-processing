@@ -40,7 +40,7 @@ variable = ExistingVar(
 
 ## Loading the data
 
-In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/loaders/#bgc_data_processing.loaders.csv_loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/loaders/#bgc_data_processing.loaders.netcdf_loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/loaders/#bgc_data_processing.loaders.abfile_loaders.ABFileLoader")}})). <br/>
+In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/loaders/csv_loaders/#bgc_data_processing.loaders.csv_loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/loaders/netcdf_loaders/#bgc_data_processing.loaders.netcdf_loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/loaders/abfile_loaders/#bgc_data_processing.loaders.abfile_loaders.ABFileLoader")}})). <br/>
 This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("reference/data_structures/variables/#bgc_data_processing.data_structures.variables.VariablesStorer")}})).
 
 Defining a loader for GLODAPv2.2022 :
