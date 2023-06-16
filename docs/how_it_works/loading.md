@@ -59,7 +59,7 @@ storer = loader()
 ```
 ## Loading from already processed file
 
-It is also possible to load data from files which have saved using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method using the read_files function:
+It is also possible to load data from files which have saved using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.storers.StorerSaver")}}) method using the read_files function:
 
 ```py
 from bgc_data_processing.data_structures import read_files
@@ -102,10 +102,10 @@ storer = read_files(
 
 ## Storers
 
-Once the data in a Storer, it is easy to save this data to a file using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method:
+Once the data in a Storer, it is easy to save this data to a file using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}) method:
 
 ```py
-storer.save("filepath/to/save/in")
+StorerSaver(storer).save_all_storer(Path("filepath/to/save/in"))
 ```
 
 It also possible to slice the Dataframe based on the dates of the rows using the [.slice_on_dates]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.slice_on_dates")}}) method. This will return a Slice object, a child class of Storer but only storing indexes of the dataframe slice and not the dataframe slice itself (to reduce the amount of memory used) :
@@ -143,5 +143,5 @@ slicer = Slice.slice_on_dates(drng, storer)     # (1)
 Slice objects can be saved in the same way as any Storer:
 
 ```py
-slicer.save("filepath/to/save/in")
+StorerSaver(slicer).save_all_storer("filepath/to/save/in")
 ```
