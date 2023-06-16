@@ -18,8 +18,6 @@ class StorerSaver:
     ----------
     storer : Storer
         Storer to save.
-    saving_directory : Path
-        Directory to save the data in.
     save_aggregated_data_only: bool
         Whether to only save the aggregated data or not.
         If False, for every provider, a folder with the providers' data will be created.
