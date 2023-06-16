@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import shapely
 from bgc_data_processing import DEFAULT_VARS, data_structures
-from bgc_data_processing.data_structures import Constraints, Storer
+from bgc_data_processing.data_structures import Constraints, Storer, StorerSaver
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import DensityPlotter, EvolutionProfile
 from cartopy import crs
@@ -290,7 +290,8 @@ def save(
     filename = Path(input().replace(" ", "_") + ".txt")
     if filename == ".txt":
         filename = Path(f"output_{round(time.time())}.txt")
-    new_storer.save(filepath=filename)
+    saver = StorerSaver(new_storer)
+    saver.save_all_storer(filepath=filename)
     print(f"File saved under {filename}")
 
 

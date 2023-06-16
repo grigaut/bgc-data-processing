@@ -110,5 +110,8 @@ if __name__ == "__main__":
 
     SAVING_DIR = Path(CONFIG["SAVING_DIR"])
 
-    observations_save.save(SAVING_DIR.joinpath("observations.txt"))
-    interpolated.save(SAVING_DIR.joinpath("simulations.txt"))
+    obs_saver = data_structures.StorerSaver(observations_save)
+    obs_saver.save_all_storer(SAVING_DIR.joinpath("observations.txt"))
+
+    int_saver = data_structures.StorerSaver(interpolated)
+    int_saver.save_all_storer(SAVING_DIR.joinpath("simulations.txt"))
