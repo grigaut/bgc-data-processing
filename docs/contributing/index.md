@@ -4,11 +4,11 @@ A few precautions must be taken when contributing to this project.
 
 ## Adding a new variable
 In order to register a new variable, one must create the variable entry in the `config/variables.toml` configuration file. In order for this addition to be permanent, the change must be done as well in the [`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml) file since `config/variables.toml` is only local.
-Once the variable is created, one must manually add this variable to all the loaders defined in every file of [data_providers]({{fix_url("reference/data_providers")}}). The variable template should be automatically loaded in the `DEFAULT_VARS` dictionnary if it has been properly defined in `config/variables.toml`.
+Once the variable is created, one must manually add this variable to all the loaders defined in every file of [providers]({{fix_url("reference/providers")}}). The variable template should be automatically loaded in the `DEFAULT_VARS` dictionnary if it has been properly defined in `config/variables.toml`.
 ### Example
 
 CMEMS's orginal loader's definition:
-``` python title="bgc_data_processing/data_providers/cmems.py"
+``` python title="bgc_data_processing/providers/cmems.py"
 """Specific parameters to load CMEMS-provided data."""
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
@@ -70,7 +70,7 @@ VALUE_FORMAT = "%10.3f"
 
 Updating the loader by adding the variable (supposedly not in the file here):
 
-``` python hl_lines="38" title="bgc_data_processing/data_providers/cmems.py"
+``` python hl_lines="38" title="bgc_data_processing/providers/cmems.py"
 """Specific parameters to load CMEMS-provided data."""
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables
 
@@ -120,7 +120,7 @@ loader = loaders.from_netcdf(
 
 ## Adding a new provider
 In order to register a new provider, one must be create a new entry in the `config/providers.toml` configuration file. In order for this addition to be permanent, the change must be done as well in the [`config/default/providers.toml`]({{repo_blob}}/config/default/providers.toml) file since `config/providers.toml` is only local.
-Once the entry is created, one must manually create a file to define this provider's loader in [data_providers]({{repo_tree}}/src/bgc_data_processing/data_providers). All the available variables must be properly defined in the loader's VariablesStorer (proper names, correction functions, flag informations...).
+Once the entry is created, one must manually create a file to define this provider's loader in [providers]({{repo_tree}}/src/bgc_data_processing/providers). All the available variables must be properly defined in the loader's VariablesStorer (proper names, correction functions, flag informations...).
 
 ### Example
 Creating a new provider entry:
@@ -136,9 +136,9 @@ CATEGORY = "in_situ"
 EXCLUDE = []
 ```
 
-Creating a new file in [data_providers]({{repo_tree}}/src/bgc_data_processing/data_providers) :
+Creating a new file in [providers]({{repo_tree}}/src/bgc_data_processing/providers) :
 
-``` py title="bgc_data_processing/data_providers/bgc_provider.py"
+``` py title="bgc_data_processing/providers/bgc_provider.py"
 """Specific parameters to load BGC_PROVIDER-provided data."""
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, variables

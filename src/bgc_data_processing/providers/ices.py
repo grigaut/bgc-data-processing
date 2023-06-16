@@ -7,15 +7,15 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     loaders,
     units,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_csv(
     provider_name="ICES",
     dirin=Path(PROVIDERS_CONFIG["ICES"]["PATH"]),
     category=PROVIDERS_CONFIG["ICES"]["CATEGORY"],
     files_pattern="ices_({years}).csv",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("Cruise"),
         date=DEFAULT_VARS["date"].in_file_as("DATE"),

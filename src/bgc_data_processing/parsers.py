@@ -9,7 +9,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any
 
-from bgc_data_processing.variables import TemplateVar
+from bgc_data_processing.data_structures.variables import TemplateVar
 from bgc_data_processing.water_masses import WaterMass
 
 

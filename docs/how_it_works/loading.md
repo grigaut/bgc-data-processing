@@ -16,7 +16,7 @@ When loading from a procider, the following arguments must be given to the loade
     Loader for CSV files, uses the `read_params` additional argument to pass specific argument to [pandas.read_csv](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
 
     ``` py
-    from bgc_data_processing.loaders import CSVLoader
+    from bgc_data_processing.loaders.csv_loaders import CSVLoader
 
     loader = CSVLoader(
         provider_name="GLODAP_2022",
@@ -39,7 +39,7 @@ When loading from a procider, the following arguments must be given to the loade
     Loader for NetCDF files.
 
     ``` py
-    from bgc_data_processing.loaders import NetCDFLoader
+    from bgc_data_processing.loaders.netcdf_loaders import NetCDFLoader
 
     loader = loaders.from_netcdf(
         provider_name="ARGO",
@@ -59,15 +59,15 @@ storer = loader()
 ```
 ## Loading from already processed file
 
-It is also possible to load data from files which have saved using the [.save]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.save")}}) method of a storer using the [.from_files]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.from_files")}}) class method:
+It is also possible to load data from files which have saved using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method using the read_files function:
 
 ```py
-from bgc_data_processing.dataclasses import Storer
+from bgc_data_processing.data_structures import read_files
 files = [
     "file1.csv",
     "file2.csv",
 ]
-storer = Storer.from_files(
+storer = read_files(
     filepath = [ "file1.csv","file2.csv"],  # (1)!
     providers_column_label = "PROVIDER",    # (2)!
     expocode_column_label = "EXPOCODE",     # (3)!
@@ -102,13 +102,13 @@ storer = Storer.from_files(
 
 ## Storers
 
-Once the data in a Storer, it is easy to save this data to a file using the [.save]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.save")}}) method:
+Once the data in a Storer, it is easy to save this data to a file using the [.save]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method:
 
 ```py
 storer.save("filepath/to/save/in")
 ```
 
-It also possible to slice the Dataframe based on the dates of the rows using the [.slice_on_dates]({{fix_url("../reference/data_classes/#bgc_data_processing.data_classes.Storer.slice_on_dates")}}) method. This will return a Slice object, a child class of Storer but only storing indexes of the dataframe slice and not the dataframe slice itself (to reduce the amount of memory used) :
+It also possible to slice the Dataframe based on the dates of the rows using the [.slice_on_dates]({{fix_url("../reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.slice_on_dates")}}) method. This will return a Slice object, a child class of Storer but only storing indexes of the dataframe slice and not the dataframe slice itself (to reduce the amount of memory used) :
 
 ``` py
 import pandas as pd

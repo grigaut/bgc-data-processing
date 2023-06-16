@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 from seawater import eos80
 
-from bgc_data_processing.variables import NotExistingVar
+from bgc_data_processing.data_structures.variables import NotExistingVar
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_classes import Storer
+    from bgc_data_processing.data_structures.storers import Storer
 
 
 def compute_pressure(

@@ -7,19 +7,17 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
     loaders,
     units,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_csv(
     provider_name="GLODAP_2022",
     dirin=Path(PROVIDERS_CONFIG["GLODAP_2022"]["PATH"]),
     category=PROVIDERS_CONFIG["GLODAP_2022"]["CATEGORY"],
     files_pattern="GLODAPv2.2022_all.csv",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
-        expocode=DEFAULT_VARS["expocode"]
-        .in_file_as("G2expocode")
-        .correct_with(lambda x: x[:-8]),
+        expocode=DEFAULT_VARS["expocode"].in_file_as("G2expocode"),
         date=DEFAULT_VARS["date"].not_in_file(),
         year=DEFAULT_VARS["year"].in_file_as("G2year"),
         month=DEFAULT_VARS["month"].in_file_as("G2month"),

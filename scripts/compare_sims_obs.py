@@ -5,9 +5,7 @@ from pathlib import Path
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
-from bgc_data_processing import DEFAULT_VARS
-from bgc_data_processing.data_classes import Storer
-from bgc_data_processing.parsers import ConfigParser
+from bgc_data_processing import DEFAULT_VARS, data_structures, parsers
 from cartopy import feature
 
 CONFIG_FOLDER = Path("config")
@@ -15,7 +13,7 @@ CONFIG_FOLDER = Path("config")
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
 
-    CONFIG = ConfigParser(
+    CONFIG = parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         check_types=False,
         dates_vars_keys=[],
@@ -28,7 +26,7 @@ if __name__ == "__main__":
     VARIABLES_TO_COMPARE: list[str] = CONFIG["VARIABLES_TO_COMPARE"]
     SHOW_MAP: bool = CONFIG["SHOW_MAP"]
 
-    obs = Storer.from_files(
+    obs = data_structures.read_files(
         OBSERVATIONS_FILE,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -46,7 +44,7 @@ if __name__ == "__main__":
         verbose=1,
     )
 
-    sims = Storer.from_files(
+    sims = data_structures.read_files(
         SIMULATIONS_FILE,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,

@@ -7,11 +7,11 @@ from time import time
 import pandas as pd
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
-    data_providers,
-    dateranges,
     parsers,
+    providers,
+    utils,
 )
-from bgc_data_processing.data_classes import Constraints, Storer
+from bgc_data_processing.data_structures import Constraints, Storer
 
 CONFIG_FOLDER = Path("config")
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     VERBOSE = CONFIG["VERBOSE"]
 
     # Dates parsing
-    dates_generator = dateranges.DateRangeGenerator(
+    dates_generator = utils.dateranges.DateRangeGenerator(
         start=DATE_MIN,
         end=DATE_MAX,
         interval=INTERVAL,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print(f"Loading data : {data_src}")
-        dset_loader = data_providers.LOADERS[data_src]
+        dset_loader = providers.LOADERS[data_src]
         variables = dset_loader.variables
         dset_loader.set_saving_order(
             var_names=VARIABLES,

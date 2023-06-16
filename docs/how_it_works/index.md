@@ -40,8 +40,8 @@ variable = ExistingVar(
 
 ## Loading the data
 
-In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/loaders/#bgc_data_processing.loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/loaders/#bgc_data_processing.loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/loaders/#bgc_data_processing.loaders.ABFileLoader")}})). <br/>
-This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("reference/variables/#bgc_data_processing.variables.VariablesStorer")}})).
+In order to load the data from a provider, one must use the loader which corresponds to the data type of the source ([CSV]({{fix_url("reference/loaders/csv_loaders/#bgc_data_processing.loaders.csv_loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/loaders/netcdf_loaders/#bgc_data_processing.loaders.netcdf_loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/loaders/abfile_loaders/#bgc_data_processing.loaders.abfile_loaders.ABFileLoader")}})). <br/>
+This loader contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("reference/data_structures/variables/#bgc_data_processing.data_structures.variables.VariablesStorer")}})).
 
 Defining a loader for GLODAPv2.2022 :
 
@@ -77,7 +77,7 @@ storer = loader()                       # (9)!
 if the pattern is "glodap_({years}).csv" and the years to load are 2007 and 2008, only the files matching the regex "glodap_(2007|2008).csv" will be loaded.
 7. Variables to load (if the variables are not in the data source, the column will still be created)
 8. Additionnal parameter passed to pd.read_csv
-9. The \__call__ method from the loader will then load the data and return a [storer]({{fix_url("reference/data_classes/#bgc_data_processing.data_classes.Storer")}}) containing the resulting dataframe.
+9. The \__call__ method from the loader will then load the data and return a [storer]({{fix_url("reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer")}}) containing the resulting dataframe.
 
 !!! note ""
     [More informations on loading]({{fix_url("how_it_works/loading.md")}})
@@ -85,7 +85,7 @@ if the pattern is "glodap_({years}).csv" and the years to load are 2007 and 2008
 ## Aggregating the data
 
 Once data has been loaded from some providers, the aggregation of the resulting storers can be done using the `+` operator. However, in order for the aggregation to work, all storer must have similar variables (to concatenates the data) and same category ('in_situ' and 'float' can't be aggregated). <br/>
-Then, in order to save a storer, one only has to call the [.save]({{fix_url("reference/data_classes/#bgc_data_processing.data_classes.Storer.save")}}) method of the object.
+Then, in order to save a storer, one only has to call the [.save]({{fix_url("reference/data_structures/storers/#bgc_data_processing.data_structures.storers.Storer.save")}}) method of the object.
 
 ``` py
 storer_glodap = loader_glodap()                 # (1)!

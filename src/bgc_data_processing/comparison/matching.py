@@ -9,11 +9,12 @@ import pandas as pd
 from abfile import ABFileArchv, ABFileGrid
 from sklearn.neighbors import NearestNeighbors
 
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.loaders import ABFileLoader
+from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.data_structures.storers import Storer
+from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.variables import VariablesStorer
+    from bgc_data_processing.data_structures.variables import VariablesStorer
 
 
 class SelectiveABFileLoader(ABFileLoader):
@@ -316,10 +317,12 @@ class SelectiveABFileLoader(ABFileLoader):
             List of basenames matching constraints.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
-        return self._select_filepaths(
+        filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=self._pattern(constraints.get_constraint_parameters(date_label)),
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
+        return [s.parent.joinpath(s.stem) for s in filepaths]
 
     @classmethod
     def from_abloader(

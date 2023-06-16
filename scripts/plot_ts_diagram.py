@@ -3,16 +3,19 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, features
-from bgc_data_processing.data_classes import Constraints, Storer
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import TemperatureSalinityDiagram
+from bgc_data_processing import (
+    DEFAULT_VARS,
+    data_structures,
+    features,
+    parsers,
+    tracers,
+)
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = ConfigParser(
+    CONFIG = parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -40,7 +43,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = Storer.from_files(
+    storer = data_structures.read_files(
         filepath=filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -62,7 +65,11 @@ if __name__ == "__main__":
     # Add relevant features to the data: Pressure / potential temperature
     depth_field = variables.get(variables.depth_var_name).label
     latitude_field = variables.get(variables.latitude_var_name).label
-    pres_var, pres_data = features.compute_pressure(storer, depth_field, latitude_field)
+    pres_var, pres_data = features.compute_pressure(
+        storer,
+        depth_field,
+        latitude_field,
+    )
     storer.add_feature(pres_var, pres_data)
     ptemp_var, ptemp_data = features.compute_potential_temperature(
         storer=storer,
@@ -72,7 +79,7 @@ if __name__ == "__main__":
     )
     storer.add_feature(ptemp_var, ptemp_data)
     # Add global constraints
-    constraints = Constraints()
+    constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -98,7 +105,7 @@ if __name__ == "__main__":
         maximal_value=DEPTH_MAX,
     )
     # Create diagram
-    plot = TemperatureSalinityDiagram(
+    plot = tracers.TemperatureSalinityDiagram(
         storer=storer,
         constraints=constraints,
         salinity_field=SALINITY_DEFAULT.label,

@@ -6,15 +6,15 @@ from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
     loaders,
-    variables,
 )
+from bgc_data_processing.data_structures.variables import VariablesStorer
 
 loader = loaders.from_netcdf(
     provider_name="ESACCI-OC",
     dirin=Path(PROVIDERS_CONFIG["ESACCI-OC"]["PATH"]),
     category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
     files_pattern="{years}/.*.nc",
-    variables=variables.VariablesStorer(
+    variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("time"),
