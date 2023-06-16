@@ -108,7 +108,7 @@ Different types of variables exist :
     ```
 
 === "ParsedVar"
-    Variable partially reconstructed from a csv file saved with a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}) method of a Storer.
+    Variable partially reconstructed from a csv file saved with a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}).
 
     They can be created from scratch but usually it useless to manually use them.
 

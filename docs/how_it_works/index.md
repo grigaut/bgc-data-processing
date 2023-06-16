@@ -85,7 +85,7 @@ if the pattern is "glodap_({years}).csv" and the years to load are 2007 and 2008
 ## Aggregating the data
 
 Once data has been loaded from some providers, the aggregation of the resulting storers can be done using the `+` operator. However, in order for the aggregation to work, all storer must have similar variables (to concatenates the data) and same category ('in_situ' and 'float' can't be aggregated). <br/>
-Then, in order to save a storer, one has to use a [StorerSaver]({{fix_url("reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}) method of the object.
+Then, in order to save a storer, one has to use a [StorerSaver]({{fix_url("reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}).
 
 ``` py
 storer_glodap = loader_glodap()                 # (1)!
@@ -100,7 +100,7 @@ saver.save_all_storer(Path("path/to/save/file"))     # (4)!
 1. Loader for GLODAP 2022.
 2. Loader for IMR.
 3. Summing both storer returns the aggregation of them.
-4. Calling the .save_all_storer methods to save the entire storer.
+4. Calling the .save_all_storer method to save the entire storer.
 
 ## Plotting the data
 

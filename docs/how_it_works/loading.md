@@ -59,7 +59,7 @@ storer = loader()
 ```
 ## Loading from already processed file
 
-It is also possible to load data from files which have saved using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.storers.StorerSaver")}}) method using the read_files function:
+It is also possible to load data from files which have saved using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.storers.StorerSaver")}}):
 
 ```py
 from bgc_data_processing.data_structures import read_files
@@ -102,7 +102,7 @@ storer = read_files(
 
 ## Storers
 
-Once the data in a Storer, it is easy to save this data to a file using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}) method:
+Once the data in a Storer, it is easy to save this data to a file using a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}):
 
 ```py
 StorerSaver(storer).save_all_storer(Path("filepath/to/save/in"))
