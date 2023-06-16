@@ -195,7 +195,6 @@ class CSVLoader(BaseLoader):
         pd.DataFrame
             Formatted Dataframe.
         """
-        # units_mapping = self._variables.unit_mapping
         # Check flags :
         data = {}
         for var in self._variables.in_dset:

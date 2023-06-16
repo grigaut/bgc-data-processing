@@ -55,7 +55,7 @@ class DateRangeGenerator:
         self.interval = interval
         self.interval_length = interval_length
 
-    def __call__(self) -> pd.DataFrame:
+    def __call__(self) -> "DateRange":
         """Load the date ranges.
 
         Returns
@@ -103,7 +103,7 @@ class DateRangeGenerator:
         ends = ends + pd.Timedelta(86399, "s")
         return pd.concat([starts, ends], axis=1)
 
-    def _make_range(self) -> pd.DataFrame:
+    def _make_range(self) -> "DateRange":
         """Create the range DataFrame for date intervals as: day, week, month or year.
 
         Returns
@@ -142,4 +142,54 @@ class DateRangeGenerator:
         starts.sort_index(inplace=True)
         ends.sort_index(inplace=True)
         ends = ends + pd.Timedelta(86399, "s")
-        return pd.concat([starts, ends], axis=1)
+        data = pd.concat([starts, ends], axis=1)
+        return DateRange(data, self.start_column_name, self.end_column_name)
+
+
+class DateRange:
+    """Class to hold dateranges dataframes.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The actual daterange dataframe.
+    start_col : str
+        Name of the column with starting dates.
+    end_col : str
+        Name of the column with ending dates.
+    """
+
+    def __init__(self, data: pd.DataFrame, start_col: str, end_col: str) -> None:
+        self._data = data
+        self._start = start_col
+        self._end = end_col
+
+    @property
+    def start_field(self) -> str:
+        """Satrting date column name."""
+        return self._start
+
+    @property
+    def end_field(self) -> str:
+        """Ending date column name."""
+        return self._end
+
+    @property
+    def start_dates(self) -> pd.Series:
+        """Starting date column."""
+        return self._data[self._start]
+
+    @property
+    def end_dates(self) -> pd.Series:
+        """Ending date column."""
+        return self._data[self._end]
+
+    def as_dataframe(self) -> pd.DataFrame:
+        """Return the dateranges as a DataFrame, ie self._data."""
+        return self._data
+
+    def as_str(self) -> pd.Series:
+        """Return a Series of dateranges as strings with format: 'YYYYMMDD-YYYYMMDD'."""
+        str_start = pd.to_datetime(self.start_dates).dt.strftime("%Y%m%d")
+        str_end = pd.to_datetime(self.end_dates).dt.strftime("%Y%m%d")
+        return str_start + "-" + str_end

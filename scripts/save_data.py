@@ -4,14 +4,13 @@ import datetime as dt
 from pathlib import Path
 from time import time
 
-import pandas as pd
 from bgc_data_processing import (
     PROVIDERS_CONFIG,
+    data_structures,
     parsers,
     providers,
     utils,
 )
-from bgc_data_processing.data_structures import Constraints, Storer
 
 CONFIG_FOLDER = Path("config")
 
@@ -48,10 +47,6 @@ if __name__ == "__main__":
         interval=INTERVAL,
         interval_length=CUSTOM_INTERVAL,
     )
-    DRNG = dates_generator()
-    str_start = pd.to_datetime(DRNG["start_date"]).dt.strftime("%Y%m%d")
-    str_end = pd.to_datetime(DRNG["end_date"]).dt.strftime("%Y%m%d")
-    dates_str = str_start + "-" + str_end
     if VERBOSE > 0:
         txt = (
             f"Processing BGC data from {DATE_MIN.strftime('%Y%m%d')} to "
@@ -60,7 +55,6 @@ if __name__ == "__main__":
         print("\n\t" + "-" * len(txt))
         print("\t" + txt)
         print("\t" + "-" * len(txt) + "\n")
-    data_dict: dict[str, list[Storer]] = {}
     # Iterate over data sources
     t0 = time()
     for data_src in PROVIDERS:
@@ -72,7 +66,7 @@ if __name__ == "__main__":
             var_names=VARIABLES,
         )
         # Constraint slicer
-        constraints = Constraints()
+        constraints = data_structures.Constraints()
         constraints.add_superset_constraint(
             field_label=variables.get(variables.expocode_var_name).label,
             values_superset=EXPOCODES_TO_LOAD,
@@ -99,51 +93,14 @@ if __name__ == "__main__":
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
-        df = dset_loader(
+        storer = dset_loader(
             constraints=constraints,
             exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"],
         )
-        # Slicing data
-        if VERBOSE > 0:
-            print(f"Slicing data : {data_src}")
-        slices_index = DRNG.apply(df.slice_on_dates, axis=1)
-        # Saving slices
-        if VERBOSE > 0:
-            print(f"Saving slices : {data_src}")
-        to_save = pd.concat([dates_str, slices_index], keys=["dates", "slice"], axis=1)
-
-        make_name = lambda x: SAVING_DIR.joinpath(
-            Path(f"{data_src}/nutrients_{data_src}_{x['dates']}.csv"),
-        )
-
-        to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
-        if VERBOSE > 0:
-            print(
-                f"\n-------Loading, Slicing, Saving completed for {data_src}-------\n",
-            )
-        category = dset_loader.category
-        if category not in data_dict.keys():
-            data_dict[category] = []
-        data_dict[category].append(df)
-    for category, data in data_dict.items():
-        # Aggregating data
-        if VERBOSE > 0:
-            print("Aggregating data")
-        df: Storer = sum(data)
-        df.remove_duplicates(priority_list=PRIORITY)
-        # Slicing aggregated data
-        slices_index = DRNG.apply(
-            df.slice_on_dates,
-            axis=1,
-        )
-        # Saving aggregated data's slices
-        if VERBOSE > 0:
-            print("Saving aggregated data")
-        to_save = pd.concat([str_start, slices_index], keys=["dates", "slice"], axis=1)
-        make_name = lambda x: SAVING_DIR.joinpath(
-            Path(f"bgc_{category}_{x['dates']}.txt"),
-        )
-        to_save.apply(lambda x: x["slice"].save(make_name(x)), axis=1)
+        storer.remove_duplicates(PRIORITY)
+        saver = data_structures.StorerSaver(storer=storer)
+        saver.saving_order = VARIABLES
+        saver.save_from_daterange(dates_generator, SAVING_DIR)
     if VERBOSE > 0:
         print("\n" + "\t" + "-" * len(txt))
         print("\t" + " " * (len(txt) // 2) + "DONE")
