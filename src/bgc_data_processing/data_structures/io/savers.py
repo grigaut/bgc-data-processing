@@ -25,7 +25,7 @@ class StorerSaver:
         If False, for every provider, a folder with the providers' data will be created.
     """
 
-    single_filename_format: str = "nutrients_{provider}_{dates}.csv"
+    single_filename_format: str = "nutrients_{provider}_{dates}.txt"
     aggr_filename_format: str = "bgc_{category}_{dates}.txt"
     _date_field: str = "date"
     _slice_field: str = "slice"
@@ -33,25 +33,12 @@ class StorerSaver:
     def __init__(
         self,
         storer: "Storer",
-        saving_directory: Path,
         save_aggregated_data_only: bool = False,
     ) -> None:
         self._storer = storer
         self._variables = copy(storer.variables)
         self._verbose = storer.verbose
-        self.dirout = saving_directory
         self.save_aggregated_data_only = save_aggregated_data_only
-
-    @property
-    def dirout(self) -> Path:
-        """Directory in which to save the data."""
-        return self._dirout
-
-    @dirout.setter
-    def dirout(self, directory: Path) -> None:
-        if not directory.is_dir():
-            directory.mkdir()
-        self._dirout = directory
 
     @property
     def saving_order(self) -> list[str]:
@@ -83,7 +70,7 @@ class StorerSaver:
             axis=1,
         )
 
-    def _make_single_filepath(self, dates_str: str) -> Path:
+    def _make_single_filepath(self, dates_str: str, saving_directory: Path) -> Path:
         """Create the filepath in which to save the data of a single provider.
 
         Parameters
@@ -109,9 +96,9 @@ class StorerSaver:
             provider=provider,
             dates=dates_str,
         )
-        return self._create_filepath(self._dirout.joinpath(provider), filename)
+        return self._create_filepath(saving_directory.joinpath(provider), filename)
 
-    def _make_aggr_filepath(self, dates_str: str) -> Path:
+    def _make_aggr_filepath(self, dates_str: str, saving_directory: Path) -> Path:
         """Create the filepath in which to save the aggregated data of all providers.
 
         Parameters
@@ -126,7 +113,7 @@ class StorerSaver:
         """
         category = self._storer.category
         filename = self.aggr_filename_format.format(category=category, dates=dates_str)
-        return self._create_filepath(self._dirout, filename)
+        return self._create_filepath(saving_directory, filename)
 
     def _create_filepath(self, dir_path: Path, filename: str) -> Path:
         """Create the filepath given the file directory and filename.
@@ -158,7 +145,7 @@ class StorerSaver:
         filepath : Path
             Filepath to the file to save the data in.
         """
-        if filepath.open("r").readlines():
+        if filepath.is_file() and filepath.open("r").readlines():
             return
         variables = self._variables
         name_format = variables.name_save_format
@@ -187,15 +174,15 @@ class StorerSaver:
             if len(lines) != 0:
                 file.writelines(lines)
 
-    def _save_data(self, filepath: Path, data_slice: "Slice") -> None:
+    def _save_data(self, filepath: Path, data_slice: "Storer") -> None:
         """Save the data of a slice within a given file.
 
         Parameters
         ----------
         filepath : Path
             Filepath to the file to save the data in.
-        data_slice : Slice
-            Data slice to save.
+        data_slice : Storer
+            Data to save.
         """
         # Verbose
         if self._verbose > 1:
@@ -206,7 +193,7 @@ class StorerSaver:
         if not data.empty:
             self._write_values(filepath, data)
 
-    def _save_slice(self, date_slice: pd.Series) -> None:
+    def _save_slice(self, date_slice: pd.Series, saving_directory: Path) -> None:
         """Save a slice.
 
         Parameters
@@ -218,15 +205,19 @@ class StorerSaver:
         data_slice: Slice = date_slice[self._slice_field]
         if not self.save_aggregated_data_only:
             self._save_data(
-                filepath=self._make_single_filepath(date_str),
+                filepath=self._make_single_filepath(date_str, saving_directory),
                 data_slice=data_slice,
             )
         self._save_data(
-            filepath=self._make_aggr_filepath(date_str[:-9]),
+            filepath=self._make_aggr_filepath(date_str[:-9], saving_directory),
             data_slice=data_slice,
         )
 
-    def save_from_daterange(self, dateranges_gen: "DateRangeGenerator") -> None:
+    def save_from_daterange(
+        self,
+        dateranges_gen: "DateRangeGenerator",
+        saving_directory: Path,
+    ) -> None:
         """Save the storer's data according to the given dateranges.
 
         Parameters
@@ -236,4 +227,21 @@ class StorerSaver:
         """
         dateranges = dateranges_gen()
         dates_slices = self._slice_using_drng(dateranges)
-        dates_slices.apply(self._save_slice, axis=1)
+        dates_slices.apply(self._save_slice, axis=1, saving_directory=saving_directory)
+
+    def save_all_storer(self, filepath: Path) -> None:
+        """Save all the storer to the given file.
+
+        Parameters
+        ----------
+        filepath : Path
+            File in which to save the storer data.
+
+        Raises
+        ------
+        FileExistsError
+            If filepath points to an existing file.
+        """
+        if filepath.is_file():
+            raise FileExistsError
+        self._save_data(filepath=filepath, data_slice=self._storer)
