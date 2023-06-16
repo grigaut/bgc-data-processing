@@ -17,9 +17,7 @@ loader = loaders.from_csv(
     files_pattern="GLODAPv2.2022_all.csv",
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
-        expocode=DEFAULT_VARS["expocode"]
-        .in_file_as("G2expocode")
-        .correct_with(lambda x: x[:-8]),
+        expocode=DEFAULT_VARS["expocode"].in_file_as("G2expocode"),
         date=DEFAULT_VARS["date"].not_in_file(),
         year=DEFAULT_VARS["year"].in_file_as("G2year"),
         month=DEFAULT_VARS["month"].in_file_as("G2month"),
