@@ -1,7 +1,6 @@
 """Data storing objects."""
 
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -308,40 +307,6 @@ class Storer:
         to_dump = duplicates.duplicated(subset=subset, keep="first")
         dump_index = duplicates[to_dump].index
         return df.drop(dump_index, axis=0)
-
-    def save(self, filepath: Path) -> None:
-        """Save the Dataframe.
-
-        Parameters
-        ----------
-        filepath : Path
-            Where to save the output.
-        """
-        # Verbose
-        if self._verbose > 1:
-            print(f"\tSaving data in {filepath.name}")
-        # Parameters
-        name_format = self.variables.name_save_format
-        value_format = self.variables.value_save_format
-        df = self.data.loc[:, self.variables.save_labels]
-        # Get unit rows' values
-        units = [self.variables.unit_mapping[col] for col in df.columns]
-        dirout = filepath.parent
-        # make directory if needed
-        if not dirout:
-            pass
-        elif not dirout.is_dir():
-            dirout.mkdir()
-        # Save file
-        with filepath.open("w") as file:
-            # Write variables row
-            file.write(name_format % tuple(df.columns) + "\n")
-            # Write unit row
-            file.write(name_format % tuple(units) + "\n")
-            # Write
-            lines = df.apply(lambda x: value_format % tuple(x) + "\n", axis=1)
-            if len(lines) != 0:
-                file.writelines(lines)
 
     def slice_on_dates(
         self,
