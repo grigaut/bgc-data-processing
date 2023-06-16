@@ -703,7 +703,9 @@ class VariablesStorer:
         mandatory_variables.append(longitude)
         self.depth_var_name = depth.name
         mandatory_variables.append(depth)
-        self._elements = mandatory_variables + list(args) + list(kwargs.values())
+        self._elements: list[ExistingVar | NotExistingVar | ParsedVar] = (
+            mandatory_variables + list(args) + list(kwargs.values())
+        )
         self._save = mandatory_variables + list(args) + list(kwargs.values())
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
@@ -894,19 +896,6 @@ class VariablesStorer:
         return {var.name: var for var in self._elements}
 
     @property
-    def unit_mapping(self) -> dict[str, str]:
-        """Map variables names and variables units.
-
-        Mostly used to create unit row.
-
-        Returns
-        -------
-        dict[str, str]
-            Mapping between names (str) and units (str).
-        """
-        return {var.name: var.unit for var in self._elements}
-
-    @property
     def save_labels(self) -> list[str | tuple[str]]:
         """Sorting order to use when saving data.
 
@@ -916,6 +905,17 @@ class VariablesStorer:
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
         return [var.label for var in self._save]
+
+    @property
+    def save_names(self) -> list[str | tuple[str]]:
+        """Sorted names of variables to use for saving.
+
+        Returns
+        -------
+        list[str | tuple[str]]
+            List of columns keys to pass as df[self.save_sort] to sort data.
+        """
+        return [var.name for var in self._save]
 
     @property
     def name_save_format(self) -> str:
