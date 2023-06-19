@@ -98,13 +98,19 @@ class FileNamePattern:
             b_max = date_constraint["boundary"]["max"]
             s_min = min(date_constraint["superset"])
             s_max = max(date_constraint["superset"])
-            return (min(b_min, s_min), max(b_max, s_max))
+            min_date = min(b_min, s_min).date()
+            max_date = max(b_max, s_max).date()
+            return (min_date, max_date)
         if superset_in:
             superset_constraint = date_constraint["superset"]
-            return (min(superset_constraint), max(superset_constraint))
+            min_date = min(superset_constraint).date()
+            max_date = max(superset_constraint).date()
+            return (min_date, max_date)
         if boundary_in:
             boundary_constraint = date_constraint["boundary"]
-            return (boundary_constraint["min"], boundary_constraint["max"])
+            min_date = boundary_constraint["min"].date()
+            max_date = boundary_constraint["max"].date()
+            return (min_date, max_date)
         raise KeyError("Date constraint dictionnary has invalid keys")
 
     def _slice(
