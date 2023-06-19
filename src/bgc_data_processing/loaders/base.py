@@ -190,11 +190,14 @@ class BaseLoader(ABC):
 
         # recursion: Search pattern on folder names
         all_patterns = pattern[1:-1].split(")|(")
-
+        # Collect all folder-related-parts of the pattern
         folder_split = [pat.split("/")[0] for pat in all_patterns]
         folder_pattern = f"({')|('.join(folder_split)})"
+        # Collect all remaining parts of the pattern
         remaining_split = ["/".join(pat.split("/")[1:]) for pat in all_patterns]
         files_pattern = f"({')|('.join(remaining_split)})"
+
+        # Compile folder regex
         folder_regex = re.compile(folder_pattern)
         matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
 
