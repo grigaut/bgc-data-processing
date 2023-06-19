@@ -243,3 +243,26 @@ class StorerSaver:
         if filepath.is_file():
             raise FileExistsError
         self._save_data(filepath=filepath, data_slice=self._storer)
+
+    @classmethod
+    def save(
+        cls,
+        storer: "Storer",
+        filepath: Path,
+        save_aggregated_data_only: bool = False,
+    ) -> None:
+        """Save all the storer to the given file.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to save.
+        filepath : Path
+            File in which to save the storer data.
+        save_aggregated_data_only: bool
+            Whether to only save the aggregated data or not.
+            If False, for every provider, a folder with the provider's
+            data will be created.
+        """
+        saver = cls(storer=storer, save_aggregated_data_only=save_aggregated_data_only)
+        saver.save_all_storer(filepath=filepath)
