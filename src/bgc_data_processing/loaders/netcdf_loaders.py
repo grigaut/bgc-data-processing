@@ -125,11 +125,11 @@ class NetCDFLoader(BaseLoader):
             Storer for the loaded data.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
-        filepaths = self._select_filepaths(
-            research_dir=self._dirin,
-            pattern=self._pattern(
-                date_constraint=constraints.get_constraint_parameters(date_label),
-            ),
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
         )
         data_list = []

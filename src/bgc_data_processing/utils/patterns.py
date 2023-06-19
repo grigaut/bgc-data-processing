@@ -1,6 +1,10 @@
 """Filenames Patterns building."""
 
 import datetime as dt
+import itertools
+import re
+from collections.abc import Callable
+from pathlib import Path
 
 
 class FileNamePattern:
@@ -34,7 +38,7 @@ class FileNamePattern:
         self._month = month_field
         self._day = day_field
 
-    def build_from_constraint(self, date_constraint: dict) -> str:
+    def build_from_constraint(self, date_constraint: dict) -> "PatternMatcher":
         """Build the pattern from date constraints.
 
         Parameters
@@ -50,7 +54,7 @@ class FileNamePattern:
         date_min, date_max = self._parse_dates_from_constraints(date_constraint)
         return self.build(date_min=date_min, date_max=date_max)
 
-    def build(self, date_min: dt.date, date_max: dt.date) -> str:
+    def build(self, date_min: dt.date, date_max: dt.date) -> "PatternMatcher":
         """Build the pattern from the starting and ending dates.
 
         Parameters
@@ -66,7 +70,8 @@ class FileNamePattern:
             Final pattern.
         """
         interval_patterns = self._slice(date_min=date_min, date_max=date_max)
-        return "|".join(map(self._create_pattern, interval_patterns))
+        pattern = "|".join(map(self._create_pattern, interval_patterns))
+        return PatternMatcher(pattern=pattern)
 
     def _parse_dates_from_constraints(
         self,
@@ -526,3 +531,174 @@ class DateIntervalPattern:
             date_max=date_max,
             precision=cls._year_precision_label,
         )
+
+
+class PatternMatcher:
+    """Matcher to find files which match agiven pattern.
+
+    Parameters
+    ----------
+    pattern : str
+        Pattern to match.
+    validation_function : Callable, optional
+        Function to use to validate that files
+        are to be loaded., by default lambdafilepath
+    """
+
+    def __init__(
+        self,
+        pattern: str,
+        validation_function: Callable = lambda filepath, exclude: True,  # noqa: ARG005
+    ) -> None:
+
+        self._pattern = pattern
+        self.validate = validation_function
+
+    @property
+    def validate(self) -> Callable:
+        """Validation function."""
+        return self._validation_function
+
+    @validate.setter
+    def validate(self, validation_function: Callable) -> None:
+        if not isinstance(validation_function, Callable):
+            raise ValueError("The validation function must be callable.")
+        self._validation_function = validation_function
+
+    def select_matching_filepath(
+        self,
+        research_directory: Path,
+        exclude: list[str] = [],
+    ) -> list[Path]:
+        """Select the filepaths matching the pattern.
+
+        Parameters
+        ----------
+        research_directory : Path
+            Directory to serach for files.
+        exclude : list[str], optional
+            Filenames to exclude., by default []
+
+        Returns
+        -------
+        list[Path]
+            List of correct paths.
+        """
+        return self._recursive_match(
+            research_dir=research_directory,
+            pattern=self._pattern,
+            exclude=exclude,
+        )
+
+    def _recursive_match(
+        self,
+        research_dir: Path,
+        pattern: str,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Find matching filepaths using recursion.
+
+        Parameters
+        ----------
+        research_dir : Path
+            Directory to search for files.
+        pattern : str
+            Pattern to use when searching.
+        exclude : list[str]
+            Files to exclude.
+
+        Returns
+        -------
+        list[Path]
+            List of correct files.
+        """
+        if "/" not in pattern:
+            return self._match_files(
+                research_dir=research_dir,
+                pattern=pattern,
+                exclude=exclude,
+            )
+        return self._match_folder(
+            research_dir=research_dir,
+            pattern=pattern,
+            exclude=exclude,
+        )
+
+    def _match_files(
+        self,
+        research_dir: Path,
+        pattern: str,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Find matching filenames.
+
+        Parameters
+        ----------
+        research_dir : Path
+            Directory to search for filenames.
+        pattern : str
+            Pattern to use.
+        exclude : list[str]
+            Filenames to exclude.
+
+        Returns
+        -------
+        list[Path]
+            List of correct files.
+        """
+        regex = re.compile(pattern)
+        files = filter(regex.match, [x.name for x in research_dir.glob("*.*")])
+        fulls_paths = map(research_dir.joinpath, files)
+
+        def valid(filepath: Path) -> bool:
+            return self.validate(filepath=filepath, exclude=exclude)
+
+        return sorted(filter(valid, fulls_paths))
+
+    def _match_folder(
+        self,
+        research_dir: Path,
+        pattern: str,
+        exclude: list[str],
+    ) -> list[Path]:
+        """Find matching folder names.
+
+        Parameters
+        ----------
+        research_dir : Path
+            Directory to search for filenames.
+        pattern : str
+            Pattern to use.
+        exclude : list[str]
+            Filenames to exclude.
+
+        Returns
+        -------
+        list[Path]
+            List of correct files.
+        """
+        # recursion: Search pattern on folder names
+        all_patterns = pattern[1:-1].split(")|(")
+        # Collect all folder-related-parts of the pattern
+        folder_split = [pat.split("/")[0] for pat in all_patterns]
+        folder_pattern = f"({')|('.join(folder_split)})"
+        # Collect all remaining parts of the pattern
+        remaining_split = ["/".join(pat.split("/")[1:]) for pat in all_patterns]
+        files_pattern = f"({')|('.join(remaining_split)})"
+
+        # Compile folder regex
+        folder_regex = re.compile(folder_pattern)
+        matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
+
+        # Prepare next recursive call
+        def recursive_call(folder: str) -> list[Path]:
+            return self._recursive_match(
+                research_dir=research_dir.joinpath(folder),
+                pattern=files_pattern,
+                exclude=exclude,
+            )
+
+        # apply recursive function to selected folders
+        recursion_results = map(recursive_call, matches)
+        # return list of all results
+        return list(itertools.chain(*recursion_results))

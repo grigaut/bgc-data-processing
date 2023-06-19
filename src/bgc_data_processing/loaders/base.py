@@ -1,8 +1,6 @@
 """Base Loaders."""
 
 
-import itertools
-import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -155,66 +153,8 @@ class BaseLoader(ABC):
         """
         ...
 
-    def _select_filepaths(
-        self,
-        research_dir: Path,
-        pattern: str,
-        exclude: list[str],
-    ) -> list[Path]:
-        """Recursive function to apply pattern on folders and file names.
-
-        Parameters
-        ----------
-        research_dir : Path
-            Directory on which to search for folders/files respecting pattern.
-        pattern : str
-            Pattern to respect (from the level of research_dir)
-        exclude : list[str]
-            Filenames to exclude.
-
-        Returns
-        -------
-        list[Path]
-            Files matching the pattern.
-        """
-        if "/" not in pattern:
-            # Search pattern on file names
-            regex = re.compile(pattern)
-            files = filter(regex.match, [x.name for x in research_dir.glob("*.*")])
-            fulls_paths = map(research_dir.joinpath, files)
-
-            def valid(filepath: Path) -> bool:
-                return self._is_file_valid(filepath=filepath, exclude=exclude)
-
-            return sorted(filter(valid, fulls_paths))
-
-        # recursion: Search pattern on folder names
-        all_patterns = pattern[1:-1].split(")|(")
-        # Collect all folder-related-parts of the pattern
-        folder_split = [pat.split("/")[0] for pat in all_patterns]
-        folder_pattern = f"({')|('.join(folder_split)})"
-        # Collect all remaining parts of the pattern
-        remaining_split = ["/".join(pat.split("/")[1:]) for pat in all_patterns]
-        files_pattern = f"({')|('.join(remaining_split)})"
-
-        # Compile folder regex
-        folder_regex = re.compile(folder_pattern)
-        matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
-
-        # Prepare next recursive call
-        def recursive_call(folder: str) -> list[Path]:
-            return self._select_filepaths(
-                research_dir=research_dir.joinpath(folder),
-                pattern=files_pattern,
-                exclude=exclude,
-            )
-
-        # apply recursive function to selected folders
-        recursion_results = map(recursive_call, matches)
-        # return list of all results
-        return list(itertools.chain(*recursion_results))
-
-    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+    @staticmethod
+    def is_file_valid(filepath: Path, exclude: list[str]) -> bool:
         """Indicate whether a file is valid to be kept or not.
 
         Parameters
@@ -337,10 +277,10 @@ class BaseLoader(ABC):
         """
         date_label = self._variables.get(self._variables.date_var_name).label
         date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern = self._files_pattern.build_from_constraint(date_constraint)
-        filepaths = self._select_filepaths(
-            research_dir=self._dirin,
-            pattern=pattern,
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
         )
         for filepath in filepaths:
