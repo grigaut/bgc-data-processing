@@ -9,10 +9,13 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
+from bgc_data_processing.data_structures.io.savers import StorerSaver
+from bgc_data_processing.data_structures.storers import Storer
+
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.storers import Storer
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.dateranges import DateRangeGenerator
 
 
 class BaseLoader(ABC):
@@ -337,3 +340,46 @@ class BaseLoader(ABC):
             to_correct.insert(len(to_correct.columns), label, correct)
             # to_correct[label] = to_correct[label]  #
         return to_correct
+
+    def load_and_save(
+        self,
+        saving_directory: Path,
+        dateranges_gen: "DateRangeGenerator",
+        exclude: list[str],
+        constraints: "Constraints",
+    ):
+        """Save data in files as soon as the data is loaded to relieve memory.
+
+        Parameters
+        ----------
+        saving_directory : Path
+            Path to the directory to save in.
+        dateranges_gen : DateRangeGenerator
+            Generator to use to retrieve dateranges.
+        exclude : list[str]
+            Filenames ot exclude from loading.
+        constraints : Constraints
+            Contraints ot apply on data.
+        """
+        date_label = self._variables.get(self._variables.date_var_name).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern = self._files_pattern.build_from_constraint(date_constraint)
+        filepaths = self._select_filepaths(
+            research_dir=self._dirin,
+            pattern=pattern,
+            exclude=exclude,
+        )
+        for filepath in filepaths:
+            data = self.load(filepath=filepath, constraints=constraints)
+            storer = Storer(
+                data=data,
+                category=self.category,
+                providers=[self.provider],
+                variables=self.variables,
+                verbose=self.verbose,
+            )
+            saver = StorerSaver(storer)
+            saver.save_from_daterange(
+                dateranges_gen=dateranges_gen,
+                saving_directory=saving_directory,
+            )
