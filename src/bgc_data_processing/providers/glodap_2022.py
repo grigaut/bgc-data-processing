@@ -9,12 +9,13 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = loaders.from_csv(
     provider_name="GLODAP_2022",
     dirin=Path(PROVIDERS_CONFIG["GLODAP_2022"]["PATH"]),
     category=PROVIDERS_CONFIG["GLODAP_2022"]["CATEGORY"],
-    files_pattern="GLODAPv2.2022_all.csv",
+    files_pattern=FileNamePattern("GLODAPv2.2022_all.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("G2expocode"),

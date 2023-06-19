@@ -8,12 +8,13 @@ from bgc_data_processing import (
     loaders,
 )
 from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = loaders.from_netcdf(
     provider_name="ESACCI-OC",
     dirin=Path(PROVIDERS_CONFIG["ESACCI-OC"]["PATH"]),
     category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
-    files_pattern="{years}/.*.nc",
+    files_pattern=FileNamePattern("{years}/.*-{years}{months}{days}-.*.nc"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
