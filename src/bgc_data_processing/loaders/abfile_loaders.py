@@ -15,13 +15,14 @@ from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 def from_abfile(
     provider_name: str,
     dirin: Path,
     category: str,
-    files_pattern: str,
+    files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
     grid_basename: str,
 ) -> "ABFileLoader":
@@ -35,7 +36,7 @@ def from_abfile(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -48,7 +49,7 @@ def from_abfile(
     Returns
     -------
     ABFileLoader
-        _description_
+        Loader
     """
     return ABFileLoader(
         provider_name=provider_name,
@@ -93,7 +94,7 @@ class ABFileLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
