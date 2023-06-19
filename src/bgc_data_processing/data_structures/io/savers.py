@@ -200,7 +200,7 @@ class StorerSaver:
             Data slice to save.
         """
         date_str: str = date_slice[self._date_field]
-        data_slice: Slice = date_slice[self._slice_field]
+        data_slice: "Slice" = date_slice[self._slice_field]
         if not self.save_aggregated_data_only:
             self._save_data(
                 filepath=self._make_single_filepath(date_str, saving_directory),
