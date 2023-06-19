@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
     from bgc_data_processing.data_structures.variables import VariablesStorer
     from bgc_data_processing.utils.dateranges import DateRangeGenerator
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 class BaseLoader(ABC):
@@ -29,7 +30,7 @@ class BaseLoader(ABC):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -44,7 +45,7 @@ class BaseLoader(ABC):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
     ) -> None:
         """Initiate base class to load data.
@@ -57,7 +58,7 @@ class BaseLoader(ABC):
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
-        files_pattern : str
+        files_pattern : FileNamePattern
             Pattern to use to parse files.
             Must contain a '{years}' in order to be completed using the .format method.
         variables : VariablesStorer
@@ -126,12 +127,12 @@ class BaseLoader(ABC):
         return self._dirin
 
     @property
-    def files_pattern(self) -> str:
+    def files_pattern(self) -> "FileNamePattern":
         """Files pattern.
 
         Returns
         -------
-        str
+        FileNamePattern
             Files pattern.
         """
         return self._files_pattern
@@ -153,41 +154,6 @@ class BaseLoader(ABC):
             Storer for the loaded data.
         """
         ...
-
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
 
     def _select_filepaths(
         self,
@@ -223,15 +189,20 @@ class BaseLoader(ABC):
             return sorted(filter(valid, fulls_paths))
 
         # recursion: Search pattern on folder names
-        pattern_split = pattern.split("/")
-        folder_regex = re.compile(pattern_split[0])
+        all_patterns = pattern[1:-1].split(")|(")
+
+        folder_split = [pat.split("/")[0] for pat in all_patterns]
+        folder_pattern = f"({')|('.join(folder_split)})"
+        remaining_split = ["/".join(pat.split("/")[1:]) for pat in all_patterns]
+        files_pattern = f"({')|('.join(remaining_split)})"
+        folder_regex = re.compile(folder_pattern)
         matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
 
         # Prepare next recursive call
         def recursive_call(folder: str) -> list[Path]:
             return self._select_filepaths(
                 research_dir=research_dir.joinpath(folder),
-                pattern="/".join(pattern_split[1:]),
+                pattern=files_pattern,
                 exclude=exclude,
             )
 
