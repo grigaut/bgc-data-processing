@@ -222,6 +222,8 @@ class StorerSaver:
         ----------
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
+        saving_directory: Path
+            Path to the idrectory to save in.
         """
         dateranges = dateranges_gen()
         dates_slices = self._slice_using_drng(dateranges)
