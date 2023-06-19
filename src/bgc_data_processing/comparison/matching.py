@@ -15,6 +15,7 @@ from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 class SelectiveABFileLoader(ABFileLoader):
@@ -28,7 +29,7 @@ class SelectiveABFileLoader(ABFileLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -44,7 +45,7 @@ class SelectiveABFileLoader(ABFileLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
