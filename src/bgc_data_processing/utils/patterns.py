@@ -54,14 +54,18 @@ class FileNamePattern:
         date_min, date_max = self._parse_dates_from_constraints(date_constraint)
         return self.build(date_min=date_min, date_max=date_max)
 
-    def build(self, date_min: dt.date, date_max: dt.date) -> "PatternMatcher":
+    def build(
+        self,
+        date_min: dt.date | None,
+        date_max: dt.date | None,
+    ) -> "PatternMatcher":
         """Build the pattern from the starting and ending dates.
 
         Parameters
         ----------
-        date_min : dt.date
+        date_min : dt.date | None
             Starting date.
-        date_max : dt.date
+        date_max : dt.date | None
             Ending date.
 
         Returns
@@ -120,16 +124,24 @@ class FileNamePattern:
 
     def _slice(
         self,
-        date_min: dt.date,
-        date_max: dt.date,
+        date_min: dt.date | None,
+        date_max: dt.date | None,
     ) -> list["DateIntervalPattern"]:
         """Slice the date interval in smaller interval patterns..
+
+        date_min: dt.date | None
+            Starting date.
+        date_max: dt.date | None
+            Ending date.
 
         Returns
         -------
         list[DateIntervalPattern, DateIntervalPattern]
             List of all interval patterns.
         """
+        if date_min is None and date_max is None:
+            return [DateIntervalPattern.with_day_precision(None, None)]
+
         years_eq = date_min.year == date_max.year
         months_eq = date_min.month == date_max.month
 
