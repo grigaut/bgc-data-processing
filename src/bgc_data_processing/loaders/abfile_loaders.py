@@ -525,11 +525,11 @@ class ABFileLoader(BaseLoader):
             If the bfile doesn't not exist.
         """
         basepath = filepath.parent / filepath.name[:-2]
-        keep_filepath = str(filepath) not in self._exclude
-        keep_filename = filepath.name not in self._exclude
+        keep_filepath = str(filepath) not in self.excluded_filenames
+        keep_filename = filepath.name not in self.excluded_filenames
         keep_file = keep_filename and keep_filepath
-        keep_basepath = str(basepath) not in self._exclude
-        keep_basename = basepath.name not in self._exclude
+        keep_basepath = str(basepath) not in self.excluded_filenames
+        keep_basename = basepath.name not in self.excluded_filenames
         keep_base = keep_basename and keep_basepath
         afile_path = Path(f"{basepath}.a")
         bfile_path = Path(f"{basepath}.b")

@@ -156,8 +156,8 @@ class BaseLoader(ABC):
         bool
             True if the name is not to be excluded.
         """
-        keep_path = str(filepath) not in self._exclude
-        keep_name = filepath.name not in self._exclude
+        keep_path = str(filepath) not in self.excluded_filenames
+        keep_name = filepath.name not in self.excluded_filenames
 
         return keep_name and keep_path
 
