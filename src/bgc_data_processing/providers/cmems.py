@@ -11,12 +11,13 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=Path(PROVIDERS_CONFIG["CMEMS"]["PATH"]),
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
-    files_pattern=".*.nc",
+    files_pattern=FileNamePattern(".*.nc"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),

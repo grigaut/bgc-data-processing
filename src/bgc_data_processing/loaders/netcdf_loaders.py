@@ -20,13 +20,14 @@ if TYPE_CHECKING:
         NotExistingVar,
         VariablesStorer,
     )
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 def from_netcdf(
     provider_name: str,
     dirin: Path,
     category: str,
-    files_pattern: str,
+    files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
 ) -> "NetCDFLoader":
     """Instantiate a NetCDF Loader.
@@ -39,7 +40,7 @@ def from_netcdf(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -79,7 +80,7 @@ class NetCDFLoader(BaseLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -99,7 +100,7 @@ class NetCDFLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
     ) -> None:
         super().__init__(provider_name, dirin, category, files_pattern, variables)
@@ -124,11 +125,11 @@ class NetCDFLoader(BaseLoader):
             Storer for the loaded data.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
-        filepaths = self._select_filepaths(
-            research_dir=self._dirin,
-            pattern=self._pattern(
-                date_constraint=constraints.get_constraint_parameters(date_label),
-            ),
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
         )
         data_list = []
@@ -550,7 +551,7 @@ class SatelliteNetCDFLoader(NetCDFLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -563,7 +564,7 @@ class SatelliteNetCDFLoader(NetCDFLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
     ) -> None:
         super().__init__(provider_name, dirin, category, files_pattern, variables)

@@ -15,13 +15,14 @@ from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 def from_abfile(
     provider_name: str,
     dirin: Path,
     category: str,
-    files_pattern: str,
+    files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
     grid_basename: str,
 ) -> "ABFileLoader":
@@ -35,7 +36,7 @@ def from_abfile(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -48,7 +49,7 @@ def from_abfile(
     Returns
     -------
     ABFileLoader
-        _description_
+        Loader
     """
     return ABFileLoader(
         provider_name=provider_name,
@@ -71,7 +72,7 @@ class ABFileLoader(BaseLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -93,7 +94,7 @@ class ABFileLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
@@ -206,9 +207,12 @@ class ABFileLoader(BaseLoader):
         """
         # load date constraint
         date_label = self._variables.get(self._variables.date_var_name).label
-        basenames = self._select_filepaths(
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        basenames = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
         # load all files
         data_slices = []
@@ -489,7 +493,29 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+    @staticmethod
+    def is_file_valid(filepath: Path, exclude: list[str]) -> bool:
+        """Check whether a file is valid or not.
+
+        Parameters
+        ----------
+        filepath : Path
+            File filepath.
+        exclude : list[str]
+            List of files ot exclude.
+
+        Returns
+        -------
+        bool
+            True if the file can be loaded.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the afile doesn't not exist.
+        FileNotFoundError
+            If the bfile doesn't not exist.
+        """
         basepath = filepath.parent / filepath.name[:-2]
         keep_filepath = str(filepath) not in exclude
         keep_filename = filepath.name not in exclude

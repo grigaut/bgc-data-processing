@@ -1,18 +1,20 @@
 """Base Loaders."""
 
 
-import itertools
-import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
 
+from bgc_data_processing.data_structures.io.savers import StorerSaver
+from bgc_data_processing.data_structures.storers import Storer
+
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.storers import Storer
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.dateranges import DateRangeGenerator
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 class BaseLoader(ABC):
@@ -26,7 +28,7 @@ class BaseLoader(ABC):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -41,7 +43,7 @@ class BaseLoader(ABC):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
     ) -> None:
         """Initiate base class to load data.
@@ -54,7 +56,7 @@ class BaseLoader(ABC):
             Directory to browse for files to load.
         category: str
             Category provider belongs to.
-        files_pattern : str
+        files_pattern : FileNamePattern
             Pattern to use to parse files.
             Must contain a '{years}' in order to be completed using the .format method.
         variables : VariablesStorer
@@ -123,12 +125,12 @@ class BaseLoader(ABC):
         return self._dirin
 
     @property
-    def files_pattern(self) -> str:
+    def files_pattern(self) -> "FileNamePattern":
         """Files pattern.
 
         Returns
         -------
-        str
+        FileNamePattern
             Files pattern.
         """
         return self._files_pattern
@@ -151,93 +153,8 @@ class BaseLoader(ABC):
         """
         ...
 
-    def _pattern(self, date_constraint: dict) -> str:
-        """Return files pattern for given years for this provider.
-
-        Returns
-        -------
-        str
-            Pattern.
-        date_constraint: dict
-            Date-related constraint dictionnary.
-        """
-        if not date_constraint:
-            years_str = "...."
-        else:
-            boundary_in = "boundary" in date_constraint
-            superset_in = "superset" in date_constraint
-            if boundary_in and superset_in and date_constraint["superset"]:
-                b_min = date_constraint["boundary"]["min"]
-                b_max = date_constraint["boundary"]["max"]
-                s_min = min(date_constraint["superset"])
-                s_max = max(date_constraint["superset"])
-                year_min = min(b_min, s_min).year
-                year_max = max(b_max, s_max).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not boundary_in:
-                year_min = min(date_constraint["superset"]).year
-                year_max = max(date_constraint["superset"]).year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            elif not superset_in:
-                year_min = date_constraint["boundary"]["min"].year
-                year_max = date_constraint["boundary"]["max"].year
-                years_str = "|".join([str(i) for i in range(year_min, year_max + 1)])
-            else:
-                raise KeyError("Date constraint dictionnary has invalid keys")
-        return self._files_pattern.format(years=years_str)
-
-    def _select_filepaths(
-        self,
-        research_dir: Path,
-        pattern: str,
-        exclude: list[str],
-    ) -> list[Path]:
-        """Recursive function to apply pattern on folders and file names.
-
-        Parameters
-        ----------
-        research_dir : Path
-            Directory on which to search for folders/files respecting pattern.
-        pattern : str
-            Pattern to respect (from the level of research_dir)
-        exclude : list[str]
-            Filenames to exclude.
-
-        Returns
-        -------
-        list[Path]
-            Files matching the pattern.
-        """
-        if "/" not in pattern:
-            # Search pattern on file names
-            regex = re.compile(pattern)
-            files = filter(regex.match, [x.name for x in research_dir.glob("*.*")])
-            fulls_paths = map(research_dir.joinpath, files)
-
-            def valid(filepath: Path) -> bool:
-                return self._is_file_valid(filepath=filepath, exclude=exclude)
-
-            return sorted(filter(valid, fulls_paths))
-
-        # recursion: Search pattern on folder names
-        pattern_split = pattern.split("/")
-        folder_regex = re.compile(pattern_split[0])
-        matches = filter(folder_regex.match, [x.name for x in research_dir.glob("*")])
-
-        # Prepare next recursive call
-        def recursive_call(folder: str) -> list[Path]:
-            return self._select_filepaths(
-                research_dir=research_dir.joinpath(folder),
-                pattern="/".join(pattern_split[1:]),
-                exclude=exclude,
-            )
-
-        # apply recursive function to selected folders
-        recursion_results = map(recursive_call, matches)
-        # return list of all results
-        return list(itertools.chain(*recursion_results))
-
-    def _is_file_valid(self, filepath: Path, exclude: list[str]) -> bool:
+    @staticmethod
+    def is_file_valid(filepath: Path, exclude: list[str]) -> bool:
         """Indicate whether a file is valid to be kept or not.
 
         Parameters
@@ -337,3 +254,46 @@ class BaseLoader(ABC):
             to_correct.insert(len(to_correct.columns), label, correct)
             # to_correct[label] = to_correct[label]  #
         return to_correct
+
+    def load_and_save(
+        self,
+        saving_directory: Path,
+        dateranges_gen: "DateRangeGenerator",
+        exclude: list[str],
+        constraints: "Constraints",
+    ):
+        """Save data in files as soon as the data is loaded to relieve memory.
+
+        Parameters
+        ----------
+        saving_directory : Path
+            Path to the directory to save in.
+        dateranges_gen : DateRangeGenerator
+            Generator to use to retrieve dateranges.
+        exclude : list[str]
+            Filenames ot exclude from loading.
+        constraints : Constraints
+            Contraints ot apply on data.
+        """
+        date_label = self._variables.get(self._variables.date_var_name).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
+            exclude=exclude,
+        )
+        for filepath in filepaths:
+            data = self.load(filepath=filepath, constraints=constraints)
+            storer = Storer(
+                data=data,
+                category=self.category,
+                providers=[self.provider],
+                variables=self.variables,
+                verbose=self.verbose,
+            )
+            saver = StorerSaver(storer)
+            saver.save_from_daterange(
+                dateranges_gen=dateranges_gen,
+                saving_directory=saving_directory,
+            )

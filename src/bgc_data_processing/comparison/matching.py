@@ -15,6 +15,7 @@ from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 class SelectiveABFileLoader(ABFileLoader):
@@ -28,7 +29,7 @@ class SelectiveABFileLoader(ABFileLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -44,7 +45,7 @@ class SelectiveABFileLoader(ABFileLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
@@ -279,9 +280,12 @@ class SelectiveABFileLoader(ABFileLoader):
         """
         # load date constraint
         date_label = self._variables.get(self._variables.date_var_name).label
-        basenames = self._select_filepaths(
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        basenames = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
-            date_constraint=constraints.get_constraint_parameters(date_label),
         )
         # load all files
         data_slices = []
@@ -317,9 +321,12 @@ class SelectiveABFileLoader(ABFileLoader):
             List of basenames matching constraints.
         """
         date_label = self._variables.get(self._variables.date_var_name).label
-        filepaths = self._select_filepaths(
-            research_dir=self._dirin,
-            pattern=self._pattern(constraints.get_constraint_parameters(date_label)),
+        date_label = self._variables.get(self._variables.date_var_name).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
         )
         return [s.parent.joinpath(s.stem) for s in filepaths]

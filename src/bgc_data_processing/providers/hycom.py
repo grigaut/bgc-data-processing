@@ -5,12 +5,13 @@ from pathlib import Path
 
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders
 from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = loaders.from_abfile(
     provider_name="HYCOM",
     dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
     category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
-    files_pattern="archm.{years}_[0-9]*_[0-9]*.a",
+    files_pattern=FileNamePattern("archm.{years}_[0-9]*_[0-9]*.a"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file().set_default("HYCOM"),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),

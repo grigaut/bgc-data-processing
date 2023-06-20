@@ -9,12 +9,13 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = loaders.from_csv(
     provider_name="NMDC",
     dirin=Path(PROVIDERS_CONFIG["NMDC"]["PATH"]),
     category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
-    files_pattern="NMDC_1990-2019_all.csv",
+    files_pattern=FileNamePattern("NMDC_1990-2019_all.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),

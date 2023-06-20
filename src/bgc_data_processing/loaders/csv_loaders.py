@@ -16,13 +16,14 @@ if TYPE_CHECKING:
         ExistingVar,
         VariablesStorer,
     )
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 def from_csv(
     provider_name: str,
     dirin: Path,
     category: str,
-    files_pattern: str,
+    files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
     read_params: dict = {},
 ) -> "CSVLoader":
@@ -36,7 +37,7 @@ def from_csv(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -48,7 +49,7 @@ def from_csv(
     Returns
     -------
     CSVLoader
-        _description_
+        Loader
     """
     return CSVLoader(
         provider_name=provider_name,
@@ -71,7 +72,7 @@ class CSVLoader(BaseLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
-    files_pattern : str
+    files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
     variables : VariablesStorer
@@ -86,7 +87,7 @@ class CSVLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
-        files_pattern: str,
+        files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         read_params: dict = {},
     ) -> None:
@@ -114,9 +115,10 @@ class CSVLoader(BaseLoader):
         """
         date_label = self._variables.get(self._variables.date_var_name).label
         date_constraint = constraints.get_constraint_parameters(date_label)
-        filepaths = self._select_filepaths(
-            research_dir=self._dirin,
-            pattern=self._pattern(date_constraint=date_constraint),
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self._dirin,
             exclude=exclude,
         )
         data_list = []

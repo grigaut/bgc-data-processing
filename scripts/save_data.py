@@ -62,9 +62,6 @@ if __name__ == "__main__":
             print(f"Loading data : {data_src}")
         dset_loader = providers.LOADERS[data_src]
         variables = dset_loader.variables
-        dset_loader.set_saving_order(
-            var_names=VARIABLES,
-        )
         # Constraint slicer
         constraints = data_structures.Constraints()
         constraints.add_superset_constraint(
@@ -93,14 +90,13 @@ if __name__ == "__main__":
         )
         dset_loader.set_verbose(VERBOSE)
         # Loading data
-        storer = dset_loader(
-            constraints=constraints,
-            exclude=PROVIDERS_CONFIG[data_src]["EXCLUDE"],
+        dset_loader.set_saving_order(var_names=VARIABLES)
+        dset_loader.load_and_save(
+            SAVING_DIR,
+            dates_generator,
+            PROVIDERS_CONFIG[data_src]["EXCLUDE"],
+            constraints,
         )
-        storer.remove_duplicates(PRIORITY)
-        saver = data_structures.StorerSaver(storer=storer)
-        saver.saving_order = VARIABLES
-        saver.save_from_daterange(dates_generator, SAVING_DIR)
     if VERBOSE > 0:
         print("\n" + "\t" + "-" * len(txt))
         print("\t" + " " * (len(txt) // 2) + "DONE")
