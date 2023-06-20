@@ -23,6 +23,7 @@ def from_csv(
     provider_name: str,
     dirin: Path,
     category: str,
+    exclude: list[str],
     files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
     read_params: dict = {},
@@ -37,6 +38,8 @@ def from_csv(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
@@ -55,6 +58,7 @@ def from_csv(
         provider_name=provider_name,
         dirin=dirin,
         category=category,
+        exclude=exclude,
         files_pattern=files_pattern,
         variables=variables,
         read_params=read_params,
@@ -72,6 +76,8 @@ class CSVLoader(BaseLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
@@ -87,17 +93,24 @@ class CSVLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
+        exclude: list[str],
         files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         read_params: dict = {},
     ) -> None:
         self._read_params = read_params
-        super().__init__(provider_name, dirin, category, files_pattern, variables)
+        super().__init__(
+            provider_name=provider_name,
+            dirin=dirin,
+            category=category,
+            exclude=exclude,
+            files_pattern=files_pattern,
+            variables=variables,
+        )
 
     def __call__(
         self,
         constraints: Constraints = Constraints(),
-        exclude: list = [],
     ) -> "Storer":
         """Load all files for the loader.
 
@@ -105,8 +118,6 @@ class CSVLoader(BaseLoader):
         ----------
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
-        exclude : list, optional
-            Files not to load., by default []
 
         Returns
         -------
@@ -119,7 +130,6 @@ class CSVLoader(BaseLoader):
         pattern_matcher.validate = self.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
-            exclude=exclude,
         )
         data_list = []
         for filepath in filepaths:

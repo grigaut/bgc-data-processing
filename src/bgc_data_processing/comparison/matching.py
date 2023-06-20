@@ -29,6 +29,8 @@ class SelectiveABFileLoader(ABFileLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
@@ -45,17 +47,19 @@ class SelectiveABFileLoader(ABFileLoader):
         provider_name: str,
         dirin: Path,
         category: str,
+        exclude: list[str],
         files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
         super().__init__(
-            provider_name,
-            dirin,
-            category,
-            files_pattern,
-            variables,
-            grid_basename,
+            provider_name=provider_name,
+            dirin=dirin,
+            category=category,
+            exclude=exclude,
+            files_pattern=files_pattern,
+            variables=variables,
+            grid_basename=grid_basename,
         )
 
     def _get_grid_field(self, variable_name: str, mask: "Mask") -> pd.Series:
@@ -262,7 +266,6 @@ class SelectiveABFileLoader(ABFileLoader):
     def __call__(
         self,
         constraints: "Constraints" = Constraints(),
-        exclude: list = [],
     ) -> "Storer":
         """Load all files for the loader.
 
@@ -270,8 +273,6 @@ class SelectiveABFileLoader(ABFileLoader):
         ----------
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
-        exclude : list, optional
-            Files not to load., by default []
 
         Returns
         -------
@@ -285,7 +286,6 @@ class SelectiveABFileLoader(ABFileLoader):
         pattern_matcher.validate = self.is_file_valid
         basenames = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
-            exclude=exclude,
         )
         # load all files
         data_slices = []
@@ -305,13 +305,11 @@ class SelectiveABFileLoader(ABFileLoader):
             verbose=self.verbose,
         )
 
-    def get_basenames(self, exclude: list, constraints: "Constraints") -> list[Path]:
+    def get_basenames(self, constraints: "Constraints") -> list[Path]:
         """Return basenames of files matching constraints.
 
         Parameters
         ----------
-        exclude : list
-            List of basename to exclude.
         constraints : Constraints
             Data constraints, only year constraint is used.
 
@@ -327,7 +325,6 @@ class SelectiveABFileLoader(ABFileLoader):
         pattern_matcher.validate = self.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
-            exclude=exclude,
         )
         return [s.parent.joinpath(s.stem) for s in filepaths]
 
@@ -682,7 +679,6 @@ class Selector:
     def __call__(
         self,
         constraints: "Constraints" = Constraints(),
-        exclude: list[str] = [],
     ) -> "Storer":
         """Load all files for the loader.
 
@@ -690,8 +686,6 @@ class Selector:
         ----------
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
-        exclude : list, optional
-            Files not to load., by default []
 
         Returns
         -------
@@ -701,7 +695,7 @@ class Selector:
         loader = SelectiveABFileLoader.from_abloader(loader=self.loader)
         date_var_name = loader.variables.date_var_name
         date_var_label = loader.variables.get(date_var_name).label
-        basenames = loader.get_basenames(exclude, constraints)
+        basenames = loader.get_basenames(constraints)
         datas: list[pd.DataFrame] = []
         for basename in basenames:
             date = Selector.parse_date_from_basename(basename)

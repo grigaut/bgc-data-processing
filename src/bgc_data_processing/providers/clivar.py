@@ -15,6 +15,7 @@ loader = loaders.from_csv(
     provider_name="CLIVAR",
     dirin=Path(PROVIDERS_CONFIG["CLIVAR"]["PATH"]),
     category=PROVIDERS_CONFIG["CLIVAR"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["CLIVAR"]["EXCLUDE"],
     files_pattern=FileNamePattern("clivar_({years})[0-9][0-9][0-9][0-9]_.*.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

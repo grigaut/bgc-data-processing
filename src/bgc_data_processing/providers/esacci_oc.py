@@ -14,6 +14,7 @@ loader = loaders.from_netcdf(
     provider_name="ESACCI-OC",
     dirin=Path(PROVIDERS_CONFIG["ESACCI-OC"]["PATH"]),
     category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["ESACCI-OC"]["EXCLUDE"],
     files_pattern=FileNamePattern("{years}/.*-{years}{months}{days}-.*.nc"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

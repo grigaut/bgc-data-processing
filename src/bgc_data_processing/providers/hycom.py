@@ -11,6 +11,7 @@ loader = loaders.from_abfile(
     provider_name="HYCOM",
     dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
     category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["HYCOM"]["EXCLUDE"],
     files_pattern=FileNamePattern("archm.{years}_[0-9]*_[0-9]*.a"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file().set_default("HYCOM"),

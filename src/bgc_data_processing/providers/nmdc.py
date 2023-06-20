@@ -15,6 +15,7 @@ loader = loaders.from_csv(
     provider_name="NMDC",
     dirin=Path(PROVIDERS_CONFIG["NMDC"]["PATH"]),
     category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["NMDC"]["EXCLUDE"],
     files_pattern=FileNamePattern("NMDC_1990-2019_all.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

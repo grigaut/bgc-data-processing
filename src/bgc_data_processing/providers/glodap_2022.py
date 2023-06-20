@@ -15,6 +15,7 @@ loader = loaders.from_csv(
     provider_name="GLODAP_2022",
     dirin=Path(PROVIDERS_CONFIG["GLODAP_2022"]["PATH"]),
     category=PROVIDERS_CONFIG["GLODAP_2022"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["GLODAP_2022"]["EXCLUDE"],
     files_pattern=FileNamePattern("GLODAPv2.2022_all.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

@@ -22,6 +22,7 @@ def from_abfile(
     provider_name: str,
     dirin: Path,
     category: str,
+    exclude: list[str],
     files_pattern: "FileNamePattern",
     variables: "VariablesStorer",
     grid_basename: str,
@@ -36,6 +37,8 @@ def from_abfile(
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
@@ -55,6 +58,7 @@ def from_abfile(
         provider_name=provider_name,
         dirin=dirin,
         category=category,
+        exclude=exclude,
         files_pattern=files_pattern,
         variables=variables,
         grid_basename=grid_basename,
@@ -72,6 +76,8 @@ class ABFileLoader(BaseLoader):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         Must contain a '{years}' in order to be completed using the .format method.
@@ -94,11 +100,19 @@ class ABFileLoader(BaseLoader):
         provider_name: str,
         dirin: Path,
         category: str,
+        exclude: list[str],
         files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
         grid_basename: str,
     ) -> None:
-        super().__init__(provider_name, dirin, category, files_pattern, variables)
+        super().__init__(
+            provider_name=provider_name,
+            dirin=dirin,
+            category=category,
+            exclude=exclude,
+            files_pattern=files_pattern,
+            variables=variables,
+        )
         self.grid_basename = grid_basename
         self.grid_file = ABFileGrid(basename=grid_basename, action="r")
         self._index = None
@@ -190,15 +204,13 @@ class ABFileLoader(BaseLoader):
             )
         return data
 
-    def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
+    def __call__(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.
 
         Parameters
         ----------
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
-        exclude : list, optional
-            Files not to load., by default []
 
         Returns
         -------
@@ -212,7 +224,6 @@ class ABFileLoader(BaseLoader):
         pattern_matcher.validate = self.is_file_valid
         basenames = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
-            exclude=exclude,
         )
         # load all files
         data_slices = []
@@ -493,16 +504,13 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    @staticmethod
-    def is_file_valid(filepath: Path, exclude: list[str]) -> bool:
+    def is_file_valid(self, filepath: Path) -> bool:
         """Check whether a file is valid or not.
 
         Parameters
         ----------
         filepath : Path
             File filepath.
-        exclude : list[str]
-            List of files ot exclude.
 
         Returns
         -------
@@ -517,11 +525,11 @@ class ABFileLoader(BaseLoader):
             If the bfile doesn't not exist.
         """
         basepath = filepath.parent / filepath.name[:-2]
-        keep_filepath = str(filepath) not in exclude
-        keep_filename = filepath.name not in exclude
+        keep_filepath = str(filepath) not in self._exclude
+        keep_filename = filepath.name not in self._exclude
         keep_file = keep_filename and keep_filepath
-        keep_basepath = str(basepath) not in exclude
-        keep_basename = basepath.name not in exclude
+        keep_basepath = str(basepath) not in self._exclude
+        keep_basename = basepath.name not in self._exclude
         keep_base = keep_basename and keep_basepath
         afile_path = Path(f"{basepath}.a")
         bfile_path = Path(f"{basepath}.b")

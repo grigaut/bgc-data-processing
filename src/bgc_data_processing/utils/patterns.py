@@ -560,7 +560,7 @@ class PatternMatcher:
     def __init__(
         self,
         pattern: str,
-        validation_function: Callable = lambda filepath, exclude: True,  # noqa: ARG005
+        validation_function: Callable = lambda filepath: True,  # noqa: ARG005
     ) -> None:
 
         self._pattern = pattern
@@ -580,7 +580,6 @@ class PatternMatcher:
     def select_matching_filepath(
         self,
         research_directory: Path,
-        exclude: list[str] = [],
     ) -> list[Path]:
         """Select the filepaths matching the pattern.
 
@@ -588,8 +587,6 @@ class PatternMatcher:
         ----------
         research_directory : Path
             Directory to serach for files.
-        exclude : list[str], optional
-            Filenames to exclude., by default []
 
         Returns
         -------
@@ -599,14 +596,12 @@ class PatternMatcher:
         return self._recursive_match(
             research_dir=research_directory,
             pattern=self._pattern,
-            exclude=exclude,
         )
 
     def _recursive_match(
         self,
         research_dir: Path,
         pattern: str,
-        exclude: list[str],
     ) -> list[Path]:
         """Find matching filepaths using recursion.
 
@@ -616,8 +611,6 @@ class PatternMatcher:
             Directory to search for files.
         pattern : str
             Pattern to use when searching.
-        exclude : list[str]
-            Files to exclude.
 
         Returns
         -------
@@ -628,19 +621,16 @@ class PatternMatcher:
             return self._match_files(
                 research_dir=research_dir,
                 pattern=pattern,
-                exclude=exclude,
             )
         return self._match_folder(
             research_dir=research_dir,
             pattern=pattern,
-            exclude=exclude,
         )
 
     def _match_files(
         self,
         research_dir: Path,
         pattern: str,
-        exclude: list[str],
     ) -> list[Path]:
         """Find matching filenames.
 
@@ -650,8 +640,6 @@ class PatternMatcher:
             Directory to search for filenames.
         pattern : str
             Pattern to use.
-        exclude : list[str]
-            Filenames to exclude.
 
         Returns
         -------
@@ -663,7 +651,7 @@ class PatternMatcher:
         fulls_paths = map(research_dir.joinpath, files)
 
         def valid(filepath: Path) -> bool:
-            return self.validate(filepath=filepath, exclude=exclude)
+            return self.validate(filepath=filepath)
 
         return sorted(filter(valid, fulls_paths))
 
@@ -671,7 +659,6 @@ class PatternMatcher:
         self,
         research_dir: Path,
         pattern: str,
-        exclude: list[str],
     ) -> list[Path]:
         """Find matching folder names.
 
@@ -681,8 +668,6 @@ class PatternMatcher:
             Directory to search for filenames.
         pattern : str
             Pattern to use.
-        exclude : list[str]
-            Filenames to exclude.
 
         Returns
         -------
@@ -707,7 +692,6 @@ class PatternMatcher:
             return self._recursive_match(
                 research_dir=research_dir.joinpath(folder),
                 pattern=files_pattern,
-                exclude=exclude,
             )
 
         # apply recursive function to selected folders
