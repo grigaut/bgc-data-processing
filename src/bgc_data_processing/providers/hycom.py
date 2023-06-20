@@ -27,7 +27,9 @@ loader = loaders.from_abfile(
         temperature=DEFAULT_VARS["temperature"].in_file_as("temp"),
         salinity=DEFAULT_VARS["salinity"].in_file_as("salin"),
         oxygen=DEFAULT_VARS["oxygen"].in_file_as("ECO_oxy"),
-        phosphate=DEFAULT_VARS["phosphate"].not_in_file(),
+        phosphate=DEFAULT_VARS["phosphate"]
+        .in_file_as("ECO_pho")
+        .correct_with(units.convert_phosphate_mgc_by_m3_to_umol_by_l),
         nitrate=DEFAULT_VARS["nitrate"]
         .in_file_as("ECO_no3")
         .correct_with(units.convert_nitrate_mgc_by_m3_to_umol_by_l),
