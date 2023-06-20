@@ -18,8 +18,8 @@ def convert_umol_by_kg_to_mmol_by_m3(
     pd.Series
         Converted data (mmol/m3)
     """
-    kg_by_m3 = 1025  # seawater density
-    mmol_by_umol = 10 ** (-3)
+    kg_by_m3 = 1025  # seawater density: 1025 kg <=> 1 m3
+    mmol_by_umol = 10 ** (-3)  # 1000 mmol = 1 mol
     return data_umol_by_kg * mmol_by_umol * kg_by_m3
 
 
