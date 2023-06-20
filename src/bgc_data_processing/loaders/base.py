@@ -122,6 +122,11 @@ class BaseLoader(ABC):
         """
         return self._files_pattern
 
+    @property
+    def excluded_filenames(self) -> list[str]:
+        """Filenames to exclude from loading."""
+        return self._exclude
+
     @abstractmethod
     def __call__(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.

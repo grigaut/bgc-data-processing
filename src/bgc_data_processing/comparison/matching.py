@@ -349,6 +349,7 @@ class SelectiveABFileLoader(ABFileLoader):
             provider_name=loader.provider,
             dirin=loader.dirin,
             category=loader.category,
+            exclude=loader.excluded_filenames,
             files_pattern=loader.files_pattern,
             variables=loader.variables,
             grid_basename=loader.grid_basename,
