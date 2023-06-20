@@ -33,7 +33,9 @@ loader = loaders.from_abfile(
         nitrate=DEFAULT_VARS["nitrate"]
         .in_file_as("ECO_no3")
         .correct_with(units.convert_nitrate_mgc_by_m3_to_umol_by_l),
-        silicate=DEFAULT_VARS["silicate"].not_in_file(),
+        silicate=DEFAULT_VARS["silicate"]
+        .in_file_as("ECO_sil")
+        .correct_with(units.convert_silicate_mgc_by_m3_to_umol_by_l),
         chlorophyll=DEFAULT_VARS["chlorophyll"].not_in_file(),
     ),
     grid_basename=PROVIDERS_CONFIG["HYCOM"]["REGIONAL_GRID_BASENAME"],
