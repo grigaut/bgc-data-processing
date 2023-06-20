@@ -17,6 +17,7 @@ loader = loaders.from_netcdf(
     provider_name="CMEMS",
     dirin=Path(PROVIDERS_CONFIG["CMEMS"]["PATH"]),
     category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["CMEMS"]["EXCLUDE"],
     files_pattern=FileNamePattern(".*.nc"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

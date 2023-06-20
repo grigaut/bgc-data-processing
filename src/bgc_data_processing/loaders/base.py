@@ -28,6 +28,8 @@ class BaseLoader(ABC):
         Directory to browse for files to load.
     category: str
         Category provider belongs to.
+    exclude: list[str]
+        Filenames to exclude from loading.
     files_pattern : FileNamePattern
         Pattern to use to parse files.
         It must contain a '{years}' in order to be completed using the .format method.
@@ -43,29 +45,14 @@ class BaseLoader(ABC):
         provider_name: str,
         dirin: Path,
         category: str,
+        exclude: list[str],
         files_pattern: "FileNamePattern",
         variables: "VariablesStorer",
     ) -> None:
-        """Initiate base class to load data.
-
-        Parameters
-        ----------
-        provider_name : str
-            Data provider name.
-        dirin : Path
-            Directory to browse for files to load.
-        category: str
-            Category provider belongs to.
-        files_pattern : FileNamePattern
-            Pattern to use to parse files.
-            Must contain a '{years}' in order to be completed using the .format method.
-        variables : VariablesStorer
-            Storer object containing all variables to consider for this data,
-            both the one in the data file but and the one not represented in the file.
-        """
         self._provider = provider_name
         self._dirin = dirin
         self._category = category
+        self._exclude = exclude
         self._files_pattern = files_pattern
         self._variables = variables
 
@@ -135,16 +122,19 @@ class BaseLoader(ABC):
         """
         return self._files_pattern
 
+    @property
+    def excluded_filenames(self) -> list[str]:
+        """Filenames to exclude from loading."""
+        return self._exclude
+
     @abstractmethod
-    def __call__(self, constraints: "Constraints", exclude: list = []) -> "Storer":
+    def __call__(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.
 
         Parameters
         ----------
         constraints: Constraints
             Constraint slicer.
-        exclude : list, optional
-            Files not to load., by default []
 
         Returns
         -------
@@ -153,24 +143,21 @@ class BaseLoader(ABC):
         """
         ...
 
-    @staticmethod
-    def is_file_valid(filepath: Path, exclude: list[str]) -> bool:
+    def is_file_valid(self, filepath: Path) -> bool:
         """Indicate whether a file is valid to be kept or not.
 
         Parameters
         ----------
         filepath : Path
             Name of the file
-        exclude : list[str]
-            List of filenames to exclude
 
         Returns
         -------
         bool
             True if the name is not to be excluded.
         """
-        keep_path = str(filepath) not in exclude
-        keep_name = filepath.name not in exclude
+        keep_path = str(filepath) not in self.excluded_filenames
+        keep_name = filepath.name not in self.excluded_filenames
 
         return keep_name and keep_path
 
@@ -252,14 +239,12 @@ class BaseLoader(ABC):
         for label, correction_func in self._variables.corrections.items():
             correct = to_correct.pop(label).apply(correction_func)
             to_correct.insert(len(to_correct.columns), label, correct)
-            # to_correct[label] = to_correct[label]  #
         return to_correct
 
     def load_and_save(
         self,
         saving_directory: Path,
         dateranges_gen: "DateRangeGenerator",
-        exclude: list[str],
         constraints: "Constraints",
     ):
         """Save data in files as soon as the data is loaded to relieve memory.
@@ -270,8 +255,6 @@ class BaseLoader(ABC):
             Path to the directory to save in.
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
-        exclude : list[str]
-            Filenames ot exclude from loading.
         constraints : Constraints
             Contraints ot apply on data.
         """
@@ -281,7 +264,6 @@ class BaseLoader(ABC):
         pattern_matcher.validate = self.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
-            exclude=exclude,
         )
         for filepath in filepaths:
             data = self.load(filepath=filepath, constraints=constraints)

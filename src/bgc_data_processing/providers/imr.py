@@ -15,6 +15,7 @@ loader = loaders.from_csv(
     provider_name="IMR",
     dirin=Path(PROVIDERS_CONFIG["IMR"]["PATH"]),
     category=PROVIDERS_CONFIG["IMR"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["IMR"]["EXCLUDE"],
     files_pattern=FileNamePattern("imr_{years}.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

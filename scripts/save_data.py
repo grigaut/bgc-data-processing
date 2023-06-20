@@ -5,7 +5,6 @@ from pathlib import Path
 from time import time
 
 from bgc_data_processing import (
-    PROVIDERS_CONFIG,
     data_structures,
     parsers,
     providers,
@@ -94,7 +93,6 @@ if __name__ == "__main__":
         dset_loader.load_and_save(
             SAVING_DIR,
             dates_generator,
-            PROVIDERS_CONFIG[data_src]["EXCLUDE"],
             constraints,
         )
     if VERBOSE > 0:

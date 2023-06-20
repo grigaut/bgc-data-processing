@@ -17,6 +17,7 @@ loader = loaders.from_netcdf(
     provider_name="ARGO",
     dirin=Path(PROVIDERS_CONFIG["ARGO"]["PATH"]),
     category=PROVIDERS_CONFIG["ARGO"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["ARGO"]["EXCLUDE"],
     files_pattern=FileNamePattern(".*.nc"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),

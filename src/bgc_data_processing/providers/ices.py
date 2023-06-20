@@ -15,6 +15,7 @@ loader = loaders.from_csv(
     provider_name="ICES",
     dirin=Path(PROVIDERS_CONFIG["ICES"]["PATH"]),
     category=PROVIDERS_CONFIG["ICES"]["CATEGORY"],
+    exclude=PROVIDERS_CONFIG["ICES"]["EXCLUDE"],
     files_pattern=FileNamePattern("ices_{years}.csv"),
     variables=VariablesStorer(
         provider=DEFAULT_VARS["provider"].not_in_file(),
