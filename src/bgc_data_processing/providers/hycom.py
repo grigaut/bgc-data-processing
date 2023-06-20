@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, units
 from bgc_data_processing.data_structures.variables import VariablesStorer
 from bgc_data_processing.utils.patterns import FileNamePattern
 
@@ -28,7 +28,9 @@ loader = loaders.from_abfile(
         salinity=DEFAULT_VARS["salinity"].in_file_as("salin"),
         oxygen=DEFAULT_VARS["oxygen"].in_file_as("ECO_oxy"),
         phosphate=DEFAULT_VARS["phosphate"].not_in_file(),
-        nitrate=DEFAULT_VARS["nitrate"].not_in_file(),
+        nitrate=DEFAULT_VARS["nitrate"]
+        .in_file_as("ECO_no3")
+        .correct_with(units.convert_nitrate_mgc_by_m3_to_umol_by_l),
         silicate=DEFAULT_VARS["silicate"].not_in_file(),
         chlorophyll=DEFAULT_VARS["chlorophyll"].not_in_file(),
     ),
