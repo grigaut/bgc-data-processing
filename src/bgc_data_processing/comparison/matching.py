@@ -523,7 +523,6 @@ class Match:
     index_loaded: str = "load_index"
 
     def __init__(self, obs_closests_indexes: pd.Series) -> None:
-
         index_link = obs_closests_indexes.to_frame(name=self.index_simulated)
         index_link.index.name = self.index_observed
         index_link.reset_index(inplace=True)

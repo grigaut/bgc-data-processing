@@ -2,7 +2,7 @@
 
 from abc import ABC
 from collections.abc import Callable, Iterable, Iterator
-from typing import Any, Self
+from typing import Any, ClassVar
 
 import numpy as np
 from _collections_abc import dict_keys
@@ -321,7 +321,7 @@ class NotExistingVar(BaseVar):
         """
         return cls(**template.building_informations())
 
-    def set_default(self, default: Any) -> Self:
+    def set_default(self, default: Any) -> "NotExistingVar":
         """Set the default value for the variable column.
 
         Parameters
@@ -331,29 +331,29 @@ class NotExistingVar(BaseVar):
 
         Returns
         -------
-        Self
+        NotExistingVar
             Self.
         """
         self.default = default
         return self
 
-    def remove_when_all_nan(self) -> Self:
+    def remove_when_all_nan(self) -> "NotExistingVar":
         """Set self._remove_if_all_nan to True.
 
         Returns
         -------
-        Self
+        NotExistingVar
             self
         """
         self._remove_if_all_nan = True
         return self
 
-    def remove_when_nan(self) -> Self:
+    def remove_when_nan(self) -> "NotExistingVar":
         """Set self._remove_if_nan to True.
 
         Returns
         -------
-        Self
+        NotExistingVar
             self
         """
         self._remove_if_nan = True
@@ -386,7 +386,7 @@ class ExistingVar(NotExistingVar):
 
     __default_exist_in_dset: bool = True
     __default_correction: callable = None
-    __default_aliases: list = []
+    __default_aliases: ClassVar[list[tuple[str, str, list]]] = []
 
     def __init__(
         self,
@@ -422,7 +422,7 @@ class ExistingVar(NotExistingVar):
         super().__init__(name, unit, var_type, default, name_format, value_format)
         self.exist_in_dset = self.__default_exist_in_dset
         self.correction = self.__default_correction
-        self._aliases = self.__default_aliases
+        self._aliases = self.__default_aliases.copy()
 
     @property
     def aliases(self) -> list[tuple[str, str, list]]:
@@ -475,7 +475,7 @@ class ExistingVar(NotExistingVar):
         """
         return super().from_template(template)
 
-    def set_aliases(self, *args: str | tuple[str, str, list]) -> Self:
+    def set_aliases(self, *args: str | tuple[str, str, list]) -> "ExistingVar":
         """Set aliases for the variable.
 
         Parameters
@@ -494,7 +494,7 @@ class ExistingVar(NotExistingVar):
 
         Returns
         -------
-        Self
+        "ExistingVar"
             Updated version of self
 
         Raises
@@ -527,7 +527,7 @@ class ExistingVar(NotExistingVar):
         self._aliases = aliases
         return self
 
-    def correct_with(self, function: Callable) -> Self:
+    def correct_with(self, function: Callable) -> "ExistingVar":
         """Correction function definition.
 
         Parameters
@@ -537,7 +537,7 @@ class ExistingVar(NotExistingVar):
 
         Returns
         -------
-        Self
+        ExistingVar
             self.
 
         Raises
@@ -620,8 +620,8 @@ class VariablesStorer:
         latitude: ExistingVar | NotExistingVar,
         longitude: ExistingVar | NotExistingVar,
         depth: ExistingVar | NotExistingVar,
-        hour: ExistingVar | NotExistingVar = None,
-        provider: ExistingVar | NotExistingVar = None,
+        hour: ExistingVar | NotExistingVar | None = None,
+        provider: ExistingVar | NotExistingVar | None = None,
         *args: ExistingVar | NotExistingVar,
         **kwargs: ExistingVar | NotExistingVar,
     ) -> None:

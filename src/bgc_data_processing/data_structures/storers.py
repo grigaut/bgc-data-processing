@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-
     from bgc_data_processing.data_structures.filtering import Constraints
     from bgc_data_processing.data_structures.variables import (
         NotExistingVar,
@@ -191,7 +190,7 @@ class Storer:
             verbose=min(self._verbose, other.verbose),
         )
 
-    def remove_duplicates(self, priority_list: list = None) -> None:
+    def remove_duplicates(self, priority_list: list | None = None) -> None:
         """Update self._data to remove duplicates in data.
 
         Parameters
@@ -251,7 +250,7 @@ class Storer:
     def _remove_duplicates_between_providers(
         self,
         df: pd.DataFrame,
-        priority_list: list,
+        priority_list: list | None,
     ) -> pd.DataFrame:
         """Remove duplicates among a common providers.
 
@@ -259,9 +258,8 @@ class Storer:
         ----------
         df : pd.DataFrame
             DataFrame to remove duplicated data from.
-        priority_list : list, optional
+        priority_list : list | None
             Providers priority order, first has priority over others and so on.
-            , by default None
 
         Returns
         -------

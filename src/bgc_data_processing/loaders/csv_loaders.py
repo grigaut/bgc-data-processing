@@ -185,8 +185,7 @@ class CSVLoader(BaseLoader):
                 continue
             if (flag_alias is not None) and (flag_alias in df.columns):
                 corrects = df[flag_alias].isin(correct_flags)
-                values = df[alias].where(corrects, np.nan)
-                return values
+                return df[alias].where(corrects, np.nan)
             return df[alias]
         return None
 

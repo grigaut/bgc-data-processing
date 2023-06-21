@@ -80,7 +80,6 @@ if __name__ == "__main__":
     print("--------------------------------------\n")
 
     if SHOW_MAP:
-
         colors = ["red", "green", "blue", "pink", "yellow"]
 
         ax = plt.axes(projection=ccrs.Orthographic(0, 90))

@@ -7,7 +7,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from bgc_data_processing.data_structures.variables import TemplateVar
 from bgc_data_processing.water_masses import WaterMass
@@ -24,7 +24,7 @@ class TomlParser:
         Whether to check types or not., by default True
     """
 
-    _str_to_type = {
+    _str_to_type: ClassVar[dict[str, type | str]] = {
         "str": str,
         "int": int,
         "list": list,

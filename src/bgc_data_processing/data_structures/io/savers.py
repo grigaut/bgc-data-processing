@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 if TYPE_CHECKING:
-
     from bgc_data_processing.data_structures.storers import Slice, Storer
     from bgc_data_processing.utils.dateranges import DateRange, DateRangeGenerator
 
