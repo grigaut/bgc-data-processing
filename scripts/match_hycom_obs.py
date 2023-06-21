@@ -71,30 +71,17 @@ if __name__ == "__main__":
         observations,
     )
     # Add pressure
-    obs_pres_var, obs_pres_data = features.compute_pressure(
-        observations,
-        DEPTH_TEMPLATE.label,
-        LATITUDE_TEMPLATE.label,
-    )
-    observations.add_feature(obs_pres_var, obs_pres_data)
-    sim_pres_var, sim_pres_data = features.compute_pressure(
-        interpolated,
-        DEPTH_TEMPLATE.label,
-        LATITUDE_TEMPLATE.label,
-    )
-    interpolated.add_feature(sim_pres_var, sim_pres_data)
+    pres_feat = features.Pressure(DEPTH_TEMPLATE, LATITUDE_TEMPLATE)
+    pres_feat.insert_in_storer(observations)
+    pres_feat.insert_in_storer(interpolated)
     # Add potential temperature
-    obs_ptemp_var, obs_ptemp_data = features.compute_potential_temperature(
-        storer=observations,
-        salinity_field=SALINITY_TEMPLATE.label,
-        temperature_field=TEMPERATURE_TEMPLATE.label,
-        pressure_field=obs_pres_var.label,
+    ptemp_feat = features.PotentialTemperature(
+        SALINITY_TEMPLATE,
+        TEMPERATURE_TEMPLATE,
+        pres_feat.variable,
     )
-    observations.add_feature(obs_ptemp_var, obs_ptemp_data)
-    interpolated.add_feature(
-        obs_ptemp_var,
-        interpolated.data[TEMPERATURE_TEMPLATE.label],
-    )
+    ptemp_feat.insert_in_storer(observations)
+    ptemp_feat.insert_in_storer(interpolated)
     save_vars = [
         var.label
         for var in observations.variables

@@ -63,21 +63,17 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
     # Add relevant features to the data: Pressure / potential temperature
-    depth_field = variables.get(variables.depth_var_name).label
-    latitude_field = variables.get(variables.latitude_var_name).label
-    pres_var, pres_data = features.compute_pressure(
-        storer,
-        depth_field,
-        latitude_field,
+    pres_feat = features.Pressure(
+        depth_variable=variables.get(variables.depth_var_name),
+        latitude_variable=variables.get(variables.latitude_var_name),
     )
-    storer.add_feature(pres_var, pres_data)
-    ptemp_var, ptemp_data = features.compute_potential_temperature(
-        storer=storer,
-        salinity_field=SALINITY_DEFAULT.label,
-        temperature_field=TEMPERATURE_DEFAULT.label,
-        pressure_field=pres_var.label,
+    pres_feat.insert_in_storer(storer)
+    ptemp_feat = features.PotentialTemperature(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
+        pressure_variable=pres_feat.variable,
     )
-    storer.add_feature(ptemp_var, ptemp_data)
+    ptemp_feat.insert_in_storer(storer)
     # Add global constraints
     constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
@@ -110,7 +106,7 @@ if __name__ == "__main__":
         constraints=constraints,
         salinity_field=SALINITY_DEFAULT.label,
         temperature_field=TEMPERATURE_DEFAULT.label,
-        ptemperature_field=ptemp_var.label,
+        ptemperature_field=ptemp_feat.variable.label,
     )
     if SHOW:
         plot.show()

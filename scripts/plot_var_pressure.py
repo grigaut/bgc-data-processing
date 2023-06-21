@@ -69,25 +69,22 @@ if __name__ == "__main__":
     # Add relevant features to the data: Pressure / potential temperature /sigma-t
     depth_field = variables.get(variables.depth_var_name).label
     latitude_field = variables.get(variables.latitude_var_name).label
-    pres_var, pres_data = features.compute_pressure(
-        storer,
-        depth_field,
-        latitude_field,
+    pres_feat = features.Pressure(
+        depth_variable=variables.get(variables.depth_var_name),
+        latitude_variable=variables.get(variables.latitude_var_name),
     )
-    storer.add_feature(pres_var, pres_data)
-    ptemp_var, ptemp_data = features.compute_potential_temperature(
-        storer=storer,
-        salinity_field=SALINITY_DEFAULT.label,
-        temperature_field=TEMPERATURE_DEFAULT.label,
-        pressure_field=pres_var.label,
+    pres_feat.insert_in_storer(storer)
+    ptemp_feat = features.PotentialTemperature(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
+        pressure_variable=pres_feat.variable,
     )
-    storer.add_feature(ptemp_var, ptemp_data)
-    sigt_var, sigt_data = features.compute_sigma_t(
-        storer=storer,
-        salinity_field=SALINITY_DEFAULT.label,
-        temperature_field=TEMPERATURE_DEFAULT.label,
+    ptemp_feat.insert_in_storer(storer)
+    sigmat_feat = features.SigmaT(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
     )
-    storer.add_feature(sigt_var, sigt_data)
+    sigmat_feat.insert_in_storer(storer)
     constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
@@ -111,10 +108,10 @@ if __name__ == "__main__":
     plot = tracers.WaterMassVariableComparison(
         storer,
         constraints,
-        pres_var.name,
-        ptemp_var.name,
-        SALINITY_DEFAULT.label,
-        sigt_var.name,
+        pres_feat.variable.name,
+        ptemp_feat.variable.name,
+        SALINITY_DEFAULT.name,
+        sigmat_feat.variable.name,
     )
     if SHOW:
         plot.show(
