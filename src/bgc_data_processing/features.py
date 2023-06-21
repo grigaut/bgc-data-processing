@@ -264,3 +264,59 @@ class SigmaT(BaseFeature):
         sigma_t = pd.Series(eos80.dens0(salinity, temperature) - 1000)
         sigma_t.name = self.variable.label
         return sigma_t
+
+
+class ChlorophyllFromDiatomFlagellate(BaseFeature):
+    """Chlorophyll-a feature.
+
+    Parameters
+    ----------
+    diatom_variable : ExistingVar | NotExistingVar | ParsedVar
+        Variable for diatom.
+    flagellate_variable : ExistingVar | NotExistingVar | ParsedVar
+        Variable for flagellate.
+    var_name_format : str, optional
+        Name format for the added variable., by default "%-10s"
+    var_value_format : str, optional
+        Value format for the added variable., by default "%10.3f"
+    """
+
+    def __init__(
+        self,
+        diatom_variable: ExistingVar | NotExistingVar | ParsedVar,
+        flagellate_variable: ExistingVar | NotExistingVar | ParsedVar,
+        var_name_format: str = "%-10s",
+        var_value_format: str = "%10.3f",
+    ) -> None:
+        super().__init__(
+            var_name="SIGT",
+            var_unit="[kg/m3]",
+            var_type=float,
+            var_default=np.nan,
+            var_name_format=var_name_format,
+            var_value_format=var_value_format,
+        )
+        self._source_vars = [diatom_variable, flagellate_variable]
+
+    def _transform(
+        self,
+        diatom: pd.Series,
+        flagellate: pd.Series,
+    ) -> pd.Series:
+        """Compute chlorophyll-a from diatom and flagellate.
+
+        Parameters
+        ----------
+        diatom : pd.Series
+            Diatoms (in mg/m3).
+        flagellate : pd.Series
+            Flagellates (in mg/m3).
+
+        Returns
+        -------
+        pd.Series
+            Chlorophyll-a (in kg/m3).
+        """
+        sigma_t = diatom + flagellate
+        sigma_t.name = self.variable.label
+        return sigma_t
