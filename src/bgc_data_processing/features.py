@@ -61,6 +61,11 @@ class BaseFeature(ABC):
         """Variable which correspond to the feature."""
         return self._output_var
 
+    @property
+    def required_variables(self) -> list[ExistingVar | NotExistingVar | ParsedVar]:
+        """Required variables for the feature computation."""
+        return self._source_vars
+
     def _extract_from_storer(self, storer: "Storer") -> tuple[pd.Series]:
         """Extract the required data columns from the storer..
 
