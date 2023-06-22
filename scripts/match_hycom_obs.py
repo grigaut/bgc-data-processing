@@ -56,7 +56,7 @@ if __name__ == "__main__":
     selector = comparison.Selector(
         reference=observations,
         strategy=comparison.NearestNeighborStrategy(metric="haversine"),
-        loader=providers.LOADERS["HYCOM"],
+        dsource=providers.LOADERS["HYCOM"],
     )
 
     simulations = selector()
@@ -87,18 +87,14 @@ if __name__ == "__main__":
         for var in observations.variables
         if var.name != observations.variables.date_var_name
     ]
-    observations.variables.set_saving_order(
-        var_names=save_vars,
-    )
-    interpolated.variables.set_saving_order(
-        var_names=save_vars,
-    )
     observations_save = observations.slice_using_index(interpolated.data.index)
 
     SAVING_DIR = Path(CONFIG["SAVING_DIR"])
 
     obs_saver = data_structures.StorerSaver(observations_save)
+    obs_saver.saving_order = save_vars
     obs_saver.save_all_storer(SAVING_DIR.joinpath("observations.txt"))
 
     int_saver = data_structures.StorerSaver(interpolated)
+    int_saver.saving_order = save_vars
     int_saver.save_all_storer(SAVING_DIR.joinpath("simulations.txt"))

@@ -1,13 +1,15 @@
-"""Variable related objects."""
+"""Variables."""
 
 from abc import ABC
-from collections.abc import Callable, Iterable, Iterator
-from typing import Any, ClassVar
+from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
-from _collections_abc import dict_keys
 
 from bgc_data_processing.exceptions import VariableInstantiationError
+
+if TYPE_CHECKING:
+    from bgc_data_processing.features import BaseFeature
 
 
 class BaseVar(ABC):
@@ -36,6 +38,7 @@ class BaseVar(ABC):
     >>> var_lat = BaseVar("LATITUDE", "[deg_N]", float, 7, 6, "%-12s", "%12.6f")
     """
 
+    is_feature = False
     exist_in_dset: bool = None
 
     def __init__(
@@ -96,7 +99,7 @@ class BaseVar(ABC):
         str
             name_unit_type
         """
-        return f"{self.name}_{self.unit}_{self.type}"
+        return f"{self.name}_{self.unit}"
 
     def __eq__(self, __o: object) -> bool:
         """Test variable equality.
@@ -566,439 +569,25 @@ class ParsedVar(BaseVar):
         return f"{self.name}_{self.unit}"
 
 
-class VariablesStorer:
-    """General storer for Var object.
-
-    This class represents the set of both variables present \
-    in the file and variables to take in consideration \
-    (therefore to add even if empty) when loading the data.
+class FeaturedVar(BaseVar):
+    """Variable resulting of an operation between variables.
 
     Parameters
     ----------
-    expocode : ExistingVar | NotExistingVar
-        Expocode related variable.
-    date : ExistingVar | NotExistingVar
-        Date related variable.
-    year : ExistingVar | NotExistingVar
-        Year related variable.
-    month : ExistingVar | NotExistingVar
-        Month related variable.
-    day : ExistingVar | NotExistingVar
-        Day related variable.
-    latitude : ExistingVar | NotExistingVar
-        Latitude related variable.
-    longitude : ExistingVar | NotExistingVar
-        Longitude related variable.
-    depth : ExistingVar | NotExistingVar
-        Depth related variable.
-    provider : ExistingVar | NotExistingVar, optional
-        Provider related variable. Can be set to None to be ignored., by default None
-    hour : ExistingVar | NotExistingVar, optional
-        Hour related variable. Can be set to None to be ignored., by default None
-    *args: list
-        Var objects to represent the variables stored by the object.
-        It is better if these Var object have been instanciated
-        using .not_here or .here_as methods.
-    *kwargs: dict
-        Var objects to represent the variables stored by the object.
-        It is better if these Var object have been instanciated
-        using .not_here or .here_as methods. The parameter name has no importance.
-
-    Raises
-    ------
-    ValueError:
-        If multiple var object have the same name.
+    feature : BaseFeature
+        Feature the variable comes from.
     """
 
-    def __init__(
-        self,
-        expocode: ExistingVar | NotExistingVar,
-        date: ExistingVar | NotExistingVar,
-        year: ExistingVar | NotExistingVar,
-        month: ExistingVar | NotExistingVar,
-        day: ExistingVar | NotExistingVar,
-        latitude: ExistingVar | NotExistingVar,
-        longitude: ExistingVar | NotExistingVar,
-        depth: ExistingVar | NotExistingVar,
-        hour: ExistingVar | NotExistingVar | None = None,
-        provider: ExistingVar | NotExistingVar | None = None,
-        *args: ExistingVar | NotExistingVar,
-        **kwargs: ExistingVar | NotExistingVar,
-    ) -> None:
-        """General storer for Var object.
+    is_feature = True
 
-        This class represents the set of both variables present \
-        in the file and variables to take in consideration \
-        (therefore to add even if empty) when loading the data.
-
-        Parameters
-        ----------
-        expocode : ExistingVar | NotExistingVar
-            Expocode related variable.
-        date : ExistingVar | NotExistingVar
-            Date related variable.
-        year : ExistingVar | NotExistingVar
-            Year related variable.
-        month : ExistingVar | NotExistingVar
-            Month related variable.
-        day : ExistingVar | NotExistingVar
-            Day related variable.
-        latitude : ExistingVar | NotExistingVar
-            Latitude related variable.
-        longitude : ExistingVar | NotExistingVar
-            Longitude related variable.
-        depth : ExistingVar | NotExistingVar
-            Depth related variable.
-        provider : ExistingVar | NotExistingVar, optional
-            Provider related variable. Set to None to ignore., by default None
-        hour : ExistingVar | NotExistingVar, optional
-            Hour related variable. Can be set to None to be ignored., by default None
-        *args: list
-            Var objects to represent the variables stored by the object.
-            It is better if these Var object have been instanciated
-            using .not_here or .here_as methods.
-        *kwargs: dict
-            Var objects to represent the variables stored by the object.
-            It is better if these Var object have been instanciated
-            using .not_here or .here_as methods. The parameter name has no importance.
-
-        Raises
-        ------
-        ValueError:
-            If multiple var object have the same name.
-        """
-        if len(args) != len({var.name for var in args}):
-            raise ValueError(
-                "To set multiple alias for the same variable, "
-                "use Var.in_file_as([alias1, alias2])",
-            )
-        mandatory_variables = []
-        if provider is None:
-            self.has_provider = False
-            self.provider_var_name = None
-        else:
-            self.has_provider = True
-            self.provider_var_name = provider.name
-            mandatory_variables.append(provider)
-        self.expocode_var_name = expocode.name
-        mandatory_variables.append(expocode)
-        self.date_var_name = date.name
-        mandatory_variables.append(date)
-        self.year_var_name = year.name
-        mandatory_variables.append(year)
-        self.month_var_name = month.name
-        mandatory_variables.append(month)
-        self.day_var_name = day.name
-        mandatory_variables.append(day)
-        if hour is None:
-            self.has_hour = False
-            self.hour_var_name = None
-        else:
-            self.has_hour = True
-            self.hour_var_name = hour.name
-            mandatory_variables.append(hour)
-        self.latitude_var_name = latitude.name
-        mandatory_variables.append(latitude)
-        self.longitude_var_name = longitude.name
-        mandatory_variables.append(longitude)
-        self.depth_var_name = depth.name
-        mandatory_variables.append(depth)
-        self._elements: list[ExistingVar | NotExistingVar | ParsedVar] = (
-            mandatory_variables + list(args) + list(kwargs.values())
+    def __init__(self, feature: "BaseFeature"):
+        super().__init__(
+            feature.variable.name,
+            feature.variable.unit,
+            feature.variable.type,
+            feature.variable.default,
+            feature.variable.name_format,
+            feature.variable.value_format,
         )
-        self._save = mandatory_variables + list(args) + list(kwargs.values())
-        self._in_dset = [var for var in self._elements if var.exist_in_dset]
-        self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
-
-    def __getitem__(self, __k: str) -> ExistingVar | NotExistingVar:
-        """Get variable by its name.
-
-        Parameters
-        ----------
-        __k : str
-            Variable name
-
-        Returns
-        -------
-        ExistingVar | NotExistingVar
-            Corresponding variable with name __k
-        """
-        return self.get(__k)
-
-    def __iter__(self) -> Iterator[ExistingVar | NotExistingVar]:
-        """Get an iterator of all variables.
-
-        Yields
-        ------
-        Iterator[ExistingVar | NotExistingVar]
-            Ietrator of all element in the storer.
-        """
-        return iter(self._elements)
-
-    def __str__(self) -> str:
-        """Convert the object to string.
-
-        Returns
-        -------
-        str
-            All variable as strings.
-        """
-        txt = ""
-        for var in self._elements:
-            if var.exist_in_dset is None:
-                here_txt = "not attributed"
-            elif var.exist_in_dset:
-                here_txt = var.aliases
-            else:
-                here_txt = "not in file"
-            txt += str(var) + f": {here_txt}\n"
-        return txt
-
-    def __len__(self) -> int:
-        """Return the number of elements.
-
-        Returns
-        -------
-        int
-            Number of elements.
-        """
-        return len(self._elements)
-
-    def __eq__(self, __o: object) -> bool:
-        """Compare to object for equality.
-
-        Parameters
-        ----------
-        __o : object
-            Object to compare with.
-
-        Returns
-        -------
-        bool
-            True if the objects have same types and all equal variables.
-        """
-        if not isinstance(__o, VariablesStorer):
-            return False
-
-        has_wrong_len = len(self) != len(__o)
-        self_keys = set(self.mapper_by_name.keys())
-        other_keys = set(__o.mapper_by_name.keys())
-        has_wrong_keys = self_keys != other_keys
-
-        if has_wrong_len or has_wrong_keys:
-            return False
-
-        repr_eq = [repr(self[key]) == repr(__o[key]) for key in self.mapper_by_name]
-        return np.all(repr_eq)
-
-    def get(self, var_name: str) -> ExistingVar | NotExistingVar:
-        """Return the variable which name corresponds to var_name.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of the variable to get.
-
-        Returns
-        -------
-        ExistingVar | NotExistingVar
-            Variable with corresponding name in self._elements.
-
-        Raises
-        ------
-        KeyError
-            If var_name doesn't correspond to any name.
-        """
-        if self.has_name(var_name=var_name):
-            return self.mapper_by_name[var_name]
-        valid_keys = self.mapper_by_name.keys()
-        error_msg = (
-            f"{var_name} is not a valid variable name."
-            f"Valid names are: {list(valid_keys)}"
-        )
-        raise KeyError(error_msg)
-
-    def add_var(self, var: ExistingVar | NotExistingVar) -> None:
-        """Add a new variable to self._elements.
-
-        Parameters
-        ----------
-        var : Var
-            Variable to add
-        """
-        if var.name in self.keys():  # noqa: SIM118
-            raise ValueError("A variable already exists with his name")
-        self._elements.append(var)
-
-    def has_name(self, var_name: str) -> bool:
-        """Check if a variable name is the nam eof one of the variables.
-
-        Parameters
-        ----------
-        var_name : str
-            Name to test.
-
-        Returns
-        -------
-        bool
-            True if the name is in self.keys(), False otherwise.
-        """
-        return var_name in self.keys()  # noqa: SIM118
-
-    def keys(self) -> dict_keys:
-        """Keys to use when calling self[key].
-
-        Returns
-        -------
-        dict_keys
-            View of self.mapper_by_name keys.
-        """
-        return self.mapper_by_name.keys()
-
-    def set_saving_order(self, var_names: list[str] = []) -> None:
-        """Set the saving order for the variables.
-
-        Parameters
-        ----------
-        var_names : list[str], optional
-            List of variable names => saving variables sorted., by default []
-
-        Raises
-        ------
-        ValueError
-            If a variable name is not one of the variables'.
-        """
-        if not var_names:
-            return
-        new_save = [self.get(name) for name in var_names]
-        self._save = new_save
-
-    @property
-    def labels(self) -> dict[str, str]:
-        """Returns a dicitonnary mapping variable names to variables labels.
-
-        Returns
-        -------
-        dict[str, str]
-            name : label
-        """
-        return {var.name: var.label for var in self._elements}
-
-    @property
-    def mapper_by_name(self) -> dict[str, ExistingVar | NotExistingVar]:
-        """Mapper between variables names and variables Var objects (for __getitem__).
-
-        Returns
-        -------
-        dict[str, Var]
-            Mapping between names (str) and variables (Var)
-        """
-        return {var.name: var for var in self._elements}
-
-    @property
-    def save_labels(self) -> list[str | tuple[str]]:
-        """Sorting order to use when saving data.
-
-        Returns
-        -------
-        list[str | tuple[str]]
-            List of columns keys to pass as df[self.save_sort] to sort data.
-        """
-        return [var.label for var in self._save]
-
-    @property
-    def save_names(self) -> list[str | tuple[str]]:
-        """Sorted names of variables to use for saving.
-
-        Returns
-        -------
-        list[str | tuple[str]]
-            List of columns keys to pass as df[self.save_sort] to sort data.
-        """
-        return [var.name for var in self._save]
-
-    @property
-    def name_save_format(self) -> str:
-        """String line to use as formatting for name and unit rows.
-
-        Returns
-        -------
-        str
-            Format string
-
-        Examples
-        --------
-        >>> var_year = Var("YEAR", "[]", int, 0, 0,"%-4s", "%4d")
-        >>> var_provider = Var("PROVIDER", "[]", str, 1, 1, "%-15s", "%15s")
-        >>> storer = VariablesStorer(var_year, var_provider)
-        >>> print(storer.name_save_format)
-        "%-4s %-15s"
-        >>> storer.name_save_format % tuple(storer.save_labels)
-        "YEAR PROVIDER "
-        """
-        return " ".join([var.name_format for var in self._save])
-
-    @property
-    def value_save_format(self) -> str:
-        """String line to use as formatting for value rows.
-
-        Returns
-        -------
-        str
-            Format string"
-        """
-        return " ".join([var.value_format for var in self._save])
-
-    @property
-    def in_dset(self) -> list[ExistingVar]:
-        """List of Var object supposedly present in the dataset.
-
-        Returns
-        -------
-        list[Var]
-            Var objects in the dataset.
-        """
-        return self._in_dset
-
-    @property
-    def corrections(self) -> dict[str, Callable]:
-        """Mapping between variables keys and correcting functions.
-
-        Returns
-        -------
-        dict[str, Callable]
-            Mapping.
-        """
-        return {
-            var.label: var.correction
-            for var in self._in_dset
-            if var.correction is not None
-        }
-
-    @property
-    def to_remove_if_all_nan(self) -> list[str]:
-        """Return the list of keys to inspect when removing rows.
-
-        This is suited when seeking for rows to delete
-        when many given variables are NaN.
-
-        Returns
-        -------
-        list[str]
-            List of keys to use.
-        """
-        return [var.label for var in self._elements if var.remove_if_all_nan]
-
-    @property
-    def to_remove_if_any_nan(self) -> list[str]:
-        """Return the list of keys to inspect when removing rows.
-
-        This is suited when seeking for rows to delete
-        when at least one given variable is NaN.
-
-        Returns
-        -------
-        list[str]
-            List of keys to use.
-        """
-        return [var.label for var in self._elements if var.remove_if_nan]
+        self._feature = feature
+        self.required_vars = feature.required_variables

@@ -8,9 +8,11 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.variables import (
+    from bgc_data_processing.data_structures.variables.ensembles import (
+        StoringVariablesEnsemble,
+    )
+    from bgc_data_processing.data_structures.variables.vars import (
         NotExistingVar,
-        VariablesStorer,
     )
 
 
@@ -25,7 +27,7 @@ class Storer:
         Data category.
     providers : list
         Names of the data providers.
-    variables : VariablesStorer
+    variables : StoringVariablesEnsemble
         Variables storer of object to keep track of the variables in the Dataframe.
     verbose : int, optional
         Controls the verbosity: the higher, the more messages., by default 0
@@ -36,24 +38,9 @@ class Storer:
         data: pd.DataFrame,
         category: str,
         providers: list,
-        variables: "VariablesStorer",
+        variables: "StoringVariablesEnsemble",
         verbose: int = 0,
     ) -> None:
-        """Instanciate a storing data class, to keep track of metadata.
-
-        Parameters
-        ----------
-        data : pd.DataFrame
-            Dataframe to store.
-        category: str
-            Data category.
-        providers : list
-            Names of the data providers.
-        variables : VariablesStorer
-            Variables storer of object to keep track of the variables in the Dataframe.
-        verbose : int, optional
-            Controls the verbosity: the higher, the more messages., by default 0
-        """
         self._data = data
         self._category = category
         self._providers = providers
@@ -94,12 +81,12 @@ class Storer:
         return self._providers
 
     @property
-    def variables(self) -> "VariablesStorer":
+    def variables(self) -> "StoringVariablesEnsemble":
         """Getter for self._variables.
 
         Returns
         -------
-        VariablesStorer
+        StoringVariablesEnsemble
             Variables storer.
         """
         return self._variables

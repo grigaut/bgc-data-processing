@@ -8,24 +8,22 @@ import pandas as pd
 from pandas.errors import EmptyDataError
 
 from bgc_data_processing.data_structures.filtering import Constraints
-from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables import (
-        ExistingVar,
-        VariablesStorer,
+    from bgc_data_processing.data_structures.variables.ensembles import (
+        VariableEnsemble,
     )
-    from bgc_data_processing.utils.patterns import FileNamePattern
+    from bgc_data_processing.data_structures.variables.vars import (
+        ExistingVar,
+    )
 
 
 def from_csv(
     provider_name: str,
-    dirin: Path,
     category: str,
     exclude: list[str],
-    files_pattern: "FileNamePattern",
-    variables: "VariablesStorer",
+    variables: "VariableEnsemble",
     read_params: dict = {},
 ) -> "CSVLoader":
     """Instanciate a CSV Loader.
@@ -34,16 +32,11 @@ def from_csv(
     ----------
     provider_name : str
         Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : VariableEnsemble
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     read_params : dict, optional
@@ -56,10 +49,8 @@ def from_csv(
     """
     return CSVLoader(
         provider_name=provider_name,
-        dirin=dirin,
         category=category,
         exclude=exclude,
-        files_pattern=files_pattern,
         variables=variables,
         read_params=read_params,
     )
@@ -72,16 +63,11 @@ class CSVLoader(BaseLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        It must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : VariableEnsemble
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     read_params : dict, optional
@@ -91,59 +77,17 @@ class CSVLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: Path,
         category: str,
         exclude: list[str],
-        files_pattern: "FileNamePattern",
-        variables: "VariablesStorer",
+        variables: "VariableEnsemble",
         read_params: dict = {},
     ) -> None:
         self._read_params = read_params
         super().__init__(
             provider_name=provider_name,
-            dirin=dirin,
             category=category,
             exclude=exclude,
-            files_pattern=files_pattern,
             variables=variables,
-        )
-
-    def __call__(
-        self,
-        constraints: Constraints = Constraints(),
-    ) -> "Storer":
-        """Load all files for the loader.
-
-        Parameters
-        ----------
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
-
-        Returns
-        -------
-        Storer
-            Storer for the loaded data.
-        """
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self.is_file_valid
-        filepaths = pattern_matcher.select_matching_filepath(
-            research_directory=self._dirin,
-        )
-        data_list = []
-        for filepath in filepaths:
-            data_list.append(self.load(filepath=filepath, constraints=constraints))
-        if data_list:
-            data = pd.concat(data_list, ignore_index=True, axis=0)
-        else:
-            data = pd.DataFrame(columns=list(self._variables.labels.values()))
-        return Storer(
-            data=data,
-            category=self.category,
-            providers=[self.provider],
-            variables=self.variables,
-            verbose=self.verbose,
         )
 
     def _read(self, filepath: Path) -> pd.DataFrame:

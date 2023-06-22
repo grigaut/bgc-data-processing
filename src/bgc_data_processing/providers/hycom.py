@@ -3,17 +3,19 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, loaders, units
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, units
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.ensembles import VariableEnsemble
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_abfile(
+loader = DataSource(
     provider_name="HYCOM",
+    data_format="abfiles",
     dirin=Path(PROVIDERS_CONFIG["HYCOM"]["PATH"]),
-    category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["HYCOM"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["HYCOM"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["HYCOM"]["EXCLUDE"],
     files_pattern=FileNamePattern("archm.{years}_[0-9]*_[0-9]*.a"),
-    variables=VariablesStorer(
+    variable_ensemble=VariableEnsemble(
         provider=DEFAULT_VARS["provider"].not_in_file().set_default("HYCOM"),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].not_in_file(),

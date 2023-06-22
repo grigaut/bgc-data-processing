@@ -6,7 +6,7 @@ import pandas as pd
 
 from bgc_data_processing.data_structures.filtering import Constraints
 from bgc_data_processing.data_structures.storers import Storer
-from bgc_data_processing.data_structures.variables import NotExistingVar
+from bgc_data_processing.data_structures.variables.vars import NotExistingVar
 
 
 class WaterMass:

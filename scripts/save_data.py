@@ -59,8 +59,8 @@ if __name__ == "__main__":
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print(f"Loading data : {data_src}")
-        dset_loader = providers.LOADERS[data_src]
-        variables = dset_loader.variables
+        datasource = providers.LOADERS[data_src]
+        variables = datasource.variables
         # Constraint slicer
         constraints = data_structures.Constraints()
         constraints.add_superset_constraint(
@@ -87,10 +87,10 @@ if __name__ == "__main__":
             minimal_value=DEPTH_MIN,
             maximal_value=DEPTH_MAX,
         )
-        dset_loader.set_verbose(VERBOSE)
+        datasource.verbose = VERBOSE
         # Loading data
-        dset_loader.set_saving_order(var_names=VARIABLES)
-        dset_loader.load_and_save(
+        datasource.saving_order = VARIABLES
+        datasource.load_and_save(
             SAVING_DIR,
             dates_generator,
             constraints,

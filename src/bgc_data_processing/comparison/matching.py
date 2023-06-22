@@ -14,8 +14,10 @@ from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables import VariablesStorer
-    from bgc_data_processing.utils.patterns import FileNamePattern
+    from bgc_data_processing.data_sources import DataSource
+    from bgc_data_processing.data_structures.variables.ensembles import (
+        LoadingVariablesEnsemble,
+    )
 
 
 class SelectiveABFileLoader(ABFileLoader):
@@ -25,16 +27,11 @@ class SelectiveABFileLoader(ABFileLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : str
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : LoadingVariablesEnsemble
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     grid_basename: str
@@ -45,19 +42,15 @@ class SelectiveABFileLoader(ABFileLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: Path,
         category: str,
         exclude: list[str],
-        files_pattern: "FileNamePattern",
-        variables: "VariablesStorer",
+        variables: "LoadingVariablesEnsemble",
         grid_basename: str,
     ) -> None:
         super().__init__(
             provider_name=provider_name,
-            dirin=dirin,
             category=category,
             exclude=exclude,
-            files_pattern=files_pattern,
             variables=variables,
             grid_basename=grid_basename,
         )
@@ -263,71 +256,6 @@ class SelectiveABFileLoader(ABFileLoader):
             all_levels.append(level_slice)
         return pd.concat(all_levels, axis=0, ignore_index=False)
 
-    def __call__(
-        self,
-        constraints: "Constraints" = Constraints(),
-    ) -> "Storer":
-        """Load all files for the loader.
-
-        Parameters
-        ----------
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
-
-        Returns
-        -------
-        Storer
-            Storer for the loaded data.
-        """
-        # load date constraint
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self.is_file_valid
-        basenames = pattern_matcher.select_matching_filepath(
-            research_directory=self._dirin,
-        )
-        # load all files
-        data_slices = []
-
-        mask = Mask.make_empty(self.grid_file)
-        for basename in basenames:
-            data_slices.append(self.load(basename, constraints, mask))
-        if data_slices:
-            data = pd.concat(data_slices, axis=0)
-        else:
-            data = pd.DataFrame(columns=list(self._variables.labels.values()))
-        return Storer(
-            data=data,
-            category=self.category,
-            providers=[self.provider],
-            variables=self.variables,
-            verbose=self.verbose,
-        )
-
-    def get_basenames(self, constraints: "Constraints") -> list[Path]:
-        """Return basenames of files matching constraints.
-
-        Parameters
-        ----------
-        constraints : Constraints
-            Data constraints, only year constraint is used.
-
-        Returns
-        -------
-        list[Path]
-            List of basenames matching constraints.
-        """
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self.is_file_valid
-        filepaths = pattern_matcher.select_matching_filepath(
-            research_directory=self._dirin,
-        )
-        return [s.parent.joinpath(s.stem) for s in filepaths]
-
     @classmethod
     def from_abloader(
         cls,
@@ -347,10 +275,8 @@ class SelectiveABFileLoader(ABFileLoader):
         """
         return SelectiveABFileLoader(
             provider_name=loader.provider,
-            dirin=loader.dirin,
             category=loader.category,
             exclude=loader.excluded_filenames,
-            files_pattern=loader.files_pattern,
             variables=loader.variables,
             grid_basename=loader.grid_basename,
         )
@@ -576,10 +502,13 @@ class Selector:
         self,
         reference: Storer,
         strategy: NearestNeighborStrategy,
-        loader: "ABFileLoader",
+        dsource: "DataSource",
     ) -> None:
         self.reference = reference.data
-        self.loader = loader
+        self.loader = SelectiveABFileLoader.from_abloader(loader=dsource.loader)
+        self.pattern = dsource.files_pattern
+        self.dirin = dsource.dirin
+        self.storing_variables = dsource.variables.storing_variables
         self.strategy = strategy
         self.grid = self.loader.grid_file
 
@@ -676,6 +605,33 @@ class Selector:
         date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
         return date.date()
 
+    def get_basenames(
+        self,
+        constraints: "Constraints",
+    ) -> list[Path]:
+        """Return basenames of files matching constraints.
+
+        Parameters
+        ----------
+        constraints : Constraints
+            Data constraints, only year constraint is used.
+
+        Returns
+        -------
+        list[Path]
+            List of basenames matching constraints.
+        """
+        date_label = self.loader.variables.get(
+            self.loader.variables.date_var_name,
+        ).label
+        date_constraint = constraints.get_constraint_parameters(date_label)
+        pattern_matcher = self.pattern.build_from_constraint(date_constraint)
+        pattern_matcher.validate = self.loader.is_file_valid
+        filepaths = pattern_matcher.select_matching_filepath(
+            research_directory=self.dirin,
+        )
+        return [s.parent.joinpath(s.stem) for s in filepaths]
+
     def __call__(
         self,
         constraints: "Constraints" = Constraints(),
@@ -692,10 +648,11 @@ class Selector:
         Storer
             Storer for the loaded data.
         """
-        loader = SelectiveABFileLoader.from_abloader(loader=self.loader)
-        date_var_name = loader.variables.date_var_name
-        date_var_label = loader.variables.get(date_var_name).label
-        basenames = loader.get_basenames(constraints)
+        date_var_name = self.loader.variables.date_var_name
+        date_var_label = self.loader.variables.get(date_var_name).label
+        basenames = self.get_basenames(
+            constraints,
+        )
         datas: list[pd.DataFrame] = []
         for basename in basenames:
             date = Selector.parse_date_from_basename(basename)
@@ -703,7 +660,7 @@ class Selector:
             if data_slice.empty:
                 continue
             mask, match = self.select(data_slice)
-            sim_data = loader.load(
+            sim_data = self.loader.load(
                 basename,
                 constraints=constraints,
                 mask=mask,
@@ -712,8 +669,8 @@ class Selector:
         concatenated = pd.concat(datas, axis=0)
         return Storer(
             data=concatenated[self.reference.columns],
-            category=loader.category,
-            providers=[loader.provider],
-            variables=loader.variables,
-            verbose=loader.verbose,
+            category=self.loader.category,
+            providers=[self.loader.provider],
+            variables=self.storing_variables,
+            verbose=self.loader.verbose,
         )

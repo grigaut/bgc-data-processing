@@ -1,4 +1,5 @@
 """Save Storers to a file."""
+
 from copy import copy
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -33,7 +34,7 @@ class StorerSaver:
         save_aggregated_data_only: bool = False,
     ) -> None:
         self._storer = storer
-        self._variables = copy(storer.variables)
+        self._variables = copy(storer.variables.saving_variables)
         self._verbose = storer.verbose
         self.save_aggregated_data_only = save_aggregated_data_only
 

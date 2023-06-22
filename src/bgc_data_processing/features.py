@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from seawater import eos80
 
-from bgc_data_processing.data_structures.variables import (
+from bgc_data_processing.data_structures.variables.vars import (
     ExistingVar,
     NotExistingVar,
     ParsedVar,

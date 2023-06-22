@@ -7,19 +7,20 @@ import numpy as np
 from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
-    loaders,
     units,
 )
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.ensembles import VariableEnsemble
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_netcdf(
+loader = DataSource(
     provider_name="CMEMS",
+    data_format="netcdf",
     dirin=Path(PROVIDERS_CONFIG["CMEMS"]["PATH"]),
-    category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["CMEMS"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["CMEMS"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["CMEMS"]["EXCLUDE"],
     files_pattern=FileNamePattern(".*.nc"),
-    variables=VariablesStorer(
+    variable_ensemble=VariableEnsemble(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("TIME"),
