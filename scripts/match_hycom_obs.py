@@ -56,7 +56,7 @@ if __name__ == "__main__":
     selector = comparison.Selector(
         reference=observations,
         strategy=comparison.NearestNeighborStrategy(metric="haversine"),
-        dsource=providers.LOADERS["HYCOM"],
+        dsource=providers.PROVIDERS["HYCOM"],
     )
 
     simulations = selector()

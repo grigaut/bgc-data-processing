@@ -59,7 +59,7 @@ if __name__ == "__main__":
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print(f"Loading data : {data_src}")
-        datasource = providers.LOADERS[data_src]
+        datasource = providers.PROVIDERS[data_src]
         variables = datasource.variables
         # Constraint slicer
         constraints = data_structures.Constraints()
