@@ -81,6 +81,16 @@ class BaseVar(ABC):
         self.name_format = name_format
         self.value_format = value_format
 
+    def __hash__(self) -> int:
+        """Hashing method.
+
+        Returns
+        -------
+        int
+            Hashed object.
+        """
+        return hash(self.__repr__())
+
     def __str__(self) -> str:
         """Convert the variable to a string.
 
