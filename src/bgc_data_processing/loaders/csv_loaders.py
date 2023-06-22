@@ -19,43 +19,6 @@ if TYPE_CHECKING:
     )
 
 
-def from_csv(
-    provider_name: str,
-    category: str,
-    exclude: list[str],
-    variables: "VariableEnsemble",
-    read_params: dict = {},
-) -> "CSVLoader":
-    """Instanciate a CSV Loader.
-
-    Parameters
-    ----------
-    provider_name : str
-        Data provider name.
-    category: str
-        Category provider belongs to.
-    exclude: list[str]
-        Filenames to exclude from loading.
-    variables : VariableEnsemble
-        Storer object containing all variables to consider for this data,
-        both the one in the data file but and the one not represented in the file.
-    read_params : dict, optional
-        Additional parameter to pass to pandas.read_csv., by default {}
-
-    Returns
-    -------
-    CSVLoader
-        Loader
-    """
-    return CSVLoader(
-        provider_name=provider_name,
-        category=category,
-        exclude=exclude,
-        variables=variables,
-        read_params=read_params,
-    )
-
-
 class CSVLoader(BaseLoader):
     """Loader class to use with csv files.
 

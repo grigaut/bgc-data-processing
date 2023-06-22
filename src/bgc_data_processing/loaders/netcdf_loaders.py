@@ -23,51 +23,6 @@ if TYPE_CHECKING:
     )
 
 
-def from_netcdf(
-    provider_name: str,
-    category: str,
-    exclude: list[str],
-    variables: "VariableEnsemble",
-) -> "NetCDFLoader":
-    """Instantiate a NetCDF Loader.
-
-    Parameters
-    ----------
-    provider_name : str
-        Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
-    category: str
-        Category provider belongs to.
-    exclude: list[str]
-        Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariableEnsemble
-        Storer object containing all variables to consider for this data,
-        both the one in the data file but and the one not represented in the file.
-
-    Returns
-    -------
-    NetCDFLoader
-        Netcdf loader
-    """
-    if category == "satellite":
-        return SatelliteNetCDFLoader(
-            provider_name=provider_name,
-            category=category,
-            exclude=exclude,
-            variables=variables,
-        )
-    return NetCDFLoader(
-        provider_name=provider_name,
-        category=category,
-        exclude=exclude,
-        variables=variables,
-    )
-
-
 class NetCDFLoader(BaseLoader):
     """Loader class to use with NetCDF files.
 

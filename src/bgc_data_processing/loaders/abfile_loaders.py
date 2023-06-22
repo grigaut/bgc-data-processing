@@ -21,44 +21,6 @@ if TYPE_CHECKING:
     )
 
 
-def from_abfile(
-    provider_name: str,
-    category: str,
-    exclude: list[str],
-    variables: "VariableEnsemble",
-    grid_basename: str,
-) -> "ABFileLoader":
-    """Instanciate a abfile Loader.
-
-    Parameters
-    ----------
-    provider_name : str
-        Data provider name.
-    category: str
-        Category provider belongs to.
-    exclude: list[str]
-        Filenames to exclude from loading.
-    variables : VariableEnsemble
-        Storer object containing all variables to consider for this data,
-        both the one in the data file but and the one not represented in the file.
-    grid_basename: str
-        Basename of the ab grid grid file for the loader.
-        => files are considered to be loaded over the same grid.
-
-    Returns
-    -------
-    ABFileLoader
-        Loader
-    """
-    return ABFileLoader(
-        provider_name=provider_name,
-        category=category,
-        exclude=exclude,
-        variables=variables,
-        grid_basename=grid_basename,
-    )
-
-
 class ABFileLoader(BaseLoader):
     """Loader class to use with ABFiles.
 
