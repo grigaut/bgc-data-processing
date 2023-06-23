@@ -378,7 +378,6 @@ class ChlorophyllFromDiatomFlagellate(BaseFeature):
             var_name_format=var_name_format,
             var_value_format=var_value_format,
         )
-        print(self.variable)
         self._source_vars = [diatom_variable, flagellate_variable]
 
     def transform(
