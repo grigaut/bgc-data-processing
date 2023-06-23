@@ -20,10 +20,10 @@ if __name__ == "__main__":
     TO_INTERPOLATE: list[str] = CONFIG["TO_INTERPOLATE"]
     INTERPOLATION_KIND: str = CONFIG["INTERPOLATION_KIND"]
     # Default variables
-    LATITUDE_TEMPLATE = bgc_dp.defaults.DEFAULT_VARS["latitude"]
-    SALINITY_TEMPLATE = bgc_dp.defaults.DEFAULT_VARS["salinity"]
-    TEMPERATURE_TEMPLATE = bgc_dp.defaults.DEFAULT_VARS["temperature"]
-    DEPTH_TEMPLATE = bgc_dp.defaults.DEFAULT_VARS["depth"]
+    LATITUDE_TEMPLATE = bgc_dp.defaults.VARS["latitude"]
+    SALINITY_TEMPLATE = bgc_dp.defaults.VARS["salinity"]
+    TEMPERATURE_TEMPLATE = bgc_dp.defaults.VARS["temperature"]
+    DEPTH_TEMPLATE = bgc_dp.defaults.VARS["depth"]
 
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
@@ -31,16 +31,16 @@ if __name__ == "__main__":
 
     observations = bgc_dp.read_files(
         filepaths,
-        providers_column_label=bgc_dp.defaults.DEFAULT_VARS["provider"].label,
-        expocode_column_label=bgc_dp.defaults.DEFAULT_VARS["expocode"].label,
-        date_column_label=bgc_dp.defaults.DEFAULT_VARS["date"].label,
-        year_column_label=bgc_dp.defaults.DEFAULT_VARS["year"].label,
-        month_column_label=bgc_dp.defaults.DEFAULT_VARS["month"].label,
-        day_column_label=bgc_dp.defaults.DEFAULT_VARS["day"].label,
-        hour_column_label=bgc_dp.defaults.DEFAULT_VARS["hour"].label,
-        latitude_column_label=bgc_dp.defaults.DEFAULT_VARS["latitude"].label,
-        longitude_column_label=bgc_dp.defaults.DEFAULT_VARS["longitude"].label,
-        depth_column_label=bgc_dp.defaults.DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.defaults.VARS["provider"].label,
+        expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
+        date_column_label=bgc_dp.defaults.VARS["date"].label,
+        year_column_label=bgc_dp.defaults.VARS["year"].label,
+        month_column_label=bgc_dp.defaults.VARS["month"].label,
+        day_column_label=bgc_dp.defaults.VARS["day"].label,
+        hour_column_label=bgc_dp.defaults.VARS["hour"].label,
+        latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
+        depth_column_label=bgc_dp.defaults.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,

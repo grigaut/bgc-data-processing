@@ -7,7 +7,7 @@ from bgc_data_processing import (
 )
 from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.defaults import DEFAULT_VARS, PROVIDERS_CONFIG
+from bgc_data_processing.defaults import PROVIDERS_CONFIG, VARS
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -18,34 +18,34 @@ loader = DataSource(
     excluded_files=PROVIDERS_CONFIG["NMDC"]["EXCLUDE"],
     files_pattern=FileNamePattern("NMDC_1990-2019_all.csv"),
     variable_ensemble=SourceVariableSet(
-        provider=DEFAULT_VARS["provider"].not_in_file(),
-        expocode=DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),
-        date=DEFAULT_VARS["date"].in_file_as("Time"),
-        year=DEFAULT_VARS["year"].not_in_file(),
-        month=DEFAULT_VARS["month"].not_in_file(),
-        day=DEFAULT_VARS["day"].not_in_file(),
-        hour=DEFAULT_VARS["hour"].not_in_file(),
-        longitude=DEFAULT_VARS["longitude"].in_file_as("Longitude"),
-        latitude=DEFAULT_VARS["latitude"].in_file_as("Latitude"),
-        depth=DEFAULT_VARS["depth"]
+        provider=VARS["provider"].not_in_file(),
+        expocode=VARS["expocode"].in_file_as("SDN_CRUISE"),
+        date=VARS["date"].in_file_as("Time"),
+        year=VARS["year"].not_in_file(),
+        month=VARS["month"].not_in_file(),
+        day=VARS["day"].not_in_file(),
+        hour=VARS["hour"].not_in_file(),
+        longitude=VARS["longitude"].in_file_as("Longitude"),
+        latitude=VARS["latitude"].in_file_as("Latitude"),
+        depth=VARS["depth"]
         .in_file_as("depth")
         .remove_when_nan()
         .correct_with(lambda x: -x),
-        temperature=DEFAULT_VARS["temperature"].not_in_file(),
-        salinity=DEFAULT_VARS["salinity"].not_in_file(),
-        oxygen=DEFAULT_VARS["oxygen"]
+        temperature=VARS["temperature"].not_in_file(),
+        salinity=VARS["salinity"].not_in_file(),
+        oxygen=VARS["oxygen"]
         .in_file_as("DOW")
         .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
-        phosphate=DEFAULT_VARS["phosphate"]
+        phosphate=VARS["phosphate"]
         .in_file_as(("Phosphate", "Phosphate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        nitrate=DEFAULT_VARS["nitrate"]
+        nitrate=VARS["nitrate"]
         .in_file_as(("Nitrate", "Nitrate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        silicate=DEFAULT_VARS["silicate"]
+        silicate=VARS["silicate"]
         .in_file_as(("Silicate", "Silicate_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
-        chlorophyll=DEFAULT_VARS["chlorophyll"]
+        chlorophyll=VARS["chlorophyll"]
         .in_file_as(("ChlA", "ChlA_SEADATANET_QC", [1]))
         .remove_when_all_nan(),
     ),

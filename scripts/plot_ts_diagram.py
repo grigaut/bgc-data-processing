@@ -4,7 +4,7 @@ import datetime as dt
 from pathlib import Path
 
 from bgc_data_processing import (
-    DEFAULT_VARS,
+    VARS,
     core,
     features,
     parsers,
@@ -36,8 +36,8 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    SALINITY_DEFAULT = DEFAULT_VARS["salinity"]
-    TEMPERATURE_DEFAULT = DEFAULT_VARS["temperature"]
+    SALINITY_DEFAULT = VARS["salinity"]
+    TEMPERATURE_DEFAULT = VARS["temperature"]
 
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
@@ -45,16 +45,16 @@ if __name__ == "__main__":
 
     storer = core.read_files(
         filepath=filepaths,
-        providers_column_label=DEFAULT_VARS["provider"].label,
-        expocode_column_label=DEFAULT_VARS["expocode"].label,
-        date_column_label=DEFAULT_VARS["date"].label,
-        year_column_label=DEFAULT_VARS["year"].label,
-        month_column_label=DEFAULT_VARS["month"].label,
-        day_column_label=DEFAULT_VARS["day"].label,
-        hour_column_label=DEFAULT_VARS["hour"].label,
-        latitude_column_label=DEFAULT_VARS["latitude"].label,
-        longitude_column_label=DEFAULT_VARS["longitude"].label,
-        depth_column_label=DEFAULT_VARS["depth"].label,
+        providers_column_label=VARS["provider"].label,
+        expocode_column_label=VARS["expocode"].label,
+        date_column_label=VARS["date"].label,
+        year_column_label=VARS["year"].label,
+        month_column_label=VARS["month"].label,
+        day_column_label=VARS["day"].label,
+        hour_column_label=VARS["hour"].label,
+        latitude_column_label=VARS["latitude"].label,
+        longitude_column_label=VARS["longitude"].label,
+        depth_column_label=VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,

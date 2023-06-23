@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).parent.resolve()
 
 __all__ = [
     "PROVIDERS_CONFIG",
-    "DEFAULT_VARS",
-    "DEFAULT_WATER_MASSES",
+    "VARS",
+    "WATER_MASSES",
     "parsers",
     "read_files",
     "save_storer",

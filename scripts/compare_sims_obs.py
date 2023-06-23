@@ -28,16 +28,16 @@ if __name__ == "__main__":
 
     obs = bgc_dp.read_files(
         OBSERVATIONS_FILE,
-        providers_column_label=bgc_dp.DEFAULT_VARS["provider"].label,
-        expocode_column_label=bgc_dp.DEFAULT_VARS["expocode"].label,
-        date_column_label=bgc_dp.DEFAULT_VARS["date"].label,
-        year_column_label=bgc_dp.DEFAULT_VARS["year"].label,
-        month_column_label=bgc_dp.DEFAULT_VARS["month"].label,
-        day_column_label=bgc_dp.DEFAULT_VARS["day"].label,
-        hour_column_label=bgc_dp.DEFAULT_VARS["hour"].label,
-        latitude_column_label=bgc_dp.DEFAULT_VARS["latitude"].label,
-        longitude_column_label=bgc_dp.DEFAULT_VARS["longitude"].label,
-        depth_column_label=bgc_dp.DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.VARS["provider"].label,
+        expocode_column_label=bgc_dp.VARS["expocode"].label,
+        date_column_label=bgc_dp.VARS["date"].label,
+        year_column_label=bgc_dp.VARS["year"].label,
+        month_column_label=bgc_dp.VARS["month"].label,
+        day_column_label=bgc_dp.VARS["day"].label,
+        hour_column_label=bgc_dp.VARS["hour"].label,
+        latitude_column_label=bgc_dp.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.VARS["longitude"].label,
+        depth_column_label=bgc_dp.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -46,16 +46,16 @@ if __name__ == "__main__":
 
     sims = bgc_dp.read_files(
         SIMULATIONS_FILE,
-        providers_column_label=bgc_dp.DEFAULT_VARS["provider"].label,
-        expocode_column_label=bgc_dp.DEFAULT_VARS["expocode"].label,
-        date_column_label=bgc_dp.DEFAULT_VARS["date"].label,
-        year_column_label=bgc_dp.DEFAULT_VARS["year"].label,
-        month_column_label=bgc_dp.DEFAULT_VARS["month"].label,
-        day_column_label=bgc_dp.DEFAULT_VARS["day"].label,
-        hour_column_label=bgc_dp.DEFAULT_VARS["hour"].label,
-        latitude_column_label=bgc_dp.DEFAULT_VARS["latitude"].label,
-        longitude_column_label=bgc_dp.DEFAULT_VARS["longitude"].label,
-        depth_column_label=bgc_dp.DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.VARS["provider"].label,
+        expocode_column_label=bgc_dp.VARS["expocode"].label,
+        date_column_label=bgc_dp.VARS["date"].label,
+        year_column_label=bgc_dp.VARS["year"].label,
+        month_column_label=bgc_dp.VARS["month"].label,
+        day_column_label=bgc_dp.VARS["day"].label,
+        hour_column_label=bgc_dp.VARS["hour"].label,
+        latitude_column_label=bgc_dp.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.VARS["longitude"].label,
+        depth_column_label=bgc_dp.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -84,11 +84,11 @@ if __name__ == "__main__":
 
         ax = plt.axes(projection=ccrs.Orthographic(0, 90))
 
-        sim_lat = sims.data[~nan_sim][bgc_dp.DEFAULT_VARS["latitude"].label]
-        sim_lon = sims.data[~nan_sim][bgc_dp.DEFAULT_VARS["longitude"].label]
+        sim_lat = sims.data[~nan_sim][bgc_dp.VARS["latitude"].label]
+        sim_lon = sims.data[~nan_sim][bgc_dp.VARS["longitude"].label]
 
-        obs_lat = obs.data[~nan_sim][bgc_dp.DEFAULT_VARS["latitude"].label]
-        obs_lon = obs.data[~nan_sim][bgc_dp.DEFAULT_VARS["longitude"].label]
+        obs_lat = obs.data[~nan_sim][bgc_dp.VARS["latitude"].label]
+        obs_lon = obs.data[~nan_sim][bgc_dp.VARS["longitude"].label]
 
         ax.set_extent(
             [
