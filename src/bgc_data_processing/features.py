@@ -81,21 +81,6 @@ class BaseFeature(ABC):
         """
         return (storer.data[x.label] for x in self._source_vars)
 
-    def _extract_from_dataframe(self, dataframe: pd.DataFrame) -> tuple[pd.Series]:
-        """Extract the required data columns from a dataframe.
-
-        Parameters
-        ----------
-        dataframe : pd.DataFrame
-            Dataframe to extract data from.
-
-        Returns
-        -------
-        tuple[pd.Series]
-            Tuple of required series.
-        """
-        return (dataframe[x.label] for x in self._source_vars)
-
     @abstractmethod
     def transform(self, *args: pd.Series) -> pd.Series:
         """Compute the new variable values using all required series."""
@@ -114,21 +99,6 @@ class BaseFeature(ABC):
             variable=self.variable,
             data=data,
         )
-
-    def from_dataframe(self, dataframe: pd.DataFrame) -> pd.Series:
-        """Create the feature from a given dataframe.
-
-        Parameters
-        ----------
-        dataframe : pd.DataFrame
-            Dataframe to use to constitude data.
-
-        Returns
-        -------
-        pd.Series
-            Feature data.
-        """
-        return self.transform(*self._extract_from_dataframe(dataframe=dataframe))
 
 
 class Pressure(BaseFeature):
