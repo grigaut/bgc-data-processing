@@ -19,7 +19,7 @@ NotParsedvar: TypeAlias = ExistingVar | NotExistingVar | FeaturedVar
 FromFileVariables: TypeAlias = ExistingVar | NotExistingVar
 
 
-class BaseVariableSet:
+class VariableSet:
     """Variable ensemble behavior implementation.
 
     This class represents the set of both variables present \
@@ -128,7 +128,7 @@ class BaseVariableSet:
         bool
             True if the objects have same types and all equal variables.
         """
-        if not isinstance(__o, BaseVariableSet):
+        if not isinstance(__o, VariableSet):
             return False
 
         has_wrong_len = len(self) != len(__o)
@@ -267,7 +267,7 @@ class BaseVariableSet:
         return {var.name: var for var in self._elements}
 
 
-class FeaturesSet(BaseVariableSet):
+class FeaturesSet(VariableSet):
     """Ensemble of features.
 
     This class represents the set of both variables present \
@@ -355,7 +355,7 @@ class FeaturesSet(BaseVariableSet):
             )
 
 
-class BaseRequiredVarsSet(BaseVariableSet):
+class BaseRequiredVarsSet(VariableSet):
     """Storer for Variable objects with some required variables.
 
     This class represents the set of both variables present \
