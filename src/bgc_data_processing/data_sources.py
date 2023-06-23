@@ -172,6 +172,45 @@ class DataSource:
             )
         raise ValueError
 
+    def _insert_all_features(self, storer: "Storer") -> None:
+        """Insert all features in a storer.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to insert features in.
+        """
+        features = self.variables.features
+        storer_vars = storer.variables.elements
+        for fvar in features.iter_constructables_features(storer_vars):
+            fvar.feature.insert_in_storer(storer)
+
+    def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
+        """Create the storer with the data from a given filepath.
+
+        Parameters
+        ----------
+        filepath : Path
+            Path to the file to load data from.
+        constraints : Constraints
+            Constraints to apply on the storer.
+
+        Returns
+        -------
+        Storer
+            Storer.
+        """
+        data = self._loader.load(filepath=filepath, constraints=constraints)
+        storer = Storer(
+            data=data,
+            category=self._category,
+            providers=[self._loader.provider],
+            variables=self._store_vars,
+            verbose=self._verbose,
+        )
+        self._insert_all_features(storer)
+        return storer
+
     def load_and_save(
         self,
         saving_directory: Path,
@@ -197,14 +236,7 @@ class DataSource:
             research_directory=self._dirin,
         )
         for filepath in filepaths:
-            data = self._loader.load(filepath=filepath, constraints=constraints)
-            storer = Storer(
-                data=data,
-                category=self._category,
-                providers=[self._loader.provider],
-                variables=self._store_vars,
-                verbose=self._verbose,
-            )
+            storer = self._create_storer(filepath=filepath, constraints=constraints)
             saver = StorerSaver(storer)
             saver.save_from_daterange(
                 dateranges_gen=dateranges_gen,
@@ -233,13 +265,6 @@ class DataSource:
         )
         storers = []
         for filepath in filepaths:
-            data = self._loader.load(filepath=filepath, constraints=constraints)
-            storer = Storer(
-                data=data,
-                category=self._category,
-                providers=[self._loader.provider],
-                variables=self._store_vars,
-                verbose=self._verbose,
-            )
+            storer = self._create_storer(filepath=filepath, constraints=constraints)
             storers.append(storer)
         return sum(storers)
