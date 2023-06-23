@@ -3,12 +3,11 @@
 from pathlib import Path
 
 from bgc_data_processing import (
-    DEFAULT_VARS,
-    PROVIDERS_CONFIG,
     units,
 )
+from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
+from bgc_data_processing.defaults import PROVIDERS_CONFIG, VARS
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -19,30 +18,28 @@ loader = DataSource(
     excluded_files=PROVIDERS_CONFIG["ICES"]["EXCLUDE"],
     files_pattern=FileNamePattern("ices_{years}.csv"),
     variable_ensemble=SourceVariableSet(
-        provider=DEFAULT_VARS["provider"].not_in_file(),
-        expocode=DEFAULT_VARS["expocode"].in_file_as("Cruise"),
-        date=DEFAULT_VARS["date"].in_file_as("DATE"),
-        year=DEFAULT_VARS["year"].not_in_file(),
-        month=DEFAULT_VARS["month"].not_in_file(),
-        day=DEFAULT_VARS["day"].not_in_file(),
-        hour=DEFAULT_VARS["hour"].not_in_file(),
-        longitude=DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
-        latitude=DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
-        depth=DEFAULT_VARS["depth"]
+        provider=VARS["provider"].not_in_file(),
+        expocode=VARS["expocode"].in_file_as("Cruise"),
+        date=VARS["date"].in_file_as("DATE"),
+        year=VARS["year"].not_in_file(),
+        month=VARS["month"].not_in_file(),
+        day=VARS["day"].not_in_file(),
+        hour=VARS["hour"].not_in_file(),
+        longitude=VARS["longitude"].in_file_as("LONGITUDE"),
+        latitude=VARS["latitude"].in_file_as("LATITUDE"),
+        depth=VARS["depth"]
         .in_file_as("DEPTH")
         .remove_when_nan()
         .correct_with(lambda x: -x),
-        temperature=DEFAULT_VARS["temperature"].in_file_as("CTDTMP"),
-        salinity=DEFAULT_VARS["salinity"].in_file_as("CTDSAL"),
-        oxygen=DEFAULT_VARS["oxygen"]
+        temperature=VARS["temperature"].in_file_as("CTDTMP"),
+        salinity=VARS["salinity"].in_file_as("CTDSAL"),
+        oxygen=VARS["oxygen"]
         .in_file_as("DOXY")
         .correct_with(units.convert_doxy_ml_by_l_to_mmol_by_m3),
-        phosphate=DEFAULT_VARS["phosphate"].in_file_as("PHOS").remove_when_all_nan(),
-        nitrate=DEFAULT_VARS["nitrate"].in_file_as("NTRA").remove_when_all_nan(),
-        silicate=DEFAULT_VARS["silicate"].in_file_as("SLCA").remove_when_all_nan(),
-        chlorophyll=DEFAULT_VARS["chlorophyll"]
-        .in_file_as("CPHL")
-        .remove_when_all_nan(),
+        phosphate=VARS["phosphate"].in_file_as("PHOS").remove_when_all_nan(),
+        nitrate=VARS["nitrate"].in_file_as("NTRA").remove_when_all_nan(),
+        silicate=VARS["silicate"].in_file_as("SLCA").remove_when_all_nan(),
+        chlorophyll=VARS["chlorophyll"].in_file_as("CPHL").remove_when_all_nan(),
     ),
     read_params={
         "low_memory": False,

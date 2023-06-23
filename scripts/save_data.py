@@ -4,18 +4,13 @@ import datetime as dt
 from pathlib import Path
 from time import time
 
-from bgc_data_processing import (
-    data_structures,
-    parsers,
-    providers,
-    utils,
-)
+import bgc_data_processing as bgc_dp
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = parsers.ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         check_types=True,
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
@@ -40,7 +35,7 @@ if __name__ == "__main__":
     VERBOSE = CONFIG["VERBOSE"]
 
     # Dates parsing
-    dates_generator = utils.dateranges.DateRangeGenerator(
+    dates_generator = bgc_dp.dateranges.DateRangeGenerator(
         start=DATE_MIN,
         end=DATE_MAX,
         interval=INTERVAL,
@@ -59,10 +54,10 @@ if __name__ == "__main__":
     for data_src in PROVIDERS:
         if VERBOSE > 0:
             print(f"Loading data : {data_src}")
-        datasource = providers.PROVIDERS[data_src]
+        datasource = bgc_dp.providers.PROVIDERS[data_src]
         variables = datasource.variables
         # Constraint slicer
-        constraints = data_structures.Constraints()
+        constraints = bgc_dp.Constraints()
         constraints.add_superset_constraint(
             field_label=variables.get(variables.expocode_var_name).label,
             values_superset=EXPOCODES_TO_LOAD,

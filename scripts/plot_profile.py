@@ -3,13 +3,13 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, data_structures, parsers, tracers
+import bgc_data_processing as bgc_dp
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = parsers.ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -38,18 +38,18 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = data_structures.read_files(
+    storer = bgc_dp.read_files(
         filepath=filepaths,
-        providers_column_label=DEFAULT_VARS["provider"].label,
-        expocode_column_label=DEFAULT_VARS["expocode"].label,
-        date_column_label=DEFAULT_VARS["date"].label,
-        year_column_label=DEFAULT_VARS["year"].label,
-        month_column_label=DEFAULT_VARS["month"].label,
-        day_column_label=DEFAULT_VARS["day"].label,
-        hour_column_label=DEFAULT_VARS["hour"].label,
-        latitude_column_label=DEFAULT_VARS["latitude"].label,
-        longitude_column_label=DEFAULT_VARS["longitude"].label,
-        depth_column_label=DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.defaults.VARS["provider"].label,
+        expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
+        date_column_label=bgc_dp.defaults.VARS["date"].label,
+        year_column_label=bgc_dp.defaults.VARS["year"].label,
+        month_column_label=bgc_dp.defaults.VARS["month"].label,
+        day_column_label=bgc_dp.defaults.VARS["day"].label,
+        hour_column_label=bgc_dp.defaults.VARS["hour"].label,
+        latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
+        depth_column_label=bgc_dp.defaults.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     storer.remove_duplicates(priority_list=PRIORITY)
     variables = storer.variables
-    constraints = data_structures.Constraints()
+    constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         minimal_value=DEPTH_MIN,
         maximal_value=DEPTH_MAX,
     )
-    profile = tracers.EvolutionProfile(storer, constraints=constraints)
+    profile = bgc_dp.tracers.EvolutionProfile(storer, constraints=constraints)
     profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
     profile.set_depth_interval(DEPTH_INTERVAL)
     if SHOW:

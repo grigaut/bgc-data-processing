@@ -3,12 +3,11 @@
 from pathlib import Path
 
 from bgc_data_processing import (
-    DEFAULT_VARS,
-    PROVIDERS_CONFIG,
     units,
 )
+from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
+from bgc_data_processing.defaults import PROVIDERS_CONFIG, VARS
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -19,28 +18,28 @@ loader = DataSource(
     excluded_files=PROVIDERS_CONFIG["GLODAPv2"]["EXCLUDE"],
     files_pattern=FileNamePattern("glodapv2_{years}.csv"),
     variable_ensemble=SourceVariableSet(
-        provider=DEFAULT_VARS["provider"].not_in_file(),
-        expocode=DEFAULT_VARS["expocode"].in_file_as("cruise"),
-        date=DEFAULT_VARS["date"].not_in_file(),
-        year=DEFAULT_VARS["year"].in_file_as("YEAR"),
-        month=DEFAULT_VARS["month"].in_file_as("MONTH"),
-        day=DEFAULT_VARS["day"].in_file_as("DAY"),
-        hour=DEFAULT_VARS["hour"].in_file_as("hour"),
-        longitude=DEFAULT_VARS["longitude"].in_file_as("LONGITUDE"),
-        latitude=DEFAULT_VARS["latitude"].in_file_as("LATITUDE"),
-        depth=DEFAULT_VARS["depth"]
+        provider=VARS["provider"].not_in_file(),
+        expocode=VARS["expocode"].in_file_as("cruise"),
+        date=VARS["date"].not_in_file(),
+        year=VARS["year"].in_file_as("YEAR"),
+        month=VARS["month"].in_file_as("MONTH"),
+        day=VARS["day"].in_file_as("DAY"),
+        hour=VARS["hour"].in_file_as("hour"),
+        longitude=VARS["longitude"].in_file_as("LONGITUDE"),
+        latitude=VARS["latitude"].in_file_as("LATITUDE"),
+        depth=VARS["depth"]
         .in_file_as("DEPTH")
         .remove_when_nan()
         .correct_with(lambda x: -x),
-        temperature=DEFAULT_VARS["temperature"].in_file_as("THETA"),
-        salinity=DEFAULT_VARS["salinity"].in_file_as("SALNTY"),
-        oxygen=DEFAULT_VARS["oxygen"]
+        temperature=VARS["temperature"].in_file_as("THETA"),
+        salinity=VARS["salinity"].in_file_as("SALNTY"),
+        oxygen=VARS["oxygen"]
         .in_file_as("OXYGEN")
         .correct_with(units.convert_umol_by_kg_to_mmol_by_m3),
-        phosphate=DEFAULT_VARS["phosphate"].in_file_as("PHSPHT").remove_when_all_nan(),
-        nitrate=DEFAULT_VARS["nitrate"].in_file_as("NITRAT").remove_when_all_nan(),
-        silicate=DEFAULT_VARS["silicate"].in_file_as("SILCAT").remove_when_all_nan(),
-        chlorophyll=DEFAULT_VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
+        phosphate=VARS["phosphate"].in_file_as("PHSPHT").remove_when_all_nan(),
+        nitrate=VARS["nitrate"].in_file_as("NITRAT").remove_when_all_nan(),
+        silicate=VARS["silicate"].in_file_as("SILCAT").remove_when_all_nan(),
+        chlorophyll=VARS["chlorophyll"].not_in_file().remove_when_all_nan(),
     ),
     read_params={
         "low_memory": False,

@@ -7,7 +7,7 @@ from typing import TypeAlias
 import numpy as np
 from _collections_abc import dict_keys
 
-from bgc_data_processing.data_structures.variables.vars import (
+from bgc_data_processing.core.variables.vars import (
     ExistingVar,
     FeatureVar,
     NotExistingVar,

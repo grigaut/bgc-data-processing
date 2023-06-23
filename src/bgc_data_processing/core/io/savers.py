@@ -7,8 +7,33 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.storers import Slice, Storer
+    from bgc_data_processing.core.storers import Slice, Storer
     from bgc_data_processing.utils.dateranges import DateRange, DateRangeGenerator
+
+
+def save_storer(
+    storer: "Storer",
+    filepath: Path,
+    save_aggregated_data_only: bool = False,
+) -> None:
+    """Save all the storer to the given file.
+
+    Parameters
+    ----------
+    storer : Storer
+        Storer to save.
+    filepath : Path
+        File in which to save the storer data.
+    save_aggregated_data_only: bool
+        Whether to only save the aggregated data or not.
+        If False, for every provider, a folder with the provider's
+        data will be created.
+    """
+    saver = StorerSaver(
+        storer=storer,
+        save_aggregated_data_only=save_aggregated_data_only,
+    )
+    saver.save_all_storer(filepath=filepath)
 
 
 class StorerSaver:

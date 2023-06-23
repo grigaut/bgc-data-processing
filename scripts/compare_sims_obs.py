@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
+import bgc_data_processing as bgc_dp
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
-from bgc_data_processing import DEFAULT_VARS, data_structures, parsers
 from cartopy import feature
 
 CONFIG_FOLDER = Path("config")
@@ -13,7 +13,7 @@ CONFIG_FOLDER = Path("config")
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
 
-    CONFIG = parsers.ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         check_types=False,
         dates_vars_keys=[],
@@ -26,36 +26,36 @@ if __name__ == "__main__":
     VARIABLES_TO_COMPARE: list[str] = CONFIG["VARIABLES_TO_COMPARE"]
     SHOW_MAP: bool = CONFIG["SHOW_MAP"]
 
-    obs = data_structures.read_files(
+    obs = bgc_dp.read_files(
         OBSERVATIONS_FILE,
-        providers_column_label=DEFAULT_VARS["provider"].label,
-        expocode_column_label=DEFAULT_VARS["expocode"].label,
-        date_column_label=DEFAULT_VARS["date"].label,
-        year_column_label=DEFAULT_VARS["year"].label,
-        month_column_label=DEFAULT_VARS["month"].label,
-        day_column_label=DEFAULT_VARS["day"].label,
-        hour_column_label=DEFAULT_VARS["hour"].label,
-        latitude_column_label=DEFAULT_VARS["latitude"].label,
-        longitude_column_label=DEFAULT_VARS["longitude"].label,
-        depth_column_label=DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.VARS["provider"].label,
+        expocode_column_label=bgc_dp.VARS["expocode"].label,
+        date_column_label=bgc_dp.VARS["date"].label,
+        year_column_label=bgc_dp.VARS["year"].label,
+        month_column_label=bgc_dp.VARS["month"].label,
+        day_column_label=bgc_dp.VARS["day"].label,
+        hour_column_label=bgc_dp.VARS["hour"].label,
+        latitude_column_label=bgc_dp.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.VARS["longitude"].label,
+        depth_column_label=bgc_dp.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
         verbose=1,
     )
 
-    sims = data_structures.read_files(
+    sims = bgc_dp.read_files(
         SIMULATIONS_FILE,
-        providers_column_label=DEFAULT_VARS["provider"].label,
-        expocode_column_label=DEFAULT_VARS["expocode"].label,
-        date_column_label=DEFAULT_VARS["date"].label,
-        year_column_label=DEFAULT_VARS["year"].label,
-        month_column_label=DEFAULT_VARS["month"].label,
-        day_column_label=DEFAULT_VARS["day"].label,
-        hour_column_label=DEFAULT_VARS["hour"].label,
-        latitude_column_label=DEFAULT_VARS["latitude"].label,
-        longitude_column_label=DEFAULT_VARS["longitude"].label,
-        depth_column_label=DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.VARS["provider"].label,
+        expocode_column_label=bgc_dp.VARS["expocode"].label,
+        date_column_label=bgc_dp.VARS["date"].label,
+        year_column_label=bgc_dp.VARS["year"].label,
+        month_column_label=bgc_dp.VARS["month"].label,
+        day_column_label=bgc_dp.VARS["day"].label,
+        hour_column_label=bgc_dp.VARS["hour"].label,
+        latitude_column_label=bgc_dp.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.VARS["longitude"].label,
+        depth_column_label=bgc_dp.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -84,11 +84,11 @@ if __name__ == "__main__":
 
         ax = plt.axes(projection=ccrs.Orthographic(0, 90))
 
-        sim_lat = sims.data[~nan_sim][DEFAULT_VARS["latitude"].label]
-        sim_lon = sims.data[~nan_sim][DEFAULT_VARS["longitude"].label]
+        sim_lat = sims.data[~nan_sim][bgc_dp.VARS["latitude"].label]
+        sim_lon = sims.data[~nan_sim][bgc_dp.VARS["longitude"].label]
 
-        obs_lat = obs.data[~nan_sim][DEFAULT_VARS["latitude"].label]
-        obs_lon = obs.data[~nan_sim][DEFAULT_VARS["longitude"].label]
+        obs_lat = obs.data[~nan_sim][bgc_dp.VARS["latitude"].label]
+        obs_lon = obs.data[~nan_sim][bgc_dp.VARS["longitude"].label]
 
         ax.set_extent(
             [
