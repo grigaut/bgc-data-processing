@@ -1,7 +1,8 @@
 """Data Source objects."""
 
+from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bgc_data_processing.data_structures.io.savers import StorerSaver
 from bgc_data_processing.data_structures.storers import Storer
@@ -63,11 +64,34 @@ class DataSource:
         self._dirin = dirin
         self._verbose = verbose
         self._provider = provider_name
+        self._read_kwargs = kwargs
         self._loader = self._build_loader(
             provider_name,
             excluded_files,
-            **kwargs,
         )
+
+    @property
+    def as_template(self) -> dict[str, Any]:
+        """Create template to easily re-create a similar data source.
+
+        Returns
+        -------
+        dict[str, Any]
+            Arguements to create a similar data source.
+        """
+        base_parameters = {
+            "provider_name": self._provider,
+            "data_format": self._format,
+            "dirin": self._dirin,
+            "data_category": self._category,
+            "excluded_files": self._loader.excluded_filenames,
+            "files_pattern": self._files_pattern,
+            "variable_ensemble": deepcopy(self._vars_ensemble),
+            "verbose": self._verbose,
+        }
+        for key, value in self._read_kwargs.items():
+            base_parameters[key] = value
+        return base_parameters
 
     @property
     def dirin(self) -> Path:
@@ -128,9 +152,7 @@ class DataSource:
     def _build_loader(
         self,
         provider_name: str,
-        # dirin: Path,
         excluded_files: list[str],
-        **kwargs,
     ) -> "BaseLoader":
         if self._format == "csv":
             return CSVLoader(
@@ -139,7 +161,7 @@ class DataSource:
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
-                **kwargs,
+                **self._read_kwargs,
             )
         if self._format == "netcdf" and self._category == "satellite":
             return SatelliteNetCDFLoader(
@@ -148,7 +170,7 @@ class DataSource:
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
-                **kwargs,
+                **self._read_kwargs,
             )
         if self._format == "netcdf":
             return NetCDFLoader(
@@ -157,7 +179,7 @@ class DataSource:
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
-                **kwargs,
+                **self._read_kwargs,
             )
         if self._format == "abfiles":
             return ABFileLoader(
@@ -166,7 +188,7 @@ class DataSource:
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
-                **kwargs,
+                **self._read_kwargs,
             )
         raise ValueError
 

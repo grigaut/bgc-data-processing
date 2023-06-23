@@ -9,13 +9,19 @@ import pandas as pd
 from abfile import ABFileArchv, ABFileGrid
 from sklearn.neighbors import NearestNeighbors
 
+from bgc_data_processing.data_sources import DataSource
 from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.data_structures.io.savers import StorerSaver
 from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_sources import DataSource
-    from bgc_data_processing.data_structures.variables.sets import LoadingVariablesSet
+    from bgc_data_processing.data_structures.variables.sets import (
+        LoadingVariablesSet,
+        SourceVariableSet,
+    )
+    from bgc_data_processing.utils.dateranges import DateRangeGenerator
+    from bgc_data_processing.utils.patterns import FileNamePattern
 
 
 class SelectiveABFileLoader(ABFileLoader):
@@ -483,8 +489,8 @@ class Match:
         return reshaped
 
 
-class Selector:
-    """Load closest datapoints from a reference dataframe.
+class SelectiveDataSource(DataSource):
+    """Selective Data Source.
 
     Parameters
     ----------
@@ -492,23 +498,69 @@ class Selector:
         Reference Dataframe (observations).
     strategy : NearestNeighborStrategy
         Closer point finding strategy.
-    loader : ABFileLoader
-        Loader.
+    provider_name : str
+        Name of the data provider.
+    data_format : str
+        Data format.
+    dirin : Path
+        Input data directory.
+    data_category : str
+        Category of the data.
+    excluded_files : list[str]
+        Files not to load.
+    files_pattern : FileNamePattern
+        Pattern to match to load files.
+    variable_ensemble : SourceVariableSet
+        Ensembles of variables to consider.
+    verbose : int, optional
+        Verbose., by default 1
     """
+
+    _loader: SelectiveABFileLoader
 
     def __init__(
         self,
-        reference: Storer,
+        reference: "Storer",
         strategy: NearestNeighborStrategy,
-        dsource: "DataSource",
+        provider_name: str,
+        data_format: str,
+        dirin: Path,
+        data_category: str,
+        excluded_files: list[str],
+        files_pattern: "FileNamePattern",
+        variable_ensemble: "SourceVariableSet",
+        verbose: int = 1,
+        **kwargs,
     ) -> None:
+        super().__init__(
+            provider_name,
+            data_format,
+            dirin,
+            data_category,
+            excluded_files,
+            files_pattern,
+            variable_ensemble,
+            verbose,
+            **kwargs,
+        )
         self.reference = reference.data
-        self.loader = SelectiveABFileLoader.from_abloader(loader=dsource.loader)
-        self.pattern = dsource.files_pattern
-        self.dirin = dsource.dirin
-        self.storing_variables = dsource.variables.storing_variables
         self.strategy = strategy
-        self.grid = self.loader.grid_file
+        self.grid = self._loader.grid_file
+
+    def _build_loader(
+        self,
+        provider_name: str,
+        excluded_files: list[str],
+    ) -> "SelectiveABFileLoader":
+        if self._format == "abfiles":
+            return SelectiveABFileLoader(
+                provider_name=provider_name,
+                category=self._category,
+                exclude=excluded_files,
+                variables=self._vars_ensemble.loading_variables,
+                **self._read_kwargs,
+            )
+        raise ValueError("Only ABFiles can be loaded from a selective data source")
 
     def get_coord(self, var_name: str) -> pd.Series:
         """Get a coordinate field from loader.grid_file.
@@ -623,17 +675,17 @@ class Selector:
             self.loader.variables.date_var_name,
         ).label
         date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self.pattern.build_from_constraint(date_constraint)
+        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
         pattern_matcher.validate = self.loader.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self.dirin,
         )
         return [s.parent.joinpath(s.stem) for s in filepaths]
 
-    def __call__(
-        self,
-        constraints: "Constraints" = Constraints(),
-    ) -> "Storer":
+    def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
+        pass
+
+    def load_all(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.
 
         Parameters
@@ -653,7 +705,7 @@ class Selector:
         )
         datas: list[pd.DataFrame] = []
         for basename in basenames:
-            date = Selector.parse_date_from_basename(basename)
+            date = self.parse_date_from_basename(basename)
             data_slice = self.reference[self.reference[date_var_label].dt.date == date]
             if data_slice.empty:
                 continue
@@ -665,10 +717,66 @@ class Selector:
             )
             datas.append(match.match(sim_data))
         concatenated = pd.concat(datas, axis=0)
-        return Storer(
-            data=concatenated[self.reference.columns],
+        storer = Storer(
+            data=concatenated,
             category=self.loader.category,
             providers=[self.loader.provider],
-            variables=self.storing_variables,
+            variables=self._store_vars,
             verbose=self.loader.verbose,
+        )
+        self._insert_all_features(storer)
+        self._remove_temporary_variables(storer)
+        return storer
+
+    def load_and_save(
+        self,
+        saving_directory: Path,
+        dateranges_gen: "DateRangeGenerator",
+        constraints: "Constraints",
+    ) -> None:
+        """Save all the data before saving it all in the saving directory.
+
+        Parameters
+        ----------
+        saving_directory : Path
+            Path to the directory to save in.
+        dateranges_gen : DateRangeGenerator
+            Generator to use to retrieve dateranges.
+        constraints : Constraints
+            Contraints ot apply on data.
+        """
+        storer = self.load_all(constraints=constraints)
+        saver = StorerSaver(storer)
+        saver.save_from_daterange(
+            dateranges_gen=dateranges_gen,
+            saving_directory=saving_directory,
+        )
+
+    @classmethod
+    def from_data_source(
+        cls,
+        reference: Storer,
+        strategy: NearestNeighborStrategy,
+        dsource: DataSource,
+    ) -> "SelectiveDataSource":
+        """Create the sleective data source from an existing data source.
+
+        Parameters
+        ----------
+        reference : Storer
+            _description_
+        strategy : NearestNeighborStrategy
+            _description_
+        dsource : DataSource
+            _description_
+
+        Returns
+        -------
+        SelectiveDataSource
+            _description_
+        """
+        return cls(
+            reference=reference,
+            strategy=strategy,
+            **dsource.as_template,
         )

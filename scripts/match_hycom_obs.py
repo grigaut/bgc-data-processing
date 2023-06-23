@@ -9,6 +9,8 @@ from bgc_data_processing import (
     parsers,
     providers,
 )
+from bgc_data_processing.comparison.matching import SelectiveDataSource
+from bgc_data_processing.data_structures.filtering import Constraints
 
 CONFIG_FOLDER = Path("config")
 
@@ -53,13 +55,13 @@ if __name__ == "__main__":
         delim_whitespace=True,
         verbose=1,
     )
-    selector = comparison.Selector(
+    selector = SelectiveDataSource.from_data_source(
         reference=observations,
         strategy=comparison.NearestNeighborStrategy(metric="haversine"),
         dsource=providers.PROVIDERS["HYCOM"],
     )
 
-    simulations = selector()
+    simulations = selector.load_all(Constraints())
 
     interpolator = comparison.Interpolator(
         base=simulations,
