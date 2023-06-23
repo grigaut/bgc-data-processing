@@ -1,6 +1,7 @@
 """Data storing objects."""
 
 
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -44,7 +45,7 @@ class Storer:
         self._data = data
         self._category = category
         self._providers = providers
-        self._variables = variables
+        self._variables = deepcopy(variables)
         self._verbose = verbose
 
     @property
