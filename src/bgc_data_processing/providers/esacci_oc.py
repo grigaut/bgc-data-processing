@@ -5,18 +5,19 @@ from pathlib import Path
 from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
-    loaders,
 )
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_netcdf(
+loader = DataSource(
     provider_name="ESACCI-OC",
+    data_format="netcdf",
     dirin=Path(PROVIDERS_CONFIG["ESACCI-OC"]["PATH"]),
-    category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["ESACCI-OC"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["ESACCI-OC"]["EXCLUDE"],
     files_pattern=FileNamePattern("{years}/.*-{years}{months}{days}-.*.nc"),
-    variables=VariablesStorer(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("time"),

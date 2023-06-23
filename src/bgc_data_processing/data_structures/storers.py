@@ -1,17 +1,17 @@
 """Data storing objects."""
 
 
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.variables import (
+    from bgc_data_processing.data_structures.variables.sets import StoringVariablesSet
+    from bgc_data_processing.data_structures.variables.vars import (
         NotExistingVar,
-        VariablesStorer,
     )
 
 
@@ -26,7 +26,7 @@ class Storer:
         Data category.
     providers : list
         Names of the data providers.
-    variables : VariablesStorer
+    variables : StoringVariablesSet
         Variables storer of object to keep track of the variables in the Dataframe.
     verbose : int, optional
         Controls the verbosity: the higher, the more messages., by default 0
@@ -37,28 +37,13 @@ class Storer:
         data: pd.DataFrame,
         category: str,
         providers: list,
-        variables: "VariablesStorer",
+        variables: "StoringVariablesSet",
         verbose: int = 0,
     ) -> None:
-        """Instanciate a storing data class, to keep track of metadata.
-
-        Parameters
-        ----------
-        data : pd.DataFrame
-            Dataframe to store.
-        category: str
-            Data category.
-        providers : list
-            Names of the data providers.
-        variables : VariablesStorer
-            Variables storer of object to keep track of the variables in the Dataframe.
-        verbose : int, optional
-            Controls the verbosity: the higher, the more messages., by default 0
-        """
         self._data = data
         self._category = category
         self._providers = providers
-        self._variables = variables
+        self._variables = deepcopy(variables)
         self._verbose = verbose
 
     @property
@@ -95,12 +80,12 @@ class Storer:
         return self._providers
 
     @property
-    def variables(self) -> "VariablesStorer":
+    def variables(self) -> "StoringVariablesSet":
         """Getter for self._variables.
 
         Returns
         -------
-        VariablesStorer
+        StoringVariablesSet
             Variables storer.
         """
         return self._variables
@@ -191,7 +176,7 @@ class Storer:
             verbose=min(self._verbose, other.verbose),
         )
 
-    def remove_duplicates(self, priority_list: list = None) -> None:
+    def remove_duplicates(self, priority_list: list | None = None) -> None:
         """Update self._data to remove duplicates in data.
 
         Parameters
@@ -251,7 +236,7 @@ class Storer:
     def _remove_duplicates_between_providers(
         self,
         df: pd.DataFrame,
-        priority_list: list,
+        priority_list: list | None,
     ) -> pd.DataFrame:
         """Remove duplicates among a common providers.
 
@@ -259,9 +244,8 @@ class Storer:
         ----------
         df : pd.DataFrame
             DataFrame to remove duplicated data from.
-        priority_list : list, optional
+        priority_list : list | None
             Providers priority order, first has priority over others and so on.
-            , by default None
 
         Returns
         -------
@@ -361,6 +345,22 @@ class Storer:
         """
         self.variables.add_var(variable)
         self._data[variable.name] = data
+
+    def pop(self, variable_name: str) -> pd.Series:
+        """Remove and return the data for a given variable.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to remove.
+
+        Returns
+        -------
+        pd.Series
+            Data of the corresponding variable.
+        """
+        var = self.variables.pop(variable_name)
+        return self._data.pop(var.name)
 
     @classmethod
     def from_constraints(

@@ -9,6 +9,8 @@ from bgc_data_processing import (
     parsers,
     providers,
 )
+from bgc_data_processing.comparison.matching import SelectiveDataSource
+from bgc_data_processing.data_structures.filtering import Constraints
 
 CONFIG_FOLDER = Path("config")
 
@@ -53,13 +55,13 @@ if __name__ == "__main__":
         delim_whitespace=True,
         verbose=1,
     )
-    selector = comparison.Selector(
+    selector = SelectiveDataSource.from_data_source(
         reference=observations,
         strategy=comparison.NearestNeighborStrategy(metric="haversine"),
-        loader=providers.LOADERS["HYCOM"],
+        dsource=providers.PROVIDERS["HYCOM"],
     )
 
-    simulations = selector()
+    simulations = selector.load_all(Constraints())
 
     interpolator = comparison.Interpolator(
         base=simulations,
@@ -71,47 +73,30 @@ if __name__ == "__main__":
         observations,
     )
     # Add pressure
-    obs_pres_var, obs_pres_data = features.compute_pressure(
-        observations,
-        DEPTH_TEMPLATE.label,
-        LATITUDE_TEMPLATE.label,
-    )
-    observations.add_feature(obs_pres_var, obs_pres_data)
-    sim_pres_var, sim_pres_data = features.compute_pressure(
-        interpolated,
-        DEPTH_TEMPLATE.label,
-        LATITUDE_TEMPLATE.label,
-    )
-    interpolated.add_feature(sim_pres_var, sim_pres_data)
+    pres_feat = features.Pressure(DEPTH_TEMPLATE, LATITUDE_TEMPLATE)
+    pres_feat.insert_in_storer(observations)
+    pres_feat.insert_in_storer(interpolated)
     # Add potential temperature
-    obs_ptemp_var, obs_ptemp_data = features.compute_potential_temperature(
-        storer=observations,
-        salinity_field=SALINITY_TEMPLATE.label,
-        temperature_field=TEMPERATURE_TEMPLATE.label,
-        pressure_field=obs_pres_var.label,
+    ptemp_feat = features.PotentialTemperature(
+        SALINITY_TEMPLATE,
+        TEMPERATURE_TEMPLATE,
+        pres_feat.variable,
     )
-    observations.add_feature(obs_ptemp_var, obs_ptemp_data)
-    interpolated.add_feature(
-        obs_ptemp_var,
-        interpolated.data[TEMPERATURE_TEMPLATE.label],
-    )
+    ptemp_feat.insert_in_storer(observations)
+    ptemp_feat.insert_in_storer(interpolated)
     save_vars = [
         var.label
         for var in observations.variables
         if var.name != observations.variables.date_var_name
     ]
-    observations.variables.set_saving_order(
-        var_names=save_vars,
-    )
-    interpolated.variables.set_saving_order(
-        var_names=save_vars,
-    )
     observations_save = observations.slice_using_index(interpolated.data.index)
 
     SAVING_DIR = Path(CONFIG["SAVING_DIR"])
 
     obs_saver = data_structures.StorerSaver(observations_save)
+    obs_saver.saving_order = save_vars
     obs_saver.save_all_storer(SAVING_DIR.joinpath("observations.txt"))
 
     int_saver = data_structures.StorerSaver(interpolated)
+    int_saver.saving_order = save_vars
     int_saver.save_all_storer(SAVING_DIR.joinpath("simulations.txt"))

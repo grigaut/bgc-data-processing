@@ -69,27 +69,22 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
     # Add relevant features to the data: Pressure / potential temperature /sigmat
-    depth_field = variables.get(variables.depth_var_name).label
-    latitude_field = variables.get(variables.latitude_var_name).label
-    pres_var, pres_data = features.compute_pressure(
-        storer,
-        depth_field,
-        latitude_field,
+    pres_feat = features.Pressure(
+        depth_variable=variables.get(variables.depth_var_name),
+        latitude_variable=variables.get(variables.latitude_var_name),
     )
-    storer.add_feature(pres_var, pres_data)
-    ptemp_var, ptemp_data = features.compute_potential_temperature(
-        storer=storer,
-        salinity_field=SALINITY_DEFAULT.label,
-        temperature_field=TEMPERATURE_DEFAULT.label,
-        pressure_field=pres_var.label,
+    pres_feat.insert_in_storer(storer)
+    ptemp_feat = features.PotentialTemperature(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
+        pressure_variable=pres_feat.variable,
     )
-    storer.add_feature(ptemp_var, ptemp_data)
-    sigt_var, sigt_data = features.compute_sigma_t(
-        storer=storer,
-        salinity_field=SALINITY_DEFAULT.label,
-        temperature_field=TEMPERATURE_DEFAULT.label,
+    ptemp_feat.insert_in_storer(storer)
+    sigmat_feat = features.SigmaT(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
     )
-    storer.add_feature(sigt_var, sigt_data)
+    sigmat_feat.insert_in_storer(storer)
     constraints = data_structures.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
@@ -118,9 +113,9 @@ if __name__ == "__main__":
         axes = figure.add_subplot(int(placement))
         storer_wm = watermass.extract_from_storer(
             storer=storer,
-            ptemperature_name=ptemp_var.label,
+            ptemperature_name=ptemp_feat.variable.label,
             salinity_name=SALINITY_DEFAULT.label,
-            sigma_t_name=sigt_var.label,
+            sigma_t_name=sigmat_feat.variable.label,
         )
         plot = tracers.VariableBoxPlot(storer_wm, constraints)
         plot.plot_to_axes(PLOT_VARIABLE, period=BOXPLOT_PERIOD, ax=axes)

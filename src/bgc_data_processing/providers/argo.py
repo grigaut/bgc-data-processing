@@ -7,19 +7,20 @@ import numpy as np
 from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
-    loaders,
     units,
 )
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_netcdf(
+loader = DataSource(
     provider_name="ARGO",
+    data_format="netcdf",
     dirin=Path(PROVIDERS_CONFIG["ARGO"]["PATH"]),
-    category=PROVIDERS_CONFIG["ARGO"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["ARGO"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["ARGO"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["ARGO"]["EXCLUDE"],
     files_pattern=FileNamePattern(".*.nc"),
-    variables=VariablesStorer(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("TIME"),

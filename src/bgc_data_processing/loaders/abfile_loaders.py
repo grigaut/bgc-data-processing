@@ -9,60 +9,14 @@ import pandas as pd
 from abfile import ABFileArchv, ABFileGrid
 
 from bgc_data_processing.data_structures.filtering import Constraints
-from bgc_data_processing.data_structures.storers import Storer
-from bgc_data_processing.data_structures.variables import ExistingVar, NotExistingVar
+from bgc_data_processing.data_structures.variables.vars import (
+    ExistingVar,
+    NotExistingVar,
+)
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables import VariablesStorer
-    from bgc_data_processing.utils.patterns import FileNamePattern
-
-
-def from_abfile(
-    provider_name: str,
-    dirin: Path,
-    category: str,
-    exclude: list[str],
-    files_pattern: "FileNamePattern",
-    variables: "VariablesStorer",
-    grid_basename: str,
-) -> "ABFileLoader":
-    """Instanciate a abfile Loader.
-
-    Parameters
-    ----------
-    provider_name : str
-        Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
-    category: str
-        Category provider belongs to.
-    exclude: list[str]
-        Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
-        Storer object containing all variables to consider for this data,
-        both the one in the data file but and the one not represented in the file.
-    grid_basename: str
-        Basename of the ab grid grid file for the loader.
-        => files are considered to be loaded over the same grid.
-
-    Returns
-    -------
-    ABFileLoader
-        Loader
-    """
-    return ABFileLoader(
-        provider_name=provider_name,
-        dirin=dirin,
-        category=category,
-        exclude=exclude,
-        files_pattern=files_pattern,
-        variables=variables,
-        grid_basename=grid_basename,
-    )
+    from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 
 
 class ABFileLoader(BaseLoader):
@@ -72,16 +26,11 @@ class ABFileLoader(BaseLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : str
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     grid_basename: str
@@ -98,19 +47,15 @@ class ABFileLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: Path,
         category: str,
         exclude: list[str],
-        files_pattern: "FileNamePattern",
-        variables: "VariablesStorer",
+        variables: "SourceVariableSet",
         grid_basename: str,
     ) -> None:
         super().__init__(
             provider_name=provider_name,
-            dirin=dirin,
             category=category,
             exclude=exclude,
-            files_pattern=files_pattern,
             variables=variables,
         )
         self.grid_basename = grid_basename
@@ -203,43 +148,6 @@ class ABFileLoader(BaseLoader):
                 f"Grid File doesn't have data for the variable {variable_name}",
             )
         return data
-
-    def __call__(self, constraints: "Constraints") -> "Storer":
-        """Load all files for the loader.
-
-        Parameters
-        ----------
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
-
-        Returns
-        -------
-        Storer
-            Storer for the loaded data.
-        """
-        # load date constraint
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self.is_file_valid
-        basenames = pattern_matcher.select_matching_filepath(
-            research_directory=self._dirin,
-        )
-        # load all files
-        data_slices = []
-        for basename in basenames:
-            data_slices.append(self.load(basename, constraints))
-        if data_slices:
-            data = pd.concat(data_slices, axis=0)
-        else:
-            data = pd.DataFrame(columns=list(self._variables.labels.values()))
-        return Storer(
-            data=data,
-            category=self.category,
-            providers=[self.provider],
-            variables=self.variables,
-            verbose=self.verbose,
-        )
 
     def _convert_types(self, wrong_types: pd.DataFrame) -> pd.DataFrame:
         """Type converting function, modified to behave with csv files.

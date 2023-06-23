@@ -6,13 +6,12 @@ from typing import TYPE_CHECKING, Any
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from shapely import Polygon
 
 from bgc_data_processing.data_structures.storers import Storer
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from shapely import Polygon
 
 
 class Constraints:
@@ -22,8 +21,8 @@ class Constraints:
         """Initiate slicer object to slice dataframes."""
         self.boundaries: dict[str, dict[str, int | float | datetime]] = {}
         self.supersets: dict[str, list] = {}
-        self.constraints: dict[str, "Callable"] = {}
-        self.polygons: list[dict[str, str | "Polygon"]] = []
+        self.constraints: dict[str, Callable] = {}
+        self.polygons: list[dict[str, str | Polygon]] = []
 
     def reset(self) -> None:
         """Reset all defined constraints."""
@@ -78,7 +77,7 @@ class Constraints:
         self,
         latitude_field: str,
         longitude_field: str,
-        polygon: "Polygon",
+        polygon: Polygon,
     ) -> None:
         """Add a polygon constraint.
 
@@ -295,8 +294,8 @@ class Constraints:
     def get_extremes(
         self,
         field_name: str,
-        default_min: int | float | datetime = None,
-        default_max: int | float | datetime = None,
+        default_min: int | float | datetime | None = None,
+        default_max: int | float | datetime | None = None,
     ) -> tuple[int | float | datetime, int | float | datetime]:
         """Return extreme values as they appear in the constraints.
 

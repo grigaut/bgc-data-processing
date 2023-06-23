@@ -5,19 +5,20 @@ from pathlib import Path
 from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
-    loaders,
     units,
 )
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_csv(
+loader = DataSource(
     provider_name="GLODAP_2022",
+    data_format="csv",
     dirin=Path(PROVIDERS_CONFIG["GLODAP_2022"]["PATH"]),
-    category=PROVIDERS_CONFIG["GLODAP_2022"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["GLODAP_2022"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["GLODAP_2022"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["GLODAP_2022"]["EXCLUDE"],
     files_pattern=FileNamePattern("GLODAPv2.2022_all.csv"),
-    variables=VariablesStorer(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("G2expocode"),
         date=DEFAULT_VARS["date"].not_in_file(),

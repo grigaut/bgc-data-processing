@@ -5,7 +5,8 @@ from pathlib import Path
 import pandas as pd
 
 from bgc_data_processing.data_structures.storers import Storer
-from bgc_data_processing.data_structures.variables import ParsedVar, VariablesStorer
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
+from bgc_data_processing.data_structures.variables.vars import ParsedVar
 
 
 def read_files(
@@ -317,7 +318,7 @@ class Reader:
         raw_df: pd.DataFrame,
         unit_row: pd.DataFrame,
         mandatory_vars: dict,
-    ) -> "VariablesStorer":
+    ) -> "SourceVariableSet":
         """Parse variables from the csv data.
 
         Parameters
@@ -331,7 +332,7 @@ class Reader:
 
         Returns
         -------
-        VariablesStorer
+        SourceVariableSet
             Collection of variables.
         """
         variables = {}
@@ -353,7 +354,7 @@ class Reader:
         for param in mandatory_vars.values():
             if param not in variables.keys():
                 variables[param] = None
-        return VariablesStorer(**variables)
+        return SourceVariableSet(**variables)
 
     def _make_date_column(
         self,
@@ -428,6 +429,6 @@ class Reader:
             data=self._data,
             category=self._category,
             providers=self._providers,
-            variables=self._variables,
+            variables=self._variables.storing_variables,
             verbose=self._verbose,
         )

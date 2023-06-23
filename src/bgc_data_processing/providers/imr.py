@@ -5,19 +5,20 @@ from pathlib import Path
 from bgc_data_processing import (
     DEFAULT_VARS,
     PROVIDERS_CONFIG,
-    loaders,
     units,
 )
-from bgc_data_processing.data_structures.variables import VariablesStorer
+from bgc_data_processing.data_sources import DataSource
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
-loader = loaders.from_csv(
+loader = DataSource(
     provider_name="IMR",
+    data_format="csv",
     dirin=Path(PROVIDERS_CONFIG["IMR"]["PATH"]),
-    category=PROVIDERS_CONFIG["IMR"]["CATEGORY"],
-    exclude=PROVIDERS_CONFIG["IMR"]["EXCLUDE"],
+    data_category=PROVIDERS_CONFIG["IMR"]["CATEGORY"],
+    excluded_files=PROVIDERS_CONFIG["IMR"]["EXCLUDE"],
     files_pattern=FileNamePattern("imr_{years}.csv"),
-    variables=VariablesStorer(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].not_in_file(),

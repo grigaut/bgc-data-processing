@@ -10,67 +10,14 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.data_structures.filtering import Constraints
-from bgc_data_processing.data_structures.storers import Storer
 from bgc_data_processing.exceptions import NetCDFLoadingError
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables import (
+    from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
+    from bgc_data_processing.data_structures.variables.vars import (
         ExistingVar,
         NotExistingVar,
-        VariablesStorer,
-    )
-    from bgc_data_processing.utils.patterns import FileNamePattern
-
-
-def from_netcdf(
-    provider_name: str,
-    dirin: Path,
-    category: str,
-    exclude: list[str],
-    files_pattern: "FileNamePattern",
-    variables: "VariablesStorer",
-) -> "NetCDFLoader":
-    """Instantiate a NetCDF Loader.
-
-    Parameters
-    ----------
-    provider_name : str
-        Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
-    category: str
-        Category provider belongs to.
-    exclude: list[str]
-        Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        Must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
-        Storer object containing all variables to consider for this data,
-        both the one in the data file but and the one not represented in the file.
-
-    Returns
-    -------
-    NetCDFLoader
-        _description_
-    """
-    if category == "satellite":
-        return SatelliteNetCDFLoader(
-            provider_name=provider_name,
-            dirin=dirin,
-            category=category,
-            exclude=exclude,
-            files_pattern=files_pattern,
-            variables=variables,
-        )
-    return NetCDFLoader(
-        provider_name=provider_name,
-        dirin=dirin,
-        category=category,
-        exclude=exclude,
-        files_pattern=files_pattern,
-        variables=variables,
     )
 
 
@@ -81,16 +28,11 @@ class NetCDFLoader(BaseLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        It must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     """
@@ -105,54 +47,15 @@ class NetCDFLoader(BaseLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: Path,
         category: str,
         exclude: list[str],
-        files_pattern: "FileNamePattern",
-        variables: "VariablesStorer",
+        variables: "SourceVariableSet",
     ) -> None:
         super().__init__(
             provider_name=provider_name,
-            dirin=dirin,
             category=category,
             exclude=exclude,
-            files_pattern=files_pattern,
             variables=variables,
-        )
-
-    def __call__(
-        self,
-        constraints: Constraints = Constraints(),
-    ) -> "Storer":
-        """Load all files for the loader.
-
-        Parameters
-        ----------
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
-
-        Returns
-        -------
-        Storer
-            Storer for the loaded data.
-        """
-        date_label = self._variables.get(self._variables.date_var_name).label
-        date_constraint = constraints.get_constraint_parameters(date_label)
-        pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self.is_file_valid
-        filepaths = pattern_matcher.select_matching_filepath(
-            research_directory=self._dirin,
-        )
-        data_list = []
-        for filepath in filepaths:
-            data_list.append(self.load(filepath=filepath, constraints=constraints))
-        data = pd.concat(data_list, ignore_index=True, axis=0)
-        return Storer(
-            data=data,
-            category=self.category,
-            providers=[self.provider],
-            variables=self.variables,
-            verbose=self.verbose,
         )
 
     def _get_id(self, filename: str) -> str:
@@ -558,16 +461,11 @@ class SatelliteNetCDFLoader(NetCDFLoader):
     ----------
     provider_name : str
         Data provider name.
-    dirin : Path
-        Directory to browse for files to load.
     category: str
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    files_pattern : FileNamePattern
-        Pattern to use to parse files.
-        It must contain a '{years}' in order to be completed using the .format method.
-    variables : VariablesStorer
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     """
@@ -575,18 +473,14 @@ class SatelliteNetCDFLoader(NetCDFLoader):
     def __init__(
         self,
         provider_name: str,
-        dirin: Path,
         category: str,
         exclude: list[str],
-        files_pattern: "FileNamePattern",
-        variables: "VariablesStorer",
+        variables: "SourceVariableSet",
     ) -> None:
         super().__init__(
             provider_name=provider_name,
-            dirin=dirin,
             category=category,
             exclude=exclude,
-            files_pattern=files_pattern,
             variables=variables,
         )
 

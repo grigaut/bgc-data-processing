@@ -2,6 +2,7 @@
 
 
 import datetime as dt
+from typing import ClassVar
 
 import pandas as pd
 
@@ -21,7 +22,7 @@ class DateRangeGenerator:
         Length of custom interval, in days., by default 1
     """
 
-    freqs = {
+    freqs: ClassVar[dict[str, str]] = {
         "day": "D",
         "week": "W",
         "month": "M",

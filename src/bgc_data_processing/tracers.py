@@ -4,7 +4,7 @@
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from bgc_data_processing.data_structures.storers import Storer
-    from bgc_data_processing.data_structures.variables import VariablesStorer
+    from bgc_data_processing.data_structures.variables.sets import StoringVariablesSet
     from bgc_data_processing.water_masses import WaterMass
 
 
@@ -72,7 +72,12 @@ class BasePlot(ABC):
         ...
 
     @abstractmethod
-    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
+    def show(
+        self,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
         """Plot method.
 
         Parameters
@@ -96,8 +101,8 @@ class BasePlot(ABC):
     def save(
         self,
         save_path: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Figure saving method.
@@ -187,12 +192,12 @@ class DensityPlotter(BasePlot):
         self._data = self._storer.data.sort_values(depth_var_label, ascending=False)
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
-    def _get_grouping_columns(self, variables: "VariablesStorer") -> list:
+    def _get_grouping_columns(self, variables: "StoringVariablesSet") -> list:
         """Return a list of columns to use when grouping the data.
 
         Parameters
         ----------
-        variables : VariablesStorer
+        variables : StoringVariablesSet
             Dtaa variables.
 
         Returns
@@ -449,8 +454,8 @@ class DensityPlotter(BasePlot):
         self,
         save_path: str,
         variable_name: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Plot the colormesh for the given variable.
@@ -481,8 +486,8 @@ class DensityPlotter(BasePlot):
     def show(
         self,
         variable_name: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Plot the colormesh for the given variable.
@@ -760,7 +765,11 @@ class EvolutionProfile(BasePlot):
         if isinstance(depth_interval, list) or (not np.isnan(depth_interval)):
             self._depth_interval = depth_interval
 
-    def set_date_intervals(self, interval: str, interval_length: int = None) -> None:
+    def set_date_intervals(
+        self,
+        interval: str,
+        interval_length: int | None = None,
+    ) -> None:
         """Set the date interval parameters.
 
         This represent the horizontal resolution of the final plot.
@@ -993,8 +1002,8 @@ class EvolutionProfile(BasePlot):
     def _build_to_new_figure(
         self,
         variable_name: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> "Figure":
         """Create a Figure and plot the data on the Figure.
@@ -1062,8 +1071,8 @@ class EvolutionProfile(BasePlot):
     def show(
         self,
         variable_name: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Plot the figure of data density evolution in a givemn area.
@@ -1090,8 +1099,8 @@ class EvolutionProfile(BasePlot):
         self,
         save_path: str,
         variable_name: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Save the figure of data density evolution in a givemn area.
@@ -1174,7 +1183,12 @@ class TemperatureSalinityDiagram(BasePlot):
         self.temperature_field = temperature_field
         self.ptemperature_field = ptemperature_field
 
-    def show(self, title: str = None, suptitle: str = None, **kwargs) -> None:
+    def show(
+        self,
+        title: str | None = None,
+        suptitle: str | None = None,
+        **kwargs,
+    ) -> None:
         """Plot the Temperature-Salinity diagram.
 
         Parameters
@@ -1191,8 +1205,8 @@ class TemperatureSalinityDiagram(BasePlot):
     def save(
         self,
         save_path: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Save the figure of Temperature-Salinity Diagram.
@@ -1319,7 +1333,7 @@ class VariableBoxPlot(BasePlot):
         Constraints slicer.
     """
 
-    period_mapping: dict[str, str] = {
+    period_mapping: ClassVar[dict[str, str]] = {
         "year": "%Y",
         "month": "%Y-%m",
         "week": "%Y-%W",
@@ -1565,8 +1579,8 @@ class WaterMassVariableComparison(BasePlot):
         self,
         variable_name: str,
         wmasses: list["WaterMass"],
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Plot method.
@@ -1597,8 +1611,8 @@ class WaterMassVariableComparison(BasePlot):
         variable_name: str,
         wmasses: list["WaterMass"],
         save_path: str,
-        title: str = None,
-        suptitle: str = None,
+        title: str | None = None,
+        suptitle: str | None = None,
         **kwargs,
     ) -> None:
         """Figure saving method.

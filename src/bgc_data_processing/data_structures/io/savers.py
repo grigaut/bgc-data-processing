@@ -1,4 +1,5 @@
 """Save Storers to a file."""
+
 from copy import copy
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -6,7 +7,6 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 if TYPE_CHECKING:
-
     from bgc_data_processing.data_structures.storers import Slice, Storer
     from bgc_data_processing.utils.dateranges import DateRange, DateRangeGenerator
 
@@ -34,7 +34,7 @@ class StorerSaver:
         save_aggregated_data_only: bool = False,
     ) -> None:
         self._storer = storer
-        self._variables = copy(storer.variables)
+        self._variables = copy(storer.variables.saving_variables)
         self._verbose = storer.verbose
         self.save_aggregated_data_only = save_aggregated_data_only
 

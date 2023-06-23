@@ -32,7 +32,6 @@ class FileNamePattern:
         month_field: str = "months",
         day_field: str = "days",
     ) -> None:
-
         self._base = str_pattern
         self._year = year_field
         self._month = month_field
@@ -562,7 +561,6 @@ class PatternMatcher:
         pattern: str,
         validation_function: Callable = lambda filepath: True,  # noqa: ARG005
     ) -> None:
-
         self._pattern = pattern
         self.validate = validation_function
 
