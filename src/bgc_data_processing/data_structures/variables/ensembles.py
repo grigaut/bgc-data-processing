@@ -20,7 +20,7 @@ FromFileVariables: TypeAlias = ExistingVar | NotExistingVar
 
 
 class BaseVariableEnsemble:
-    """General storer for Var object.
+    """Variable ensemble behavior implementation.
 
     This class represents the set of both variables present \
     in the file and variables to take in consideration \
@@ -28,26 +28,6 @@ class BaseVariableEnsemble:
 
     Parameters
     ----------
-    expocode : FromFileVariables
-        Expocode related variable.
-    date : FromFileVariables
-        Date related variable.
-    year : FromFileVariables
-        Year related variable.
-    month : FromFileVariables
-        Month related variable.
-    day : FromFileVariables
-        Day related variable.
-    latitude : FromFileVariables
-        Latitude related variable.
-    longitude : FromFileVariables
-        Longitude related variable.
-    depth : FromFileVariables
-        Depth related variable.
-    provider : FromFileVariables, optional
-        Provider related variable. Can be set to None to be ignored., by default None
-    hour : FromFileVariables, optional
-        Hour related variable. Can be set to None to be ignored., by default None
     *args: list
         Var objects to represent the variables stored by the object.
         It is better if these Var object have been instanciated
@@ -65,16 +45,6 @@ class BaseVariableEnsemble:
 
     def __init__(
         self,
-        expocode: FromFileVariables,
-        date: FromFileVariables,
-        year: FromFileVariables,
-        month: FromFileVariables,
-        day: FromFileVariables,
-        latitude: FromFileVariables,
-        longitude: FromFileVariables,
-        depth: FromFileVariables,
-        hour: FromFileVariables | None = None,
-        provider: FromFileVariables | None = None,
         *args: FromFileVariables,
         **kwargs: FromFileVariables,
     ) -> None:
@@ -83,41 +53,8 @@ class BaseVariableEnsemble:
                 "To set multiple alias for the same variable, "
                 "use Var.in_file_as([alias1, alias2])",
             )
-        mandatory_variables = []
-        if provider is None:
-            self.has_provider = False
-            self.provider_var_name = None
-        else:
-            self.has_provider = True
-            self.provider_var_name = provider.name
-            mandatory_variables.append(provider)
-        self.expocode_var_name = expocode.name
-        mandatory_variables.append(expocode)
-        self.date_var_name = date.name
-        mandatory_variables.append(date)
-        self.year_var_name = year.name
-        mandatory_variables.append(year)
-        self.month_var_name = month.name
-        mandatory_variables.append(month)
-        self.day_var_name = day.name
-        mandatory_variables.append(day)
-        if hour is None:
-            self.has_hour = False
-            self.hour_var_name = None
-        else:
-            self.has_hour = True
-            self.hour_var_name = hour.name
-            mandatory_variables.append(hour)
-        self.latitude_var_name = latitude.name
-        mandatory_variables.append(latitude)
-        self.longitude_var_name = longitude.name
-        mandatory_variables.append(longitude)
-        self.depth_var_name = depth.name
-        mandatory_variables.append(depth)
-        self._elements: list[FromFileVariables | ParsedVar] = (
-            mandatory_variables + list(args) + list(kwargs.values())
-        )
-        self._save = mandatory_variables + list(args) + list(kwargs.values())
+        self._elements: list[FromFileVariables | ParsedVar] = [*args, *kwargs.values()]
+        self._save = [*args, *kwargs.values()]
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
@@ -267,18 +204,7 @@ class BaseVariableEnsemble:
         return self.mapper_by_name.keys()
 
     def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:
-        return {
-            "expocode": self.get(self.expocode_var_name),
-            "provider": self.get(self.provider_var_name) if self.has_provider else None,
-            "date": self.get(self.date_var_name),
-            "year": self.get(self.year_var_name),
-            "month": self.get(self.month_var_name),
-            "day": self.get(self.day_var_name),
-            "hour": self.get(self.hour_var_name) if self.has_hour else None,
-            "latitude": self.get(self.latitude_var_name),
-            "longitude": self.get(self.longitude_var_name),
-            "depth": self.get(self.depth_var_name),
-        }
+        return {}
 
     def _get_inputs_for_new_ensemble(
         self,
@@ -290,6 +216,11 @@ class BaseVariableEnsemble:
             if var.name not in mandatory_names:
                 variables[var.name] = var
         return variables
+
+    @property
+    def elements(self) -> list[AllVariablesTypes]:
+        """All variables in the ensemble."""
+        return self._elements
 
     @property
     def labels(self) -> dict[str, str]:
@@ -314,7 +245,124 @@ class BaseVariableEnsemble:
         return {var.name: var for var in self._elements}
 
 
-class LoadingVariablesEnsemble(BaseVariableEnsemble):
+class BaseRequiredVarsEnsemble(BaseVariableEnsemble):
+    """Storer for Variable objects with some required variables.
+
+    This class represents the set of both variables present \
+    in the file and variables to take in consideration \
+    (therefore to add even if empty) when loading the data.
+
+    Parameters
+    ----------
+    expocode : FromFileVariables
+        Expocode related variable.
+    date : FromFileVariables
+        Date related variable.
+    year : FromFileVariables
+        Year related variable.
+    month : FromFileVariables
+        Month related variable.
+    day : FromFileVariables
+        Day related variable.
+    latitude : FromFileVariables
+        Latitude related variable.
+    longitude : FromFileVariables
+        Longitude related variable.
+    depth : FromFileVariables
+        Depth related variable.
+    provider : FromFileVariables, optional
+        Provider related variable. Can be set to None to be ignored., by default None
+    hour : FromFileVariables, optional
+        Hour related variable. Can be set to None to be ignored., by default None
+    *args: list
+        Var objects to represent the variables stored by the object.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods.
+    *kwargs: dict
+        Var objects to represent the variables stored by the object.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods. The parameter name has no importance.
+
+    Raises
+    ------
+    ValueError:
+        If multiple var object have the same name.
+    """
+
+    def __init__(
+        self,
+        expocode: FromFileVariables,
+        date: FromFileVariables,
+        year: FromFileVariables,
+        month: FromFileVariables,
+        day: FromFileVariables,
+        latitude: FromFileVariables,
+        longitude: FromFileVariables,
+        depth: FromFileVariables,
+        hour: FromFileVariables | None = None,
+        provider: FromFileVariables | None = None,
+        *args: FromFileVariables,
+        **kwargs: FromFileVariables,
+    ) -> None:
+        if len(args) != len({var.name for var in args}):
+            raise ValueError(
+                "To set multiple alias for the same variable, "
+                "use Var.in_file_as([alias1, alias2])",
+            )
+        mandatory_variables = []
+        if provider is None:
+            self.has_provider = False
+            self.provider_var_name = None
+        else:
+            self.has_provider = True
+            self.provider_var_name = provider.name
+            mandatory_variables.append(provider)
+        self.expocode_var_name = expocode.name
+        mandatory_variables.append(expocode)
+        self.date_var_name = date.name
+        mandatory_variables.append(date)
+        self.year_var_name = year.name
+        mandatory_variables.append(year)
+        self.month_var_name = month.name
+        mandatory_variables.append(month)
+        self.day_var_name = day.name
+        mandatory_variables.append(day)
+        if hour is None:
+            self.has_hour = False
+            self.hour_var_name = None
+        else:
+            self.has_hour = True
+            self.hour_var_name = hour.name
+            mandatory_variables.append(hour)
+        self.latitude_var_name = latitude.name
+        mandatory_variables.append(latitude)
+        self.longitude_var_name = longitude.name
+        mandatory_variables.append(longitude)
+        self.depth_var_name = depth.name
+        mandatory_variables.append(depth)
+        self._elements: list[FromFileVariables | ParsedVar] = (
+            mandatory_variables + list(args) + list(kwargs.values())
+        )
+        self._save = mandatory_variables + list(args) + list(kwargs.values())
+        self._in_dset = [var for var in self._elements if var.exist_in_dset]
+        self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
+
+    def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:
+        return {
+            "expocode": self.get(self.expocode_var_name),
+            "provider": self.get(self.provider_var_name) if self.has_provider else None,
+            "date": self.get(self.date_var_name),
+            "year": self.get(self.year_var_name),
+            "month": self.get(self.month_var_name),
+            "day": self.get(self.day_var_name),
+            "hour": self.get(self.hour_var_name) if self.has_hour else None,
+            "latitude": self.get(self.latitude_var_name),
+            "longitude": self.get(self.longitude_var_name),
+            "depth": self.get(self.depth_var_name),
+        }
+
+
+class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
     """Storer for Var object which are going to be loaded.
 
     This class represents the set of both variables present \
@@ -444,8 +492,13 @@ class LoadingVariablesEnsemble(BaseVariableEnsemble):
         """
         return [var.label for var in self._elements if var.remove_if_nan]
 
+    @property
+    def variables_from_features(self) -> list["FeaturedVar"]:
+        """Variables resulting from a feature."""
+        return self._featured
 
-class StoringVariablesEnsemble(BaseVariableEnsemble):
+
+class StoringVariablesEnsemble(BaseRequiredVarsEnsemble):
     """Storer for Var object which are going to be stored.
 
     This class represents the set of both variables present \
@@ -545,7 +598,7 @@ class StoringVariablesEnsemble(BaseVariableEnsemble):
         return SavingVariablesEnsemble(**variables, save_order=self._save.copy())
 
 
-class SavingVariablesEnsemble(BaseVariableEnsemble):
+class SavingVariablesEnsemble(BaseRequiredVarsEnsemble):
     """Storer for Var object which are going to be saved.
 
     This class represents the set of both variables present \
@@ -687,7 +740,7 @@ class SavingVariablesEnsemble(BaseVariableEnsemble):
         return " ".join([var.value_format for var in self._save])
 
 
-class VariableEnsemble(BaseVariableEnsemble):
+class VariableEnsemble(BaseRequiredVarsEnsemble):
     """Ensemble of variables.
 
     This class represents the set of both variables present \
@@ -767,5 +820,9 @@ class VariableEnsemble(BaseVariableEnsemble):
     @property
     def storing_variables(self) -> StoringVariablesEnsemble:
         """Ensemble of variables to store."""
-        variables = self._get_inputs_for_new_ensemble(self._elements)
+        # variables = self._get_inputs_for_new_ensemble(self._elements)
+        all_non_features_map = map(self._get_loadable_required_vars, self._elements)
+        variables = self._get_inputs_for_new_ensemble(
+            list(set(itertools.chain(*all_non_features_map))),
+        )
         return StoringVariablesEnsemble(**variables)

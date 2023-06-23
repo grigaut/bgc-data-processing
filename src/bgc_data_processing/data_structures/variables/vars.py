@@ -601,3 +601,26 @@ class FeaturedVar(BaseVar):
         )
         self._feature = feature
         self.required_vars = feature.required_variables
+
+    @property
+    def feature(self) -> "BaseFeature":
+        """Feature for the variable."""
+        return self._feature
+
+    def is_loadable(self, loaded_list: list[ExistingVar | NotExistingVar]) -> bool:
+        """Find if the variable can be made using given some loaded variables.
+
+        Parameters
+        ----------
+        loaded_list : list[ExistingVar  |  NotExistingVar]
+            List of available variables.
+
+        Returns
+        -------
+        bool
+            True if the variable is loadable.
+        """
+        for var in self.required_vars:
+            if not any(x.name == var.name for x in loaded_list):
+                return False
+        return True
