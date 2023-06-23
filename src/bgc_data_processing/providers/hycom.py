@@ -6,6 +6,8 @@ from pathlib import Path
 from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, units
 from bgc_data_processing.data_sources import DataSource
 from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
+from bgc_data_processing.data_structures.variables.vars import FeatureVar
+from bgc_data_processing.features import ChlorophyllFromDiatomFlagellate
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -38,7 +40,13 @@ loader = DataSource(
         silicate=DEFAULT_VARS["silicate"]
         .in_file_as("ECO_sil")
         .correct_with(units.convert_silicate_mgc_by_m3_to_umol_by_l),
-        chlorophyll=DEFAULT_VARS["chlorophyll"].not_in_file(),
+        chlorophyll=FeatureVar(
+            ChlorophyllFromDiatomFlagellate.copy_var_infos_from_template(
+                template=DEFAULT_VARS["chlorophyll"],
+                diatom_variable=DEFAULT_VARS["diatom"].in_file_as("ECO_diac"),
+                flagellate_variable=DEFAULT_VARS["flagellate"].in_file_as("ECO_flac"),
+            ),
+        ),
     ),
     grid_basename=PROVIDERS_CONFIG["HYCOM"]["REGIONAL_GRID_BASENAME"],
 )
