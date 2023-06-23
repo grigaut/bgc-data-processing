@@ -9,13 +9,13 @@ from _collections_abc import dict_keys
 
 from bgc_data_processing.data_structures.variables.vars import (
     ExistingVar,
-    FeaturedVar,
+    FeatureVar,
     NotExistingVar,
     ParsedVar,
 )
 
-AllVariablesTypes: TypeAlias = ExistingVar | NotExistingVar | ParsedVar | FeaturedVar
-NotParsedvar: TypeAlias = ExistingVar | NotExistingVar | FeaturedVar
+AllVariablesTypes: TypeAlias = ExistingVar | NotExistingVar | ParsedVar | FeatureVar
+NotParsedvar: TypeAlias = ExistingVar | NotExistingVar | FeatureVar
 FromFileVariables: TypeAlias = ExistingVar | NotExistingVar
 
 
@@ -291,26 +291,26 @@ class FeatureVariablesSet(VariableSet):
         If multiple var object have the same name.
     """
 
-    def __init__(self, *args: "FeaturedVar", **kwargs: "FeaturedVar") -> None:
+    def __init__(self, *args: "FeatureVar", **kwargs: "FeatureVar") -> None:
         super().__init__(*args, **kwargs)
 
     def _get_constructable_features(
         self,
-        to_inspect: list[FeaturedVar],
+        to_inspect: list[FeatureVar],
         available_vars: list[AllVariablesTypes],
-    ) -> list[FeaturedVar]:
+    ) -> list[FeatureVar]:
         """Get constructables features given available variables.
 
         Parameters
         ----------
-        to_inspect : list[FeaturedVar]
+        to_inspect : list[FeatureVar]
             Features to inspect for constructibility.
         available_vars : list[AllVariablesTypes]
             Variables to use to construct the variables.
 
         Returns
         -------
-        list[FeaturedVar]
+        list[FeatureVar]
             Construtable variables.
         """
         return [f for f in to_inspect if f.is_loadable(available_vars)]
@@ -318,7 +318,7 @@ class FeatureVariablesSet(VariableSet):
     def iter_constructables_features(
         self,
         available_vars: list[AllVariablesTypes],
-    ) -> Iterator[FeaturedVar]:
+    ) -> Iterator[FeatureVar]:
         """Create an iterator returning constructables features.
 
         The Iterator considers that all constructed features
@@ -331,7 +331,7 @@ class FeatureVariablesSet(VariableSet):
 
         Yields
         ------
-        Iterator[FeaturedVar]
+        Iterator[FeatureVar]
             Iterator.
 
         Raises
@@ -926,7 +926,7 @@ class SourceVariableSet(BaseRequiredVarsSet):
 
     def _get_loadable_required_vars(
         self,
-        var: FromFileVariables | ParsedVar | FeaturedVar,
+        var: FromFileVariables | ParsedVar | FeatureVar,
     ) -> list[FromFileVariables | ParsedVar]:
         if var.is_feature:
             loadables = map(self._get_loadable_required_vars, var.required_vars)
@@ -935,7 +935,7 @@ class SourceVariableSet(BaseRequiredVarsSet):
 
     def _get_featured_vars(
         self,
-        var: FromFileVariables | ParsedVar | FeaturedVar,
+        var: FromFileVariables | ParsedVar | FeatureVar,
     ) -> list[FromFileVariables | ParsedVar]:
         if not var.is_feature:
             return []
@@ -944,7 +944,7 @@ class SourceVariableSet(BaseRequiredVarsSet):
 
     @property
     def features(self) -> FeatureVariablesSet:
-        """FeaturedVar list."""
+        """FeatureVar list."""
         all_features_map = map(self._get_featured_vars, self._elements)
         features = list(set(itertools.chain(*all_features_map)))
         return FeatureVariablesSet(*features)

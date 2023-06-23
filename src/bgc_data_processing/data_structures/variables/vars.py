@@ -579,7 +579,7 @@ class ParsedVar(BaseVar):
         return f"{self.name}_{self.unit}"
 
 
-class FeaturedVar(BaseVar):
+class FeatureVar(BaseVar):
     """Variable resulting of an operation between variables.
 
     Parameters
