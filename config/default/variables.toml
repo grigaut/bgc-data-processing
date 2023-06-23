@@ -223,3 +223,29 @@ DEFAULT = nan
 NAME_FORMAT = "%-10s"
 #? chlorophyll.VALUE_FORMAT: str: format to use to save the values of the variable as text
 VALUE_FORMAT = "%10.3f"
+[diatom]
+#? diatom.NAME: str: variable name
+NAME = "DIAC"
+#? diatom.UNIT: str: variable unit
+UNIT = "[mg/m3]"
+#? diatom.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE = "float"
+#? diatom.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT = nan
+#? diatom.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
+NAME_FORMAT = "%-10s"
+#? diatom.VALUE_FORMAT: str: format to use to save the values of the variable as text
+VALUE_FORMAT = "%10.3f"
+[flagellate]
+#? flagellate.NAME: str: variable name
+NAME = "FLAC"
+#? flagellate.UNIT: str: variable unit
+UNIT = "[mg/m3]"
+#? flagellate.TYPE: str: variable type (among ['int', 'float', 'str', 'datetime64[ns]'])
+TYPE = "float"
+#? flagellate.DEFAULT: str | int | float: default variable value if nan or not existing
+DEFAULT = nan
+#? flagellate.NAME_FORMAT: str: format to use to save the name and unit of the variable as text
+NAME_FORMAT = "%-10s"
+#? flagellate.VALUE_FORMAT: str: format to use to save the values of the variable as text
+VALUE_FORMAT = "%10.3f"
