@@ -2,6 +2,7 @@
 
 import itertools
 from collections.abc import Callable, Iterator
+from copy import copy
 from typing import TypeAlias
 
 import numpy as np
@@ -53,8 +54,11 @@ class BaseVariableEnsemble:
                 "To set multiple alias for the same variable, "
                 "use Var.in_file_as([alias1, alias2])",
             )
-        self._elements: list[FromFileVariables | ParsedVar] = [*args, *kwargs.values()]
-        self._save = [*args, *kwargs.values()]
+        self._instantiate_from_elements([*args, *kwargs.values()])
+
+    def _instantiate_from_elements(self, elements: list[AllVariablesTypes]) -> None:
+        self._elements: list[FromFileVariables | ParsedVar] = copy(elements)
+        self._save = copy(elements)
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
