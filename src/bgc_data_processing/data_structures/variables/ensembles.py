@@ -506,7 +506,6 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
         depth: FromFileVariables,
         hour: FromFileVariables | None = None,
         provider: FromFileVariables | None = None,
-        features: FeaturesEnsemble = FeaturesEnsemble(),
         *args: FromFileVariables,
         **kwargs: FromFileVariables,
     ) -> None:
@@ -524,7 +523,6 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
             *args,
             **kwargs,
         )
-        self._features = features
 
     @property
     def in_dset(self) -> list[ExistingVar]:
@@ -579,11 +577,6 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
             List of keys to use.
         """
         return [var.label for var in self._elements if var.remove_if_nan]
-
-    @property
-    def features(self) -> FeaturesEnsemble:
-        """Variables resulting from a feature."""
-        return self._features
 
 
 class StoringVariablesEnsemble(BaseRequiredVarsEnsemble):
@@ -881,13 +874,6 @@ class VariableEnsemble(BaseRequiredVarsEnsemble):
             return list(itertools.chain(*loadables))
         return [var]
 
-    @property
-    def features(self) -> FeaturesEnsemble:
-        """FeaturedVar list."""
-        all_features_map = map(self._get_featured_vars, self._elements)
-        features = list(set(itertools.chain(*all_features_map)))
-        return FeaturesEnsemble(*features)
-
     def _get_featured_vars(
         self,
         var: FromFileVariables | ParsedVar | FeaturedVar,
@@ -898,13 +884,20 @@ class VariableEnsemble(BaseRequiredVarsEnsemble):
         return [var, *list(itertools.chain(*loadables))]
 
     @property
+    def features(self) -> FeaturesEnsemble:
+        """FeaturedVar list."""
+        all_features_map = map(self._get_featured_vars, self._elements)
+        features = list(set(itertools.chain(*all_features_map)))
+        return FeaturesEnsemble(*features)
+
+    @property
     def loading_variables(self) -> LoadingVariablesEnsemble:
         """Ensembles of variables to load."""
         all_non_features_map = map(self._get_loadable_required_vars, self._elements)
         variables = self._get_inputs_for_new_ensemble(
             list(set(itertools.chain(*all_non_features_map))),
         )
-        return LoadingVariablesEnsemble(**variables, featured=self.features)
+        return LoadingVariablesEnsemble(**variables)
 
     @property
     def storing_variables(self) -> StoringVariablesEnsemble:
