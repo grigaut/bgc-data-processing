@@ -81,8 +81,23 @@ class BaseFeature(ABC):
         """
         return (storer.data[x.label] for x in self._source_vars)
 
+    def _extract_from_dataframe(self, dataframe: pd.DataFrame) -> tuple[pd.Series]:
+        """Extract the required data columns from a dataframe.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            Dataframe to extract data from.
+
+        Returns
+        -------
+        tuple[pd.Series]
+            Tuple of required series.
+        """
+        return (dataframe[x.label] for x in self._source_vars)
+
     @abstractmethod
-    def _transform(self, *args: pd.Series) -> pd.Series:
+    def transform(self, *args: pd.Series) -> pd.Series:
         """Compute the new variable values using all required series."""
 
     def insert_in_storer(self, storer: "Storer") -> None:
@@ -93,12 +108,27 @@ class BaseFeature(ABC):
         storer : Storer
             Storer to include data into.
         """
-        data = self._transform(*self._extract_from_storer(storer=storer))
+        data = self.transform(*self._extract_from_storer(storer=storer))
         data.index = storer.data.index
         storer.add_feature(
             variable=self.variable,
             data=data,
         )
+
+    def from_dataframe(self, dataframe: pd.DataFrame) -> pd.Series:
+        """Create the feature from a given dataframe.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            Dataframe to use to constitude data.
+
+        Returns
+        -------
+        pd.Series
+            Feature data.
+        """
+        return self.transform(*self._extract_from_dataframe(dataframe=dataframe))
 
 
 class Pressure(BaseFeature):
@@ -133,7 +163,7 @@ class Pressure(BaseFeature):
         )
         self._source_vars = [depth_variable, latitude_variable]
 
-    def _transform(self, depth: pd.Series, latitude: pd.Series) -> pd.Series:
+    def transform(self, depth: pd.Series, latitude: pd.Series) -> pd.Series:
         """Compute pressure from depth and latitude.
 
         Parameters
@@ -188,7 +218,7 @@ class PotentialTemperature(BaseFeature):
         )
         self._source_vars = [salinity_variable, temperature_variable, pressure_variable]
 
-    def _transform(
+    def transform(
         self,
         salinity: pd.Series,
         temperature: pd.Series,
@@ -247,7 +277,7 @@ class SigmaT(BaseFeature):
         )
         self._source_vars = [salinity_variable, temperature_variable]
 
-    def _transform(
+    def transform(
         self,
         salinity: pd.Series,
         temperature: pd.Series,
@@ -303,7 +333,7 @@ class ChlorophyllFromDiatomFlagellate(BaseFeature):
         )
         self._source_vars = [diatom_variable, flagellate_variable]
 
-    def _transform(
+    def transform(
         self,
         diatom: pd.Series,
         flagellate: pd.Series,

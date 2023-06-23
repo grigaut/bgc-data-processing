@@ -245,6 +245,94 @@ class BaseVariableEnsemble:
         return {var.name: var for var in self._elements}
 
 
+class FeaturesEnsemble(BaseVariableEnsemble):
+    """Ensemble of features.
+
+    This class represents the set of both variables present \
+    in the file and variables to take in consideration \
+    (therefore to add even if empty) when loading the data.
+
+    Parameters
+    ----------
+    *args: list
+        Var objects to represent the variables stored by the object.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods.
+    *kwargs: dict
+        Var objects to represent the variables stored by the object.
+        It is better if these Var object have been instanciated
+        using .not_here or .here_as methods. The parameter name has no importance.
+
+    Raises
+    ------
+    ValueError:
+        If multiple var object have the same name.
+    """
+
+    def __init__(self, *args: "FeaturedVar", **kwargs: "FeaturedVar") -> None:
+        super().__init__(*args, **kwargs)
+
+    def _get_constructable_features(
+        self,
+        to_inspect: list[FeaturedVar],
+        available_vars: list[AllVariablesTypes],
+    ) -> list[FeaturedVar]:
+        """Get constructables features given available variables.
+
+        Parameters
+        ----------
+        to_inspect : list[FeaturedVar]
+            Features to inspect for constructibility.
+        available_vars : list[AllVariablesTypes]
+            Variables to use to construct the variables.
+
+        Returns
+        -------
+        list[FeaturedVar]
+            Construtable variables.
+        """
+        return [f for f in to_inspect if f.is_loadable(available_vars)]
+
+    def iter_constructables_features(
+        self,
+        available_vars: list[AllVariablesTypes],
+    ) -> Iterator[FeaturedVar]:
+        """Create an iterator returning constructables features.
+
+        The Iterator considers that all constructed features
+        are available to construct the following ones.
+
+        Parameters
+        ----------
+        available_vars : list[AllVariablesTypes]
+            Variable available to build the features.
+
+        Yields
+        ------
+        Iterator[FeaturedVar]
+            Iterator.
+
+        Raises
+        ------
+        ValueError
+            If all features can not be constructed.
+        """
+        available = available_vars.copy()
+        features = self._elements.copy()
+        constructables = self._get_constructable_features(features, available)
+        while constructables:
+            for feature in constructables:
+                available.append(feature)
+                yield feature
+            features = [f for f in features if all(f != a for a in available)]
+            constructables = self._get_constructable_features(features, available)
+        if features:
+            raise ValueError(
+                f"The following features can not be loaded: {features}."
+                "They probably depend on non loaded variables.",
+            )
+
+
 class BaseRequiredVarsEnsemble(BaseVariableEnsemble):
     """Storer for Variable objects with some required variables.
 
@@ -418,7 +506,7 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
         depth: FromFileVariables,
         hour: FromFileVariables | None = None,
         provider: FromFileVariables | None = None,
-        featured: list[FeaturedVar] = [],
+        features: FeaturesEnsemble = FeaturesEnsemble(),
         *args: FromFileVariables,
         **kwargs: FromFileVariables,
     ) -> None:
@@ -436,7 +524,7 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
             *args,
             **kwargs,
         )
-        self._featured = featured
+        self._features = features
 
     @property
     def in_dset(self) -> list[ExistingVar]:
@@ -493,9 +581,9 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
         return [var.label for var in self._elements if var.remove_if_nan]
 
     @property
-    def variables_from_features(self) -> list["FeaturedVar"]:
+    def features(self) -> FeaturesEnsemble:
         """Variables resulting from a feature."""
-        return self._featured
+        return self._features
 
 
 class StoringVariablesEnsemble(BaseRequiredVarsEnsemble):
@@ -794,10 +882,11 @@ class VariableEnsemble(BaseRequiredVarsEnsemble):
         return [var]
 
     @property
-    def featured_variables(self) -> list[FromFileVariables | ParsedVar]:
+    def features(self) -> FeaturesEnsemble:
         """FeaturedVar list."""
         all_features_map = map(self._get_featured_vars, self._elements)
-        return list(set(itertools.chain(*all_features_map)))
+        features = list(set(itertools.chain(*all_features_map)))
+        return FeaturesEnsemble(*features)
 
     def _get_featured_vars(
         self,
@@ -815,7 +904,7 @@ class VariableEnsemble(BaseRequiredVarsEnsemble):
         variables = self._get_inputs_for_new_ensemble(
             list(set(itertools.chain(*all_non_features_map))),
         )
-        return LoadingVariablesEnsemble(**variables, featured=self.featured_variables)
+        return LoadingVariablesEnsemble(**variables, featured=self.features)
 
     @property
     def storing_variables(self) -> StoringVariablesEnsemble:
