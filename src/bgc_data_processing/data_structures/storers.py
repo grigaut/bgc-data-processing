@@ -10,7 +10,7 @@ import pandas as pd
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
     from bgc_data_processing.data_structures.variables.ensembles import (
-        StoringVariablesEnsemble,
+        StoringVariablesSet,
     )
     from bgc_data_processing.data_structures.variables.vars import (
         NotExistingVar,
@@ -28,7 +28,7 @@ class Storer:
         Data category.
     providers : list
         Names of the data providers.
-    variables : StoringVariablesEnsemble
+    variables : StoringVariablesSet
         Variables storer of object to keep track of the variables in the Dataframe.
     verbose : int, optional
         Controls the verbosity: the higher, the more messages., by default 0
@@ -39,7 +39,7 @@ class Storer:
         data: pd.DataFrame,
         category: str,
         providers: list,
-        variables: "StoringVariablesEnsemble",
+        variables: "StoringVariablesSet",
         verbose: int = 0,
     ) -> None:
         self._data = data
@@ -82,12 +82,12 @@ class Storer:
         return self._providers
 
     @property
-    def variables(self) -> "StoringVariablesEnsemble":
+    def variables(self) -> "StoringVariablesSet":
         """Getter for self._variables.
 
         Returns
         -------
-        StoringVariablesEnsemble
+        StoringVariablesSet
             Variables storer.
         """
         return self._variables

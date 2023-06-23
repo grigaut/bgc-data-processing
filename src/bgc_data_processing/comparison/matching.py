@@ -16,7 +16,7 @@ from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 if TYPE_CHECKING:
     from bgc_data_processing.data_sources import DataSource
     from bgc_data_processing.data_structures.variables.ensembles import (
-        LoadingVariablesEnsemble,
+        LoadingVariablesSet,
     )
 
 
@@ -31,7 +31,7 @@ class SelectiveABFileLoader(ABFileLoader):
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    variables : LoadingVariablesEnsemble
+    variables : LoadingVariablesSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     grid_basename: str
@@ -44,7 +44,7 @@ class SelectiveABFileLoader(ABFileLoader):
         provider_name: str,
         category: str,
         exclude: list[str],
-        variables: "LoadingVariablesEnsemble",
+        variables: "LoadingVariablesSet",
         grid_basename: str,
     ) -> None:
         super().__init__(

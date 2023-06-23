@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
     from bgc_data_processing.data_structures.storers import Storer
     from bgc_data_processing.data_structures.variables.ensembles import (
-        StoringVariablesEnsemble,
+        StoringVariablesSet,
     )
     from bgc_data_processing.water_masses import WaterMass
 
@@ -194,12 +194,12 @@ class DensityPlotter(BasePlot):
         self._data = self._storer.data.sort_values(depth_var_label, ascending=False)
         self._grouping_columns = self._get_grouping_columns(self._variables)
 
-    def _get_grouping_columns(self, variables: "StoringVariablesEnsemble") -> list:
+    def _get_grouping_columns(self, variables: "StoringVariablesSet") -> list:
         """Return a list of columns to use when grouping the data.
 
         Parameters
         ----------
-        variables : StoringVariablesEnsemble
+        variables : StoringVariablesSet
             Dtaa variables.
 
         Returns

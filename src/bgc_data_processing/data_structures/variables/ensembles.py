@@ -267,7 +267,7 @@ class VariableSet:
         return {var.name: var for var in self._elements}
 
 
-class FeaturesSet(VariableSet):
+class FeatureVariablesSet(VariableSet):
     """Ensemble of features.
 
     This class represents the set of both variables present \
@@ -509,7 +509,7 @@ class BaseRequiredVarsSet(VariableSet):
         }
 
 
-class LoadingVariablesEnsemble(BaseRequiredVarsSet):
+class LoadingVariablesSet(BaseRequiredVarsSet):
     """Storer for Var object which are going to be loaded.
 
     This class represents the set of both variables present \
@@ -638,7 +638,7 @@ class LoadingVariablesEnsemble(BaseRequiredVarsSet):
         return [var.label for var in self._elements if var.remove_if_nan]
 
 
-class StoringVariablesEnsemble(BaseRequiredVarsSet):
+class StoringVariablesSet(BaseRequiredVarsSet):
     """Storer for Var object which are going to be stored.
 
     This class represents the set of both variables present \
@@ -732,13 +732,13 @@ class StoringVariablesEnsemble(BaseRequiredVarsSet):
         self._save = new_save
 
     @property
-    def saving_variables(self) -> "SavingVariablesEnsemble":
+    def saving_variables(self) -> "SavingVariablesSet":
         """Order of the variables to save."""
         variables = self._get_inputs_for_new_ensemble(self._elements)
-        return SavingVariablesEnsemble(**variables, save_order=self._save.copy())
+        return SavingVariablesSet(**variables, save_order=self._save.copy())
 
 
-class SavingVariablesEnsemble(BaseRequiredVarsSet):
+class SavingVariablesSet(BaseRequiredVarsSet):
     """Storer for Var object which are going to be saved.
 
     This class represents the set of both variables present \
@@ -943,27 +943,27 @@ class SourceVariableSet(BaseRequiredVarsSet):
         return [var, *list(itertools.chain(*loadables))]
 
     @property
-    def features(self) -> FeaturesSet:
+    def features(self) -> FeatureVariablesSet:
         """FeaturedVar list."""
         all_features_map = map(self._get_featured_vars, self._elements)
         features = list(set(itertools.chain(*all_features_map)))
-        return FeaturesSet(*features)
+        return FeatureVariablesSet(*features)
 
     @property
-    def loading_variables(self) -> LoadingVariablesEnsemble:
+    def loading_variables(self) -> LoadingVariablesSet:
         """Ensembles of variables to load."""
         all_non_features_map = map(self._get_loadable_required_vars, self._elements)
         variables = self._get_inputs_for_new_ensemble(
             list(set(itertools.chain(*all_non_features_map))),
         )
-        return LoadingVariablesEnsemble(**variables)
+        return LoadingVariablesSet(**variables)
 
     @property
-    def storing_variables(self) -> StoringVariablesEnsemble:
+    def storing_variables(self) -> StoringVariablesSet:
         """Ensemble of variables to store."""
         # variables = self._get_inputs_for_new_ensemble(self._elements)
         all_non_features_map = map(self._get_loadable_required_vars, self._elements)
         variables = self._get_inputs_for_new_ensemble(
             list(set(itertools.chain(*all_non_features_map))),
         )
-        return StoringVariablesEnsemble(**variables)
+        return StoringVariablesSet(**variables)

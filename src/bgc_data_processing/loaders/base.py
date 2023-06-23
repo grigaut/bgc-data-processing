@@ -9,7 +9,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables.ensembles import (
-        LoadingVariablesEnsemble,
+        LoadingVariablesSet,
     )
 
 
@@ -36,7 +36,7 @@ class BaseLoader(ABC):
         provider_name: str,
         category: str,
         exclude: list[str],
-        variables: "LoadingVariablesEnsemble",
+        variables: "LoadingVariablesSet",
     ) -> None:
         self._provider = provider_name
         self._category = category
@@ -77,12 +77,12 @@ class BaseLoader(ABC):
         return self._verbose
 
     @property
-    def variables(self) -> "LoadingVariablesEnsemble":
+    def variables(self) -> "LoadingVariablesSet":
         """_variables attribute getter.
 
         Returns
         -------
-        LoadingVariablesEnsemble
+        LoadingVariablesSet
             Loading variables storer.
         """
         return self._variables
