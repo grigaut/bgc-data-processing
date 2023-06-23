@@ -11,9 +11,9 @@ from sklearn.neighbors import NearestNeighbors
 
 from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.core.io.savers import StorerSaver
+from bgc_data_processing.core.loaders.abfile_loaders import ABFileLoader
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import (

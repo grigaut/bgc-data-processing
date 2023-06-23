@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.core.filtering import Constraints
+from bgc_data_processing.core.loaders.base import BaseLoader
 from bgc_data_processing.exceptions import NetCDFLoadingError
-from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import SourceVariableSet

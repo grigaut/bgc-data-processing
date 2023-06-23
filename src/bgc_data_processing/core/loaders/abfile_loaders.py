@@ -9,11 +9,11 @@ import pandas as pd
 from abfile import ABFileArchv, ABFileGrid
 
 from bgc_data_processing.core.filtering import Constraints
+from bgc_data_processing.core.loaders.base import BaseLoader
 from bgc_data_processing.core.variables.vars import (
     ExistingVar,
     NotExistingVar,
 )
-from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import SourceVariableSet
