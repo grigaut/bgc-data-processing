@@ -183,6 +183,18 @@ class DataSource:
         for fvar in features.iter_constructables_features(storer_vars):
             fvar.feature.insert_in_storer(storer)
 
+    def _remove_temporary_variables(self, storer: "Storer") -> None:
+        """Remove variables which were used to construct features.
+
+        Parameters
+        ----------
+        storer : Storer
+            Storer to remove variables from
+        """
+        to_remove = [x for x in storer.variables if not self.variables.has_name(x.name)]
+        for var in to_remove:
+            _ = storer.pop(var.name)
+
     def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
         """Create the storer with the data from a given filepath.
 
@@ -207,6 +219,7 @@ class DataSource:
             verbose=self._verbose,
         )
         self._insert_all_features(storer)
+        self._remove_temporary_variables(storer)
         return storer
 
     def load_and_save(
