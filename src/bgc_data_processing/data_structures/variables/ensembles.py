@@ -880,7 +880,7 @@ class SavingVariablesEnsemble(BaseRequiredVarsSet):
         return " ".join([var.value_format for var in self._save])
 
 
-class VariableSet(BaseRequiredVarsSet):
+class SourceVariableSet(BaseRequiredVarsSet):
     """Ensemble of variables.
 
     This class represents the set of both variables present \

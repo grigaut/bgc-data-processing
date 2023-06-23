@@ -8,7 +8,7 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.ensembles import VariableSet
+from bgc_data_processing.data_structures.variables.ensembles import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -18,7 +18,7 @@ loader = DataSource(
     data_category=PROVIDERS_CONFIG["CLIVAR"]["CATEGORY"],
     excluded_files=PROVIDERS_CONFIG["CLIVAR"]["EXCLUDE"],
     files_pattern=FileNamePattern("clivar_({years})[0-9][0-9][0-9][0-9]_.*.csv"),
-    variable_ensemble=VariableSet(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("EXPOCODE"),
         date=DEFAULT_VARS["date"].in_file_as("DATE"),

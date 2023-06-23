@@ -8,7 +8,7 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.ensembles import VariableSet
+from bgc_data_processing.data_structures.variables.ensembles import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -18,7 +18,7 @@ loader = DataSource(
     data_category=PROVIDERS_CONFIG["NMDC"]["CATEGORY"],
     excluded_files=PROVIDERS_CONFIG["NMDC"]["EXCLUDE"],
     files_pattern=FileNamePattern("NMDC_1990-2019_all.csv"),
-    variable_ensemble=VariableSet(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("SDN_CRUISE"),
         date=DEFAULT_VARS["date"].in_file_as("Time"),

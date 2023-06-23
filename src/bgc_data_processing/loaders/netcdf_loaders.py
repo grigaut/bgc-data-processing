@@ -15,7 +15,7 @@ from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables.ensembles import (
-        VariableSet,
+        SourceVariableSet,
     )
     from bgc_data_processing.data_structures.variables.vars import (
         ExistingVar,
@@ -34,7 +34,7 @@ class NetCDFLoader(BaseLoader):
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    variables : VariableSet
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     """
@@ -51,7 +51,7 @@ class NetCDFLoader(BaseLoader):
         provider_name: str,
         category: str,
         exclude: list[str],
-        variables: "VariableSet",
+        variables: "SourceVariableSet",
     ) -> None:
         super().__init__(
             provider_name=provider_name,
@@ -467,7 +467,7 @@ class SatelliteNetCDFLoader(NetCDFLoader):
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    variables : VariableSet
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     """
@@ -477,7 +477,7 @@ class SatelliteNetCDFLoader(NetCDFLoader):
         provider_name: str,
         category: str,
         exclude: list[str],
-        variables: "VariableSet",
+        variables: "SourceVariableSet",
     ) -> None:
         super().__init__(
             provider_name=provider_name,

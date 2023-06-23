@@ -7,7 +7,7 @@ from bgc_data_processing import (
     PROVIDERS_CONFIG,
 )
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.ensembles import VariableSet
+from bgc_data_processing.data_structures.variables.ensembles import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -17,7 +17,7 @@ loader = DataSource(
     data_category=PROVIDERS_CONFIG["ESACCI-OC"]["CATEGORY"],
     excluded_files=PROVIDERS_CONFIG["ESACCI-OC"]["EXCLUDE"],
     files_pattern=FileNamePattern("{years}/.*-{years}{months}{days}-.*.nc"),
-    variable_ensemble=VariableSet(
+    variable_ensemble=SourceVariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].not_in_file(),
         date=DEFAULT_VARS["date"].in_file_as("time"),

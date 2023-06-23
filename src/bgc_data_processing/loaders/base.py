@@ -24,7 +24,7 @@ class BaseLoader(ABC):
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    variables : VariableSet
+    variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     """
