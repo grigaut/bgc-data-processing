@@ -589,6 +589,7 @@ class FeaturedVar(BaseVar):
     """
 
     is_feature = True
+    exist_in_dset: bool = False
 
     def __init__(self, feature: "BaseFeature"):
         super().__init__(
