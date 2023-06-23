@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from seawater import eos80
 
-from bgc_data_processing.data_structures.variables.vars import (
+from bgc_data_processing.core.variables.vars import (
     ExistingVar,
     NotExistingVar,
     ParsedVar,
@@ -15,7 +15,7 @@ from bgc_data_processing.data_structures.variables.vars import (
 )
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.storers import Storer
+    from bgc_data_processing.core.storers import Storer
 
 
 class BaseFeature(ABC):

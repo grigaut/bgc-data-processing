@@ -7,12 +7,12 @@ import numpy as np
 import pandas as pd
 from pandas.errors import EmptyDataError
 
-from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
-    from bgc_data_processing.data_structures.variables.vars import ExistingVar
+    from bgc_data_processing.core.variables.sets import SourceVariableSet
+    from bgc_data_processing.core.variables.vars import ExistingVar
 
 
 class CSVLoader(BaseLoader):

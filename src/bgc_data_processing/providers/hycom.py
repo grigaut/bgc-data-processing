@@ -3,10 +3,11 @@
 
 from pathlib import Path
 
-from bgc_data_processing import DEFAULT_VARS, PROVIDERS_CONFIG, units
+from bgc_data_processing import units
+from bgc_data_processing.core.variables.sets import SourceVariableSet
+from bgc_data_processing.core.variables.vars import FeatureVar
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
-from bgc_data_processing.data_structures.variables.vars import FeatureVar
+from bgc_data_processing.defaults import DEFAULT_VARS, PROVIDERS_CONFIG
 from bgc_data_processing.features import ChlorophyllFromDiatomFlagellate
 from bgc_data_processing.utils.patterns import FileNamePattern
 

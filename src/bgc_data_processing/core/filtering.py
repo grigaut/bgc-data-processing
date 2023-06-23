@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from shapely import Polygon
 
-from bgc_data_processing.data_structures.storers import Storer
+from bgc_data_processing.core.storers import Storer
 
 if TYPE_CHECKING:
     from collections.abc import Callable

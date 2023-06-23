@@ -4,22 +4,14 @@ import datetime as dt
 from math import ceil
 from pathlib import Path
 
+import bgc_data_processing as bgc_dp
 import matplotlib.pyplot as plt
-from bgc_data_processing import (
-    DEFAULT_VARS,
-    DEFAULT_WATER_MASSES,
-    data_structures,
-    features,
-    parsers,
-    tracers,
-)
-from bgc_data_processing.water_masses import WaterMass
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = parsers.ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -36,30 +28,32 @@ if __name__ == "__main__":
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
     ACRONYMS: list[str] = CONFIG["WATER_MASS_ACRONYMS"]
-    WATER_MASSES: list[WaterMass] = [DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS]
+    WATER_MASSES: list[bgc_dp.WaterMass] = [
+        bgc_dp.defaults.DEFAULT_WATER_MASSES[acro] for acro in ACRONYMS
+    ]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    SALINITY_DEFAULT = DEFAULT_VARS["salinity"]
-    TEMPERATURE_DEFAULT = DEFAULT_VARS["temperature"]
+    SALINITY_DEFAULT = bgc_dp.defaults.DEFAULT_VARS["salinity"]
+    TEMPERATURE_DEFAULT = bgc_dp.defaults.DEFAULT_VARS["temperature"]
 
     filepaths_txt = list(LOADING_DIR.glob("*.txt"))
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = data_structures.read_files(
+    storer = bgc_dp.read_files(
         filepaths,
-        providers_column_label=DEFAULT_VARS["provider"].label,
-        expocode_column_label=DEFAULT_VARS["expocode"].label,
-        date_column_label=DEFAULT_VARS["date"].label,
-        year_column_label=DEFAULT_VARS["year"].label,
-        month_column_label=DEFAULT_VARS["month"].label,
-        day_column_label=DEFAULT_VARS["day"].label,
-        hour_column_label=DEFAULT_VARS["hour"].label,
-        latitude_column_label=DEFAULT_VARS["latitude"].label,
-        longitude_column_label=DEFAULT_VARS["longitude"].label,
-        depth_column_label=DEFAULT_VARS["depth"].label,
+        providers_column_label=bgc_dp.defaults.DEFAULT_VARS["provider"].label,
+        expocode_column_label=bgc_dp.defaults.DEFAULT_VARS["expocode"].label,
+        date_column_label=bgc_dp.defaults.DEFAULT_VARS["date"].label,
+        year_column_label=bgc_dp.defaults.DEFAULT_VARS["year"].label,
+        month_column_label=bgc_dp.defaults.DEFAULT_VARS["month"].label,
+        day_column_label=bgc_dp.defaults.DEFAULT_VARS["day"].label,
+        hour_column_label=bgc_dp.defaults.DEFAULT_VARS["hour"].label,
+        latitude_column_label=bgc_dp.defaults.DEFAULT_VARS["latitude"].label,
+        longitude_column_label=bgc_dp.defaults.DEFAULT_VARS["longitude"].label,
+        depth_column_label=bgc_dp.defaults.DEFAULT_VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -67,25 +61,25 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    # Add relevant features to the data: Pressure / potential temperature /sigmat
-    pres_feat = features.Pressure(
+    # Add relevant bgc_dp.features to the data: Pressure / potential temperature /sigmat
+    pres_feat = bgc_dp.features.Pressure(
         depth_variable=variables.get(variables.depth_var_name),
         latitude_variable=variables.get(variables.latitude_var_name),
     )
     pres_feat.insert_in_storer(storer)
-    ptemp_feat = features.PotentialTemperature(
+    ptemp_feat = bgc_dp.features.PotentialTemperature(
         salinity_variable=SALINITY_DEFAULT,
         temperature_variable=TEMPERATURE_DEFAULT,
         pressure_variable=pres_feat.variable,
     )
     ptemp_feat.insert_in_storer(storer)
-    sigmat_feat = features.SigmaT(
+    sigmat_feat = bgc_dp.features.SigmaT(
         salinity_variable=SALINITY_DEFAULT,
         temperature_variable=TEMPERATURE_DEFAULT,
     )
     sigmat_feat.insert_in_storer(storer)
 
-    constraints = data_structures.Constraints()
+    constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -116,7 +110,7 @@ if __name__ == "__main__":
             salinity_name=SALINITY_DEFAULT.label,
             sigma_t_name=sigmat_feat.variable.label,
         )
-        plot = tracers.VariableHistogram(storer_wm, constraints)
+        plot = bgc_dp.tracers.VariableHistogram(storer_wm, constraints)
         plot.plot_to_axes(PLOT_VARIABLE, ax=axes)
         axes.set_title(f"{watermass.name} ({watermass.acronym})")
     plt.suptitle(f"{PLOT_VARIABLE} Histogram")

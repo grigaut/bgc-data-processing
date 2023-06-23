@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-from bgc_data_processing.data_structures.storers import Storer
+from bgc_data_processing.core.storers import Storer
 
 
 class Interpolator:

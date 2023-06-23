@@ -7,8 +7,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import shapely
-from bgc_data_processing import DEFAULT_VARS, data_structures
-from bgc_data_processing.data_structures import Constraints, Storer, StorerSaver
+from bgc_data_processing import DEFAULT_VARS, core
+from bgc_data_processing.core import Constraints, Storer, StorerSaver
 from bgc_data_processing.parsers import ConfigParser
 from bgc_data_processing.tracers import DensityPlotter, EvolutionProfile
 from cartopy import crs
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = data_structures.read_files(
+    storer = core.read_files(
         filepath=filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,

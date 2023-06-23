@@ -5,7 +5,7 @@ from pathlib import Path
 
 from bgc_data_processing import (
     DEFAULT_VARS,
-    data_structures,
+    core,
     features,
     parsers,
     tracers,
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     filepaths_csv = list(LOADING_DIR.glob("*.csv"))
     filepaths = filepaths_txt + filepaths_csv
 
-    storer = data_structures.read_files(
+    storer = core.read_files(
         filepath=filepaths,
         providers_column_label=DEFAULT_VARS["provider"].label,
         expocode_column_label=DEFAULT_VARS["expocode"].label,
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )
     ptemp_feat.insert_in_storer(storer)
     # Add global constraints
-    constraints = data_structures.Constraints()
+    constraints = core.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,

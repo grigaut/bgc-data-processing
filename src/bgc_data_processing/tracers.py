@@ -13,7 +13,7 @@ from cartopy import crs, feature
 from scipy.stats import norm
 from seawater import eos80
 
-from bgc_data_processing.data_structures.filtering import Constraints
+from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.utils.dateranges import DateRangeGenerator
 
 if TYPE_CHECKING:
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
     from matplotlib.collections import Collection, PathCollection
     from matplotlib.figure import Figure
 
-    from bgc_data_processing.data_structures.storers import Storer
-    from bgc_data_processing.data_structures.variables.sets import StoringVariablesSet
+    from bgc_data_processing.core.storers import Storer
+    from bgc_data_processing.core.variables.sets import StoringVariablesSet
     from bgc_data_processing.water_masses import WaterMass
 
 

@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from bgc_data_processing.data_structures.storers import Storer
-from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
-from bgc_data_processing.data_structures.variables.vars import ParsedVar
+from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.core.variables.sets import SourceVariableSet
+from bgc_data_processing.core.variables.vars import ParsedVar
 
 
 def read_files(
