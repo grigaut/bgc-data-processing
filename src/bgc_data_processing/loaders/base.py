@@ -8,9 +8,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        LoadingVariablesSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import LoadingVariablesSet
 
 
 class BaseLoader(ABC):

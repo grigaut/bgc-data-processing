@@ -14,9 +14,7 @@ from bgc_data_processing.exceptions import NetCDFLoadingError
 from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        SourceVariableSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
     from bgc_data_processing.data_structures.variables.vars import (
         ExistingVar,
         NotExistingVar,

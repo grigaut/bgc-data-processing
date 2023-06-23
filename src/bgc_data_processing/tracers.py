@@ -23,9 +23,7 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from bgc_data_processing.data_structures.storers import Storer
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        StoringVariablesSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import StoringVariablesSet
     from bgc_data_processing.water_masses import WaterMass
 
 

@@ -10,7 +10,7 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.ensembles import SourceVariableSet
+from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(

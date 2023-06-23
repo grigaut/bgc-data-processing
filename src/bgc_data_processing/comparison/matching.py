@@ -15,9 +15,7 @@ from bgc_data_processing.loaders.abfile_loaders import ABFileLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_sources import DataSource
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        LoadingVariablesSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import LoadingVariablesSet
 
 
 class SelectiveABFileLoader(ABFileLoader):

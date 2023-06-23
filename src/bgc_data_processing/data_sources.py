@@ -14,9 +14,7 @@ from bgc_data_processing.loaders.netcdf_loaders import (
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        SourceVariableSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import SourceVariableSet
     from bgc_data_processing.loaders.base import BaseLoader
     from bgc_data_processing.utils.dateranges import DateRangeGenerator
     from bgc_data_processing.utils.patterns import FileNamePattern

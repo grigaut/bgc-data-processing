@@ -9,9 +9,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
-    from bgc_data_processing.data_structures.variables.ensembles import (
-        StoringVariablesSet,
-    )
+    from bgc_data_processing.data_structures.variables.sets import StoringVariablesSet
     from bgc_data_processing.data_structures.variables.vars import (
         NotExistingVar,
     )
