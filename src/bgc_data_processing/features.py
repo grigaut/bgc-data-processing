@@ -11,6 +11,7 @@ from bgc_data_processing.data_structures.variables.vars import (
     ExistingVar,
     NotExistingVar,
     ParsedVar,
+    TemplateVar,
 )
 
 if TYPE_CHECKING:
@@ -100,6 +101,34 @@ class BaseFeature(ABC):
             data=data,
         )
 
+    @classmethod
+    def copy_var_infos_from_template(
+        cls,
+        template: "TemplateVar",
+        **kwargs: ExistingVar | NotExistingVar | ParsedVar,
+    ) -> "BaseFeature":
+        """Create Feature from a variable template.
+
+        Parameters
+        ----------
+        template : TemplateVar
+            Template to use for the variable definition.
+
+        Returns
+        -------
+        BaseFeature
+            Feature.
+        """
+        return cls(
+            **kwargs,
+            var_name=template.name,
+            var_unit=template.unit,
+            var_type=template.type,
+            var_default=template.default,
+            var_name_format=template.name_format,
+            var_value_format=template.value_format,
+        )
+
 
 class Pressure(BaseFeature):
     """Pressure feature.
@@ -110,6 +139,14 @@ class Pressure(BaseFeature):
         Variable for depth.
     latitude_variable : ExistingVar | NotExistingVar | ParsedVar
         Variable for latitude.
+    var_name : str, optional
+        Variable Name., by default "PRES"
+    var_unit : str, optional
+        Variable unit., by default "[dbars]"
+    var_type : str, optional
+        Data type., by default float
+    var_default : Any, optional
+        Default value., by default np.nan
     var_name_format : str, optional
         Name format for the added variable., by default "%-10s"
     var_value_format : str, optional
@@ -120,14 +157,18 @@ class Pressure(BaseFeature):
         self,
         depth_variable: ExistingVar | NotExistingVar | ParsedVar,
         latitude_variable: ExistingVar | NotExistingVar | ParsedVar,
+        var_name: str = "PRES",
+        var_unit: str = "[dbars]",
+        var_type: str = float,
+        var_default: Any = np.nan,
         var_name_format: str = "%-10s",
         var_value_format: str = "%10.3f",
     ) -> None:
         super().__init__(
-            var_name="PRES",
-            var_unit="[dbars]",
-            var_type=float,
-            var_default=np.nan,
+            var_name=var_name,
+            var_unit=var_unit,
+            var_type=var_type,
+            var_default=var_default,
             var_name_format=var_name_format,
             var_value_format=var_value_format,
         )
@@ -164,6 +205,14 @@ class PotentialTemperature(BaseFeature):
         Variable for temperature.
     pressure_variable : ExistingVar | NotExistingVar | ParsedVar
         Variable for pressure.
+    var_name : str, optional
+        Variable name., by default "PTEMP"
+    var_unit : str, optional
+        Variable unit., by default "[deg_C]"
+    var_type : str, optional
+        Data type., by default float
+    var_default : Any, optional
+        Default value, by default np.nan
     var_name_format : str, optional
         Name format for the added variable., by default "%-10s"
     var_value_format : str, optional
@@ -175,14 +224,18 @@ class PotentialTemperature(BaseFeature):
         salinity_variable: ExistingVar | NotExistingVar | ParsedVar,
         temperature_variable: ExistingVar | NotExistingVar | ParsedVar,
         pressure_variable: ExistingVar | NotExistingVar | ParsedVar,
+        var_name: str = "PTEMP",
+        var_unit: str = "[deg_C]",
+        var_type: str = float,
+        var_default: Any = np.nan,
         var_name_format: str = "%-10s",
         var_value_format: str = "%10.3f",
     ) -> None:
         super().__init__(
-            var_name="PTEMP",
-            var_unit="[deg_C]",
-            var_type=float,
-            var_default=np.nan,
+            var_name=var_name,
+            var_unit=var_unit,
+            var_type=var_type,
+            var_default=var_default,
             var_name_format=var_name_format,
             var_value_format=var_value_format,
         )
@@ -224,6 +277,14 @@ class SigmaT(BaseFeature):
         Variable for slainity.
     temperature_variable : ExistingVar | NotExistingVar | ParsedVar
         Variable for temperature.
+    var_name : str, optional
+        Variable name., by default "SIGT"
+    var_unit : str, optional
+        Variable unit., by default "[kg/m3]"
+    var_type : str, optional
+        Data type., by default float
+    var_default : Any, optional
+        Default value., by default np.nan
     var_name_format : str, optional
         Name format for the added variable., by default "%-10s"
     var_value_format : str, optional
@@ -234,14 +295,18 @@ class SigmaT(BaseFeature):
         self,
         salinity_variable: ExistingVar | NotExistingVar | ParsedVar,
         temperature_variable: ExistingVar | NotExistingVar | ParsedVar,
+        var_name: str = "SIGT",
+        var_unit: str = "[kg/m3]",
+        var_type: str = float,
+        var_default: Any = np.nan,
         var_name_format: str = "%-10s",
         var_value_format: str = "%10.3f",
     ) -> None:
         super().__init__(
-            var_name="SIGT",
-            var_unit="[kg/m3]",
-            var_type=float,
-            var_default=np.nan,
+            var_name=var_name,
+            var_unit=var_unit,
+            var_type=var_type,
+            var_default=var_default,
             var_name_format=var_name_format,
             var_value_format=var_value_format,
         )
@@ -280,6 +345,14 @@ class ChlorophyllFromDiatomFlagellate(BaseFeature):
         Variable for diatom.
     flagellate_variable : ExistingVar | NotExistingVar | ParsedVar
         Variable for flagellate.
+    var_name : str, optional
+        Variable name., by default "CPHL"
+    var_unit : str, optional
+        Variable unit., by default "[mg/m3]"
+    var_type : str, optional
+        Data type., by default float
+    var_default : Any, optional
+        Default value., by default np.nan
     var_name_format : str, optional
         Name format for the added variable., by default "%-10s"
     var_value_format : str, optional
@@ -290,17 +363,22 @@ class ChlorophyllFromDiatomFlagellate(BaseFeature):
         self,
         diatom_variable: ExistingVar | NotExistingVar | ParsedVar,
         flagellate_variable: ExistingVar | NotExistingVar | ParsedVar,
+        var_name: str = "CPHL",
+        var_unit: str = "[mg/m3]",
+        var_type: str = float,
+        var_default: Any = np.nan,
         var_name_format: str = "%-10s",
         var_value_format: str = "%10.3f",
     ) -> None:
         super().__init__(
-            var_name="SIGT",
-            var_unit="[kg/m3]",
-            var_type=float,
-            var_default=np.nan,
+            var_name=var_name,
+            var_unit=var_unit,
+            var_type=var_type,
+            var_default=var_default,
             var_name_format=var_name_format,
             var_value_format=var_value_format,
         )
+        print(self.variable)
         self._source_vars = [diatom_variable, flagellate_variable]
 
     def transform(
