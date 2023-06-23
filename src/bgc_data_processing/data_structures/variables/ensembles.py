@@ -1,5 +1,4 @@
 """Variable Ensembles."""
-
 import itertools
 from collections.abc import Callable, Iterator
 from copy import copy
@@ -181,6 +180,25 @@ class BaseVariableEnsemble:
         if var.name in self.keys():  # noqa: SIM118
             raise ValueError("A variable already exists with his name")
         self._elements.append(var)
+        self._instantiate_from_elements(self._elements)
+
+    def pop(self, var_name: str) -> AllVariablesTypes:
+        """Remove and return the variable with the given name.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of the variable to remove from the ensemble.
+
+        Returns
+        -------
+        AllVariablesTypes
+            Removed variable.
+        """
+        var_to_suppress = self.get(var_name)
+        elements = [e for e in self._elements if e.name != var_name]
+        self._instantiate_from_elements(elements)
+        return var_to_suppress
 
     def has_name(self, var_name: str) -> bool:
         """Check if a variable name is the nam eof one of the variables.
@@ -438,6 +456,43 @@ class BaseRequiredVarsEnsemble(BaseVariableEnsemble):
         self._save = mandatory_variables + list(args) + list(kwargs.values())
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
+
+    def pop(self, var_name: str) -> AllVariablesTypes:
+        """Remove and return the variable with the given name.
+
+        Parameters
+        ----------
+        var_name : str
+            Name of the variable to remove from the ensemble.
+
+        Returns
+        -------
+        AllVariablesTypes
+            Removed variable.
+
+        Raises
+        ------
+        KeyError
+            If the variable is mandatory.
+        """
+        mandatory_variables_names = [
+            self.expocode_var_name,
+            self.provider_var_name,
+            self.date_var_name,
+            self.year_var_name,
+            self.month_var_name,
+            self.day_var_name,
+            self.hour_var_name,
+            self.latitude_var_name,
+            self.longitude_var_name,
+            self.depth_var_name,
+        ]
+        if var_name in mandatory_variables_names:
+            raise KeyError(
+                f"Variable {var_name} can not be removed "
+                "since it is a mandatory variable.",
+            )
+        return super().pop(var_name)
 
     def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:
         return {

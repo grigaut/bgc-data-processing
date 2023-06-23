@@ -348,6 +348,22 @@ class Storer:
         self.variables.add_var(variable)
         self._data[variable.name] = data
 
+    def pop(self, variable_name: str) -> pd.Series:
+        """Remove and return the data for a given variable.
+
+        Parameters
+        ----------
+        variable_name : str
+            Name of the variable to remove.
+
+        Returns
+        -------
+        pd.Series
+            Data of the corresponding variable.
+        """
+        var = self.variables.pop(variable_name)
+        return self._data.pop(var.name)
+
     @classmethod
     def from_constraints(
         cls,
