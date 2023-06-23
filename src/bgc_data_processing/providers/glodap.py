@@ -8,7 +8,7 @@ from bgc_data_processing import (
     units,
 )
 from bgc_data_processing.data_sources import DataSource
-from bgc_data_processing.data_structures.variables.ensembles import VariableEnsemble
+from bgc_data_processing.data_structures.variables.ensembles import VariableSet
 from bgc_data_processing.utils.patterns import FileNamePattern
 
 loader = DataSource(
@@ -18,7 +18,7 @@ loader = DataSource(
     data_category=PROVIDERS_CONFIG["GLODAPv2"]["CATEGORY"],
     excluded_files=PROVIDERS_CONFIG["GLODAPv2"]["EXCLUDE"],
     files_pattern=FileNamePattern("glodapv2_{years}.csv"),
-    variable_ensemble=VariableEnsemble(
+    variable_ensemble=VariableSet(
         provider=DEFAULT_VARS["provider"].not_in_file(),
         expocode=DEFAULT_VARS["expocode"].in_file_as("cruise"),
         date=DEFAULT_VARS["date"].not_in_file(),

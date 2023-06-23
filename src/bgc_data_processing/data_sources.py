@@ -15,7 +15,7 @@ from bgc_data_processing.loaders.netcdf_loaders import (
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.filtering import Constraints
     from bgc_data_processing.data_structures.variables.ensembles import (
-        VariableEnsemble,
+        VariableSet,
     )
     from bgc_data_processing.loaders.base import BaseLoader
     from bgc_data_processing.utils.dateranges import DateRangeGenerator
@@ -39,7 +39,7 @@ class DataSource:
         Files not to load.
     files_pattern : FileNamePattern
         Pattern to match to load files.
-    variable_ensemble : VariableEnsemble
+    variable_ensemble : VariableSet
         Ensembles of variables to consider.
     verbose : int, optional
         Verbose., by default 1
@@ -53,7 +53,7 @@ class DataSource:
         data_category: str,
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
-        variable_ensemble: "VariableEnsemble",
+        variable_ensemble: "VariableSet",
         verbose: int = 1,
         **kwargs,
     ) -> None:
@@ -97,7 +97,7 @@ class DataSource:
         return self._category
 
     @property
-    def variables(self) -> "VariableEnsemble":
+    def variables(self) -> "VariableSet":
         """Ensemble of all variables."""
         return self._vars_ensemble
 

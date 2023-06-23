@@ -17,7 +17,7 @@ from bgc_data_processing.loaders.base import BaseLoader
 
 if TYPE_CHECKING:
     from bgc_data_processing.data_structures.variables.ensembles import (
-        VariableEnsemble,
+        VariableSet,
     )
 
 
@@ -32,7 +32,7 @@ class ABFileLoader(BaseLoader):
         Category provider belongs to.
     exclude: list[str]
         Filenames to exclude from loading.
-    variables : VariableEnsemble
+    variables : VariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
     grid_basename: str
@@ -51,7 +51,7 @@ class ABFileLoader(BaseLoader):
         provider_name: str,
         category: str,
         exclude: list[str],
-        variables: "VariableEnsemble",
+        variables: "VariableSet",
         grid_basename: str,
     ) -> None:
         super().__init__(

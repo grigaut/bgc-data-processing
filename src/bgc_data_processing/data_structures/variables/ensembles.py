@@ -19,7 +19,7 @@ NotParsedvar: TypeAlias = ExistingVar | NotExistingVar | FeaturedVar
 FromFileVariables: TypeAlias = ExistingVar | NotExistingVar
 
 
-class BaseVariableEnsemble:
+class BaseVariableSet:
     """Variable ensemble behavior implementation.
 
     This class represents the set of both variables present \
@@ -128,7 +128,7 @@ class BaseVariableEnsemble:
         bool
             True if the objects have same types and all equal variables.
         """
-        if not isinstance(__o, BaseVariableEnsemble):
+        if not isinstance(__o, BaseVariableSet):
             return False
 
         has_wrong_len = len(self) != len(__o)
@@ -267,7 +267,7 @@ class BaseVariableEnsemble:
         return {var.name: var for var in self._elements}
 
 
-class FeaturesEnsemble(BaseVariableEnsemble):
+class FeaturesSet(BaseVariableSet):
     """Ensemble of features.
 
     This class represents the set of both variables present \
@@ -355,7 +355,7 @@ class FeaturesEnsemble(BaseVariableEnsemble):
             )
 
 
-class BaseRequiredVarsEnsemble(BaseVariableEnsemble):
+class BaseRequiredVarsSet(BaseVariableSet):
     """Storer for Variable objects with some required variables.
 
     This class represents the set of both variables present \
@@ -509,7 +509,7 @@ class BaseRequiredVarsEnsemble(BaseVariableEnsemble):
         }
 
 
-class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
+class LoadingVariablesEnsemble(BaseRequiredVarsSet):
     """Storer for Var object which are going to be loaded.
 
     This class represents the set of both variables present \
@@ -638,7 +638,7 @@ class LoadingVariablesEnsemble(BaseRequiredVarsEnsemble):
         return [var.label for var in self._elements if var.remove_if_nan]
 
 
-class StoringVariablesEnsemble(BaseRequiredVarsEnsemble):
+class StoringVariablesEnsemble(BaseRequiredVarsSet):
     """Storer for Var object which are going to be stored.
 
     This class represents the set of both variables present \
@@ -738,7 +738,7 @@ class StoringVariablesEnsemble(BaseRequiredVarsEnsemble):
         return SavingVariablesEnsemble(**variables, save_order=self._save.copy())
 
 
-class SavingVariablesEnsemble(BaseRequiredVarsEnsemble):
+class SavingVariablesEnsemble(BaseRequiredVarsSet):
     """Storer for Var object which are going to be saved.
 
     This class represents the set of both variables present \
@@ -880,7 +880,7 @@ class SavingVariablesEnsemble(BaseRequiredVarsEnsemble):
         return " ".join([var.value_format for var in self._save])
 
 
-class VariableEnsemble(BaseRequiredVarsEnsemble):
+class VariableSet(BaseRequiredVarsSet):
     """Ensemble of variables.
 
     This class represents the set of both variables present \
@@ -943,11 +943,11 @@ class VariableEnsemble(BaseRequiredVarsEnsemble):
         return [var, *list(itertools.chain(*loadables))]
 
     @property
-    def features(self) -> FeaturesEnsemble:
+    def features(self) -> FeaturesSet:
         """FeaturedVar list."""
         all_features_map = map(self._get_featured_vars, self._elements)
         features = list(set(itertools.chain(*all_features_map)))
-        return FeaturesEnsemble(*features)
+        return FeaturesSet(*features)
 
     @property
     def loading_variables(self) -> LoadingVariablesEnsemble:
