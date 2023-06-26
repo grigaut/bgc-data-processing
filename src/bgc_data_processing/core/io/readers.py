@@ -1,12 +1,13 @@
 """Read generated files."""
 
+from copy import deepcopy
 from pathlib import Path
 
 import pandas as pd
 
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.core.variables.sets import SourceVariableSet
-from bgc_data_processing.core.variables.vars import ParsedVar
+from bgc_data_processing.core.variables.vars import BaseVar, ParsedVar
 
 
 def read_files(
@@ -21,6 +22,7 @@ def read_files(
     latitude_column_label: str = "LATITUDE",
     longitude_column_label: str = "LONGITUDE",
     depth_column_label: str = "DEPH",
+    variables_reference: list[BaseVar] = [],
     category: str = "in_situ",
     unit_row_index: int = 1,
     delim_whitespace: bool = True,
@@ -52,6 +54,9 @@ def read_files(
         Longitude column in the dataframe., by default "LONGITUDE"
     depth_column_label : str, optional
         Depth column in the dataframe., by default "DEPH"
+    variables_reference: list[BaseVar]
+        List of variable to use as reference. If a variable label is a column name,
+         this variable will be used for the output storer., by default []
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
@@ -101,6 +106,7 @@ def read_files(
                 latitude_column_label=latitude_column_label,
                 longitude_column_label=longitude_column_label,
                 depth_column_label=depth_column_label,
+                variables_reference=variables_reference,
                 category=category,
                 unit_row_index=unit_row_index,
                 delim_whitespace=delim_whitespace,
@@ -127,6 +133,7 @@ def read_files(
         latitude_column_label=latitude_column_label,
         longitude_column_label=longitude_column_label,
         depth_column_label=depth_column_label,
+        variables_reference=variables_reference,
         category=category,
         unit_row_index=unit_row_index,
         delim_whitespace=delim_whitespace,
@@ -162,6 +169,9 @@ class Reader:
         Longitude column in the dataframe., by default "LONGITUDE"
     depth_column_label : str, optional
         Depth column in the dataframe., by default "DEPH"
+    variables_reference: list[BaseVar]
+        List of variable to use as reference. If a variable label is a column name,
+         this variable will be used for the output storer., by default []
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
@@ -194,56 +204,14 @@ class Reader:
         latitude_column_label: str = "LATITUDE",
         longitude_column_label: str = "LONGITUDE",
         depth_column_label: str = "DEPH",
+        variables_reference: list[BaseVar] = [],
         category: str = "in_situ",
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
         verbose: int = 1,
     ):
-        """Initiate reading routine to parse csv files.
-
-        Parameters
-        ----------
-        filepath : Path
-            Path to the file to read.
-        providers_column_label : str, optional
-            Provider column in the dataframe., by default "PROVIDER"
-        expocode_column_label : str, optional
-            Expocode column in the dataframe., by default "EXPOCODE"
-        date_column_label : str, optional
-            Date column in the dataframe., by default "DATE"
-        year_column_label : str, optional
-            Year column in the dataframe., by default "YEAR"
-        month_column_label : str, optional
-            Month column in the dataframe., by default "MONTH"
-        day_column_label : str, optional
-            Day column in the dataframe., by default "DAY"
-        hour_column_label : str, optional
-            Hour column in the dataframe., by default "HOUR"
-        latitude_column_label : str, optional
-            Latitude column in the dataframe., by default "LATITUDE"
-        longitude_column_label : str, optional
-            Longitude column in the dataframe., by default "LONGITUDE"
-        depth_column_label : str, optional
-            Depth column in the dataframe., by default "DEPH"
-        category : str, optional
-            Category of the loaded file., by default "in_situ"
-        unit_row_index : int, optional
-            Index of the row with the units, None if there's no unit row., by default 1
-        delim_whitespace : bool, optional
-            Whether to use whitespace as delimiters., by default True
-        verbose : int, optional
-            Controls the verbose, by default 1
-
-        Examples
-        --------
-        Loading from a file:
-        >>> filepath = "path/to/file"
-        >>> reader = Reader(filepath, providers="providers_column_name")
-
-        Getting the storer:
-        >>> storer = reader.get_storer()
-        """
         self._verbose = verbose
+        self._reference_vars = {var.label: var for var in variables_reference}
 
         raw_df, unit_row = self._read(filepath, unit_row_index, delim_whitespace)
         mandatory_vars = {
@@ -342,11 +310,12 @@ class Reader:
             else:
                 unit = unit_row[column].values[0]
 
-            var = ParsedVar(
+            default_var = ParsedVar(
                 name=column.upper(),
                 unit=unit,
                 var_type=raw_df.dtypes[column].name,
             )
+            var = deepcopy(self._reference_vars.get(column, default_var))
             if column in mandatory_vars:
                 variables[mandatory_vars[column]] = var
             else:
