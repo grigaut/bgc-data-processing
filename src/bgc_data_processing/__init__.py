@@ -28,6 +28,7 @@ from bgc_data_processing.water_masses import WaterMass
 BASE_DIR = Path(__file__).parent.resolve()
 
 __all__ = [
+    "BASE_DIR",
     "Constraints",
     "DataSource",
     "PROVIDERS_CONFIG",
