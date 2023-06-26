@@ -10,7 +10,8 @@ SAVING_DIR = "extracted_data"
 DATE_MIN = "20070101"
 #? DATE_MAX: str: last date to load
 DATE_MAX = "20071231"
-#? FROM_POLYGON: bool
+#? FROM_POLYGON: bool: If true, the extracted data is the data within POLYGON_DOMAIN, otherwise, the data within the
+# [LONGITUDE_MIN, LONGITUDE_MAX] and [LATITUDE_MIN, LATITUDE_MAX] boundaries
 FROM_POLYGON = false
 #? LATITUDE_MIN: int | float: minimum latitude boundary (included)
 LATITUDE_MIN = 60
@@ -20,7 +21,9 @@ LATITUDE_MAX = 80
 LONGITUDE_MIN = -50
 #? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
 LONGITUDE_MAX = 50
-#? POLYGON_DOMAIN: str
+#? POLYGON_DOMAIN: str: if FROM_POLYGON = true -> the data within POLYGON_DOMAIN will be selected
+# POLYGON_DOMAIN is expected to follow the "Well-Known text representation of geometry":
+# https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry
 POLYGON_DOMAIN = "POLYGON((-50 60, 50 60, 50 80, -50 80, -50 60))"
 #? PRIORITY: list[str]: providers priority list to use when removing duplicates
 PRIORITY = [
