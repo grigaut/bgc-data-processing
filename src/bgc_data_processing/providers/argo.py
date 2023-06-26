@@ -4,11 +4,9 @@ from pathlib import Path
 
 import numpy as np
 
-from bgc_data_processing import (
-    units,
-)
+from bgc_data_processing import units
+from bgc_data_processing.core.sources import DataSource
 from bgc_data_processing.core.variables.sets import SourceVariableSet
-from bgc_data_processing.data_sources import DataSource
 from bgc_data_processing.defaults import PROVIDERS_CONFIG, VARS
 from bgc_data_processing.utils.patterns import FileNamePattern
 

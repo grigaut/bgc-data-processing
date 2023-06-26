@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bgc_data_processing.data_sources import DataSource
+    from bgc_data_processing.core.sources import DataSource
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
 

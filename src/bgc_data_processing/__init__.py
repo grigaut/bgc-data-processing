@@ -15,6 +15,7 @@ from bgc_data_processing.comparison import SelectiveDataSource
 from bgc_data_processing.core import variables
 from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.core.io import read_files, save_storer, savers
+from bgc_data_processing.core.sources import DataSource
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.utils import dateranges
@@ -43,4 +44,5 @@ __all__ = [
     "units",
     "savers",
     "WaterMass",
+    "DataSource",
 ]
