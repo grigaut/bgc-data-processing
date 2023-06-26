@@ -7,6 +7,6 @@ OBSERVATIONS_FILE = "output/observations.txt"
 #? SIMULATIONS_FILE: str: path to the file with the simulations values.
 SIMULATIONS_FILE = "output/simulations.txt"
 #? VARIABLES_TO_COMPARE: list[str]: names of the variables to compare.
-VARIABLES_TO_COMPARE = ["TEMP", "PSAL", "PTEMP"]
+VARIABLES_TO_COMPARE = ["PTEMP", "DOXY", "PSAL", "NTRA", "SLCA", "PHOS", "CPHL"]
 #? SHOW_MAP: whether to show the map of all compared points or not
-SHOW_MAP = true
+SHOW_MAP = false
