@@ -13,3 +13,9 @@ WATER_MASSES = parsers.WaterMassesParser(
     filepath=Path("config/water_masses.toml"),
     check_types=True,
 )
+
+__all__ = [
+    "PROVIDERS_CONFIG",
+    "VARS",
+    "WATER_MASSES",
+]

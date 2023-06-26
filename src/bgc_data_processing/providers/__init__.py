@@ -9,12 +9,13 @@ if TYPE_CHECKING:
 
 BASE_DIR = Path(__file__).parent.parent.resolve()
 
-__all__ = [
-    "PROVIDERS",
-]
 
 PROVIDERS: dict[str, "DataSource"] = {}
 for file in BASE_DIR.joinpath("providers").glob("*.py"):
     if file.name != "__init__.py":
         mod = import_module(f"bgc_data_processing.providers.{file.stem}")
         PROVIDERS[mod.loader.provider] = mod.loader
+
+__all__ = [
+    "PROVIDERS",
+]
