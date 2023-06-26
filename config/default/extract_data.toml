@@ -3,7 +3,7 @@
 # Variable keys: possible types: additionnal comment
 
 #? LOADING_DIR: str: directory from which to load observation data
-LOADING_DIR = "test_imr"
+LOADING_DIR = "bgc_data"
 #? SAVING_DIR: str: directory in which to save the data
 SAVING_DIR = "extracted_data"
 #? DATE_MIN: str: first date to load
