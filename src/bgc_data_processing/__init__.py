@@ -4,12 +4,16 @@ from pathlib import Path
 
 from bgc_data_processing import (
     comparison,
+    core,
     defaults,
+    exceptions,
     features,
     parsers,
     providers,
     tracers,
     units,
+    utils,
+    water_masses,
 )
 from bgc_data_processing.comparison import SelectiveDataSource
 from bgc_data_processing.core import variables
@@ -34,8 +38,10 @@ __all__ = [
     "WATER_MASSES",
     "WaterMass",
     "comparison",
+    "core",
     "dateranges",
     "defaults",
+    "exceptions",
     "features",
     "parsers",
     "providers",
@@ -44,5 +50,7 @@ __all__ = [
     "savers",
     "tracers",
     "units",
+    "utils",
     "variables",
+    "water_masses",
 ]
