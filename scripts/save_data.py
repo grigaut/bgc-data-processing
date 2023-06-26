@@ -1,6 +1,7 @@
 """Data aggregation and saving script."""
 
 import datetime as dt
+import os
 from pathlib import Path
 from time import time
 
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
     VERBOSE = CONFIG["VERBOSE"]
+    PRIORITY = CONFIG["PRIORITY"]
 
     # Dates parsing
     dates_generator = bgc_dp.dateranges.DateRangeGenerator(
@@ -52,7 +54,7 @@ if __name__ == "__main__":
     t0 = time()
     for data_src in PROVIDERS:
         if VERBOSE > 0:
-            print(f"Loading data : {data_src}")
+            print(f"Loading data: {data_src}")
         datasource = bgc_dp.providers.PROVIDERS[data_src]
         variables = datasource.variables
         # Constraint slicer
@@ -89,6 +91,30 @@ if __name__ == "__main__":
             dates_generator,
             constraints,
         )
+    for file in SAVING_DIR.glob("*.txt"):
+        if VERBOSE > 0:
+            print(f"Removing duplicates from: {file}")
+        storer = bgc_dp.read_files(
+            filepath=file,
+            providers_column_label=bgc_dp.defaults.VARS["provider"].label,
+            expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
+            date_column_label=bgc_dp.defaults.VARS["date"].label,
+            year_column_label=bgc_dp.defaults.VARS["year"].label,
+            month_column_label=bgc_dp.defaults.VARS["month"].label,
+            day_column_label=bgc_dp.defaults.VARS["day"].label,
+            hour_column_label=bgc_dp.defaults.VARS["hour"].label,
+            latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
+            longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
+            depth_column_label=bgc_dp.defaults.VARS["depth"].label,
+            variables_reference=bgc_dp.defaults.VARS.to_list(),
+            category="_",
+            unit_row_index=1,
+            delim_whitespace=True,
+            verbose=1,
+        )
+        os.remove(file)
+        storer.remove_duplicates(PRIORITY)
+        bgc_dp.save_storer(storer, filepath=file, saving_order=VARIABLES)
     if VERBOSE > 0:
         print("\n" + "\t" + "-" * len(txt))
         print("\t" + " " * (len(txt) // 2) + "DONE")
