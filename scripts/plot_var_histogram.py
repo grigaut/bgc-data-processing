@@ -54,6 +54,7 @@ if __name__ == "__main__":
         latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
         longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
         depth_column_label=bgc_dp.defaults.VARS["depth"].label,
+        variables_reference=bgc_dp.defaults.VARS.to_list(),
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
