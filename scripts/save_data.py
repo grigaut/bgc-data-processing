@@ -31,7 +31,6 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     PROVIDERS = CONFIG["PROVIDERS"]
-    PRIORITY = CONFIG["PRIORITY"]
     VERBOSE = CONFIG["VERBOSE"]
 
     # Dates parsing

@@ -54,8 +54,6 @@ DEPTH_MAX = 0
 #? EXPOCODES_TO_LOAD: list[str]: precise expocode to load alone.
 # If empty, no discrimination on expocode will be conducted
 EXPOCODES_TO_LOAD = []
-#? PRIORITY: list[str]: providers priority list to use when removing duplicates
-PRIORITY = ["GLODAP_2022", "CMEMS", "ARGO", "NMDC", "CLIVAR", "IMR", "ICES"]
 #? VERBOSE: int: verbose value, the higher, the more informations.
 # If set to 0 or below: no information displayed
 # If set to 1: minimal informations displayed

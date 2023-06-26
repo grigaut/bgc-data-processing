@@ -57,7 +57,6 @@ if __name__ == "__main__":
         verbose=1,
     )
     storer.remove_duplicates(PRIORITY)
-    storer.remove_duplicates(priority_list=PRIORITY)
     variables = storer.variables
     constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(

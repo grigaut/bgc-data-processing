@@ -28,6 +28,7 @@ if __name__ == "__main__":
     LONGITUDE_MIN: float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: float = CONFIG["LONGITUDE_MAX"]
     VERBOSE: int = CONFIG["VERBOSE"]
+    PRIORITY: list[str] = CONFIG["PRIORITY"]
 
     filepaths = list(LOADING_DIR.glob("*.txt"))
 
@@ -49,6 +50,7 @@ if __name__ == "__main__":
         delim_whitespace=True,
         verbose=VERBOSE,
     )
+    storer.remove_duplicates(PRIORITY)
     variables = storer.variables
     constraints = bgc_dp.Constraints()
     constraints.add_boundary_constraint(

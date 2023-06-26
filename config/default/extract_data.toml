@@ -22,6 +22,17 @@ LONGITUDE_MIN = -50
 LONGITUDE_MAX = 50
 #? POLYGON_DOMAIN: str
 POLYGON_DOMAIN = "POLYGON((-50 60, 50 60, 50 80, -50 80, -50 60))"
+#? PRIORITY: list[str]: providers priority list to use when removing duplicates
+PRIORITY = [
+    "GLODAP_2022",
+    "CMEMS",
+    "ARGO",
+    "NMDC",
+    "CLIVAR",
+    "IMR",
+    "ICES",
+    "ESACCI-OC",
+]
 #? VERBOSE: int: verbose value, the higher, the more informations.
 # If set to 0 or below: no information displayed
 # If set to 1: minimal informations displayed
