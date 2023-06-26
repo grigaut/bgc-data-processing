@@ -25,12 +25,8 @@ if __name__ == "__main__":
     TEMPERATURE_TEMPLATE = bgc_dp.defaults.VARS["temperature"]
     DEPTH_TEMPLATE = bgc_dp.defaults.VARS["depth"]
 
-    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
-    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
-    filepaths = filepaths_txt + filepaths_csv
-
     observations = bgc_dp.read_files(
-        filepaths,
+        filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
         date_column_label=bgc_dp.defaults.VARS["date"].label,

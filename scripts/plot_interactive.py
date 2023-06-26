@@ -5,12 +5,9 @@ import time
 from copy import deepcopy
 from pathlib import Path
 
+import bgc_data_processing as bgc_dp
 import matplotlib.pyplot as plt
 import shapely
-from bgc_data_processing import VARS, core
-from bgc_data_processing.core import Constraints, Storer, StorerSaver
-from bgc_data_processing.parsers import ConfigParser
-from bgc_data_processing.tracers import DensityPlotter, EvolutionProfile
 from cartopy import crs
 from eomaps import Maps
 from eomaps.draw import ShapeDrawer
@@ -44,10 +41,10 @@ def get_drawer_polygon(
 
 def update_profile(
     polygon: shapely.Polygon,
-    storer: Storer,
+    storer: bgc_dp.Storer,
     axes: Axes,
     colorbar_axes: Axes,
-    constraints_base: Constraints,
+    constraints_base: bgc_dp.Constraints,
 ):
     """Update the evolution profile plot.
 
@@ -73,7 +70,7 @@ def update_profile(
         longitude_field=longitude_field,
         polygon=polygon,
     )
-    profile_tmp = EvolutionProfile(storer, constraints)
+    profile_tmp = bgc_dp.tracers.EvolutionProfile(storer, constraints)
     profile_tmp.set_date_intervals("week")
     profile_tmp.set_depth_interval(100)
     _, cbar = profile_tmp.plot_to_axes(VARIABLE, axes)
@@ -83,10 +80,10 @@ def update_profile(
 
 def update_map(
     polygon: shapely.Polygon,
-    storer: Storer,
+    storer: bgc_dp.Storer,
     zoom_map_bg: Maps,
     colorbar_axes: Axes,
-    constraints_base: Constraints,
+    constraints_base: bgc_dp.Constraints,
 ):
     """Update the zoomed map.
 
@@ -113,7 +110,7 @@ def update_map(
         polygon=polygon,
     )
     lon_bin = (polygon.bounds[2] - polygon.bounds[0]) / 100
-    plot_tmp = DensityPlotter(storer, constraints)
+    plot_tmp = bgc_dp.tracers.DensityPlotter(storer, constraints)
     plot_tmp.set_density_type(consider_depth=True)
     plot_tmp.set_bins_size(bins_size=[lon_bin, lon_bin * 3])
     df = plot_tmp.get_df(VARIABLE)
@@ -138,12 +135,12 @@ def update_map(
 
 def update_from_drawer(
     drawers: list[ShapeDrawer],
-    storer: Storer,
+    storer: bgc_dp.Storer,
     zoom_map_bg: Maps,
     zoom_cbar_axes: Axes,
     profile_axes: Axes,
     profile_cbar_axes: Axes,
-    constraints_base: Constraints,
+    constraints_base: bgc_dp.Constraints,
     **_kwargs,
 ):
     """Update the lateral maps using the ShapeDrawer polygon.
@@ -183,12 +180,12 @@ def update_from_drawer(
 
 
 def update_from_loaded(
-    storer: Storer,
+    storer: bgc_dp.Storer,
     zoom_map_bg: Maps,
     zoom_cbar_axes: Axes,
     profile_axes: Axes,
     profile_cbar_axes: Axes,
-    constraints_base: Constraints,
+    constraints_base: bgc_dp.Constraints,
     polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]],
     **_kwargs,
 ):
@@ -255,8 +252,8 @@ def clear(
 
 
 def save(
-    storer: Storer,
-    constraints_base: Constraints,
+    storer: bgc_dp.Storer,
+    constraints_base: bgc_dp.Constraints,
     polygons_history: list[tuple[str, ShapeDrawer | shapely.Polygon]],
     **_kwargs,
 ) -> None:
@@ -285,12 +282,12 @@ def save(
         longitude_field=longitude_field,
         polygon=polygon,
     )
-    new_storer = Storer.from_constraints(storer=storer, constraints=constraints)
+    new_storer = bgc_dp.Storer.from_constraints(storer=storer, constraints=constraints)
     print("Enter the name of the file (don't write the extension):")
     filename = Path(input().replace(" ", "_") + ".txt")
     if filename == ".txt":
         filename = Path(f"output_{round(time.time())}.txt")
-    saver = StorerSaver(new_storer)
+    saver = bgc_dp.savers.StorerSaver(new_storer)
     saver.save_all_storer(filepath=filename)
     print(f"File saved under {filename}")
 
@@ -378,7 +375,7 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=[],
@@ -404,22 +401,18 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     POLYGONS_FOLDER = Path(CONFIG["POLYGONS_FOLDER"])
 
-    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
-    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
-    filepaths = filepaths_txt + filepaths_csv
-
-    storer = core.read_files(
-        filepath=filepaths,
-        providers_column_label=VARS["provider"].label,
-        expocode_column_label=VARS["expocode"].label,
-        date_column_label=VARS["date"].label,
-        year_column_label=VARS["year"].label,
-        month_column_label=VARS["month"].label,
-        day_column_label=VARS["day"].label,
-        hour_column_label=VARS["hour"].label,
-        latitude_column_label=VARS["latitude"].label,
-        longitude_column_label=VARS["longitude"].label,
-        depth_column_label=VARS["depth"].label,
+    storer = bgc_dp.read_files(
+        filepath=list(LOADING_DIR.glob("*.txt")),
+        providers_column_label=bgc_dp.defaults.VARS["provider"].label,
+        expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
+        date_column_label=bgc_dp.defaults.VARS["date"].label,
+        year_column_label=bgc_dp.defaults.VARS["year"].label,
+        month_column_label=bgc_dp.defaults.VARS["month"].label,
+        day_column_label=bgc_dp.defaults.VARS["day"].label,
+        hour_column_label=bgc_dp.defaults.VARS["hour"].label,
+        latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
+        depth_column_label=bgc_dp.defaults.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -427,7 +420,7 @@ if __name__ == "__main__":
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    constraints = Constraints()
+    constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -521,7 +514,7 @@ if __name__ == "__main__":
     main_map.add_feature.preset.land(zorder=1)
     main_map.add_feature.preset.ocean()
     # Plotter for the map
-    plot = DensityPlotter(storer=storer, constraints=constraints_copy)
+    plot = bgc_dp.tracers.DensityPlotter(storer=storer, constraints=constraints_copy)
     plot.set_density_type(consider_depth=CONSIDER_DEPTH)
     plot.set_bins_size(bins_size=BIN_SIZE)
     plot.set_map_boundaries(

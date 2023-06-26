@@ -30,10 +30,8 @@ if __name__ == "__main__":
     VERBOSE: int = CONFIG["VERBOSE"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
 
-    filepaths = list(LOADING_DIR.glob("*.txt"))
-
     storer = bgc_dp.read_files(
-        filepaths,
+        filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
         date_column_label=bgc_dp.defaults.VARS["date"].label,
