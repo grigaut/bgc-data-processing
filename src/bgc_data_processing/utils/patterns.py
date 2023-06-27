@@ -577,13 +577,13 @@ class PatternMatcher:
 
     def select_matching_filepath(
         self,
-        research_directory: Path,
+        research_directory: Path | str,
     ) -> list[Path]:
         """Select the filepaths matching the pattern.
 
         Parameters
         ----------
-        research_directory : Path
+        research_directory : Path | str
             Directory to serach for files.
 
         Returns
@@ -592,7 +592,7 @@ class PatternMatcher:
             List of correct paths.
         """
         return self._recursive_match(
-            research_dir=research_directory,
+            research_dir=Path(research_directory),
             pattern=self._pattern,
         )
 
