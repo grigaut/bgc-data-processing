@@ -71,12 +71,16 @@ select = [
     "ARG",
     # flake8-bugbear
     'B',
-    # # flake8-commas
+    # flake8-commas
     'COM',
     # flake8-comprehensions
     'C4',
     # flake8-quotes
     'Q',
+    # flake8-errmsg
+    'EM',
+    # flake8-raise
+    "RSE",
     # flake8-return
     "RET",
     # flake8-self

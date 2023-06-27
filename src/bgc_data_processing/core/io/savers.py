@@ -120,7 +120,8 @@ class StorerSaver:
         if len(self._storer.providers) == 1:
             provider = self._storer.providers[0]
         else:
-            raise ValueError("Multiple providers in the storer.")
+            error_msg = "Multiple providers in the storer."
+            raise ValueError(error_msg)
         filename = self.single_filename_format.format(
             provider=provider,
             dates=dates_str,

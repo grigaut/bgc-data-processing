@@ -62,16 +62,16 @@ class TomlParser:
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
-            raise KeyError(
-                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}",
-            )
+            error_msg = f"Variable {'.'.join(keys[:1])} does "
+            f"not exist in {self.filepath}"
+            raise KeyError(error_msg)
         var = self._elements[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var, dict)) or (key not in var.keys()):
-                raise KeyError(
-                    f"Variable {'.'.join(keys[:i+2])} doesn't exist in {self.filepath}",
-                )
+                error_msg = f"Variable {'.'.join(keys[:i + 2])} doesn't "
+                f"exist in {self.filepath}"
+                raise KeyError(error_msg)
             var = var[key]
         return deepcopy(var)
 
@@ -92,18 +92,18 @@ class TomlParser:
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
-            raise KeyError(
-                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}",
+            error_msg = (
+                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
             )
+            raise KeyError(error_msg)
         if len(keys) > 1:
             var = self._elements[keys[0]]
             for i in range(len(keys[1:-1])):
                 key = keys[1:][i]
                 if (not isinstance(var, dict)) or (key not in var.keys()):
                     keys_str = ".".join(keys[: i + 2])
-                    raise KeyError(
-                        f"Variable {keys_str} does not exist in {self.filepath}",
-                    )
+                    error_msg = f"Variable {keys_str} does not exist in {self.filepath}"
+                    raise KeyError(error_msg)
                 var = var[key]
             var[keys[-1]] = value
         elif len(keys) == 1:
@@ -239,7 +239,8 @@ class TomlParser:
                 for key in var:
                     self.raise_if_wrong_type_below(keys=[*keys, key])
         elif not isinstance(self._elements, dict):
-            raise TypeError("Wrong type for toml object, should be a dictionnary")
+            error_msg = "Wrong type for toml object, should be a dictionnary"
+            raise TypeError(error_msg)
         else:
             for key in self._elements:
                 self.raise_if_wrong_type_below(keys=[*keys, key])
@@ -264,17 +265,17 @@ class TomlParser:
             If the type can't be found in the config file.
         """
         if keys[0] not in self._parsed_types.keys():
-            raise KeyError(
-                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}",
+            error_msg = (
+                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}"
             )
+            raise KeyError(error_msg)
         var_type = self._parsed_types[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var_type, dict)) or (key not in var_type.keys()):
                 keys_str = ".".join(keys[: i + 2])
-                raise KeyError(
-                    f"Type of {keys_str} can't be parsed from {self.filepath}",
-                )
+                error_msg = f"Type of {keys_str} can't be parsed from {self.filepath}"
+                raise KeyError(error_msg)
             var_type = var_type[key]
         return var_type
 
@@ -333,9 +334,10 @@ def directory_check(get_variable: Callable) -> Callable:
             if directory.is_dir():
                 if [p for p in directory.glob("*.*") if p.name != ".gitignore"]:
                     if self.existing_dir_behavior == "raise":
-                        raise IsADirectoryError(
-                            f"Directory {directory} already exists and is not empty.",
+                        error_msg = (
+                            f"Directory {directory} already exists and is not empty."
                         )
+                        raise IsADirectoryError(error_msg)
                     if self.existing_dir_behavior == "merge":
                         pass
                     elif self.existing_dir_behavior == "clean":
@@ -390,7 +392,8 @@ class ConfigParser(TomlParser):
             elif isinstance(var, str):
                 self.dirs_vars_keys.append([var])
             else:
-                raise TypeError(f"Unsupported type for directpory key {var}")
+                error_msg = f"Unsupported type for directpory key {var}"
+                raise TypeError(error_msg)
         self.existing_dir_behavior = existing_directory
         self._dir_created = {
             "-".join(directory): False for directory in self.dirs_vars_keys

@@ -1529,9 +1529,9 @@ class VariableBoxPlot(BasePlot):
         if period in self.period_mapping:
             period_str = self.period_mapping[period]
         else:
-            raise ValueError(
-                f"Wrong 'period' value, accepted values: {self.period_mapping.keys()}",
-            )
+            error_msg = "Wrong 'period' value, accepted values: "
+            f"{self.period_mapping.keys()}"
+            raise ValueError(error_msg)
         period_data = date_data.dt.strftime(period_str)
         period_data.name = "period"
         concat_data = pd.concat([period_data, variable_data], axis=1)

@@ -186,9 +186,8 @@ class WaterMass:
                 verbose=original_storer.verbose,
             )
         if not create_var_if_missing:
-            raise ValueError(
-                f"{water_mass_variable_name} invalid for the given storer.",
-            )
+            error_msg = f"{water_mass_variable_name} invalid for the given storer."
+            raise ValueError(error_msg)
 
         data = pd.Series(np.nan, index=full_data.index)
         data[compliant] = self.name

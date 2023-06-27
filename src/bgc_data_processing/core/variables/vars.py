@@ -533,9 +533,11 @@ class ExistingVar(NotExistingVar):
                     flag_alias = arg[1]
                     flag_value = arg[2]
                 else:
-                    raise ValueError(f"{arg} can't be of length {len(arg)}")
+                    msg = f"{arg} can't be of length {len(arg)}"
+                    raise ValueError(msg)
             else:
-                raise ValueError(f"{arg} must be str or Iterable")
+                msg = f"{arg} must be str or Iterable"
+                raise ValueError(msg)
             aliases.append((alias, flag_alias, flag_value))
         self._aliases = aliases
         return self
@@ -559,7 +561,8 @@ class ExistingVar(NotExistingVar):
             If the given object is not callable.
         """
         if not isinstance(function, Callable):
-            raise VariableInstantiationError("Correcting function must be callable.")
+            msg = "Correcting function must be callable."
+            raise VariableInstantiationError(msg)
         self.correction = function
         self._has_correction = True
         return self

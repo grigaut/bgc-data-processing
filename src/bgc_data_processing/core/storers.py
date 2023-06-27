@@ -7,6 +7,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pandas as pd
 
+from bgc_data_processing.exceptions import (
+    DifferentSliceOriginError,
+    IncompatibleCategoriesError,
+    IncompatibleVariableSetsError,
+)
+
 if TYPE_CHECKING:
     from bgc_data_processing.core.filtering import Constraints
     from bgc_data_processing.core.variables.sets import StoringVariablesSet
@@ -157,13 +163,16 @@ class Storer:
             Concatenation of both storer's dataframes.
         """
         if not isinstance(other, Storer):
-            raise TypeError(f"Can't add CSVStorer object to {type(other)}")
+            error_msg = f"Can't add CSVStorer object to {type(other)}"
+            raise TypeError(error_msg)
         # Assert variables are the same
-        if not (self.variables == other.variables):
-            raise ValueError("Variables or categories are not compatible")
+        if self.variables != other.variables:
+            error_msg = "Variables or categories are not compatible"
+            raise IncompatibleVariableSetsError(error_msg)
         # Assert categories are the same
-        if not (self.category == other.category):
-            raise ValueError("Categories are not compatible")
+        if self.category != other.category:
+            error_msg = "Categories are not compatible"
+            raise IncompatibleCategoriesError(error_msg)
 
         concat_data = pd.concat([self._data, other.data], ignore_index=True)
         concat_providers = list(set(self.providers + other.providers))
@@ -510,8 +519,7 @@ class Slice(Storer):
             Is the slices don't originate from same storer.
         """
         if self.storer != __o.storer:
-            raise ValueError(
-                "Addition can only be performed with slice from same CSVStorer",
-            )
+            error_msg = "Addition can only be performed with slice from same CSVStorer"
+            raise DifferentSliceOriginError(error_msg)
         new_index = list(set(self.slice_index).union(set(__o.slice_index)))
         return Slice(self.storer, new_index)

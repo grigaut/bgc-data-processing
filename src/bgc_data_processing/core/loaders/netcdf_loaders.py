@@ -122,15 +122,15 @@ class NetCDFLoader(BaseLoader):
                 shapes1.append(var_data.shape[1])
         # Assert all shape (1st dimension) are the same
         if len(set(shapes0)) > 1:
-            raise NetCDFLoadingError(
-                "Some variables have different size (first dimension)",
-            )
+            error_msg = "Some variables have different size (first dimension)"
+            raise NetCDFLoadingError(error_msg)
         shape0 = shapes0[0] if len(set(shapes0)) == 1 else 1
         if shapes1:
             # Assert all shape (2nd dimension) are the same
             if len(set(shapes1)) != 1:
+                msg = "Some variables have different size (second dimension)"
                 raise NetCDFLoadingError(
-                    "Some variables have different size (second dimension)",
+                    msg,
                 )
             shape1 = shapes1[0]
         else:
@@ -172,7 +172,8 @@ class NetCDFLoader(BaseLoader):
         if not missing_vars:
             return data_dict
         if len(missing_vars) == len(self.variables):
-            raise NetCDFLoadingError("Empty data for all variables to consider")
+            error_msg = "Empty data for all variables to consider"
+            raise NetCDFLoadingError(error_msg)
         # Get data shape from a non missing variable
         var_ref = [var for var in self.variables.in_dset if var not in missing_vars][0]
         shape_ref = data_dict[var_ref.label].shape
@@ -299,7 +300,8 @@ class NetCDFLoader(BaseLoader):
         time_search = re.search(self._time_regex, units)
 
         if date_search is None:
-            raise NetCDFLoadingError(f"Impossible to find date from time unit: {units}")
+            error_msg = f"Impossible to find date from time unit: {units}"
+            raise NetCDFLoadingError(error_msg)
         date_slice = date_search.group(0)
 
         time_slice = self._default_time if time_search is None else time_search.group(0)

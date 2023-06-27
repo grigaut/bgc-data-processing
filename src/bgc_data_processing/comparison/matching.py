@@ -100,9 +100,8 @@ class SelectiveABFileLoader(ABFileLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            raise KeyError(
-                f"Grid File doesn't have data for the variable {variable_name}",
-            )
+            error_msg = f"Grid File doesn't have data for the variable {variable_name}"
+            raise KeyError(error_msg)
         return data
 
     def _load_field(
@@ -359,7 +358,8 @@ class Mask:
     @mask.setter
     def mask(self, mask_2d: np.ndarray) -> None:
         if mask_2d.shape != self._index_2d.shape:
-            raise ValueError("Both mask and index must have similar shapes.")
+            msg = "Both mask and index must have similar shapes."
+            raise ValueError(msg)
         self._mask = mask_2d
         self._index = pd.Index(self._index_2d[self._mask].flatten())
 
@@ -412,7 +412,8 @@ class Mask:
             If mask_array has the wrong shape.
         """
         if mask_array.shape != self.mask.shape:
-            raise ValueError("New mask array has incorrect shape.")
+            msg = "New mask array has incorrect shape."
+            raise ValueError(msg)
         return Mask(
             mask_2d=self._mask & mask_array,
             index_2d=self._index_2d,
@@ -560,7 +561,8 @@ class SelectiveDataSource(DataSource):
                 variables=self._vars_ensemble.loading_variables,
                 **self._read_kwargs,
             )
-        raise ValueError("Only ABFiles can be loaded from a selective data source")
+        msg = "Only ABFiles can be loaded from a selective data source"
+        raise ValueError(msg)
 
     def get_coord(self, var_name: str) -> pd.Series:
         """Get a coordinate field from loader.grid_file.

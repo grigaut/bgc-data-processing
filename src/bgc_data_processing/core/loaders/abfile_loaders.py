@@ -144,9 +144,8 @@ class ABFileLoader(BaseLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            raise KeyError(
-                f"Grid File doesn't have data for the variable {variable_name}",
-            )
+            error_msg = f"Grid File doesn't have data for the variable {variable_name}"
+            raise KeyError(error_msg)
         return data
 
     def _convert_types(self, wrong_types: pd.DataFrame) -> pd.DataFrame:
@@ -443,13 +442,11 @@ class ABFileLoader(BaseLoader):
         afile_path = Path(f"{basepath}.a")
         bfile_path = Path(f"{basepath}.b")
         if not afile_path.is_file():
-            raise FileNotFoundError(
-                f"{afile_path} does not exist.",
-            )
+            error_msg = f"{afile_path} does not exist."
+            raise FileNotFoundError(error_msg)
         if not bfile_path.is_file():
-            raise FileNotFoundError(
-                f"{bfile_path} does not exist.",
-            )
+            error_msg = f"{bfile_path} does not exist."
+            raise FileNotFoundError(error_msg)
         return keep_base and keep_file
 
     def _create_missing_column(

@@ -120,7 +120,8 @@ def read_files(
     elif isinstance(filepath, str):
         path = Path(filepath)
     else:
-        raise TypeError(f"Can't read filepaths from {filepath}")
+        error_msg = f"Can't read filepaths from {filepath}"
+        raise TypeError(error_msg)
     reader = Reader(
         filepath=path,
         providers_column_label=providers_column_label,
