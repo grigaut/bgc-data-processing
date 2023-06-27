@@ -94,6 +94,8 @@ select = [
     "PLE",
     "PLR",
     "PLW",
+    # tryceratops
+    "TRY",
     # Ruff-specific rules
     'RUF',
 ]

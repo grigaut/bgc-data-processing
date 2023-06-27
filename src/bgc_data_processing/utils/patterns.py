@@ -580,7 +580,7 @@ class PatternMatcher:
     def validate(self, validation_function: Callable) -> None:
         if not isinstance(validation_function, Callable):
             error_msg = "The validation function must be callable."
-            raise ValueError(error_msg)
+            raise TypeError(error_msg)
         self._validation_function = validation_function
 
     def select_matching_filepath(

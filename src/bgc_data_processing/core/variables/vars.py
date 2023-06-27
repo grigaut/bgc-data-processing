@@ -537,7 +537,7 @@ class ExistingVar(NotExistingVar):
                     raise ValueError(msg)
             else:
                 msg = f"{arg} must be str or Iterable"
-                raise ValueError(msg)
+                raise TypeError(msg)
             aliases.append((alias, flag_alias, flag_value))
         self._aliases = aliases
         return self
