@@ -364,7 +364,8 @@ def load_polygon(**_kwargs) -> shapely.Polygon:
     filename = Path(input().replace(" ", "_") + ".txt")
     filepath = POLYGONS_FOLDER.joinpath(filename)
     if not filepath.is_file():
-        raise FileNotFoundError(f"Loading aborted : the file {filepath} doesn't exist.")
+        error_msg = f"Loading aborted : the file {filepath} doesn't exist."
+        raise FileNotFoundError(error_msg)
     with filepath.open() as file:
         first_line = file.readlines()[0]
         print(first_line)
