@@ -15,7 +15,7 @@ if __name__ == "__main__":
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
     )
-    LOADING_DIR: Path = CONFIG["LOADING_DIR"]
+    LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
     VARIABLE: str = CONFIG["VARIABLE"]
     SHOW: bool = CONFIG["SHOW"]
     SAVE: bool = CONFIG["SAVE"]
