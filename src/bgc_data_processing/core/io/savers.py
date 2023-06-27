@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 def save_storer(
     storer: "Storer",
-    filepath: Path,
+    filepath: Path | str,
     saving_order: list[str] = [],
     save_aggregated_data_only: bool = True,
 ) -> None:
@@ -23,7 +23,7 @@ def save_storer(
     ----------
     storer : Storer
         Storer to save.
-    filepath : Path
+    filepath : Path | str
         File in which to save the storer data.
     saving_order : list[str], optional
         Variable order to respect when saving. If the list is empty
@@ -39,7 +39,7 @@ def save_storer(
     )
     if saving_order:
         saver.saving_order = saving_order
-    saver.save_all_storer(filepath=filepath)
+    saver.save_all_storer(filepath=Path(filepath))
 
 
 class StorerSaver:
@@ -245,7 +245,7 @@ class StorerSaver:
     def save_from_daterange(
         self,
         dateranges_gen: "DateRangeGenerator",
-        saving_directory: Path,
+        saving_directory: Path | str,
     ) -> None:
         """Save the storer's data according to the given dateranges.
 
@@ -253,19 +253,23 @@ class StorerSaver:
         ----------
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
-        saving_directory: Path
+        saving_directory: Path | str
             Path to the idrectory to save in.
         """
         dateranges = dateranges_gen()
         dates_slices = self._slice_using_drng(dateranges)
-        dates_slices.apply(self._save_slice, axis=1, saving_directory=saving_directory)
+        dates_slices.apply(
+            self._save_slice,
+            axis=1,
+            saving_directory=Path(saving_directory),
+        )
 
-    def save_all_storer(self, filepath: Path) -> None:
+    def save_all_storer(self, filepath: Path | str) -> None:
         """Save all the storer to the given file.
 
         Parameters
         ----------
-        filepath : Path
+        filepath : Path | str
             File in which to save the storer data.
 
         Raises
@@ -275,13 +279,13 @@ class StorerSaver:
         """
         if filepath.is_file():
             raise FileExistsError
-        self._save_data(filepath=filepath, data_slice=self._storer)
+        self._save_data(filepath=Path(filepath), data_slice=self._storer)
 
     @classmethod
     def save(
         cls,
         storer: "Storer",
-        filepath: Path,
+        filepath: Path | str,
         save_aggregated_data_only: bool = False,
     ) -> None:
         """Save all the storer to the given file.
@@ -290,7 +294,7 @@ class StorerSaver:
         ----------
         storer : Storer
             Storer to save.
-        filepath : Path
+        filepath : Path | str
             File in which to save the storer data.
         save_aggregated_data_only: bool
             Whether to only save the aggregated data or not.
@@ -298,4 +302,4 @@ class StorerSaver:
             data will be created.
         """
         saver = cls(storer=storer, save_aggregated_data_only=save_aggregated_data_only)
-        saver.save_all_storer(filepath=filepath)
+        saver.save_all_storer(filepath=Path(filepath))

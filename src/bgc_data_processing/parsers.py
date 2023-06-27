@@ -18,7 +18,7 @@ class TomlParser:
 
     Parameters
     ----------
-    filepath : Path
+    filepath : Path | str
         Path to the config file.
     check_types : bool, optional
         Whether to check types or not., by default True
@@ -34,17 +34,8 @@ class TomlParser:
         "datetime64[ns]": "datetime64[ns]",
     }
 
-    def __init__(self, filepath: Path, check_types: bool = True) -> None:
-        """Instanciate a parsing class for config.toml.
-
-        Parameters
-        ----------
-        filepath : Path
-            Path to the config file.
-        check_types : bool, optional
-            Whether to check types or not., by default True
-        """
-        self.filepath = filepath
+    def __init__(self, filepath: Path | str, check_types: bool = True) -> None:
+        self.filepath = Path(filepath)
         self._check = check_types
         with self.filepath.open("rb") as f:
             self._elements = tomllib.load(f)
@@ -367,7 +358,7 @@ class ConfigParser(TomlParser):
 
     Parameters
     ----------
-    filepath : Path
+    filepath : Path | str
         Path to the file.
     check_types : bool, optional
         Whether to check types or not., by default True
@@ -383,30 +374,12 @@ class ConfigParser(TomlParser):
 
     def __init__(
         self,
-        filepath: Path,
+        filepath: Path | str,
         check_types: bool = True,
         dates_vars_keys: list[str | list[str]] = [],
         dirs_vars_keys: list[str | list[str]] = [],
         existing_directory: str = "raise",
     ) -> None:
-        """Class to parse toml config scripts.
-
-        Parameters
-        ----------
-        filepath : Path
-            Path to the file.
-        check_types : bool, optional
-            Whether to check types or not., by default True
-        dates_vars_keys : list[str | list[str]], optional
-            Keys to variable defining dates., by default []
-        dirs_vars_keys : list[str | list[str]], optional
-            Keys to variable defining directories., by default []
-        existing_directory: str, optional
-            Behavior for directory creation, 'raise' raises an error if the directory
-            exists and is not empty, 'merge' will keep the directory as is
-            but might replace its content when savong file and 'clean'
-            will erase the directory if it exists.
-        """
         super().__init__(filepath, check_types)
         self.dates_vars_keys = dates_vars_keys
         self.dirs_vars_keys: list[list[str]] = []

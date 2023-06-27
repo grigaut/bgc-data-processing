@@ -179,14 +179,14 @@ class ABFileLoader(BaseLoader):
 
     def load(
         self,
-        basename: Path,
+        basename: Path | str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a abfiles from basename.
 
         Parameters
         ----------
-        basename: Path
+        basename: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -200,7 +200,7 @@ class ABFileLoader(BaseLoader):
         # transform thickness in depth
         with_depth = self._create_depth_column(raw_data)
         # create date columns
-        with_dates = self._set_date_related_columns(with_depth, basename)
+        with_dates = self._set_date_related_columns(with_depth, Path(basename))
         # converts types
         typed = self._convert_types(with_dates)
         # apply corrections
@@ -412,12 +412,12 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    def is_file_valid(self, filepath: Path) -> bool:
+    def is_file_valid(self, filepath: Path | str) -> bool:
         """Check whether a file is valid or not.
 
         Parameters
         ----------
-        filepath : Path
+        filepath : Path | str
             File filepath.
 
         Returns
@@ -432,9 +432,10 @@ class ABFileLoader(BaseLoader):
         FileNotFoundError
             If the bfile doesn't not exist.
         """
-        basepath = filepath.parent / filepath.name[:-2]
-        keep_filepath = str(filepath) not in self.excluded_filenames
-        keep_filename = filepath.name not in self.excluded_filenames
+        path = Path(filepath)
+        basepath = path.parent / path.name[:-2]
+        keep_filepath = str(path) not in self.excluded_filenames
+        keep_filename = path.name not in self.excluded_filenames
         keep_file = keep_filename and keep_filepath
         keep_basepath = str(basepath) not in self.excluded_filenames
         keep_basename = basepath.name not in self.excluded_filenames

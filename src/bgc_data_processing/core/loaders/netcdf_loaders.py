@@ -418,14 +418,14 @@ class NetCDFLoader(BaseLoader):
 
     def load(
         self,
-        filepath: Path,
+        filepath: Path | str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a netCDF file from filepath.
 
         Parameters
         ----------
-        filepath: Path
+        filepath: Path | str
             Path to the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -436,9 +436,9 @@ class NetCDFLoader(BaseLoader):
             DataFrame corresponding to the file.
         """
         if self._verbose > 1:
-            print(f"\tLoading data from {filepath.name}")
-        file_id = self._get_id(filepath.name)
-        nc_data = self._read(filepath=filepath)
+            print(f"\tLoading data from {Path(filepath).name}")
+        file_id = self._get_id(Path(filepath).name)
+        nc_data = self._read(filepath=Path(filepath))
         df_format = self._format(nc_data)
         df_dates = self._set_dates(df_format)
         df_dates_sliced = constraints.apply_specific_constraint(

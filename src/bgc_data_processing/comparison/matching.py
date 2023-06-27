@@ -196,7 +196,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
     def load(
         self,
-        basename: Path,
+        basename: Path | str,
         constraints: Constraints,
         mask: "Mask",
     ) -> pd.DataFrame:
@@ -204,7 +204,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
         Parameters
         ----------
-        basename: Path
+        basename: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer.
@@ -502,7 +502,7 @@ class SelectiveDataSource(DataSource):
         Name of the data provider.
     data_format : str
         Data format.
-    dirin : Path
+    dirin : Path | str
         Input data directory.
     data_category : str
         Category of the data.
@@ -524,7 +524,7 @@ class SelectiveDataSource(DataSource):
         strategy: NearestNeighborStrategy,
         provider_name: str,
         data_format: str,
-        dirin: Path,
+        dirin: Path | str,
         data_category: str,
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
@@ -638,12 +638,12 @@ class SelectiveDataSource(DataSource):
         return Mask(to_keep, indexes_2d), Match(index)
 
     @staticmethod
-    def parse_date_from_basename(basename: Path) -> dt.date:
+    def parse_date_from_basename(basename: Path | str) -> dt.date:
         """Parse date from abfile basename.
 
         Parameters
         ----------
-        basename : Path
+        basename : Path | str
             File basename.
 
         Returns
@@ -651,7 +651,7 @@ class SelectiveDataSource(DataSource):
         dt.date
             Corresponding date.
         """
-        date_part_basename = basename.name.split(".")[-1]
+        date_part_basename = Path(basename).name.split(".")[-1]
         date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
         return date.date()
 
@@ -682,7 +682,11 @@ class SelectiveDataSource(DataSource):
         )
         return [s.parent.joinpath(s.stem) for s in filepaths]
 
-    def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
+    def _create_storer(
+        self,
+        filepath: Path | str,
+        constraints: "Constraints",
+    ) -> "Storer":
         pass
 
     def load_all(self, constraints: "Constraints") -> "Storer":
@@ -730,7 +734,7 @@ class SelectiveDataSource(DataSource):
 
     def load_and_save(
         self,
-        saving_directory: Path,
+        saving_directory: Path | str,
         dateranges_gen: "DateRangeGenerator",
         constraints: "Constraints",
     ) -> None:
@@ -738,7 +742,7 @@ class SelectiveDataSource(DataSource):
 
         Parameters
         ----------
-        saving_directory : Path
+        saving_directory : Path | str
             Path to the directory to save in.
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
@@ -749,7 +753,7 @@ class SelectiveDataSource(DataSource):
         saver = StorerSaver(storer)
         saver.save_from_daterange(
             dateranges_gen=dateranges_gen,
-            saving_directory=saving_directory,
+            saving_directory=Path(saving_directory),
         )
 
     @classmethod
@@ -764,16 +768,16 @@ class SelectiveDataSource(DataSource):
         Parameters
         ----------
         reference : Storer
-            _description_
+            Reference Dataframe (observations).
         strategy : NearestNeighborStrategy
-            _description_
+            Closer point finding strategy.
         dsource : DataSource
-            _description_
+            Template DataSource
 
         Returns
         -------
         SelectiveDataSource
-            _description_
+            Selective datasource from Template.
         """
         return cls(
             reference=reference,
