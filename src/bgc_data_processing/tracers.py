@@ -847,8 +847,8 @@ class EvolutionProfile(BasePlot):
         )
         drng = drng_generator()
         return pd.IntervalIndex.from_arrays(
-            pd.to_datetime(drng[drng_generator.start_column_name]),
-            pd.to_datetime(drng[drng_generator.end_column_name]),
+            pd.to_datetime(drng.start_dates),
+            pd.to_datetime(drng.end_dates),
             closed="both",
         )
 
