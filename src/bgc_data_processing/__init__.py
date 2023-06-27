@@ -15,7 +15,8 @@ from bgc_data_processing import (
     utils,
     water_masses,
 )
-from bgc_data_processing.comparison import SelectiveDataSource
+from bgc_data_processing.comparison import metrics
+from bgc_data_processing.comparison.matching import SelectiveDataSource
 from bgc_data_processing.core import variables
 from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.core.io import read_files, save_storer, savers
@@ -44,6 +45,7 @@ __all__ = [
     "defaults",
     "exceptions",
     "features",
+    "metrics",
     "parsers",
     "providers",
     "read_files",

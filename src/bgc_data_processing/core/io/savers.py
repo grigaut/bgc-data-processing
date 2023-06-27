@@ -14,9 +14,10 @@ if TYPE_CHECKING:
 def save_storer(
     storer: "Storer",
     filepath: Path,
-    save_aggregated_data_only: bool = False,
+    saving_order: list[str] = [],
+    save_aggregated_data_only: bool = True,
 ) -> None:
-    """Save all the storer to the given file.
+    """_summary_.
 
     Parameters
     ----------
@@ -24,15 +25,20 @@ def save_storer(
         Storer to save.
     filepath : Path
         File in which to save the storer data.
-    save_aggregated_data_only: bool
+    saving_order : list[str], optional
+        Variable order to respect when saving. If the list is empty
+        , all variables are saved., by default []
+    save_aggregated_data_only : bool, optional
         Whether to only save the aggregated data or not.
         If False, for every provider, a folder with the provider's
-        data will be created.
+        data will be created., by default True
     """
     saver = StorerSaver(
         storer=storer,
         save_aggregated_data_only=save_aggregated_data_only,
     )
+    if saving_order:
+        saver.saving_order = saving_order
     saver.save_all_storer(filepath=filepath)
 
 

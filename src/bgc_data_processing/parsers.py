@@ -489,6 +489,16 @@ class ConfigParser(TomlParser):
 class DefaultTemplatesParser(TomlParser):
     """Parser for variables.toml to create Template Variables."""
 
+    def to_list(self) -> list[TemplateVar]:
+        """Return the variable ensemble as a list.
+
+        Returns
+        -------
+        list[TemplateVar]
+            LIst of all templates.
+        """
+        return list(self.variables.values())
+
     def __getitem__(self, __k: str) -> TemplateVar:
         """Return self.variables[__k].
 

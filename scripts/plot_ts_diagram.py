@@ -3,19 +3,13 @@
 import datetime as dt
 from pathlib import Path
 
-from bgc_data_processing import (
-    VARS,
-    core,
-    features,
-    parsers,
-    tracers,
-)
+import bgc_data_processing as bgc_dp
 
 CONFIG_FOLDER = Path("config")
 
 if __name__ == "__main__":
     config_filepath = CONFIG_FOLDER.joinpath(Path(__file__).stem)
-    CONFIG = parsers.ConfigParser(
+    CONFIG = bgc_dp.parsers.ConfigParser(
         filepath=config_filepath.with_suffix(".toml"),
         dates_vars_keys=["DATE_MIN", "DATE_MAX"],
         dirs_vars_keys=["SAVING_DIR"],
@@ -36,25 +30,21 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
-    SALINITY_DEFAULT = VARS["salinity"]
-    TEMPERATURE_DEFAULT = VARS["temperature"]
+    SALINITY_DEFAULT = bgc_dp.defaults.VARS["salinity"]
+    TEMPERATURE_DEFAULT = bgc_dp.defaults.VARS["temperature"]
 
-    filepaths_txt = list(LOADING_DIR.glob("*.txt"))
-    filepaths_csv = list(LOADING_DIR.glob("*.csv"))
-    filepaths = filepaths_txt + filepaths_csv
-
-    storer = core.read_files(
-        filepath=filepaths,
-        providers_column_label=VARS["provider"].label,
-        expocode_column_label=VARS["expocode"].label,
-        date_column_label=VARS["date"].label,
-        year_column_label=VARS["year"].label,
-        month_column_label=VARS["month"].label,
-        day_column_label=VARS["day"].label,
-        hour_column_label=VARS["hour"].label,
-        latitude_column_label=VARS["latitude"].label,
-        longitude_column_label=VARS["longitude"].label,
-        depth_column_label=VARS["depth"].label,
+    storer = bgc_dp.read_files(
+        filepath=list(LOADING_DIR.glob("*.txt")),
+        providers_column_label=bgc_dp.defaults.VARS["provider"].label,
+        expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
+        date_column_label=bgc_dp.defaults.VARS["date"].label,
+        year_column_label=bgc_dp.defaults.VARS["year"].label,
+        month_column_label=bgc_dp.defaults.VARS["month"].label,
+        day_column_label=bgc_dp.defaults.VARS["day"].label,
+        hour_column_label=bgc_dp.defaults.VARS["hour"].label,
+        latitude_column_label=bgc_dp.defaults.VARS["latitude"].label,
+        longitude_column_label=bgc_dp.defaults.VARS["longitude"].label,
+        depth_column_label=bgc_dp.defaults.VARS["depth"].label,
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
@@ -63,19 +53,19 @@ if __name__ == "__main__":
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
     # Add relevant features to the data: Pressure / potential temperature
-    pres_feat = features.Pressure(
+    pres_feat = bgc_dp.features.Pressure(
         depth_variable=variables.get(variables.depth_var_name),
         latitude_variable=variables.get(variables.latitude_var_name),
     )
     pres_feat.insert_in_storer(storer)
-    ptemp_feat = features.PotentialTemperature(
+    ptemp_feat = bgc_dp.features.PotentialTemperature(
         salinity_variable=SALINITY_DEFAULT,
         temperature_variable=TEMPERATURE_DEFAULT,
         pressure_variable=pres_feat.variable,
     )
     ptemp_feat.insert_in_storer(storer)
     # Add global constraints
-    constraints = core.Constraints()
+    constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(
         field_label=variables.get(variables.expocode_var_name).label,
         values_superset=EXPOCODES_TO_LOAD,
@@ -101,7 +91,7 @@ if __name__ == "__main__":
         maximal_value=DEPTH_MAX,
     )
     # Create diagram
-    plot = tracers.TemperatureSalinityDiagram(
+    plot = bgc_dp.tracers.TemperatureSalinityDiagram(
         storer=storer,
         constraints=constraints,
         salinity_field=SALINITY_DEFAULT.label,

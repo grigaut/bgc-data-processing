@@ -1,4 +1,4 @@
-"""Create an Evolution Profile from files in a directory."""
+"""Extract data from a given water mass."""
 
 import datetime as dt
 from pathlib import Path
@@ -15,24 +15,21 @@ if __name__ == "__main__":
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
     )
-    LOADING_DIR: Path = CONFIG["LOADING_DIR"]
-    VARIABLE: str = CONFIG["VARIABLE"]
-    SHOW: bool = CONFIG["SHOW"]
-    SAVE: bool = CONFIG["SAVE"]
+    LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
+    SAVING_DIR: Path = Path(CONFIG["SAVING_DIR"])
     DATE_MIN: dt.datetime = CONFIG["DATE_MIN"]
     DATE_MAX: dt.datetime = CONFIG["DATE_MAX"]
     LATITUDE_MIN: int | float = CONFIG["LATITUDE_MIN"]
     LATITUDE_MAX: int | float = CONFIG["LATITUDE_MAX"]
     LONGITUDE_MIN: int | float = CONFIG["LONGITUDE_MIN"]
     LONGITUDE_MAX: int | float = CONFIG["LONGITUDE_MAX"]
-    DEPTH_MIN: int | float = CONFIG["DEPTH_MIN"]
-    DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
-    INTERVAL: str = CONFIG["INTERVAL"]
-    CUSTOM_INTERVAL: int = CONFIG["CUSTOM_INTERVAL"]
-    DEPTH_INTERVAL: int = CONFIG["DEPTH_INTERVAL"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
-    EXPOCODES_TO_LOAD: list[str] = CONFIG["EXPOCODES_TO_LOAD"]
     VERBOSE: int = CONFIG["VERBOSE"]
+
+    ACRONYM: list[str] = CONFIG["WATER_MASS_ACRONYM"]
+
+    SALINITY_DEFAULT = bgc_dp.defaults.VARS["salinity"]
+    TEMPERATURE_DEFAULT = bgc_dp.defaults.VARS["temperature"]
 
     storer = bgc_dp.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
@@ -50,15 +47,30 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=1,
+        verbose=VERBOSE,
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables
-    constraints = bgc_dp.Constraints()
-    constraints.add_superset_constraint(
-        field_label=variables.get(variables.expocode_var_name).label,
-        values_superset=EXPOCODES_TO_LOAD,
+    # Add relevant features to the data: Pressure / potential temperature /sigma-t
+    depth_field = variables.get(variables.depth_var_name).label
+    latitude_field = variables.get(variables.latitude_var_name).label
+    pres_feat = bgc_dp.features.Pressure(
+        depth_variable=variables.get(variables.depth_var_name),
+        latitude_variable=variables.get(variables.latitude_var_name),
     )
+    pres_feat.insert_in_storer(storer)
+    ptemp_feat = bgc_dp.features.PotentialTemperature(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
+        pressure_variable=pres_feat.variable,
+    )
+    ptemp_feat.insert_in_storer(storer)
+    sigmat_feat = bgc_dp.features.SigmaT(
+        salinity_variable=SALINITY_DEFAULT,
+        temperature_variable=TEMPERATURE_DEFAULT,
+    )
+    sigmat_feat.insert_in_storer(storer)
+    constraints = bgc_dp.Constraints()
     constraints.add_boundary_constraint(
         field_label=variables.get(variables.date_var_name).label,
         minimal_value=DATE_MIN,
@@ -74,21 +86,20 @@ if __name__ == "__main__":
         minimal_value=LONGITUDE_MIN,
         maximal_value=LONGITUDE_MAX,
     )
-    constraints.add_boundary_constraint(
-        field_label=variables.get(variables.depth_var_name).label,
-        minimal_value=DEPTH_MIN,
-        maximal_value=DEPTH_MAX,
+    watermass = bgc_dp.defaults.WATER_MASSES[ACRONYM]
+    storer_wm = watermass.extract_from_storer(
+        storer=storer,
+        ptemperature_name=ptemp_feat.variable.label,
+        salinity_name=SALINITY_DEFAULT.label,
+        sigma_t_name=sigmat_feat.variable.label,
     )
-    profile = bgc_dp.tracers.EvolutionProfile(storer, constraints=constraints)
-    profile.set_date_intervals(INTERVAL, CUSTOM_INTERVAL)
-    profile.set_depth_interval(DEPTH_INTERVAL)
-    if SHOW:
-        profile.show(VARIABLE)
-    if SAVE:
-        date_min_str = DATE_MIN.strftime("%Y%m%d")
-        date_max_str = DATE_MAX.strftime("%Y%m%d")
-        save_name = f"profile_{VARIABLE}_{date_min_str}_{date_max_str}.png"
-        profile.save(
-            save_path=f"{CONFIG['SAVING_DIR']}/{save_name}",
-            variable_name=VARIABLE,
-        )
+    bgc_dp.save_storer(
+        storer_wm,
+        filepath=SAVING_DIR.joinpath("extracted_watermass.txt"),
+        saving_order=[
+            col
+            for col in storer.data.columns
+            if col != variables.get(variables.date_var_name).label
+        ],
+        save_aggregated_data_only=True,
+    )
