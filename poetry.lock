@@ -1734,17 +1734,6 @@ files = [
 six = ">=1.5"
 
 [[package]]
-name = "python-git-info"
-version = "0.8.3"
-description = "Get git information repository, directly from .git"
-optional = false
-python-versions = "*"
-files = [
-    {file = "python-git-info-0.8.3.tar.gz", hash = "sha256:c08a2764a16da029e4db909ab8436ae484f8846405f83b1bcfd415fe5e3ab30d"},
-    {file = "python_git_info-0.8.3-py3-none-any.whl", hash = "sha256:f8911aa590170434272c834d1967b74faea71ee573e50cbe0b88e938e3db406b"},
-]
-
-[[package]]
 name = "pytz"
 version = "2023.3"
 description = "World timezone definitions, modern and historical"
@@ -2278,4 +2267,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "5d64d07de67e8c0c6d843e049e74417dc284a83e98132707950b613c8e4e7fc5"
+content-hash = "aeb9b82d177f9639a3beb5f19b54dcb5da2d6a541d81d97033b67b3df13e625f"
