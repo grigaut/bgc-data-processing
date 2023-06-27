@@ -150,7 +150,7 @@ class Bias(BaseMetric):
         List of the names of the variables to use to evaluate.
     """
 
-    metric_name = "bias"
+    metric_name = "Bias"
 
     def _eval(
         self,

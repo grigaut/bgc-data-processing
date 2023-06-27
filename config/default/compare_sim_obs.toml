@@ -1,0 +1,36 @@
+# Lines starting with '#? ' are used to verify variables' types
+# Type hints lines are structured the following way:
+# Variable keys: possible types: additionnal comment
+
+#? LOADING_DIR: str: directory from which to load observation data
+LOADING_DIR = "bgc_data"
+#? SAVING_DIR: str: directory in which to save the data
+SAVING_DIR = "output"
+#? SIM_PROVIDER: str: Name of the data provider for the simulated data
+SIM_PROVIDER = "HYCOM"
+#? TO_INTERPOLATE: list[str]: variables to interpolate
+TO_INTERPOLATE = ["TEMP", "PSAL", "DOXY", "PHOS", "NTRA", "SLCA", "CPHL"]
+#? INTERPOLATION_KIND: str: kind of interpolation for scipy.interpolate.interp1d
+INTERPOLATION_KIND = "linear"
+#? RESULT_OUTPUT_FILE: str: filepath to the output
+RESULT_OUTPUT_FILE = "comparison_output.txt"
+#? VARIABLES_TO_COMPARE: list[str]: names of the variables to compare.
+VARIABLES_TO_COMPARE = ["PTEMP", "DOXY", "PSAL", "NTRA", "SLCA", "PHOS", "CPHL"]
+#? DATE_MIN: str: first date to load
+DATE_MIN = "20150601"
+#? DATE_MAX: str: last date to load
+DATE_MAX = "20150630"
+#? LATITUDE_MIN: int | float: minimum latitude boundary (included)
+LATITUDE_MIN = 50
+#? LATITUDE_MAX: int | float: maximum latitude boundary (included)
+LATITUDE_MAX = 90
+#? LONGITUDE_MIN: int | float: minimum longitude boundary (included)
+LONGITUDE_MIN = -180
+#? LONGITUDE_MAX: int | float: maximum longitude boundary (included)
+LONGITUDE_MAX = 180
+#? DEPTH_MIN: int | float: minimum depth boundary (included)
+DEPTH_MIN = nan
+#? DEPTH_MAX: int | float: maximum depth boundary (included)
+DEPTH_MAX = nan
+#? SHOW_MAP: whether to show the map of all compared points or not
+SHOW_MAP = false

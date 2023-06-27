@@ -181,6 +181,8 @@ class Constraints:
     def apply_constraints_to_storer(self, storer: Storer) -> Storer:
         """Apply all constraints to a DataFrame.
 
+        The index of the previous Storer's dataframe are conserved.
+
         Parameters
         ----------
         storer : pd.DataFrame
@@ -204,6 +206,8 @@ class Constraints:
         dataframe: pd.DataFrame,
     ) -> pd.DataFrame | None:
         """Apply all constraints to a DataFrame.
+
+        This slice conserves indexes values.
 
         Parameters
         ----------
