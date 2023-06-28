@@ -17,9 +17,9 @@ RESULT_OUTPUT_FILE = "comparison_output.txt"
 #? VARIABLES_TO_COMPARE: list[str]: names of the variables to compare.
 VARIABLES_TO_COMPARE = ["PTEMP", "DOXY", "PSAL", "NTRA", "SLCA", "PHOS", "CPHL"]
 #? DATE_MIN: str: first date to load
-DATE_MIN = "20150601"
+DATE_MIN = "20150101"
 #? DATE_MAX: str: last date to load
-DATE_MAX = "20150630"
+DATE_MAX = "20151231"
 #? LATITUDE_MIN: int | float: minimum latitude boundary (included)
 LATITUDE_MIN = 50
 #? LATITUDE_MAX: int | float: maximum latitude boundary (included)
@@ -34,3 +34,9 @@ DEPTH_MIN = nan
 DEPTH_MAX = nan
 #? SHOW_MAP: whether to show the map of all compared points or not
 SHOW_MAP = false
+#? VERBOSE: int: verbose value, the higher, the more informations.
+# If set to 0 or below: no information displayed
+# If set to 1: minimal informations displayed
+# If set to 2: very complete informations displayed
+# if set to 3 or higher: exhaustive informations displayed
+VERBOSE = 3
