@@ -1,5 +1,7 @@
 """Specific exceptions."""
 
+from pathlib import Path
+
 
 class VariableInstantiationError(Exception):
     """Exception class to raise when instantiating variables."""
@@ -35,3 +37,19 @@ class IncompatibleCategoriesError(Exception):
 
 class DifferentSliceOriginError(Exception):
     """Exception raised when performing operation ons torers with differents storers."""
+
+
+class ImpossibleTypeParsingError(Exception):
+    """Exception raised when a TOML parser can not access to a variable's type."""
+
+    def __init__(self, keys: list[str], filepath: Path | str) -> None:
+        error_msg = f"Type of {'.'.join(keys)} can't be parsed from {filepath}"
+        super().__init__(error_msg)
+
+
+class InvalidParameterKeyError(Exception):
+    """Exception raised when accessing a parsed parameter using an incorrect name."""
+
+    def __init__(self, keys: list[str], filepath: Path | str) -> None:
+        error_msg = f"Variable {'.'.join(keys)} does not exist in {filepath}"
+        super().__init__(error_msg)

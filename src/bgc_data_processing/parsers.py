@@ -10,6 +10,10 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 from bgc_data_processing.core.variables.vars import TemplateVar
+from bgc_data_processing.exceptions import (
+    ImpossibleTypeParsingError,
+    InvalidParameterKeyError,
+)
 from bgc_data_processing.water_masses import WaterMass
 
 
@@ -62,16 +66,12 @@ class TomlParser:
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
-            error_msg = f"Variable {'.'.join(keys[:1])} does "
-            f"not exist in {self.filepath}"
-            raise KeyError(error_msg)
+            raise InvalidParameterKeyError(keys[:1], self.filepath)
         var = self._elements[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var, dict)) or (key not in var.keys()):
-                error_msg = f"Variable {'.'.join(keys[:i + 2])} doesn't "
-                f"exist in {self.filepath}"
-                raise KeyError(error_msg)
+                raise InvalidParameterKeyError(keys[: i + 2, self.filepath])
             var = var[key]
         return deepcopy(var)
 
@@ -92,18 +92,13 @@ class TomlParser:
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
-            error_msg = (
-                f"Variable {'.'.join(keys[:1])} does not exist in {self.filepath}"
-            )
-            raise KeyError(error_msg)
+            raise InvalidParameterKeyError(keys[:1], self.filepath)
         if len(keys) > 1:
             var = self._elements[keys[0]]
             for i in range(len(keys[1:-1])):
                 key = keys[1:][i]
                 if (not isinstance(var, dict)) or (key not in var.keys()):
-                    keys_str = ".".join(keys[: i + 2])
-                    error_msg = f"Variable {keys_str} does not exist in {self.filepath}"
-                    raise KeyError(error_msg)
+                    raise InvalidParameterKeyError(keys[: i + 2], self.filepath)
                 var = var[key]
             var[keys[-1]] = value
         elif len(keys) == 1:
@@ -193,31 +188,6 @@ class TomlParser:
             return is_correct_iterator and all(isinstance(x, var_type[1]) for x in var)
         return isinstance(var, var_type)
 
-    def _make_error_msg(self, keys: list[str], types: list[type]) -> str:
-        """Create error message for TypeErrors.
-
-        Parameters
-        ----------
-        keys : list[str]
-            List path to the variable: ["VAR1", "VAR2", "VAR3"]
-            is the path to the variable VAR1.VAR2.VAR3 in the toml.
-        types : list[type]
-            Correct types for the variable.
-
-        Returns
-        -------
-        str
-            Error message to pass to TypeError.
-        """
-        type_msg = f"Variable {'.'.join(keys)} from {self.filepath} has incorrect type."
-        crop = lambda x: str(str(x).split("'")[1])
-        iterables = [t for t in types if isinstance(t, tuple)]
-        str_iter = [crop(t[0]) + "[" + crop(t[1]) + "]" for t in iterables]
-        str_other = [crop(t) for t in types if not isinstance(t, tuple)]
-        str_types = ", ".join(str_other + str_iter)
-        correct_type_msg = f"Must be of one of these types: {str_types}."
-        return f"{type_msg} {correct_type_msg}"
-
     def raise_if_wrong_type_below(
         self,
         keys: list[str],
@@ -265,17 +235,12 @@ class TomlParser:
             If the type can't be found in the config file.
         """
         if keys[0] not in self._parsed_types.keys():
-            error_msg = (
-                f"Type of {'.'.join(keys[:1])} can't be parsed from {self.filepath}"
-            )
-            raise KeyError(error_msg)
+            raise ImpossibleTypeParsingError(keys[:1], self.filepath)
         var_type = self._parsed_types[keys[0]]
         for i in range(len(keys[1:])):
             key = keys[1:][i]
             if (not isinstance(var_type, dict)) or (key not in var_type.keys()):
-                keys_str = ".".join(keys[: i + 2])
-                error_msg = f"Type of {keys_str} can't be parsed from {self.filepath}"
-                raise KeyError(error_msg)
+                raise ImpossibleTypeParsingError(keys[: i + 2], self.filepath)
             var_type = var_type[key]
         return var_type
 
@@ -301,7 +266,15 @@ class TomlParser:
         # Check type:
         is_any_type = any(self._check_type(var, var_type) for var_type in types)
         if not is_any_type:
-            raise TypeError(self._make_error_msg(keys=keys, types=types))
+            type_msg = f"Type of {'.'.join(keys)} from {self.filepath} is incorrect."
+            crop = lambda x: str(x).split("'")[1]
+            iterables = [t for t in types if isinstance(t, tuple)]
+            str_iter = [crop(t[0]) + "[" + crop(t[1]) + "]" for t in iterables]
+            str_other = [crop(t) for t in types if not isinstance(t, tuple)]
+            str_types = ", ".join(str_other + str_iter)
+            correct_type_msg = f"Must be of one of these types: {str_types}."
+            error_msg = f"{type_msg} {correct_type_msg}"
+            raise TypeError(error_msg)
 
 
 def directory_check(get_variable: Callable) -> Callable:
@@ -392,7 +365,7 @@ class ConfigParser(TomlParser):
             elif isinstance(var, str):
                 self.dirs_vars_keys.append([var])
             else:
-                error_msg = f"Unsupported type for directpory key {var}"
+                error_msg = f"Unsupported type for directory key {var}: {type(var)}."
                 raise TypeError(error_msg)
         self.existing_dir_behavior = existing_directory
         self._dir_created = {
