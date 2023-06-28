@@ -14,6 +14,10 @@ from bgc_data_processing.core.io.savers import StorerSaver
 from bgc_data_processing.core.loaders.abfile_loaders import ABFileLoader
 from bgc_data_processing.core.sources import DataSource
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.exceptions import (
+    ABFileLoadingError,
+    IncompatibleMaskShapeError,
+)
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import (
@@ -74,7 +78,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
         Raises
         ------
-        KeyError
+        ABFileLoadingError
             If the variable does not exist in the dataset.
         """
         variable = self._variables.get(var_name=variable_name)
@@ -100,8 +104,9 @@ class SelectiveABFileLoader(ABFileLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            error_msg = f"Grid File doesn't have data for the variable {variable_name}"
-            raise KeyError(error_msg)
+            error_msg = f"Grid File has no data for the variable {variable_name}."
+            f"Possible fieldnames are {self.grid_file.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         return data
 
     def _load_field(
@@ -358,8 +363,7 @@ class Mask:
     @mask.setter
     def mask(self, mask_2d: np.ndarray) -> None:
         if mask_2d.shape != self._index_2d.shape:
-            msg = "Both mask and index must have similar shapes."
-            raise ValueError(msg)
+            raise IncompatibleMaskShapeError(self._index_2d.shape, mask_2d.shape)
         self._mask = mask_2d
         self._index = pd.Index(self._index_2d[self._mask].flatten())
 
@@ -408,12 +412,11 @@ class Mask:
 
         Raises
         ------
-        ValueError
+        IncompatibleMaskShapeError
             If mask_array has the wrong shape.
         """
         if mask_array.shape != self.mask.shape:
-            msg = "New mask array has incorrect shape."
-            raise ValueError(msg)
+            raise IncompatibleMaskShapeError(self.mask.shape, mask_array.shape)
         return Mask(
             mask_2d=self._mask & mask_array,
             index_2d=self._index_2d,
@@ -579,7 +582,7 @@ class SelectiveDataSource(DataSource):
 
         Raises
         ------
-        ValueError
+        ABFileLoadingError
             If the variable dosn't exist in the grid file.
         """
         var = self.loader.variables.get(var_name)
@@ -590,7 +593,9 @@ class SelectiveDataSource(DataSource):
                 found = True
                 break
         if not found:
-            raise ValueError
+            error_msg = f"Grid File has no data for the variable {var.name}."
+            f"Possible fieldnames are {self.grid.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         value = mask_2d.filled(np.nan)
         return pd.Series(value.flatten(), name=var.label)
 

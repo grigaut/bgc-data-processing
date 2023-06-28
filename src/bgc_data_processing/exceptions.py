@@ -53,3 +53,14 @@ class InvalidParameterKeyError(Exception):
     def __init__(self, keys: list[str], filepath: Path | str) -> None:
         error_msg = f"Variable {'.'.join(keys)} does not exist in {filepath}"
         super().__init__(error_msg)
+
+
+class IncompatibleMaskShapeError(Exception):
+    """Exception raised when a Mask with an incorrect shape is trying to be set."""
+
+    def __init__(self, correct_shape: tuple, incorrect_shape: tuple) -> None:
+        error_msg = (
+            f"Mask shape should be {correct_shape}. "
+            f"Given mask shape is {incorrect_shape}."
+        )
+        super().__init__(error_msg)
