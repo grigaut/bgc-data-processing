@@ -153,7 +153,7 @@ class WaterMass:
         sigma_t_name : str
             Sigma-t at pressure 0 variable name.
         create_var_if_missing : bool, optional
-            Wehtehr to create the water mass variable in the storer., by default True
+            Whether to create the water mass variable in the storer., by default True
 
         Returns
         -------
@@ -172,7 +172,7 @@ class WaterMass:
         )
         full_data = original_storer.data
         compliant = constraints.apply_constraints_to_dataframe(full_data).index
-        if water_mass_variable_name in original_storer.variables.keys():  # noqa: SIM118
+        if original_storer.variables.has_name(water_mass_variable_name):
             water_mass_var = original_storer.variables.get(water_mass_variable_name)
             water_mass_label = water_mass_var.label
             data = full_data[water_mass_label]
