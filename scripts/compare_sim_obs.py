@@ -7,6 +7,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from bgc_data_processing.verbose import Verbose
 from cartopy import feature
 
 CONFIG_FOLDER = Path("config")
@@ -20,12 +21,10 @@ if __name__ == "__main__":
         dirs_vars_keys=["SAVING_DIR"],
         existing_directory="raise",
     )
-    # Configuration parameters
     LOADING_DIR: Path = Path(CONFIG["LOADING_DIR"])
     SIM_PROVIDER: str = CONFIG["SIM_PROVIDER"]
     TO_INTERPOLATE: list[str] = CONFIG["TO_INTERPOLATE"]
     INTERPOLATION_KIND: str = CONFIG["INTERPOLATION_KIND"]
-    # Default variables
     LATITUDE_TEMPLATE = bgc_dp.defaults.VARS["latitude"]
     SALINITY_TEMPLATE = bgc_dp.defaults.VARS["salinity"]
     TEMPERATURE_TEMPLATE = bgc_dp.defaults.VARS["temperature"]
@@ -43,6 +42,8 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     SHOW_MAP: bool = CONFIG["SHOW_MAP"]
 
+    Verbose(CONFIG["VERBOSE"])
+
     observations = bgc_dp.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
@@ -59,7 +60,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=1,
     )
     variables = observations.variables
     constraints = bgc_dp.Constraints()
@@ -90,6 +90,7 @@ if __name__ == "__main__":
         strategy=bgc_dp.comparison.NearestNeighborStrategy(metric="haversine"),
         dsource=bgc_dp.providers.PROVIDERS["HYCOM"],
     )
+    # selector.verbose = VERBOSE
 
     simulations = selector.load_all(bgc_dp.Constraints())
 
@@ -147,7 +148,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=1,
     )
 
     sims = bgc_dp.read_files(
@@ -166,7 +166,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=1,
     )
 
     rmse = bgc_dp.metrics.RMSE(VARIABLES_TO_COMPARE)

@@ -8,6 +8,7 @@ import pandas as pd
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.core.variables.vars import BaseVar, ParsedVar
+from bgc_data_processing.verbose import with_verbose
 
 
 def read_files(
@@ -26,7 +27,6 @@ def read_files(
     category: str = "in_situ",
     unit_row_index: int = 1,
     delim_whitespace: bool = True,
-    verbose: int = 1,
 ) -> "Storer":
     """Build Storer reading data from csv or txt files.
 
@@ -63,8 +63,6 @@ def read_files(
         Index of the row with the units, None if there's no unit row., by default 1
     delim_whitespace : bool, optional
         Whether to use whitespace as delimiters., by default True
-    verbose : int, optional
-        Controls the verbose, by default 1
 
     Returns
     -------
@@ -110,7 +108,6 @@ def read_files(
                 category=category,
                 unit_row_index=unit_row_index,
                 delim_whitespace=delim_whitespace,
-                verbose=verbose,
             )
 
             storers.append(storer)
@@ -139,7 +136,6 @@ def read_files(
         category=category,
         unit_row_index=unit_row_index,
         delim_whitespace=delim_whitespace,
-        verbose=verbose,
     )
     return reader.get_storer()
 
@@ -180,8 +176,6 @@ class Reader:
         Index of the row with the units, None if there's no unit row., by default 1
     delim_whitespace : bool, optional
         Whether to use whitespace as delimiters., by default True
-    verbose : int, optional
-        Controls the verbose, by default 1
 
     Examples
     --------
@@ -210,12 +204,14 @@ class Reader:
         category: str = "in_situ",
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
-        verbose: int = 1,
     ):
-        self._verbose = verbose
         self._reference_vars = {var.label: var for var in variables_reference}
 
-        raw_df, unit_row = self._read(Path(filepath), unit_row_index, delim_whitespace)
+        raw_df, unit_row = self._read(
+            filepath=Path(filepath),
+            unit_row_index=unit_row_index,
+            delim_whitespace=delim_whitespace,
+        )
         mandatory_vars = {
             providers_column_label: "provider",
             expocode_column_label: "expocode",
@@ -242,6 +238,7 @@ class Reader:
         )
         self._variables = self._get_variables(raw_df, unit_row, mandatory_vars)
 
+    @with_verbose(trigger_threshold=0, message="Reading data from {filepath}")
     def _read(
         self,
         filepath: Path,
@@ -274,8 +271,6 @@ class Reader:
                 delim_whitespace=delim_whitespace,
                 skiprows=lambda x: x not in [*skiprows, 0],
             )
-        if self._verbose > 0:
-            print(f"Reading data from {filepath}")
         raw_df = pd.read_csv(
             filepath,
             delim_whitespace=delim_whitespace,
@@ -283,6 +278,7 @@ class Reader:
         )
         return raw_df, unit_row
 
+    @with_verbose(trigger_threshold=1, message="Parsing file columns.")
     def _get_variables(
         self,
         raw_df: pd.DataFrame,
@@ -354,6 +350,7 @@ class Reader:
         """
         return pd.to_datetime(raw_df[[year_col, month_col, day_col]])
 
+    @with_verbose(trigger_threshold=1, message="Parsing date values.")
     def _add_date_columns(
         self,
         raw_df: pd.DataFrame,
@@ -401,5 +398,4 @@ class Reader:
             category=self._category,
             providers=self._providers,
             variables=self._variables.storing_variables,
-            verbose=self._verbose,
         )

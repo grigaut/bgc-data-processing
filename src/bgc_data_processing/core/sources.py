@@ -13,6 +13,7 @@ from bgc_data_processing.core.loaders.netcdf_loaders import (
 )
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.exceptions import UnsupportedLoadingFormatError
+from bgc_data_processing.verbose import with_verbose
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.filtering import Constraints
@@ -41,8 +42,6 @@ class DataSource:
         Pattern to match to load files.
     variable_ensemble : SourceVariableSet
         Ensembles of variables to consider.
-    verbose : int, optional
-        Verbose., by default 1
     """
 
     def __init__(
@@ -54,7 +53,6 @@ class DataSource:
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
         variable_ensemble: "SourceVariableSet",
-        verbose: int = 1,
         **kwargs,
     ) -> None:
         self._format = data_format
@@ -63,7 +61,6 @@ class DataSource:
         self._store_vars = variable_ensemble.storing_variables
         self._files_pattern = files_pattern
         self._dirin = Path(dirin)
-        self._verbose = verbose
         self._provider = provider_name
         self._read_kwargs = kwargs
         self._loader = self._build_loader(
@@ -88,7 +85,6 @@ class DataSource:
             "excluded_files": self._loader.excluded_filenames,
             "files_pattern": self._files_pattern,
             "variable_ensemble": deepcopy(self._vars_ensemble),
-            "verbose": self._verbose,
         }
         for key, value in self._read_kwargs.items():
             base_parameters[key] = value
@@ -128,16 +124,6 @@ class DataSource:
     def loader(self) -> "BaseLoader":
         """Data loader."""
         return self._loader
-
-    @property
-    def verbose(self) -> int:
-        """Verbose level."""
-        return self._verbose
-
-    @verbose.setter
-    def verbose(self, verbose_value) -> None:
-        assert isinstance(verbose_value, int), "self.verbose must be an instance of int"
-        self._verbose = verbose_value
 
     @property
     def saving_order(self) -> list[str]:
@@ -214,6 +200,7 @@ class DataSource:
         for var in to_remove:
             _ = storer.pop(var.name)
 
+    @with_verbose(trigger_threshold=0, message="Loading data from {filepath}")
     def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
         """Create the storer with the data from a given filepath.
 
@@ -235,7 +222,6 @@ class DataSource:
             category=self._category,
             providers=[self._loader.provider],
             variables=self._store_vars,
-            verbose=self._verbose,
         )
         self._insert_all_features(storer)
         self._remove_temporary_variables(storer)

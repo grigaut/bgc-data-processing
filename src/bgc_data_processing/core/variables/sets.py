@@ -861,7 +861,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         list[str | tuple[str]]
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
-        return [var.name for var in self._save]
+        return self._save
 
     @property
     def name_save_format(self) -> str:

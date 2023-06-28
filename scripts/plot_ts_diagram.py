@@ -30,6 +30,8 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     VERBOSE: int = CONFIG["VERBOSE"]
 
+    bgc_dp.set_verbose_level(VERBOSE)
+
     SALINITY_DEFAULT = bgc_dp.defaults.VARS["salinity"]
     TEMPERATURE_DEFAULT = bgc_dp.defaults.VARS["temperature"]
 
@@ -48,7 +50,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=VERBOSE,
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables

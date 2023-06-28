@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from bgc_data_processing.exceptions import ImpossibleSaveError
+from bgc_data_processing.verbose import with_verbose
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.storers import Slice, Storer
@@ -68,7 +69,6 @@ class StorerSaver:
     ) -> None:
         self._storer = storer
         self._variables = copy(storer.variables.saving_variables)
-        self._verbose = storer.verbose
         self.save_aggregated_data_only = save_aggregated_data_only
 
     @property
@@ -169,6 +169,7 @@ class StorerSaver:
             filepath.open("w")
         return filepath
 
+    @with_verbose(trigger_threshold=2, message="Writing file header.")
     def _write_header(self, filepath: Path) -> None:
         """Write a file's header with data variables names and units.
 
@@ -189,6 +190,7 @@ class StorerSaver:
             # Write unit row
             file.write(name_format % tuple(units) + "\n")
 
+    @with_verbose(trigger_threshold=2, message="Appending values to file.")
     def _write_values(self, filepath: Path, data: pd.DataFrame) -> None:
         """Write the data values within the given file.
 
@@ -206,6 +208,7 @@ class StorerSaver:
             if len(lines) != 0:
                 file.writelines(lines)
 
+    @with_verbose(trigger_threshold=1, message="Saving data in {filepath}.")
     def _save_data(self, filepath: Path, data_slice: "Storer") -> None:
         """Save the data of a slice within a given file.
 
@@ -216,9 +219,6 @@ class StorerSaver:
         data_slice : Storer
             Data to save.
         """
-        # Verbose
-        if self._verbose > 1:
-            print(f"\tSaving data in {filepath.name}")
         # Parameters
         data: pd.DataFrame = data_slice.data.loc[:, self._variables.save_labels]
         self._write_header(filepath)
