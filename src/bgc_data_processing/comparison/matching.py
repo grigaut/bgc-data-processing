@@ -659,6 +659,7 @@ class SelectiveDataSource(DataSource):
         return Mask(to_keep, indexes_2d), Match(index)
 
     @staticmethod
+    @with_verbose(trigger_threshold=0, message="Loading data from {filepath}")
     def parse_date_from_filepath(filepath: Path | str) -> dt.date:
         """Parse date from abfile basename.
 
