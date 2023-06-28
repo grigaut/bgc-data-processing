@@ -161,6 +161,15 @@ class Storer:
         -------
         Storer
             Concatenation of both storer's dataframes.
+
+        Raises
+        ------
+        TypeError
+            If other is not a storer.
+        IncompatibleVariableSetsError
+            If both storers have a different variable set.
+        IncompatibleCategoriesError
+            If both storers have different categories.
         """
         if not isinstance(other, Storer):
             error_msg = f"Can't add CSVStorer object to {type(other)}"
@@ -515,8 +524,8 @@ class Slice(Storer):
 
         Raises
         ------
-        ValueError
-            Is the slices don't originate from same storer.
+        DifferentSliceOriginError
+            If the slices don't originate from same storer.
         """
         if self.storer != __o.storer:
             error_msg = "Addition can only be performed with slice from same CSVStorer"
