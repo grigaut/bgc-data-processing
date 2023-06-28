@@ -512,7 +512,7 @@ class ExistingVar(NotExistingVar):
 
         Raises
         ------
-        ValueError
+        VariableInstantiationError
             If one of the arguments length is different than 1 and 3.
         ValueError
             If one of the arguments is not an instance of string or Iterable.
@@ -534,7 +534,7 @@ class ExistingVar(NotExistingVar):
                     flag_value = arg[2]
                 else:
                     msg = f"{arg} can't be of length {len(arg)}"
-                    raise ValueError(msg)
+                    raise VariableInstantiationError(msg)
             else:
                 msg = f"{arg} must be str or Iterable"
                 raise TypeError(msg)
