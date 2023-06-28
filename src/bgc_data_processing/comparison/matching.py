@@ -17,6 +17,7 @@ from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.exceptions import (
     ABFileLoadingError,
     IncompatibleMaskShapeError,
+    UnsupportedLoadingFormatError,
 )
 
 if TYPE_CHECKING:
@@ -564,8 +565,7 @@ class SelectiveDataSource(DataSource):
                 variables=self._vars_ensemble.loading_variables,
                 **self._read_kwargs,
             )
-        msg = "Only ABFiles can be loaded from a selective data source"
-        raise ValueError(msg)
+        raise UnsupportedLoadingFormatError(self._format)
 
     def get_coord(self, var_name: str) -> pd.Series:
         """Get a coordinate field from loader.grid_file.

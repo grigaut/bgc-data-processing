@@ -12,6 +12,7 @@ from bgc_data_processing.core.loaders.netcdf_loaders import (
     SatelliteNetCDFLoader,
 )
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.exceptions import UnsupportedLoadingFormatError
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.filtering import Constraints
@@ -157,7 +158,6 @@ class DataSource:
         if self._format == "csv":
             return CSVLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -166,7 +166,6 @@ class DataSource:
         if self._format == "netcdf" and self._category == "satellite":
             return SatelliteNetCDFLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -175,7 +174,6 @@ class DataSource:
         if self._format == "netcdf":
             return NetCDFLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -184,13 +182,12 @@ class DataSource:
         if self._format == "abfiles":
             return ABFileLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
                 **self._read_kwargs,
             )
-        raise ValueError
+        raise UnsupportedLoadingFormatError(self._format)
 
     def _insert_all_features(self, storer: "Storer") -> None:
         """Insert all features in a storer.

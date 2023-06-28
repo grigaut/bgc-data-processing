@@ -33,6 +33,14 @@ class ABFileLoadingError(Exception):
     """Exception class to raise when loading NetCDF files."""
 
 
+class UnsupportedLoadingFormatError(Exception):
+    """Exception raised when trying to load data with unsupported format."""
+
+    def __init__(self, file_format: str) -> None:
+        error_msg = f"File format: {file_format} can not be loaded."
+        super().__init__(error_msg)
+
+
 # Storer Related Errors
 class IncompatibleCategoriesError(Exception):
     """Exception raised when performing operation on incompatible data categories."""
