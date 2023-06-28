@@ -179,6 +179,8 @@ class StorerSaver:
         """
         if filepath.is_file() and filepath.open("r").readlines():
             return
+        if self._verbose > 2:
+            print("\t\tWriting file header.")
         variables = self._variables
         name_format = variables.name_save_format
         labels = [variables.get(name).label for name in variables.save_names]
@@ -199,6 +201,8 @@ class StorerSaver:
         data : pd.DataFrame
             Data to save.
         """
+        if self._verbose > 2:
+            print("\t\tAppending values to file.")
         value_format = self._variables.value_save_format
         with filepath.open("a") as file:
             # Write
