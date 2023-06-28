@@ -21,7 +21,7 @@ class Verbose:
     max_allowed: int = 2
     min_allowed: int = 0
 
-    def __new__(cls, level: int = 1) -> "Verbose":
+    def __new__(cls, level: int = 0) -> "Verbose":
         """Instanciate new verbose singleton.
 
         Create an instance if there is no instance existing.
@@ -55,14 +55,16 @@ class Verbose:
 
 
 def with_verbose(trigger_threshold: int, message: str):
-    """_summary_.
+    """Display verbose on the function call.
 
     Parameters
     ----------
     trigger_threshold : int
-        _description_
+        Level to use as trigger for verbose display.
+        Example: if trigger_level = 1 -> message is displayed if
+        the global verbose level is striclty above 1.
     message : str
-        _description_
+        Message to display.
     """
 
     def verbose_wrapper(func):
