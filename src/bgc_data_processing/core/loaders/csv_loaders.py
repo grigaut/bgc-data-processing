@@ -209,8 +209,6 @@ class CSVLoader(BaseLoader):
         pd.DataFrame
             DataFrame corresponding to the file.
         """
-        if self._verbose > 1:
-            print(f"\tLoading data from {Path(filepath).name}")
         df_raw = self._read(Path(filepath))
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)

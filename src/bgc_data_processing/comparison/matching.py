@@ -716,6 +716,8 @@ class SelectiveDataSource(DataSource):
         )
         datas: list[pd.DataFrame] = []
         for basename in basenames:
+            if self._verbose > 1:
+                print(f"\tLoading data from {Path(basename).name}")
             date = self.parse_date_from_basename(basename)
             data_slice = self.reference[self.reference[date_var_label].dt.date == date]
             if data_slice.empty:
