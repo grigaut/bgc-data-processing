@@ -120,7 +120,8 @@ def read_files(
     elif isinstance(filepath, str):
         path = Path(filepath)
     else:
-        error_msg = f"Can't read filepaths from {filepath}"
+        error_msg = f"Can't read filepaths from {filepath}. "
+        "Accepted types are Path or str."
         raise TypeError(error_msg)
     reader = Reader(
         filepath=path,
