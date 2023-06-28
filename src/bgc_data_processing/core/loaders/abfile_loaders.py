@@ -63,6 +63,23 @@ class ABFileLoader(BaseLoader):
         self.grid_file = ABFileGrid(basename=grid_basename, action="r")
         self._index = None
 
+    @staticmethod
+    def convert_filepath_to_basename(filepath: Path | str) -> Path:
+        """Convert a filepath to the basename.
+
+        Parameters
+        ----------
+        filepath : Path | str
+            Filepath ot convert.
+
+        Returns
+        -------
+        Path
+            Basename
+        """
+        path = Path(filepath)
+        return path.parent.joinpath(path.stem)
+
     @overload
     def _set_index(self, data: pd.DataFrame) -> pd.DataFrame:
         ...
@@ -180,14 +197,14 @@ class ABFileLoader(BaseLoader):
 
     def load(
         self,
-        basename: Path | str,
+        filepath: Path | str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a abfiles from basename.
 
         Parameters
         ----------
-        basename: Path | str
+        filepath: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -197,6 +214,7 @@ class ABFileLoader(BaseLoader):
         pd.DataFrame
             DataFrame corresponding to the file.
         """
+        basename = self.convert_filepath_to_basename(filepath)
         raw_data = self._read(basename=str(basename))
         # transform thickness in depth
         with_depth = self._create_depth_column(raw_data)

@@ -1,7 +1,7 @@
 """Variable Ensembles."""
 import itertools
 from collections.abc import Callable, Iterator
-from copy import copy
+from copy import copy, deepcopy
 from typing import TypeAlias
 
 import numpy as np
@@ -61,7 +61,7 @@ class VariableSet:
 
     def _instantiate_from_elements(self, elements: list[AllVariablesTypes]) -> None:
         self._elements: list[FromFileVariables | ParsedVar] = copy(elements)
-        self._save = copy(elements)
+        self._save = [var.name for var in elements]
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
@@ -166,8 +166,10 @@ class VariableSet:
         """
         if self.has_name(var_name=var_name):
             return self.mapper_by_name[var_name]
-        error_msg = f"{var_name} is not a valid variable name.Valid names are: "
-        f"{list(self.mapper_by_name.keys())}"
+        error_msg = (
+            f"{var_name} is not a valid variable name.Valid names are: "
+            f"{list(self.mapper_by_name.keys())}"
+        )
         raise IncorrectVariableNameError(error_msg)
 
     def add_var(self, var: FromFileVariables) -> None:
@@ -458,7 +460,7 @@ class BaseRequiredVarsSet(VariableSet):
         self._elements: list[FromFileVariables | ParsedVar] = (
             mandatory_variables + list(args) + list(kwargs.values())
         )
-        self._save = mandatory_variables + list(args) + list(kwargs.values())
+        self._save = [var.name for var in self._elements]
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
         self._not_in_dset = [var for var in self._elements if not var.exist_in_dset]
 
@@ -715,7 +717,7 @@ class StoringVariablesSet(BaseRequiredVarsSet):
             *args,
             **kwargs,
         )
-        self._save = self._elements.copy()
+        self._save = [var.name for var in self._elements]
 
     def set_saving_order(self, var_names: list[str] = []) -> None:
         """Set the saving order for the variables.
@@ -732,7 +734,8 @@ class StoringVariablesSet(BaseRequiredVarsSet):
         """
         if not var_names:
             return
-        new_save = [self.get(name) for name in var_names]
+        # new_save = [self.get(name) for name in var_names]
+        new_save = deepcopy(var_names)
         self._save = new_save
 
     @property
@@ -817,7 +820,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
             **kwargs,
         )
         if not save_order:
-            self._save = self._elements.copy()
+            self._save = [var.name for var in self._elements.copy()]
         else:
             self._save = save_order
 
@@ -836,8 +839,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         """
         if not var_names:
             return
-        new_save = [self.get(name) for name in var_names]
-        self._save = new_save
+        self._save = deepcopy(var_names)
 
     @property
     def save_labels(self) -> list[str | tuple[str]]:
@@ -848,7 +850,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         list[str | tuple[str]]
             List of columns keys to pass as df[self.save_sort] to sort data.
         """
-        return [var.label for var in self._save]
+        return [self.get(name).label for name in self._save]
 
     @property
     def save_names(self) -> list[str | tuple[str]]:
@@ -870,7 +872,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         str
             Format string
         """
-        return " ".join([var.name_format for var in self._save])
+        return " ".join([self.get(name).name_format for name in self._save])
 
     @property
     def value_save_format(self) -> str:
@@ -881,7 +883,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         str
             Format string"
         """
-        return " ".join([var.value_format for var in self._save])
+        return " ".join([self.get(name).value_format for name in self._save])
 
 
 class SourceVariableSet(BaseRequiredVarsSet):
