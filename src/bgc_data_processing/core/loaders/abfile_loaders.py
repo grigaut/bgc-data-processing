@@ -14,6 +14,7 @@ from bgc_data_processing.core.variables.vars import (
     ExistingVar,
     NotExistingVar,
 )
+from bgc_data_processing.exceptions import ABFileLoadingError
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import SourceVariableSet
@@ -118,7 +119,7 @@ class ABFileLoader(BaseLoader):
 
         Raises
         ------
-        KeyError
+        ABFileLoadingError
             If the variable does not exist in the dataset.
         """
         variable = self._variables.get(var_name=variable_name)
@@ -144,8 +145,9 @@ class ABFileLoader(BaseLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            error_msg = f"Grid File doesn't have data for the variable {variable_name}"
-            raise KeyError(error_msg)
+            error_msg = f"Grid File has no data for the variable {variable_name}."
+            f"Possible fieldnames are {self.grid_file.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         return data
 
     def _convert_types(self, wrong_types: pd.DataFrame) -> pd.DataFrame:
