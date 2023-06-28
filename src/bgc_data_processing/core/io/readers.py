@@ -216,6 +216,8 @@ class Reader:
         self._reference_vars = {var.label: var for var in variables_reference}
 
         raw_df, unit_row = self._read(Path(filepath), unit_row_index, delim_whitespace)
+        if self._verbose > 1:
+            print("\tParsing file variables.")
         mandatory_vars = {
             providers_column_label: "provider",
             expocode_column_label: "expocode",
@@ -307,6 +309,8 @@ class Reader:
         """
         variables = {}
         for column in raw_df.columns:
+            if self._verbose > 2:
+                print(f"\t\tParsing column {column}.")
             if unit_row is None or column not in unit_row.columns:
                 unit = "[]"
             else:
@@ -382,6 +386,8 @@ class Reader:
         pd.DataFrame
             Dataframe with new columns
         """
+        if self._verbose > 2:
+            print("\t\tParsing date.")
         if date_col in raw_df.columns:
             return raw_df
         missing_col = self._make_date_column(raw_df, year_col, month_col, day_col)
