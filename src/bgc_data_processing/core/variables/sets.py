@@ -15,6 +15,7 @@ from bgc_data_processing.core.variables.vars import (
 )
 from bgc_data_processing.exceptions import (
     DuplicatedVariableNameError,
+    FeatureConstructionError,
     IncorrectVariableNameError,
 )
 
@@ -160,7 +161,7 @@ class VariableSet:
 
         Raises
         ------
-        KeyError
+        IncorrectVariableNameError
             If var_name doesn't correspond to any name.
         """
         if self.has_name(var_name=var_name):
@@ -176,6 +177,11 @@ class VariableSet:
         ----------
         var : Var
             Variable to add
+
+        Raises
+        ------
+        DuplicatedVariableNameError
+            If the variable name is already in the set.
         """
         if var.name in self.keys():  # noqa: SIM118
             error_msg = "A variable already exists with his name"
@@ -337,7 +343,7 @@ class FeatureVariablesSet(VariableSet):
 
         Raises
         ------
-        ValueError
+        FeatureConstructionError
             If all features can not be constructed.
         """
         available = available_vars.copy()
@@ -352,7 +358,7 @@ class FeatureVariablesSet(VariableSet):
         if features:
             error_msg = f"The following features can not be loaded: {features}. "
             "They probably depend on non loaded variables."
-            raise ValueError(error_msg)
+            raise FeatureConstructionError(error_msg)
 
 
 class BaseRequiredVarsSet(VariableSet):

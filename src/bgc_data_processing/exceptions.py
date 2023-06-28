@@ -20,6 +20,10 @@ class IncompatibleVariableSetsError(Exception):
     """Exception raised when performing operation on incompatible variable sets."""
 
 
+class FeatureConstructionError(Exception):
+    """Exception raised when unsuccessfully trying to build a feature."""
+
+
 # Loading Related Errors
 class CSVLoadingError(Exception):
     """Exception class to raise when loading CSV files."""
