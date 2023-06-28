@@ -62,7 +62,7 @@ class TomlParser:
 
         Raises
         ------
-        KeyError
+        InvalidParameterKeyError
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
@@ -88,7 +88,7 @@ class TomlParser:
 
         Raises
         ------
-        KeyError
+        InvalidParameterKeyError
             If the path doesn't match the file's architecture
         """
         if keys[0] not in self._elements.keys():
@@ -198,6 +198,11 @@ class TomlParser:
         ----------
         keys : list[str]
             'Root' level which to start checking types after
+
+        Raises
+        ------
+        TypeError
+            if self._elements is not a dictionnary.
         """
         if not self._check:
             return
@@ -231,7 +236,7 @@ class TomlParser:
 
         Raises
         ------
-        KeyError
+        ImpossibleTypeParsingError
             If the type can't be found in the config file.
         """
         if keys[0] not in self._parsed_types.keys():
