@@ -183,7 +183,6 @@ class WaterMass:
                 category=original_storer.category,
                 providers=original_storer.providers[:],
                 variables=original_storer.variables,
-                verbose=original_storer.verbose,
             )
         if not create_var_if_missing:
             error_msg = f"{water_mass_variable_name} invalid for the given storer."
@@ -204,7 +203,6 @@ class WaterMass:
             category=original_storer.category,
             providers=original_storer.providers[:],
             variables=original_storer.variables,
-            verbose=original_storer.verbose,
         )
         new_storer.add_feature(new_var, data)
         return new_storer

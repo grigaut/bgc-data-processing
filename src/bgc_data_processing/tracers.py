@@ -15,6 +15,7 @@ from seawater import eos80
 
 from bgc_data_processing.core.filtering import Constraints
 from bgc_data_processing.utils.dateranges import DateRangeGenerator
+from bgc_data_processing.verbose import with_verbose
 
 if TYPE_CHECKING:
     from cartopy.mpl.geoaxes import GeoAxes
@@ -51,7 +52,6 @@ class BasePlot(ABC):
         self._storer = constraints.apply_constraints_to_storer(storer)
         self._variables = storer.variables
         self._constraints = constraints
-        self._verbose = storer.verbose
 
     @abstractmethod
     def _build_to_new_figure(self, *args, **kwargs) -> "Figure":
@@ -72,6 +72,7 @@ class BasePlot(ABC):
         ...
 
     @abstractmethod
+    @with_verbose(trigger_threshold=0, message="Showing Figure.")
     def show(
         self,
         title: str | None = None,
@@ -98,6 +99,7 @@ class BasePlot(ABC):
         plt.close()
 
     @abstractmethod
+    @with_verbose(trigger_threshold=0, message="Saving figure in {save_path}")
     def save(
         self,
         save_path: str,
@@ -262,6 +264,7 @@ class DensityPlotter(BasePlot):
             var_series: pd.Series = group.first()
         return var_series.reset_index().filter([lat_key, lon_key, var_key])
 
+    @with_verbose(trigger_threshold=2, message="Creating geographic array.")
     def _geo_linspace(
         self,
         column: pd.Series,
@@ -417,15 +420,11 @@ class DensityPlotter(BasePlot):
         """
         lat = self._variables.get(self._variables.latitude_var_name).label
         lon = self._variables.get(self._variables.longitude_var_name).label
-        if self._verbose > 2:
-            print("\t\tCreating latitude array")
         lat_cut, lat_points = self._geo_linspace(
             column=df[lat],
             bin_size=self._lat_bin,
             cut_name="lat_cut",
         )
-        if self._verbose > 2:
-            print("\t\tCreating longitude array")
         lon_cut, lon_points = self._geo_linspace(
             column=df[lon],
             bin_size=self._lon_bin,
@@ -435,8 +434,6 @@ class DensityPlotter(BasePlot):
         bins_concat = pd.concat([lat_cut, lon_cut, df[label]], axis=1)
         # Meshing
         lons, lats = np.meshgrid(lon_points, lat_points)
-        if self._verbose > 2:
-            print("\t\tPivotting data to 2D table")
         vals = bins_concat.pivot_table(
             values=label,
             index="lat_cut",
@@ -557,6 +554,7 @@ class DensityPlotter(BasePlot):
         ax.set_title(title)
         return fig
 
+    @with_verbose(trigger_threshold=1, message="Meshing {variable_name} data.")
     def _build_to_geoaxes(
         self,
         variable_name: str,
@@ -579,8 +577,6 @@ class DensityPlotter(BasePlot):
         tuple[GeoAxes, Collection]
             Axes, Colorbar.
         """
-        if self._verbose > 1:
-            print(f"\tMeshing {variable_name} data")
         if variable_name == "all":
             label = "all"
         else:
@@ -590,8 +586,6 @@ class DensityPlotter(BasePlot):
             lat_key=self._variables.get(self._variables.latitude_var_name).label,
             lon_key=self._variables.get(self._variables.longitude_var_name).label,
         )
-        if self._verbose > 1:
-            print("\tCreating figure")
         ax.gridlines(draw_labels=True)
         ax.add_feature(feature.LAND, zorder=4)
         ax.add_feature(feature.OCEAN, zorder=1)
@@ -654,6 +648,7 @@ class DensityPlotter(BasePlot):
             **kwargs,
         )
 
+    @with_verbose(trigger_threshold=1, message="Meshing {variable_name} data.")
     def get_df(
         self,
         variable_name: str,
@@ -671,8 +666,6 @@ class DensityPlotter(BasePlot):
             Three columns dataframe : longitude, latitude and variable density.
              The column names are the same as in the original DataFrame.
         """
-        if self._verbose > 1:
-            print(f"\tMeshing {variable_name} data")
         if variable_name == "all":
             label = "all"
         else:
@@ -684,8 +677,6 @@ class DensityPlotter(BasePlot):
             lat_key=lat_label,
             lon_key=lon_label,
         )
-        if self._verbose > 1:
-            print("\tCreating figure")
         if df.empty:
             return pd.DataFrame(columns=[lon_label, lat_label, label])
         longis_2d, latis_2d, values_2d = self._mesh(
@@ -786,6 +777,7 @@ class EvolutionProfile(BasePlot):
         if interval_length is not None:
             self._interval_length = interval_length
 
+    @with_verbose(trigger_threshold=2, message="Making depth intervals.")
     def _make_depth_intervals(self) -> pd.IntervalIndex:
         """Create the depth intervals from depth boundaries and interval resolution.
 
@@ -825,6 +817,7 @@ class EvolutionProfile(BasePlot):
             closed="right",
         )
 
+    @with_verbose(trigger_threshold=2, message="Making date intervals.")
     def _make_date_intervals(self) -> pd.IntervalIndex:
         """Create the datetime intervals to use for the cut.
 
@@ -881,6 +874,7 @@ class EvolutionProfile(BasePlot):
         ticks = np.append(cut_intervals.left.values, last_tick)
         return intervals_cut, ticks
 
+    @with_verbose(trigger_threshold=1, message="Pivotting dataframe.")
     def _make_full_pivotted_table(
         self,
         df: pd.DataFrame,
@@ -926,6 +920,7 @@ class EvolutionProfile(BasePlot):
         pivotted.sort_index(axis=0, inplace=True)
         return pivotted
 
+    @with_verbose(trigger_threshold=2, message="Adding the figure to the given axes.")
     def _build_to_axes(
         self,
         variable_name: str,
@@ -959,8 +954,6 @@ class EvolutionProfile(BasePlot):
         var_count = (~df[var_label].isna()).astype(int)
         var_count.reset_index(drop=True, inplace=True)
         # Make cuts
-        if self._verbose > 1:
-            print("\tMaking date intervals.")
         depth_cut, depth_ticks = self._create_cut_and_ticks(
             column_to_cut=df[self._depth_col],
             cut_intervals=self._make_depth_intervals(),
@@ -978,8 +971,6 @@ class EvolutionProfile(BasePlot):
             ],
             axis=1,
         )
-        if self._verbose > 1:
-            print("\tPivotting dataframe.")
         # Aggregate using 'sum' to count non-nan values
         df_pivot = self._make_full_pivotted_table(
             df=data,
@@ -990,15 +981,13 @@ class EvolutionProfile(BasePlot):
             values_series_name=var_count.name,
         )
         # Figure
-        if self._verbose > 1:
-            print("\tCreating figure.")
-
         date, depth = np.meshgrid((date_ticks), (depth_ticks))
         # Color mesh
         cbar = ax.pcolormesh(date, depth, df_pivot.values, **kwargs)
 
         return ax, cbar
 
+    @with_verbose(trigger_threshold=1, message="Creating Axes.")
     def _build_to_new_figure(
         self,
         variable_name: str,

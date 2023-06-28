@@ -27,8 +27,6 @@ class BaseLoader(ABC):
         both the one in the data file but and the one not represented in the file.
     """
 
-    _verbose: int = 1
-
     def __init__(
         self,
         provider_name: str,
@@ -62,17 +60,6 @@ class BaseLoader(ABC):
             Category provider belongs to.
         """
         return self._category
-
-    @property
-    def verbose(self) -> int:
-        """_verbose attribute getter.
-
-        Returns
-        -------
-        int
-            Verbose value.
-        """
-        return self._verbose
 
     @property
     def variables(self) -> "LoadingVariablesSet":

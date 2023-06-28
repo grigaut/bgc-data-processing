@@ -1,6 +1,7 @@
 """Data storing objects."""
 
 
+import datetime as dt
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
@@ -12,6 +13,7 @@ from bgc_data_processing.exceptions import (
     IncompatibleCategoriesError,
     IncompatibleVariableSetsError,
 )
+from bgc_data_processing.verbose import with_verbose
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.filtering import Constraints
@@ -34,8 +36,6 @@ class Storer:
         Names of the data providers.
     variables : StoringVariablesSet
         Variables storer of object to keep track of the variables in the Dataframe.
-    verbose : int, optional
-        Controls the verbosity: the higher, the more messages., by default 0
     """
 
     def __init__(
@@ -44,13 +44,11 @@ class Storer:
         category: str,
         providers: list,
         variables: "StoringVariablesSet",
-        verbose: int = 0,
     ) -> None:
         self._data = data
         self._category = category
         self._providers = providers
         self._variables = deepcopy(variables)
-        self._verbose = verbose
 
     @property
     def data(self) -> pd.DataFrame:
@@ -95,17 +93,6 @@ class Storer:
             Variables storer.
         """
         return self._variables
-
-    @property
-    def verbose(self) -> int:
-        """_verbose attribute getter.
-
-        Returns
-        -------
-        int
-            Verbose value.
-        """
-        return self._verbose
 
     def __repr__(self) -> str:
         """Representation of self.
@@ -191,7 +178,6 @@ class Storer:
             category=self.category,
             providers=concat_providers,
             variables=self.variables,
-            verbose=min(self._verbose, other.verbose),
         )
 
     def remove_duplicates(self, priority_list: list | None = None) -> None:
@@ -310,6 +296,23 @@ class Storer:
         dump_index = duplicates[to_dump].index
         return df.drop(dump_index, axis=0)
 
+    @staticmethod
+    @with_verbose(
+        trigger_threshold=1,
+        message="Slicing data for date range: {_start_date}-{_end_date}.",
+    )
+    def slice_verbose(_start_date: dt.date, _end_date: dt.date) -> None:
+        """Invoke Verbose for slicing.
+
+        Parameters
+        ----------
+        start_date : dt.date
+            Start date.
+        end_date : dt.date
+            End date.
+        """
+        return
+
     def slice_on_dates(
         self,
         drng: pd.Series,
@@ -329,15 +332,10 @@ class Storer:
             Indexes to use for slicing.
         """
         # Params
-        start_date = drng["start_date"]
-        end_date = drng["end_date"]
+        start_date: dt.datetime = drng["start_date"]
+        end_date: dt.datetime = drng["end_date"]
+        self.slice_verbose(_start_date=start_date.date(), _end_date=end_date.date())
         dates_col = self._data[self._variables.get(self._variables.date_var_name).label]
-        # Verbose
-        if self._verbose > 1:
-            print(
-                "\tSlicing data for date range"
-                f" {start_date.date()} {end_date.date()}",
-            )
         # slice
         after_start = dates_col >= start_date
         before_end = dates_col <= end_date
@@ -406,7 +404,6 @@ class Storer:
             category=storer.category,
             providers=storer.providers,
             variables=storer.variables,
-            verbose=storer.verbose,
         )
 
     def slice_using_index(self, index: pd.Index) -> "Storer":
@@ -427,7 +424,6 @@ class Storer:
             category=self._category,
             providers=self._providers,
             variables=self._variables,
-            verbose=self._verbose,
         )
 
 
@@ -463,7 +459,6 @@ class Slice(Storer):
             category=storer.category,
             providers=storer.providers,
             variables=storer.variables,
-            verbose=storer.verbose,
         )
 
     @property

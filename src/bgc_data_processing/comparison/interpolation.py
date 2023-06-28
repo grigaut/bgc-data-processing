@@ -7,6 +7,7 @@ import pandas as pd
 from scipy import interpolate
 
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.verbose import with_verbose
 
 
 class Interpolator:
@@ -36,6 +37,10 @@ class Interpolator:
         self._ys = [base.variables.get(name).label for name in y_columns_name]
         self.kind = kind
 
+    @with_verbose(
+        trigger_threshold=2,
+        message="Interpolation depth outbound -> keeping max depth value.",
+    )
     def _handle_outbound_max(
         self,
         ref_slice: pd.DataFrame | pd.Series,
@@ -66,6 +71,10 @@ class Interpolator:
         max_series.name = name
         return max_series[self._columns_order]
 
+    @with_verbose(
+        trigger_threshold=2,
+        message="Interpolation depth outbound -> keeping min depth value.",
+    )
     def _handle_outbound_min(
         self,
         ref_slice: pd.DataFrame | pd.Series,
@@ -126,6 +135,10 @@ class Interpolator:
         """
         return dataframe.loc[:, ~dataframe.columns.isin(self._ys)]
 
+    @with_verbose(
+        trigger_threshold=2,
+        message="NaN depth encountered -> setting values to NaN.",
+    )
     def _handle_nan_depth(
         self,
         ref_slice: pd.DataFrame,
@@ -160,6 +173,10 @@ class Interpolator:
         result[self._x] = obs_depth
         return result[self._columns_order]
 
+    @with_verbose(
+        trigger_threshold=2,
+        message="Valid interpolation depth -> interpolation.",
+    )
     def _interpolate(
         self,
         ref_slice: pd.DataFrame,
@@ -201,6 +218,7 @@ class Interpolator:
         concatenated[self._x] = obs_depth
         return concatenated[self._columns_order]
 
+    @with_verbose(trigger_threshold=1, message="Interpolating row.")
     def interpolate(
         self,
         row: pd.Series,
@@ -230,6 +248,10 @@ class Interpolator:
             return self._handle_outbound_min(ref_slice, obs_depth, row.name)
         return self._interpolate(ref_slice, obs_depth, row.name)
 
+    @with_verbose(
+        trigger_threshold=0,
+        message="Interpolating Data to match observations' depth values.",
+    )
     def interpolate_storer(
         self,
         observations_storer: Storer,
@@ -254,5 +276,4 @@ class Interpolator:
             category=self._storer.category,
             providers=self._storer.providers,
             variables=self._storer.variables,
-            verbose=self._storer.verbose,
         )

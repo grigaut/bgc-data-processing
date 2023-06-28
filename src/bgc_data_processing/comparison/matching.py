@@ -19,6 +19,7 @@ from bgc_data_processing.exceptions import (
     IncompatibleMaskShapeError,
     UnsupportedLoadingFormatError,
 )
+from bgc_data_processing.verbose import with_verbose
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import (
@@ -302,10 +303,21 @@ class NearestNeighborStrategy:
         The value of 'n_neighbors' while be overridden by 1.
     """
 
+    _strategy_name: str = "Nearest Neighbor"
+
     def __init__(self, **model_kwargs) -> None:
         model_kwargs["n_neighbors"] = 1
         self.model_kwargs = model_kwargs
 
+    @property
+    def name(self) -> str:
+        """Strategy name."""
+        return self._strategy_name
+
+    @with_verbose(
+        trigger_threshold=2,
+        message=f"Closest index selection using {_strategy_name}.",
+    )
     def get_closest_indexes(
         self,
         simulations_lat_lon: pd.DataFrame,
@@ -464,6 +476,7 @@ class Match:
         index_link.reset_index(inplace=True)
         self.index_link = index_link
 
+    @with_verbose(trigger_threshold=1, message="Matching indexes.")
     def match(self, loaded_df: pd.DataFrame) -> pd.DataFrame:
         """Transform the DataFrame index to link it to observations' index.
 
@@ -535,7 +548,6 @@ class SelectiveDataSource(DataSource):
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
         variable_ensemble: "SourceVariableSet",
-        verbose: int = 1,
         **kwargs,
     ) -> None:
         super().__init__(
@@ -546,7 +558,6 @@ class SelectiveDataSource(DataSource):
             excluded_files,
             files_pattern,
             variable_ensemble,
-            verbose,
             **kwargs,
         )
         self.reference = reference.data
@@ -600,6 +611,7 @@ class SelectiveDataSource(DataSource):
         value = mask_2d.filled(np.nan)
         return pd.Series(value.flatten(), name=var.label)
 
+    @with_verbose(trigger_threshold=2, message="Collecting grid file's indexes.")
     def get_x_y_indexes(self) -> tuple[pd.Series, pd.Series]:
         """Get x and y indexes.
 
@@ -613,6 +625,7 @@ class SelectiveDataSource(DataSource):
         y_coords_series = pd.Series(y_coords.flatten())
         return x_coords_series, y_coords_series
 
+    @with_verbose(trigger_threshold=1, message="Selecting Data.")
     def select(
         self,
         data_slice: pd.DataFrame,
@@ -715,7 +728,6 @@ class SelectiveDataSource(DataSource):
         filepaths = self.get_basenames(
             constraints,
         )
-        print(filepaths)
         datas: list[pd.DataFrame] = []
         for filepath in filepaths:
             date = self.parse_date_from_filepath(filepath)
@@ -736,7 +748,6 @@ class SelectiveDataSource(DataSource):
             category=self.loader.category,
             providers=[self.loader.provider],
             variables=self._store_vars,
-            verbose=self.loader.verbose,
         )
         self._insert_all_features(storer)
         self._remove_temporary_variables(storer)
