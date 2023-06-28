@@ -54,6 +54,10 @@ class IncomparableStorersError(Exception):
     """Exception raised when storers with uncomparable properties are compared."""
 
 
+class ImpossibleSaveError(Exception):
+    """Exception raised when it is impossible to save a Storer."""
+
+
 # Parsing Related Errors
 class ImpossibleTypeParsingError(Exception):
     """Exception raised when a TOML parser can not access to a variable's type."""

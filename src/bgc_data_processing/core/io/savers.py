@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
+from bgc_data_processing.exceptions import ImpossibleSaveError
+
 if TYPE_CHECKING:
     from bgc_data_processing.core.storers import Slice, Storer
     from bgc_data_processing.utils.dateranges import DateRange, DateRangeGenerator
@@ -114,14 +116,14 @@ class StorerSaver:
 
         Raises
         ------
-        ValueError
+        ImpossibleSaveError
             If the storer has multiple providers.
         """
         if len(self._storer.providers) == 1:
             provider = self._storer.providers[0]
         else:
             error_msg = "Multiple providers in the storer."
-            raise ValueError(error_msg)
+            raise ImpossibleSaveError(error_msg)
         filename = self.single_filename_format.format(
             provider=provider,
             dates=dates_str,
@@ -279,7 +281,8 @@ class StorerSaver:
             If filepath points to an existing file.
         """
         if filepath.is_file():
-            raise FileExistsError
+            error_msg = f"A file already exist at {filepath} and can not be erased."
+            raise FileExistsError(error_msg)
         self._save_data(filepath=Path(filepath), data_slice=self._storer)
 
     @classmethod
