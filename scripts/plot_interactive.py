@@ -417,7 +417,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=1,
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables

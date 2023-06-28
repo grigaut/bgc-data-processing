@@ -30,6 +30,8 @@ if __name__ == "__main__":
     VERBOSE: int = CONFIG["VERBOSE"]
     PRIORITY: list[str] = CONFIG["PRIORITY"]
 
+    bgc_dp.set_verbose_level(VERBOSE)
+
     storer = bgc_dp.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
@@ -46,7 +48,6 @@ if __name__ == "__main__":
         category="in_situ",
         unit_row_index=1,
         delim_whitespace=True,
-        verbose=VERBOSE,
     )
     storer.remove_duplicates(PRIORITY)
     variables = storer.variables

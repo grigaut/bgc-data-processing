@@ -35,6 +35,8 @@ if __name__ == "__main__":
     VERBOSE = CONFIG["VERBOSE"]
     PRIORITY = CONFIG["PRIORITY"]
 
+    bgc_dp.set_verbose_level(VERBOSE)
+
     # Dates parsing
     dates_generator = bgc_dp.dateranges.DateRangeGenerator(
         start=DATE_MIN,
@@ -83,7 +85,6 @@ if __name__ == "__main__":
             minimal_value=DEPTH_MIN,
             maximal_value=DEPTH_MAX,
         )
-        datasource.verbose = VERBOSE
         # Loading data
         datasource.saving_order = VARIABLES
         datasource.load_and_save(
@@ -110,7 +111,6 @@ if __name__ == "__main__":
             category="_",
             unit_row_index=1,
             delim_whitespace=True,
-            verbose=1,
         )
         os.remove(file)
         storer.remove_duplicates(PRIORITY)

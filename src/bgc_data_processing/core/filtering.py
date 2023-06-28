@@ -198,7 +198,6 @@ class Constraints:
             category=storer.category,
             providers=storer.providers,
             variables=storer.variables,
-            verbose=storer.verbose,
         )
 
     def apply_constraints_to_dataframe(

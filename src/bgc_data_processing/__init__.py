@@ -24,6 +24,7 @@ from bgc_data_processing.core.sources import DataSource
 from bgc_data_processing.core.storers import Storer
 from bgc_data_processing.core.variables.sets import SourceVariableSet
 from bgc_data_processing.utils import dateranges
+from bgc_data_processing.verbose import set_verbose_level
 from bgc_data_processing.water_masses import WaterMass
 
 BASE_DIR = Path(__file__).parent.resolve()
@@ -51,6 +52,7 @@ __all__ = [
     "read_files",
     "save_storer",
     "savers",
+    "set_verbose_level",
     "tracers",
     "units",
     "utils",
