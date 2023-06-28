@@ -201,7 +201,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
     def load(
         self,
-        basename: Path | str,
+        filepath: Path | str,
         constraints: Constraints,
         mask: "Mask",
     ) -> pd.DataFrame:
@@ -209,7 +209,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
         Parameters
         ----------
-        basename: Path | str
+        filepath: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer.
@@ -220,6 +220,7 @@ class SelectiveABFileLoader(ABFileLoader):
             DataFrame corresponding to the file.
         """
         self._index = mask.index
+        basename = ABFileLoader.convert_filepath_to_basename(filepath)
         raw_data = self._read(basename=str(basename), mask=mask)
         # transform thickness in depth
         with_depth = self._create_depth_column(raw_data)
@@ -645,19 +646,20 @@ class SelectiveDataSource(DataSource):
         return Mask(to_keep, indexes_2d), Match(index)
 
     @staticmethod
-    def parse_date_from_basename(basename: Path | str) -> dt.date:
+    def parse_date_from_filepath(filepath: Path | str) -> dt.date:
         """Parse date from abfile basename.
 
         Parameters
         ----------
-        basename : Path | str
-            File basename.
+        filepath : Path | str
+            File path.
 
         Returns
         -------
         dt.date
             Corresponding date.
         """
+        basename = ABFileLoader.convert_filepath_to_basename(filepath)
         date_part_basename = Path(basename).name.split(".")[-1]
         date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
         return date.date()
@@ -684,10 +686,9 @@ class SelectiveDataSource(DataSource):
         date_constraint = constraints.get_constraint_parameters(date_label)
         pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
         pattern_matcher.validate = self.loader.is_file_valid
-        filepaths = pattern_matcher.select_matching_filepath(
+        return pattern_matcher.select_matching_filepath(
             research_directory=self.dirin,
         )
-        return [s.parent.joinpath(s.stem) for s in filepaths]
 
     def _create_storer(
         self,
@@ -711,21 +712,23 @@ class SelectiveDataSource(DataSource):
         """
         date_var_name = self.loader.variables.date_var_name
         date_var_label = self.loader.variables.get(date_var_name).label
-        basenames = self.get_basenames(
+        filepaths = self.get_basenames(
             constraints,
         )
+        print(filepaths)
         datas: list[pd.DataFrame] = []
-        for basename in basenames:
-            date = self.parse_date_from_basename(basename)
+        for filepath in filepaths:
+            date = self.parse_date_from_filepath(filepath)
             data_slice = self.reference[self.reference[date_var_label].dt.date == date]
             if data_slice.empty:
                 continue
             mask, match = self.select(data_slice)
             sim_data = self.loader.load(
-                basename,
+                filepath,
                 constraints=constraints,
                 mask=mask,
             )
+            print(filepath, " loaded")
             datas.append(match.match(sim_data))
         concatenated = pd.concat(datas, axis=0)
         storer = Storer(
