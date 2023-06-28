@@ -266,6 +266,8 @@ class DataSource:
             research_directory=self._dirin,
         )
         for filepath in filepaths:
+            if self._verbose > 1:
+                print(f"\tLoading data from {Path(filepath).name}")
             storer = self._create_storer(filepath=filepath, constraints=constraints)
             saver = StorerSaver(storer)
             saver.save_from_daterange(

@@ -437,8 +437,6 @@ class NetCDFLoader(BaseLoader):
         pd.DataFrame
             DataFrame corresponding to the file.
         """
-        if self._verbose > 1:
-            print(f"\tLoading data from {Path(filepath).name}")
         file_id = self._get_id(Path(filepath).name)
         nc_data = self._read(filepath=Path(filepath))
         df_format = self._format(nc_data)
