@@ -12,6 +12,7 @@ from bgc_data_processing.core.loaders.netcdf_loaders import (
     SatelliteNetCDFLoader,
 )
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.exceptions import UnsupportedLoadingFormatError
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.filtering import Constraints
@@ -30,7 +31,7 @@ class DataSource:
         Name of the data provider.
     data_format : str
         Data format.
-    dirin : Path
+    dirin : Path | str
         Input data directory.
     data_category : str
         Category of the data.
@@ -48,7 +49,7 @@ class DataSource:
         self,
         provider_name: str,
         data_format: str,
-        dirin: Path,
+        dirin: Path | str,
         data_category: str,
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
@@ -61,7 +62,7 @@ class DataSource:
         self._vars_ensemble = variable_ensemble
         self._store_vars = variable_ensemble.storing_variables
         self._files_pattern = files_pattern
-        self._dirin = dirin
+        self._dirin = Path(dirin)
         self._verbose = verbose
         self._provider = provider_name
         self._read_kwargs = kwargs
@@ -157,7 +158,6 @@ class DataSource:
         if self._format == "csv":
             return CSVLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -166,7 +166,6 @@ class DataSource:
         if self._format == "netcdf" and self._category == "satellite":
             return SatelliteNetCDFLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -175,7 +174,6 @@ class DataSource:
         if self._format == "netcdf":
             return NetCDFLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
@@ -184,13 +182,12 @@ class DataSource:
         if self._format == "abfiles":
             return ABFileLoader(
                 provider_name=provider_name,
-                # dirin=dirin,
                 category=self._category,
                 exclude=excluded_files,
                 variables=self._vars_ensemble.loading_variables,
                 **self._read_kwargs,
             )
-        raise ValueError
+        raise UnsupportedLoadingFormatError(self._format)
 
     def _insert_all_features(self, storer: "Storer") -> None:
         """Insert all features in a storer.
@@ -246,7 +243,7 @@ class DataSource:
 
     def load_and_save(
         self,
-        saving_directory: Path,
+        saving_directory: Path | str,
         dateranges_gen: "DateRangeGenerator",
         constraints: "Constraints",
     ) -> None:
@@ -254,7 +251,7 @@ class DataSource:
 
         Parameters
         ----------
-        saving_directory : Path
+        saving_directory : Path | str
             Path to the directory to save in.
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
@@ -273,7 +270,7 @@ class DataSource:
             saver = StorerSaver(storer)
             saver.save_from_daterange(
                 dateranges_gen=dateranges_gen,
-                saving_directory=saving_directory,
+                saving_directory=Path(saving_directory),
             )
 
     def load_all(self, constraints: "Constraints") -> "Storer":

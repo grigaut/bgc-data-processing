@@ -192,14 +192,14 @@ class CSVLoader(BaseLoader):
 
     def load(
         self,
-        filepath: Path,
+        filepath: Path | str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a csv file from filepath.
 
         Parameters
         ----------
-        filepath: Path
+        filepath: Path | str
             Path to the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -210,8 +210,8 @@ class CSVLoader(BaseLoader):
             DataFrame corresponding to the file.
         """
         if self._verbose > 1:
-            print(f"\tLoading data from {filepath.name}")
-        df_raw = self._read(filepath)
+            print(f"\tLoading data from {Path(filepath).name}")
+        df_raw = self._read(Path(filepath))
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)
         df_corr = self._correct(df_type)

@@ -36,7 +36,6 @@ mkdocs-macros-plugin = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
-python-git-info = "^0.8.2"
 pre-commit = "^3.1.1"
 ruff = "^0.0.274"
 
@@ -72,12 +71,16 @@ select = [
     "ARG",
     # flake8-bugbear
     'B',
-    # # flake8-commas
+    # flake8-commas
     'COM',
     # flake8-comprehensions
     'C4',
     # flake8-quotes
     'Q',
+    # flake8-errmsg
+    'EM',
+    # flake8-raise
+    "RSE",
     # flake8-return
     "RET",
     # flake8-self
@@ -91,6 +94,8 @@ select = [
     "PLE",
     "PLR",
     "PLW",
+    # tryceratops
+    "TRY",
     # Ruff-specific rules
     'RUF',
 ]

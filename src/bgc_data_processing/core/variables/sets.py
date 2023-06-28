@@ -13,6 +13,11 @@ from bgc_data_processing.core.variables.vars import (
     NotExistingVar,
     ParsedVar,
 )
+from bgc_data_processing.exceptions import (
+    DuplicatedVariableNameError,
+    FeatureConstructionError,
+    IncorrectVariableNameError,
+)
 
 AllVariablesTypes: TypeAlias = ExistingVar | NotExistingVar | ParsedVar | FeatureVar
 NotParsedvar: TypeAlias = ExistingVar | NotExistingVar | FeatureVar
@@ -49,10 +54,9 @@ class VariableSet:
         **kwargs: FromFileVariables,
     ) -> None:
         if len(args) != len({var.name for var in args}):
-            raise ValueError(
-                "To set multiple alias for the same variable, "
-                "use Var.in_file_as([alias1, alias2])",
-            )
+            error_msg = "To set multiple alias for the same variable, "
+            "use Var.in_file_as([alias1, alias2])"
+            raise ValueError(error_msg)
         self._instantiate_from_elements([*args, *kwargs.values()])
 
     def _instantiate_from_elements(self, elements: list[AllVariablesTypes]) -> None:
@@ -157,17 +161,14 @@ class VariableSet:
 
         Raises
         ------
-        KeyError
+        IncorrectVariableNameError
             If var_name doesn't correspond to any name.
         """
         if self.has_name(var_name=var_name):
             return self.mapper_by_name[var_name]
-        valid_keys = self.mapper_by_name.keys()
-        error_msg = (
-            f"{var_name} is not a valid variable name."
-            f"Valid names are: {list(valid_keys)}"
-        )
-        raise KeyError(error_msg)
+        error_msg = f"{var_name} is not a valid variable name.Valid names are: "
+        f"{list(self.mapper_by_name.keys())}"
+        raise IncorrectVariableNameError(error_msg)
 
     def add_var(self, var: FromFileVariables) -> None:
         """Add a new variable to self._elements.
@@ -176,9 +177,15 @@ class VariableSet:
         ----------
         var : Var
             Variable to add
+
+        Raises
+        ------
+        DuplicatedVariableNameError
+            If the variable name is already in the set.
         """
         if var.name in self.keys():  # noqa: SIM118
-            raise ValueError("A variable already exists with his name")
+            error_msg = "A variable already exists with his name"
+            raise DuplicatedVariableNameError(error_msg)
         self._elements.append(var)
         self._instantiate_from_elements(self._elements)
 
@@ -336,7 +343,7 @@ class FeatureVariablesSet(VariableSet):
 
         Raises
         ------
-        ValueError
+        FeatureConstructionError
             If all features can not be constructed.
         """
         available = available_vars.copy()
@@ -349,10 +356,9 @@ class FeatureVariablesSet(VariableSet):
             features = [f for f in features if all(f != a for a in available)]
             constructables = self._get_constructable_features(features, available)
         if features:
-            raise ValueError(
-                f"The following features can not be loaded: {features}."
-                "They probably depend on non loaded variables.",
-            )
+            error_msg = f"The following features can not be loaded: {features}. "
+            "They probably depend on non loaded variables."
+            raise FeatureConstructionError(error_msg)
 
 
 class BaseRequiredVarsSet(VariableSet):
@@ -415,10 +421,9 @@ class BaseRequiredVarsSet(VariableSet):
         **kwargs: FromFileVariables,
     ) -> None:
         if len(args) != len({var.name for var in args}):
-            raise ValueError(
-                "To set multiple alias for the same variable, "
-                "use Var.in_file_as([alias1, alias2])",
-            )
+            error_msg = "To set multiple alias for the same variable, "
+            "use Var.in_file_as([alias1, alias2])"
+            raise ValueError(error_msg)
         mandatory_variables = []
         if provider is None:
             self.has_provider = False
@@ -488,10 +493,9 @@ class BaseRequiredVarsSet(VariableSet):
             self.depth_var_name,
         ]
         if var_name in mandatory_variables_names:
-            raise KeyError(
-                f"Variable {var_name} can not be removed "
-                "since it is a mandatory variable.",
-            )
+            error_msg = f"Variable {var_name} can not be removed since "
+            "it is a mandatory variable."
+            raise IncorrectVariableNameError(error_msg)
         return super().pop(var_name)
 
     def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:

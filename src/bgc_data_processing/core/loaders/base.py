@@ -90,12 +90,12 @@ class BaseLoader(ABC):
         """Filenames to exclude from loading."""
         return self._exclude
 
-    def is_file_valid(self, filepath: Path) -> bool:
+    def is_file_valid(self, filepath: Path | str) -> bool:
         """Indicate whether a file is valid to be kept or not.
 
         Parameters
         ----------
-        filepath : Path
+        filepath : Path | str
             Name of the file
 
         Returns
@@ -104,7 +104,7 @@ class BaseLoader(ABC):
             True if the name is not to be excluded.
         """
         keep_path = str(filepath) not in self.excluded_filenames
-        keep_name = filepath.name not in self.excluded_filenames
+        keep_name = Path(filepath).name not in self.excluded_filenames
 
         return keep_name and keep_path
 

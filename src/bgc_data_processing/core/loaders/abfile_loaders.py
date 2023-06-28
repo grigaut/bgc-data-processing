@@ -14,6 +14,7 @@ from bgc_data_processing.core.variables.vars import (
     ExistingVar,
     NotExistingVar,
 )
+from bgc_data_processing.exceptions import ABFileLoadingError
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import SourceVariableSet
@@ -118,7 +119,7 @@ class ABFileLoader(BaseLoader):
 
         Raises
         ------
-        KeyError
+        ABFileLoadingError
             If the variable does not exist in the dataset.
         """
         variable = self._variables.get(var_name=variable_name)
@@ -144,9 +145,9 @@ class ABFileLoader(BaseLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            raise KeyError(
-                f"Grid File doesn't have data for the variable {variable_name}",
-            )
+            error_msg = f"Grid File has no data for the variable {variable_name}."
+            f"Possible fieldnames are {self.grid_file.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         return data
 
     def _convert_types(self, wrong_types: pd.DataFrame) -> pd.DataFrame:
@@ -179,14 +180,14 @@ class ABFileLoader(BaseLoader):
 
     def load(
         self,
-        basename: Path,
+        basename: Path | str,
         constraints: Constraints = Constraints(),
     ) -> pd.DataFrame:
         """Load a abfiles from basename.
 
         Parameters
         ----------
-        basename: Path
+        basename: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer., by default Constraints()
@@ -200,7 +201,7 @@ class ABFileLoader(BaseLoader):
         # transform thickness in depth
         with_depth = self._create_depth_column(raw_data)
         # create date columns
-        with_dates = self._set_date_related_columns(with_depth, basename)
+        with_dates = self._set_date_related_columns(with_depth, Path(basename))
         # converts types
         typed = self._convert_types(with_dates)
         # apply corrections
@@ -412,12 +413,12 @@ class ABFileLoader(BaseLoader):
         thickness_df[depth_var.label] = -np.abs(depth_meters)
         return thickness_df
 
-    def is_file_valid(self, filepath: Path) -> bool:
+    def is_file_valid(self, filepath: Path | str) -> bool:
         """Check whether a file is valid or not.
 
         Parameters
         ----------
-        filepath : Path
+        filepath : Path | str
             File filepath.
 
         Returns
@@ -432,9 +433,10 @@ class ABFileLoader(BaseLoader):
         FileNotFoundError
             If the bfile doesn't not exist.
         """
-        basepath = filepath.parent / filepath.name[:-2]
-        keep_filepath = str(filepath) not in self.excluded_filenames
-        keep_filename = filepath.name not in self.excluded_filenames
+        path = Path(filepath)
+        basepath = path.parent / path.name[:-2]
+        keep_filepath = str(path) not in self.excluded_filenames
+        keep_filename = path.name not in self.excluded_filenames
         keep_file = keep_filename and keep_filepath
         keep_basepath = str(basepath) not in self.excluded_filenames
         keep_basename = basepath.name not in self.excluded_filenames
@@ -442,13 +444,11 @@ class ABFileLoader(BaseLoader):
         afile_path = Path(f"{basepath}.a")
         bfile_path = Path(f"{basepath}.b")
         if not afile_path.is_file():
-            raise FileNotFoundError(
-                f"{afile_path} does not exist.",
-            )
+            error_msg = f"{afile_path} does not exist."
+            raise FileNotFoundError(error_msg)
         if not bfile_path.is_file():
-            raise FileNotFoundError(
-                f"{bfile_path} does not exist.",
-            )
+            error_msg = f"{bfile_path} does not exist."
+            raise FileNotFoundError(error_msg)
         return keep_base and keep_file
 
     def _create_missing_column(

@@ -6,6 +6,8 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 
+from bgc_data_processing.exceptions import InvalidDateInputsError, InvalidPrecisionError
+
 
 class FileNamePattern:
     """Create the pattern to use to select filenames.
@@ -119,7 +121,8 @@ class FileNamePattern:
             min_date = boundary_constraint["min"].date()
             max_date = boundary_constraint["max"].date()
             return (min_date, max_date)
-        raise KeyError("Date constraint dictionnary has invalid keys")
+        error_msg = "Date constraint dictionnary has invalid keys"
+        raise KeyError(error_msg)
 
     def _slice(
         self,
@@ -432,17 +435,17 @@ class DateIntervalPattern:
 
         Raises
         ------
-        ValueError
+        InvalidDateInputsError
             If date_min is None.
-        ValueError
+        InvalidDateInputsError
             If date_max is None.
-        ValueError
+        InvalidDateInputsError
             If date_min > date_max.
-        ValueError
+        InvalidPrecisionError
             If precision is not valid.
-        ValueError
+        InvalidPrecisionError
             If Month precision is incoherent with given dates.
-        ValueError
+        InvalidPrecisionError
             If Day precision incoherent with given dates.
         """
         possible_precisions = [
@@ -451,19 +454,25 @@ class DateIntervalPattern:
             self._day_precision_label,
         ]
         if date_min is None:
-            raise ValueError("date_min can't be None is date_max isn't.")
+            error_msg = "date_min can't be None if date_max isn't."
+            raise InvalidDateInputsError(error_msg)
         if date_max is None:
-            raise ValueError("date_max can't be None is date_min isn't.")
+            error_msg = "date_max can't be None if date_min isn't."
+            raise InvalidDateInputsError(error_msg)
         if date_min > date_max:
-            raise ValueError("date_min must be lower than date_max.")
+            error_msg = "date_min must be lower than date_max."
+            raise InvalidDateInputsError(error_msg)
         if precision not in possible_precisions:
-            raise ValueError(f"{precision} must be one of {possible_precisions}")
+            error_msg = f"{precision} must be one of {possible_precisions}"
+            raise InvalidPrecisionError(error_msg)
         same_year = date_min.year == date_max.year
         same_month = same_year and date_min.month == date_max.month
         if precision == self._month_precision_label and not same_year:
-            raise ValueError(f"'{precision}' only concerns dates in the same year.")
+            error_msg = f"'{precision}' only concerns dates in the same year."
+            raise InvalidPrecisionError(error_msg)
         if precision == self._day_precision_label and not same_month:
-            raise ValueError(f"'{precision}' only concerns dates in the same month.")
+            error_msg = f"'{precision}' only concerns dates in the same month."
+            raise InvalidPrecisionError(error_msg)
 
     @classmethod
     def with_day_precision(
@@ -572,18 +581,19 @@ class PatternMatcher:
     @validate.setter
     def validate(self, validation_function: Callable) -> None:
         if not isinstance(validation_function, Callable):
-            raise ValueError("The validation function must be callable.")
+            error_msg = "The validation function must be callable."
+            raise TypeError(error_msg)
         self._validation_function = validation_function
 
     def select_matching_filepath(
         self,
-        research_directory: Path,
+        research_directory: Path | str,
     ) -> list[Path]:
         """Select the filepaths matching the pattern.
 
         Parameters
         ----------
-        research_directory : Path
+        research_directory : Path | str
             Directory to serach for files.
 
         Returns
@@ -592,7 +602,7 @@ class PatternMatcher:
             List of correct paths.
         """
         return self._recursive_match(
-            research_dir=research_directory,
+            research_dir=Path(research_directory),
             pattern=self._pattern,
         )
 

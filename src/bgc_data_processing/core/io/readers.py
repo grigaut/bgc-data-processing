@@ -120,7 +120,9 @@ def read_files(
     elif isinstance(filepath, str):
         path = Path(filepath)
     else:
-        raise TypeError(f"Can't read filepaths from {filepath}")
+        error_msg = f"Can't read filepaths from {filepath}. "
+        "Accepted types are Path or str."
+        raise TypeError(error_msg)
     reader = Reader(
         filepath=path,
         providers_column_label=providers_column_label,
@@ -147,7 +149,7 @@ class Reader:
 
     Parameters
     ----------
-    filepath : Path | list[Path]
+    filepath : Path | str
         Path to the file to read.
     providers_column_label : str, optional
         Provider column in the dataframe., by default "PROVIDER"
@@ -193,7 +195,7 @@ class Reader:
 
     def __init__(
         self,
-        filepath: Path,
+        filepath: Path | str,
         providers_column_label: str = "PROVIDER",
         expocode_column_label: str = "EXPOCODE",
         date_column_label: str = "DATE",
@@ -213,7 +215,7 @@ class Reader:
         self._verbose = verbose
         self._reference_vars = {var.label: var for var in variables_reference}
 
-        raw_df, unit_row = self._read(filepath, unit_row_index, delim_whitespace)
+        raw_df, unit_row = self._read(Path(filepath), unit_row_index, delim_whitespace)
         mandatory_vars = {
             providers_column_label: "provider",
             expocode_column_label: "expocode",

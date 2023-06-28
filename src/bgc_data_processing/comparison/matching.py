@@ -14,6 +14,11 @@ from bgc_data_processing.core.io.savers import StorerSaver
 from bgc_data_processing.core.loaders.abfile_loaders import ABFileLoader
 from bgc_data_processing.core.sources import DataSource
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.exceptions import (
+    ABFileLoadingError,
+    IncompatibleMaskShapeError,
+    UnsupportedLoadingFormatError,
+)
 
 if TYPE_CHECKING:
     from bgc_data_processing.core.variables.sets import (
@@ -74,7 +79,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
         Raises
         ------
-        KeyError
+        ABFileLoadingError
             If the variable does not exist in the dataset.
         """
         variable = self._variables.get(var_name=variable_name)
@@ -100,9 +105,9 @@ class SelectiveABFileLoader(ABFileLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            raise KeyError(
-                f"Grid File doesn't have data for the variable {variable_name}",
-            )
+            error_msg = f"Grid File has no data for the variable {variable_name}."
+            f"Possible fieldnames are {self.grid_file.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         return data
 
     def _load_field(
@@ -196,7 +201,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
     def load(
         self,
-        basename: Path,
+        basename: Path | str,
         constraints: Constraints,
         mask: "Mask",
     ) -> pd.DataFrame:
@@ -204,7 +209,7 @@ class SelectiveABFileLoader(ABFileLoader):
 
         Parameters
         ----------
-        basename: Path
+        basename: Path | str
             Path to the basename of the file to load.
         constraints : Constraints, optional
             Constraints slicer.
@@ -359,7 +364,7 @@ class Mask:
     @mask.setter
     def mask(self, mask_2d: np.ndarray) -> None:
         if mask_2d.shape != self._index_2d.shape:
-            raise ValueError("Both mask and index must have similar shapes.")
+            raise IncompatibleMaskShapeError(self._index_2d.shape, mask_2d.shape)
         self._mask = mask_2d
         self._index = pd.Index(self._index_2d[self._mask].flatten())
 
@@ -408,11 +413,11 @@ class Mask:
 
         Raises
         ------
-        ValueError
+        IncompatibleMaskShapeError
             If mask_array has the wrong shape.
         """
         if mask_array.shape != self.mask.shape:
-            raise ValueError("New mask array has incorrect shape.")
+            raise IncompatibleMaskShapeError(self.mask.shape, mask_array.shape)
         return Mask(
             mask_2d=self._mask & mask_array,
             index_2d=self._index_2d,
@@ -502,7 +507,7 @@ class SelectiveDataSource(DataSource):
         Name of the data provider.
     data_format : str
         Data format.
-    dirin : Path
+    dirin : Path | str
         Input data directory.
     data_category : str
         Category of the data.
@@ -524,7 +529,7 @@ class SelectiveDataSource(DataSource):
         strategy: NearestNeighborStrategy,
         provider_name: str,
         data_format: str,
-        dirin: Path,
+        dirin: Path | str,
         data_category: str,
         excluded_files: list[str],
         files_pattern: "FileNamePattern",
@@ -560,7 +565,7 @@ class SelectiveDataSource(DataSource):
                 variables=self._vars_ensemble.loading_variables,
                 **self._read_kwargs,
             )
-        raise ValueError("Only ABFiles can be loaded from a selective data source")
+        raise UnsupportedLoadingFormatError(self._format)
 
     def get_coord(self, var_name: str) -> pd.Series:
         """Get a coordinate field from loader.grid_file.
@@ -577,7 +582,7 @@ class SelectiveDataSource(DataSource):
 
         Raises
         ------
-        ValueError
+        ABFileLoadingError
             If the variable dosn't exist in the grid file.
         """
         var = self.loader.variables.get(var_name)
@@ -588,7 +593,9 @@ class SelectiveDataSource(DataSource):
                 found = True
                 break
         if not found:
-            raise ValueError
+            error_msg = f"Grid File has no data for the variable {var.name}."
+            f"Possible fieldnames are {self.grid.fieldnames}."
+            raise ABFileLoadingError(error_msg)
         value = mask_2d.filled(np.nan)
         return pd.Series(value.flatten(), name=var.label)
 
@@ -638,12 +645,12 @@ class SelectiveDataSource(DataSource):
         return Mask(to_keep, indexes_2d), Match(index)
 
     @staticmethod
-    def parse_date_from_basename(basename: Path) -> dt.date:
+    def parse_date_from_basename(basename: Path | str) -> dt.date:
         """Parse date from abfile basename.
 
         Parameters
         ----------
-        basename : Path
+        basename : Path | str
             File basename.
 
         Returns
@@ -651,7 +658,7 @@ class SelectiveDataSource(DataSource):
         dt.date
             Corresponding date.
         """
-        date_part_basename = basename.name.split(".")[-1]
+        date_part_basename = Path(basename).name.split(".")[-1]
         date = dt.datetime.strptime(date_part_basename, "%Y_%j_%H")
         return date.date()
 
@@ -682,7 +689,11 @@ class SelectiveDataSource(DataSource):
         )
         return [s.parent.joinpath(s.stem) for s in filepaths]
 
-    def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
+    def _create_storer(
+        self,
+        filepath: Path | str,
+        constraints: "Constraints",
+    ) -> "Storer":
         pass
 
     def load_all(self, constraints: "Constraints") -> "Storer":
@@ -730,7 +741,7 @@ class SelectiveDataSource(DataSource):
 
     def load_and_save(
         self,
-        saving_directory: Path,
+        saving_directory: Path | str,
         dateranges_gen: "DateRangeGenerator",
         constraints: "Constraints",
     ) -> None:
@@ -738,7 +749,7 @@ class SelectiveDataSource(DataSource):
 
         Parameters
         ----------
-        saving_directory : Path
+        saving_directory : Path | str
             Path to the directory to save in.
         dateranges_gen : DateRangeGenerator
             Generator to use to retrieve dateranges.
@@ -749,7 +760,7 @@ class SelectiveDataSource(DataSource):
         saver = StorerSaver(storer)
         saver.save_from_daterange(
             dateranges_gen=dateranges_gen,
-            saving_directory=saving_directory,
+            saving_directory=Path(saving_directory),
         )
 
     @classmethod
@@ -764,16 +775,16 @@ class SelectiveDataSource(DataSource):
         Parameters
         ----------
         reference : Storer
-            _description_
+            Reference Dataframe (observations).
         strategy : NearestNeighborStrategy
-            _description_
+            Closer point finding strategy.
         dsource : DataSource
-            _description_
+            Template DataSource
 
         Returns
         -------
         SelectiveDataSource
-            _description_
+            Selective datasource from Template.
         """
         return cls(
             reference=reference,
