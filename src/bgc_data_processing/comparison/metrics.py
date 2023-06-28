@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from bgc_data_processing.core.storers import Storer
+from bgc_data_processing.exceptions import IncomparableStorersError
 
 
 class BaseMetric(ABC):
@@ -74,8 +75,8 @@ class BaseMetric(ABC):
 
         Raises
         ------
-        ValueError
-            _description_
+        IncomparableStorersError
+            If the storers have different shapes.
         """
         obs_vars = observations_storer.variables
         obs_eval_labels = [obs_vars.get(name).label for name in self._eval_vars]
@@ -89,7 +90,7 @@ class BaseMetric(ABC):
             "- simulations: {sim_df.shape}) -> make sure both storer have the variables"
             "to evaluate on"
             f" (variables: {self._eval_vars})"
-            raise ValueError(error_msg)
+            raise IncomparableStorersError(error_msg)
 
         nans = obs_df.isna().all(axis=1) | sim_df.isna().all(axis=1)
         return self.evaluate(observations=obs_df[~nans], simulations=sim_df[~nans])

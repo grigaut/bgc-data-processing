@@ -64,3 +64,7 @@ class IncompatibleMaskShapeError(Exception):
             f"Given mask shape is {incorrect_shape}."
         )
         super().__init__(error_msg)
+
+
+class IncomparableStorersError(Exception):
+    """Exception raised when storers with uncomparable properties are compared."""
