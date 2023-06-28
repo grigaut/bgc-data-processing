@@ -89,3 +89,12 @@ class IncompatibleMaskShapeError(Exception):
             f"Given mask shape is {incorrect_shape}."
         )
         super().__init__(error_msg)
+
+
+# Patterns Related Errors
+class InvalidDateInputsError(Exception):
+    """Exception raised when a DateIntervalPattern is set with invalid dates."""
+
+
+class InvalidPrecisionError(Exception):
+    """Exception raised when a DateIntervalPattern is set with invalid precision."""
