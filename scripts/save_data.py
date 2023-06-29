@@ -115,7 +115,7 @@ if __name__ == "__main__":
         storer.remove_duplicates(PRIORITY)
         bgc_dp.save_storer(storer, filepath=file, saving_order=VARIABLES)
     if VERBOSE > 0:
-        print("\n" + "\t" + "-" * len(txt))
-        print("\t" + " " * (len(txt) // 2) + "DONE")
-        print("\t" + "-" * len(txt) + "\n")
+        print("\n\t-" * len(txt))
+        print("\t " * (len(txt) // 2) + "DONE")
+        print("\t-" * len(txt) + "\n")
     print(time() - t0)

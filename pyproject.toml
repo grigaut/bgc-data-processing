@@ -87,6 +87,8 @@ select = [
     "ISC",
     # flake8-import-conventions
     "ICN",
+    # flake8-pie
+    "PIE",
     # flake8-raise
     "RSE",
     # flake8-return

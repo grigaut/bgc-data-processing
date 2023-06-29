@@ -744,7 +744,6 @@ class SelectiveDataSource(DataSource):
         Storer
             Storer.
         """
-        pass
 
     def load_all(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.
