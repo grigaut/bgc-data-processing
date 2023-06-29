@@ -17,6 +17,16 @@ for path in sorted(Path("src/bgc_data_processing").rglob("*.py")):
         parts = parts[:-1]
         doc_path = doc_path.with_name("index.md")
         full_doc_path = full_doc_path.with_name("index.md")
+        ident = ".".join(parts)
+        nav[parts] = doc_path
+        with mkdocs_gen_files.open(full_doc_path, "w") as fd:
+            print(f"# `{ident}`\n", file=fd)
+            print("::: " + ident, file=fd)
+            print("    options:", file=fd)
+            print("      members:", file=fd)
+            print("        - __all__", file=fd)
+            mkdocs_gen_files.set_edit_path(full_doc_path, path)
+            continue
     elif parts[-1] == "__main__":
         continue
 
