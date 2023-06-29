@@ -19,7 +19,7 @@ theme:
     - content.code.annotate         # Admonitions
     - content.code.copy             # copy code block
     - watch:
-        - "src/bgc_data_processing/"
+        - "src/bgc_data_processing"
 
 nav:
   - Getting Started:
