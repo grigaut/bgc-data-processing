@@ -19,7 +19,7 @@ theme:
     - content.code.annotate         # Admonitions
     - content.code.copy             # copy code block
     - watch:
-        - "bgc_data_processing"
+        - "src/bgc_data_processing/"
 
 nav:
   - Getting Started:
@@ -65,13 +65,17 @@ plugins:
       handlers:
         python:
           options:
+            # General Options
+            # Headings Options
+            heading_level: 3                    # Heading size
+            # Members Options
+            members_order: source               # Member sorting
+            # Docstrings Options
             docstring_style: numpy              # To parse docstrings
-            docstring_section_style: spacy
-            heading_level: 3
-            show_root_toc_entry: false
-            show_if_no_docstring: true
-            showsubmodules: true
-
+            docstring_section_style: table      # Display section format
+            merge_init_into_class: true         # Merge __init__ docstring in Class'
+            show_if_no_docstring: true          # Show even if no docstring
+            # Signature Options
 
 markdown_extensions:
   - admonition
