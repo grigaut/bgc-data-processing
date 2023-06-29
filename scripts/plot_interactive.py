@@ -402,7 +402,7 @@ if __name__ == "__main__":
     PRIORITY: list[str] = CONFIG["PRIORITY"]
     POLYGONS_FOLDER = Path(CONFIG["POLYGONS_FOLDER"])
 
-    storer = bgc_dp.read_files(
+    storer = bgc_dp.io.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,

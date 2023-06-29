@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     bgc_dp.set_verbose_level(VERBOSE)
 
-    storer = bgc_dp.read_files(
+    storer = bgc_dp.io.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         )
     sliced_storer = constraints.apply_constraints_to_storer(storer)
 
-    bgc_dp.save_storer(
+    bgc_dp.io.save_storer(
         sliced_storer,
         filepath=SAVING_DIR.joinpath("extracted_domain_data.txt"),
         saving_order=[
