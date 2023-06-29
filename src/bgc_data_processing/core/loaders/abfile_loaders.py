@@ -89,6 +89,21 @@ class ABFileLoader(BaseLoader):
         ...
 
     def _set_index(self, data: pd.DataFrame | pd.Series) -> pd.DataFrame | pd.Series:
+        """Set the DataFrame or Series index.
+
+        The first call to this function will save the index as reference. Next calls
+        will set data's index to the saved values.
+
+        Parameters
+        ----------
+        data : pd.DataFrame | pd.Series
+            DataFrame or Series to use as index reference or to set the index to.
+
+        Returns
+        -------
+        pd.DataFrame | pd.Series
+            DataFRame or Series with the proper index.
+        """
         if self._index is None:
             self._index = data.index
         else:
@@ -338,7 +353,7 @@ class ABFileLoader(BaseLoader):
         Parameters
         ----------
         file : ABFileArchv
-            File to load dat from.
+            File to load data from.
         level : int
             Number of the level to load data from.
         flag_name : str | None

@@ -62,6 +62,13 @@ class VariableSet:
         self._instantiate_from_elements([*args, *kwargs.values()])
 
     def _instantiate_from_elements(self, elements: list[AllVariablesTypes]) -> None:
+        """Set instance's attribute to aa correct value based on the list of elements.
+
+        Parameters
+        ----------
+        elements : list[AllVariablesTypes]
+            List of all elements.
+        """
         self._elements: list[FromFileVariables | ParsedVar] = copy(elements)
         self._save = [var.name for var in elements]
         self._in_dset = [var for var in self._elements if var.exist_in_dset]
@@ -237,12 +244,31 @@ class VariableSet:
         return self.mapper_by_name.keys()
 
     def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:
+        """Return Mandatory variables as dict suitable for Set instanciation..
+
+        Returns
+        -------
+        dict[str, AllVariablesTypes]
+            Mapping between parameter name and variable value.
+        """
         return {}
 
     def _get_inputs_for_new_ensemble(
         self,
         variables_list: list[AllVariablesTypes],
     ) -> dict[str, AllVariablesTypes]:
+        """Load elements to instanciate a new set.
+
+        Parameters
+        ----------
+        variables_list : list[AllVariablesTypes]
+            List of all variables to return.
+
+        Returns
+        -------
+        dict[str, AllVariablesTypes]
+            Mapping between variables name or parameter name and variable value.
+        """
         variables = self._get_mandatory_variables_as_input_dict()
         mandatory_names = [var.name for var in variables.values()]
         for var in variables_list:
@@ -509,6 +535,13 @@ class BaseRequiredVarsSet(VariableSet):
         return super().pop(var_name)
 
     def _get_mandatory_variables_as_input_dict(self) -> dict[str, AllVariablesTypes]:
+        """Return Mandatory variables as dict suitable for Set instanciation..
+
+        Returns
+        -------
+        dict[str, AllVariablesTypes]
+            Mapping between parameter name and variable value.
+        """
         return {
             "expocode": self.get(self.expocode_var_name),
             "provider": self.get(self.provider_var_name) if self.has_provider else None,
@@ -972,6 +1005,27 @@ class SourceVariableSet(BaseRequiredVarsSet):
         self,
         var: FromFileVariables | ParsedVar | FeatureVar,
     ) -> list[FromFileVariables | ParsedVar]:
+        """Return Variable to load.
+
+        This function 'unwraps' features and return the variables required
+        for the features. For example, for feature variable which required
+        Temperature and Salinity variables (both not features as well),
+        this will return a list with those two variables.
+        Additionally, if a feature variable is required for another feature,
+        this feature will be unwrapped as well.
+
+        Parameters
+        ----------
+        var : FromFileVariables | ParsedVar | FeatureVar
+            Variable to unwrap.
+
+        Returns
+        -------
+        list[FromFileVariables | ParsedVar]
+            List of all required variables to create the input variable.
+            (The list can contain only the input variable if the input is
+            not a feature.)
+        """
         if var.is_feature:
             loadables = map(self._get_loadable_required_vars, var.required_vars)
             return list(itertools.chain(*loadables))
@@ -981,6 +1035,21 @@ class SourceVariableSet(BaseRequiredVarsSet):
         self,
         var: FromFileVariables | ParsedVar | FeatureVar,
     ) -> list[FromFileVariables | ParsedVar]:
+        """Return all needed features.
+
+        This function will'unwrap' a variable and return all feature that this variable
+        could require.
+
+        Parameters
+        ----------
+        var : FromFileVariables | ParsedVar | FeatureVar
+            Variable to unwrap.
+
+        Returns
+        -------
+        list[FromFileVariables | ParsedVar]
+            List of all required features for the given variable.
+        """
         if not var.is_feature:
             return []
         loadables = map(self._get_featured_vars, var.required_vars)

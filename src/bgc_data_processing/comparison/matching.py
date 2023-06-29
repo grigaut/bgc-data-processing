@@ -569,6 +569,26 @@ class SelectiveDataSource(DataSource):
         provider_name: str,
         excluded_files: list[str],
     ) -> "SelectiveABFileLoader":
+        """Build the loader.
+
+        Parameters
+        ----------
+        provider_name : str
+            Name of the Data provider.
+            !!! At the moment, it is only possible to use "abfiles".
+        excluded_files : list[str]
+            Files to exclude.
+
+        Returns
+        -------
+        SelectiveABFileLoader
+            Selective Loader.
+
+        Raises
+        ------
+        UnsupportedLoadingFormatError
+            If the file format is not supported.
+        """
         if self._format == "abfiles":
             return SelectiveABFileLoader(
                 provider_name=provider_name,
@@ -711,6 +731,20 @@ class SelectiveDataSource(DataSource):
         filepath: Path | str,
         constraints: "Constraints",
     ) -> "Storer":
+        """Create storer method definition to shadow DataSource's method.
+
+        Parameters
+        ----------
+        filepath : Path | str
+            File path.
+        constraints : Constraints
+            Constraints.
+
+        Returns
+        -------
+        Storer
+            Storer.
+        """
         pass
 
     def load_all(self, constraints: "Constraints") -> "Storer":
