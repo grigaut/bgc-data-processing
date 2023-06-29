@@ -7,7 +7,6 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from bgc_data_processing.verbose import Verbose
 from cartopy import feature
 
 CONFIG_FOLDER = Path("config")
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     DEPTH_MAX: int | float = CONFIG["DEPTH_MAX"]
     SHOW_MAP: bool = CONFIG["SHOW_MAP"]
 
-    Verbose(CONFIG["VERBOSE"])
+    bgc_dp.set_verbose_level(CONFIG["VERBOSE"])
 
     observations = bgc_dp.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
