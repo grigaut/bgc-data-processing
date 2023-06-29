@@ -215,7 +215,7 @@ class ABFileLoader(BaseLoader):
     def load(
         self,
         filepath: Path | str,
-        constraints: Constraints = Constraints(),
+        constraints: Constraints | None = None,
     ) -> pd.DataFrame:
         """Load a abfiles from basename.
 
@@ -223,14 +223,16 @@ class ABFileLoader(BaseLoader):
         ----------
         filepath: Path | str
             Path to the basename of the file to load.
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
+        constraints : Constraints| None, optional
+            Constraints slicer., by default None
 
         Returns
         -------
         pd.DataFrame
             DataFrame corresponding to the file.
         """
+        if constraints is None:
+            constraints = Constraints()
         basename = self.convert_filepath_to_basename(filepath)
         raw_data = self._read(basename=str(basename))
         # transform thickness in depth

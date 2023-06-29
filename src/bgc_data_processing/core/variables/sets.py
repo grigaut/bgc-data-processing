@@ -760,20 +760,20 @@ class StoringVariablesSet(BaseRequiredVarsSet):
         )
         self._save = [var.name for var in self._elements]
 
-    def set_saving_order(self, var_names: list[str] = []) -> None:
+    def set_saving_order(self, var_names: list[str] | None = None) -> None:
         """Set the saving order for the variables.
 
         Parameters
         ----------
-        var_names : list[str], optional
-            List of variable names => saving variables sorted., by default []
+        var_names : list[str] | None, optional
+            List of variable names => saving variables sorted., by default None
 
         Raises
         ------
         ValueError
             If a variable name is not one of the variables'.
         """
-        if not var_names:
+        if var_names is None:
             return
         new_save = deepcopy(var_names)
         self._save = new_save
@@ -810,10 +810,12 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         Longitude related variable.
     depth : FromFileVariables
         Depth related variable.
-    provider : FromFileVariables, optional
-        Provider related variable. Can be set to None to be ignored., by default None
     hour : FromFileVariables, optional
         Hour related variable. Can be set to None to be ignored., by default None
+    provider : FromFileVariables, optional
+        Provider related variable. Can be set to None to be ignored., by default None
+    save_order : list[AllVariablesTypes] | None, optional
+        Default saving order. Order of the variables if None., by default None
     *args: list
         Var objects to represent the variables stored by the object.
         It is better if these Var object have been instanciated
@@ -841,7 +843,7 @@ class SavingVariablesSet(BaseRequiredVarsSet):
         depth: FromFileVariables,
         hour: FromFileVariables | None = None,
         provider: FromFileVariables | None = None,
-        save_order: list[AllVariablesTypes] = [],
+        save_order: list[AllVariablesTypes] | None = None,
         *args: FromFileVariables,
         **kwargs: FromFileVariables,
     ) -> None:
@@ -859,25 +861,25 @@ class SavingVariablesSet(BaseRequiredVarsSet):
             *args,
             **kwargs,
         )
-        if not save_order:
+        if save_order is None:
             self._save = [var.name for var in self._elements.copy()]
         else:
             self._save = save_order
 
-    def set_saving_order(self, var_names: list[str] = []) -> None:
+    def set_saving_order(self, var_names: list[str] | None = None) -> None:
         """Set the saving order for the variables.
 
         Parameters
         ----------
-        var_names : list[str], optional
-            List of variable names => saving variables sorted., by default []
+        var_names : list[str] | None, optional
+            List of variable names => saving variables sorted., by default None
 
         Raises
         ------
         ValueError
             If a variable name is not one of the variables'.
         """
-        if not var_names:
+        if var_names is None:
             return
         self._save = deepcopy(var_names)
 

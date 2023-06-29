@@ -170,7 +170,7 @@ class DensityPlotter(BasePlot):
     def __init__(
         self,
         storer: "Storer",
-        constraints: "Constraints" = Constraints(),
+        constraints: Constraints | None = None,
     ) -> None:
         """Instanciate base class for tracing on earthmaps.
 
@@ -178,9 +178,11 @@ class DensityPlotter(BasePlot):
         ----------
         storer : Storer
             Data Storer containing data to plot.
-        constraints: Constraints
+        constraints: Constraints | None
                 Constraint slicer.
         """
+        if constraints is None:
+            constraints = Constraints()
         super().__init__(storer=storer, constraints=constraints)
         self._lat_bin: int | float = self.__default_lat_bin
         self._lon_bin: int | float = self.__default_lon_bin
@@ -711,7 +713,7 @@ class EvolutionProfile(BasePlot):
     def __init__(
         self,
         storer: "Storer",
-        constraints: "Constraints" = Constraints(),
+        constraints: Constraints | None = None,
     ) -> None:
         """Class to plot the evolution of data on a given area.
 
@@ -719,9 +721,11 @@ class EvolutionProfile(BasePlot):
         ----------
         storer : Storer
             Storer to map data of.
-        constraints: Constraints
+        constraints: Constraints|None
                 Constraint slicer.
         """
+        if constraints is None:
+            constraints = Constraints()
         super().__init__(storer, constraints)
         self._interval: str = self.__default_interval
         self._interval_length: int = self.__default_interval_length

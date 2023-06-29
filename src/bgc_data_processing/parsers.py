@@ -342,10 +342,10 @@ class ConfigParser(TomlParser):
         Path to the file.
     check_types : bool, optional
         Whether to check types or not., by default True
-    dates_vars_keys : list[str | list[str]], optional
-        Keys to variable defining dates., by default []
-    dirs_vars_keys : list[str | list[str]], optional
-        Keys to variable defining directories., by default []
+    dates_vars_keys : list[str | list[str]] | None, optional
+        Keys to variable defining dates., by default None
+    dirs_vars_keys : list[str | list[str]] | None, optional
+        Keys to variable defining directories., by default None
     existing_directory: str, optional
         Behavior for directory creation, 'raise' raises an error if the directory
         exists and is not empty, 'merge' will keep the directory as is but might replace
@@ -356,22 +356,28 @@ class ConfigParser(TomlParser):
         self,
         filepath: Path | str,
         check_types: bool = True,
-        dates_vars_keys: list[str | list[str]] = [],
-        dirs_vars_keys: list[str | list[str]] = [],
+        dates_vars_keys: list[str | list[str]] | None = None,
+        dirs_vars_keys: list[str | list[str]] | None = None,
         existing_directory: str = "raise",
     ) -> None:
         super().__init__(filepath, check_types)
-        self.dates_vars_keys = dates_vars_keys
+        if dates_vars_keys is None:
+            self.dates_vars_keys = []
+        else:
+            self.dates_vars_keys = dates_vars_keys
         self.dirs_vars_keys: list[list[str]] = []
         self._parsed = False
-        for var in dirs_vars_keys:
-            if isinstance(var, list):
-                self.dirs_vars_keys.append(var)
-            elif isinstance(var, str):
-                self.dirs_vars_keys.append([var])
-            else:
-                error_msg = f"Unsupported type for directory key {var}: {type(var)}."
-                raise TypeError(error_msg)
+        if dirs_vars_keys is not None:
+            for var in dirs_vars_keys:
+                if isinstance(var, list):
+                    self.dirs_vars_keys.append(var)
+                elif isinstance(var, str):
+                    self.dirs_vars_keys.append([var])
+                else:
+                    error_msg = (
+                        f"Unsupported type for directory key {var}: {type(var)}."
+                    )
+                    raise TypeError(error_msg)
         self.existing_dir_behavior = existing_directory
         self._dir_created = {
             "-".join(directory): False for directory in self.dirs_vars_keys

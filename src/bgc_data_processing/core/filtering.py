@@ -58,7 +58,7 @@ class Constraints:
     def add_superset_constraint(
         self,
         field_label: str,
-        values_superset: list[Any] = [],
+        values_superset: list[Any] | None = None,
     ) -> None:
         """Add a constrainte of type 'superset'.
 
@@ -66,10 +66,12 @@ class Constraints:
         ----------
         field_label : str
             Name of the column to apply the constraint to.
-        values_superset : list[Any]
+        values_superset : list[Any] | None
             All the values that the column can take.
-            If empty, no constraint will be applied.
+            If empty, no constraint will be applied., by default None
         """
+        if values_superset is None:
+            values_superset = []
         if values_superset:
             self.supersets[field_label] = values_superset
 

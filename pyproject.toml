@@ -110,10 +110,6 @@ select = [
 ignore = [
     # do not assign a lambda expression, use a def
     "E731",
-    # controversial
-    "B006",
-    # controversial
-    "B008",
     # Function definition does not bind loop variable
     "B023",
     # Too many arguments to function call
