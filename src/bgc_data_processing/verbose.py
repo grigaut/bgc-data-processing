@@ -57,30 +57,62 @@ class Verbose:
 def with_verbose(trigger_threshold: int, message: str):
     """Display verbose on the function call.
 
+    One must keep in mind that the message is displayed only if the verbose
+    level is STRICTLY greater than the trigger_threshold.
+
+    In order to use a placeholder to insert values in the message use square brackets
+    ('[' and ']').
+    However, keep in mind that for the placeholder to work, one must
+    the name of the parameter in the function call.
+
+    For example, with:
+
+    >>> @with_verbose(trigger_threshold=0, message="Input with a=[a]")
+    >>> def func(a: int) -> None:
+    >>>     print(a)
+
+    We can have the following results depending on how 'func' is called:
+
+    >>> func(a=3)
+    ... Input with a=3
+    ... 3
+
+    Or
+
+    >>> func(3)
+    ... Input with a=[a]
+    ... 3
+
     Parameters
     ----------
     trigger_threshold : int
         Level to use as trigger for verbose display.
         Example: if trigger_level = 1 -> message is displayed if
-        the global verbose level is striclty above 1.
+        the global verbose level is striclty greater than 1.
     message : str
         Message to display.
     """
 
-    def verbose_wrapper(func):
+    def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            assert isinstance(trigger_threshold, int), "ff"
+            if not isinstance(trigger_threshold, int):
+                error_msg = "Trigger threshold must be an integer"
+                raise TypeError(error_msg)
             verbose = Verbose()
-            level = max(
-                verbose.min_allowed,
-                min(trigger_threshold, verbose.max_allowed),
-            )
+            threshold_or_max = min(trigger_threshold, verbose.max_allowed)
+            level = max(verbose.min_allowed, threshold_or_max)
+            content = message
             if verbose.level > level:
+                # Adjust indentation
                 offset = "".join(["\t"] * level)
-                print(f"{offset}{message.format(**kwargs)}")
+                # Replace placeholders
+                for key, value in kwargs.items():
+                    content = content.replace("[" + key + "]", str(value))
+                    # print verbose
+                print(f"{offset}{content}")
             return func(*args, **kwargs)
 
         return wrapper
 
-    return verbose_wrapper
+    return decorator

@@ -200,7 +200,7 @@ class DataSource:
         for var in to_remove:
             _ = storer.pop(var.name)
 
-    @with_verbose(trigger_threshold=0, message="Loading data from {filepath}")
+    @with_verbose(trigger_threshold=0, message="Loading data from [filepath]")
     def _create_storer(self, filepath: Path, constraints: "Constraints") -> "Storer":
         """Create the storer with the data from a given filepath.
 
