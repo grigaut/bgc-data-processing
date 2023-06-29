@@ -83,6 +83,8 @@ select = [
     'Q',
     # flake8-errmsg
     'EM',
+    # flake8-implicit-str-concat
+    "ISC",
     # flake8-raise
     "RSE",
     # flake8-return
