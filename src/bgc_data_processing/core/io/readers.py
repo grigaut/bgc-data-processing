@@ -239,7 +239,7 @@ class Reader:
         )
         self._variables = self._get_variables(raw_df, unit_row, mandatory_vars)
 
-    @with_verbose(trigger_threshold=0, message="Reading data from {filepath}")
+    @with_verbose(trigger_threshold=0, message="Reading data from [filepath].")
     def _read(
         self,
         filepath: Path,

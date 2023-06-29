@@ -208,7 +208,7 @@ class StorerSaver:
             if len(lines) != 0:
                 file.writelines(lines)
 
-    @with_verbose(trigger_threshold=1, message="Saving data in {filepath}.")
+    @with_verbose(trigger_threshold=1, message="Saving data in [filepath].")
     def _save_data(self, filepath: Path, data_slice: "Storer") -> None:
         """Save the data of a slice within a given file.
 

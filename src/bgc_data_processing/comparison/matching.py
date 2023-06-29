@@ -318,7 +318,7 @@ class NearestNeighborStrategy:
 
     @with_verbose(
         trigger_threshold=2,
-        message=f"Closest index selection using {_strategy_name}.",
+        message=f"Closest index selection using {_strategy_name} strategy.",
     )
     def get_closest_indexes(
         self,
@@ -663,7 +663,7 @@ class SelectiveDataSource(DataSource):
         return Mask(to_keep, indexes_2d), Match(index)
 
     @staticmethod
-    @with_verbose(trigger_threshold=0, message="Loading data from {filepath}")
+    @with_verbose(trigger_threshold=0, message="Loading data from [filepath].")
     def parse_date_from_filepath(filepath: Path | str) -> dt.date:
         """Parse date from abfile basename.
 
@@ -735,7 +735,7 @@ class SelectiveDataSource(DataSource):
         )
         datas: list[pd.DataFrame] = []
         for filepath in filepaths:
-            date = self.parse_date_from_filepath(filepath)
+            date = self.parse_date_from_filepath(filepath=filepath)
             data_slice = self.reference[self.reference[date_var_label].dt.date == date]
             if data_slice.empty:
                 continue
@@ -745,7 +745,6 @@ class SelectiveDataSource(DataSource):
                 constraints=constraints,
                 mask=mask,
             )
-            print(filepath, " loaded")
             datas.append(match.match(sim_data))
         concatenated = pd.concat(datas, axis=0)
         storer = Storer(

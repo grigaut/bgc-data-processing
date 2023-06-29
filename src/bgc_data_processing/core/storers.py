@@ -299,7 +299,7 @@ class Storer:
     @staticmethod
     @with_verbose(
         trigger_threshold=1,
-        message="Slicing data for date range: {_start_date}-{_end_date}.",
+        message="Slicing data for date range: [_start_date]-[_end_date].",
     )
     def slice_verbose(_start_date: dt.date, _end_date: dt.date) -> None:
         """Invoke Verbose for slicing.

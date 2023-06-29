@@ -99,7 +99,7 @@ class BasePlot(ABC):
         plt.close()
 
     @abstractmethod
-    @with_verbose(trigger_threshold=0, message="Saving figure in {save_path}")
+    @with_verbose(trigger_threshold=0, message="Saving figure in [save_path]")
     def save(
         self,
         save_path: str,
@@ -554,7 +554,7 @@ class DensityPlotter(BasePlot):
         ax.set_title(title)
         return fig
 
-    @with_verbose(trigger_threshold=1, message="Meshing {variable_name} data.")
+    @with_verbose(trigger_threshold=1, message="Meshing [variable_name] data.")
     def _build_to_geoaxes(
         self,
         variable_name: str,
@@ -648,7 +648,7 @@ class DensityPlotter(BasePlot):
             **kwargs,
         )
 
-    @with_verbose(trigger_threshold=1, message="Meshing {variable_name} data.")
+    @with_verbose(trigger_threshold=1, message="Meshing [variable_name] data.")
     def get_df(
         self,
         variable_name: str,
