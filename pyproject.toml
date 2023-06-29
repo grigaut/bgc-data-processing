@@ -99,6 +99,8 @@ select = [
     "SLF",
     # flake8-simplify
     "SIM",
+    # flake8-tidy-imports
+    "TID",
     # flake8-type-checking
     "TCH",
     # pylint
