@@ -154,6 +154,9 @@ class Bias(BaseMetric):
 
     metric_name = "Bias"
 
+    def __init__(self, variables_to_evaluate: list[str]) -> None:
+        super().__init__(variables_to_evaluate)
+
     def _eval(
         self,
         observations: pd.DataFrame,

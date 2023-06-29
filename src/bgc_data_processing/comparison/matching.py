@@ -533,8 +533,6 @@ class SelectiveDataSource(DataSource):
         Pattern to match to load files.
     variable_ensemble : SourceVariableSet
         Ensembles of variables to consider.
-    verbose : int, optional
-        Verbose., by default 1
     """
 
     _loader: SelectiveABFileLoader

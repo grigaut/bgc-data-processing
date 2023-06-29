@@ -306,9 +306,9 @@ class Storer:
 
         Parameters
         ----------
-        start_date : dt.date
+        _start_date : dt.date
             Start date.
-        end_date : dt.date
+        _end_date : dt.date
             End date.
         """
         return

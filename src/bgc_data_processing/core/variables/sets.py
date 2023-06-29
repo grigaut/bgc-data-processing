@@ -938,6 +938,36 @@ class SourceVariableSet(BaseRequiredVarsSet):
         If multiple var object have the same name.
     """
 
+    def __init__(
+        self,
+        expocode: FromFileVariables,
+        date: FromFileVariables,
+        year: FromFileVariables,
+        month: FromFileVariables,
+        day: FromFileVariables,
+        latitude: FromFileVariables,
+        longitude: FromFileVariables,
+        depth: FromFileVariables,
+        hour: FromFileVariables | None = None,
+        provider: FromFileVariables | None = None,
+        *args: FromFileVariables,
+        **kwargs: FromFileVariables,
+    ) -> None:
+        super().__init__(
+            expocode,
+            date,
+            year,
+            month,
+            day,
+            latitude,
+            longitude,
+            depth,
+            hour,
+            provider,
+            *args,
+            **kwargs,
+        )
+
     def _get_loadable_required_vars(
         self,
         var: FromFileVariables | ParsedVar | FeatureVar,
