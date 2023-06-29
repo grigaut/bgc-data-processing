@@ -86,10 +86,12 @@ class BaseMetric(ABC):
         sim_df = simulations_storer.data.filter(sim_eval_labels, axis=1)
 
         if obs_df.shape != sim_df.shape:
-            error_msg = f"DataFrame shapes don't match(observations: {obs_df.shape} "
-            "- simulations: {sim_df.shape}) -> make sure both storer have the variables"
-            "to evaluate on"
-            f" (variables: {self._eval_vars})"
+            error_msg = (
+                f"DataFrame shapes don't match(observations: {obs_df.shape} "
+                "- simulations: {sim_df.shape}) -> make sure both storer have "
+                "the variables to evaluate on"
+                f" (variables: {self._eval_vars})"
+            )
             raise IncomparableStorersError(error_msg)
 
         nans = obs_df.isna().all(axis=1) | sim_df.isna().all(axis=1)
