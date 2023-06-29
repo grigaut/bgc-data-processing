@@ -106,8 +106,10 @@ class SelectiveABFileLoader(ABFileLoader):
                 data[~is_valid] = variable.default
                 break
         if data is None:
-            error_msg = f"Grid File has no data for the variable {variable_name}."
-            f"Possible fieldnames are {self.grid_file.fieldnames}."
+            error_msg = (
+                f"Grid File has no data for the variable {variable_name}."
+                f"Possible fieldnames are {self.grid_file.fieldnames}."
+            )
             raise ABFileLoadingError(error_msg)
         return data
 
@@ -605,8 +607,10 @@ class SelectiveDataSource(DataSource):
                 found = True
                 break
         if not found:
-            error_msg = f"Grid File has no data for the variable {var.name}."
-            f"Possible fieldnames are {self.grid.fieldnames}."
+            error_msg = (
+                f"Grid File has no data for the variable {var.name}."
+                f"Possible fieldnames are {self.grid.fieldnames}."
+            )
             raise ABFileLoadingError(error_msg)
         value = mask_2d.filled(np.nan)
         return pd.Series(value.flatten(), name=var.label)

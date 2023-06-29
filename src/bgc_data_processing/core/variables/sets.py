@@ -54,8 +54,10 @@ class VariableSet:
         **kwargs: FromFileVariables,
     ) -> None:
         if len(args) != len({var.name for var in args}):
-            error_msg = "To set multiple alias for the same variable, "
-            "use Var.in_file_as([alias1, alias2])"
+            error_msg = (
+                "To set multiple alias for the same variable, "
+                "use Var.in_file_as([alias1, alias2])"
+            )
             raise ValueError(error_msg)
         self._instantiate_from_elements([*args, *kwargs.values()])
 
@@ -358,8 +360,10 @@ class FeatureVariablesSet(VariableSet):
             features = [f for f in features if all(f != a for a in available)]
             constructables = self._get_constructable_features(features, available)
         if features:
-            error_msg = f"The following features can not be loaded: {features}. "
-            "They probably depend on non loaded variables."
+            error_msg = (
+                f"The following features can not be loaded: {features}. "
+                "They probably depend on non loaded variables."
+            )
             raise FeatureConstructionError(error_msg)
 
 
@@ -423,8 +427,10 @@ class BaseRequiredVarsSet(VariableSet):
         **kwargs: FromFileVariables,
     ) -> None:
         if len(args) != len({var.name for var in args}):
-            error_msg = "To set multiple alias for the same variable, "
-            "use Var.in_file_as([alias1, alias2])"
+            error_msg = (
+                "To set multiple alias for the same variable, "
+                "use Var.in_file_as([alias1, alias2])"
+            )
             raise ValueError(error_msg)
         mandatory_variables = []
         if provider is None:
@@ -495,8 +501,10 @@ class BaseRequiredVarsSet(VariableSet):
             self.depth_var_name,
         ]
         if var_name in mandatory_variables_names:
-            error_msg = f"Variable {var_name} can not be removed since "
-            "it is a mandatory variable."
+            error_msg = (
+                f"Variable {var_name} can not be removed since "
+                "it is a mandatory variable."
+            )
             raise IncorrectVariableNameError(error_msg)
         return super().pop(var_name)
 

@@ -1518,8 +1518,10 @@ class VariableBoxPlot(BasePlot):
         if period in self.period_mapping:
             period_str = self.period_mapping[period]
         else:
-            error_msg = "Wrong 'period' value, accepted values: "
-            f"{self.period_mapping.keys()}"
+            error_msg = (
+                "Wrong 'period' value, accepted values: "
+                f"{self.period_mapping.keys()}"
+            )
             raise ValueError(error_msg)
         period_data = date_data.dt.strftime(period_str)
         period_data.name = "period"
