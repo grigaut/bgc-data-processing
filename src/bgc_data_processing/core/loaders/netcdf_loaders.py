@@ -379,7 +379,6 @@ class NetCDFLoader(BaseLoader):
         """
         expocode_var_name = self._variables.expocode_var_name
         df.insert(0, self._variables.get(expocode_var_name).label, file_id)
-        # df[self._variables.get(expocode_var_name).label] = file_id  #
         return df
 
     def _add_empty_cols(self, df: pd.DataFrame) -> pd.DataFrame:

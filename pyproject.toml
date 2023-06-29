@@ -69,6 +69,10 @@ select = [
     "A",
     # flake8-unused-arguments
     "ARG",
+    # flake8-use-pathlib
+    "PTH",
+    # eradicate
+    "ERA",
     # flake8-bugbear
     'B',
     # flake8-commas

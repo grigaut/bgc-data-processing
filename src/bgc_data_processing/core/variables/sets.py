@@ -775,7 +775,6 @@ class StoringVariablesSet(BaseRequiredVarsSet):
         """
         if not var_names:
             return
-        # new_save = [self.get(name) for name in var_names]
         new_save = deepcopy(var_names)
         self._save = new_save
 
@@ -1074,7 +1073,6 @@ class SourceVariableSet(BaseRequiredVarsSet):
     @property
     def storing_variables(self) -> StoringVariablesSet:
         """Ensemble of variables to store."""
-        # variables = self._get_inputs_for_new_ensemble(self._elements)
         all_non_features_map = map(self._get_loadable_required_vars, self._elements)
         variables = self._get_inputs_for_new_ensemble(
             list(set(itertools.chain(*all_non_features_map))),

@@ -109,7 +109,7 @@ def with_verbose(trigger_threshold: int, message: str):
                 # Replace placeholders
                 for key, value in kwargs.items():
                     content = content.replace("[" + key + "]", str(value))
-                    # print verbose
+                    # verbose
                 print(f"{offset}{content}")
             return func(*args, **kwargs)
 

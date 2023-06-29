@@ -92,7 +92,6 @@ class SelectiveABFileLoader(ABFileLoader):
                 mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
                 data_2d: np.ndarray = mask_2d.filled(np.nan)
                 data = mask(data_2d, name=variable.label)
-                # data = self._set_index(pd.Series(data_1d, name=variable.label))
                 # load flag
                 if flag_name is None or flag_values is None:
                     is_valid = self._set_index(pd.Series(True, index=mask.index))

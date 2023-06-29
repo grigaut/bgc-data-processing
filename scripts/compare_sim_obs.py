@@ -89,7 +89,6 @@ if __name__ == "__main__":
         strategy=bgc_dp.comparison.NearestNeighborStrategy(metric="haversine"),
         dsource=bgc_dp.providers.PROVIDERS["HYCOM"],
     )
-    # selector.verbose = VERBOSE
 
     simulations = selector.load_all(bgc_dp.Constraints())
 
