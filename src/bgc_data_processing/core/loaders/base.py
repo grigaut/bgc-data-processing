@@ -112,12 +112,12 @@ class BaseLoader(ABC):
         Parameters
         ----------
         df : pd.DataFrame
-            _description_
+            DatafRame on which to remove rows.
 
         Returns
         -------
         pd.DataFrame
-            _description_
+            DataFrame with rows removed
         """
         # Load keys
         vars_to_remove_when_any_nan = self._variables.to_remove_if_any_nan

@@ -20,7 +20,7 @@ def save_storer(
     saving_order: list[str] = [],
     save_aggregated_data_only: bool = True,
 ) -> None:
-    """_summary_.
+    """Save en entire Storer to a given filepath.
 
     Parameters
     ----------

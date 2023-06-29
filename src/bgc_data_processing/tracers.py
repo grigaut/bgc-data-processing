@@ -862,7 +862,7 @@ class EvolutionProfile(BasePlot):
         Returns
         -------
         tuple[pd.IntervalIndex, np.ndarray]
-            _description_
+            Cuts interval, corresponding ticks
         """
         cut = pd.cut(
             column_to_cut,
