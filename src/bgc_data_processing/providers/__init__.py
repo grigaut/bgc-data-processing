@@ -1,4 +1,9 @@
-"""Contain all loaders for given providers."""
+"""Build all data sources which are defined in src/bgc_data_processing/providers.
+
+From this namespace is accessible:
+
+- `PROVIDERS` -> Providers mapping between: name -> DataSource
+"""
 
 from importlib import import_module
 from pathlib import Path

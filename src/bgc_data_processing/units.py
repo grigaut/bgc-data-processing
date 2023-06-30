@@ -48,7 +48,7 @@ def convert_nitrate_mgc_by_m3_to_umol_by_l(
 
     Parameters
     ----------
-    data_ml_by_l : pd.Series
+    data_mgc_m3 : pd.Series
         Original data (mgC/m3)
 
     Returns
@@ -74,7 +74,7 @@ def convert_silicate_mgc_by_m3_to_umol_by_l(
 
     Parameters
     ----------
-    data_ml_by_l : pd.Series
+    data_mgc_m3 : pd.Series
         Original data (mgC/m3)
 
     Returns
@@ -100,7 +100,7 @@ def convert_phosphate_mgc_by_m3_to_umol_by_l(
 
     Parameters
     ----------
-    data_ml_by_l : pd.Series
+    data_mgc_m3 : pd.Series
         Original data (mgC/m3)
 
     Returns

@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     bgc_dp.set_verbose_level(VERBOSE)
 
-    storer = bgc_dp.read_files(
+    storer = bgc_dp.io.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -95,14 +95,14 @@ if __name__ == "__main__":
     date_min = DATE_MIN.strftime("%Y%m%d")
     date_max = DATE_MAX.strftime("%Y%m%d")
     if SHOW:
-        suptitle = f"{VARIABLE} - from {LOADING_DIR}\n" f"{date_min}-{date_max}"
+        suptitle = f"{VARIABLE} - from {LOADING_DIR}\n{date_min}-{date_max}"
         plot.show(
             variable_name=VARIABLE,
             suptitle=suptitle,
         )
     if SAVE:
         save_name = f"density_map_{VARIABLE}_{date_min}_{date_max}.png"
-        suptitle = f"{VARIABLE} - from {LOADING_DIR}\n" f"{date_min}-{date_max}"
+        suptitle = f"{VARIABLE} - from {LOADING_DIR}\n{date_min}-{date_max}"
         plot.save(
             save_path=f"{CONFIG['SAVING_DIR']}/{save_name}",
             variable_name=VARIABLE,

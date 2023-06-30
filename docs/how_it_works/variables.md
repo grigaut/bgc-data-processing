@@ -20,9 +20,9 @@ Different types of variables exist :
     Pre-created variable which can then be turned into ExistingVar or NotExistingVar depending on the variables in the dataset.
 
     ```py
-    from bgc_data_processing import TemplateVar
+    import bgc_data_processing as bgc_dp
 
-    template = TemplateVar(
+    template = bgc_dp.variables.TemplateVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -32,7 +32,7 @@ Different types of variables exist :
     ```
 
     !!! tip "Usecase of TemplateVar"
-        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [.not_in_file]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.TemplateVar.not_in_file")}}) and [.in_file_as]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.TemplateVar.in_file_as")}}) methods.
+        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [`.not_in_file`]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.not_in_file")}}) and [`.in_file_as`]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.in_file_as")}}) methods.
 
 === "NotExistingVar"
     Variable which is known to not exist in the dataset. If needed, the corresponding column in the dataframe can be filled later or it will remain as nan.
@@ -40,9 +40,9 @@ Different types of variables exist :
     They can be created from a TemplateVar (recommended):
 
     ```py
-    from bgc_data_processing import TemplateVar
+    import bgc_data_processing as bgc_dp
 
-    template = TemplateVar(
+    template = bgc_dp.variables.TemplateVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -55,9 +55,9 @@ Different types of variables exist :
     or they can be created from scratch:
 
     ```py
-    from bgc_data_processing import NotExistingVar
+    import bgc_data_processing as bgc_dp
 
-    notexisting = NotExistingVar(
+    notexisting = bgc_dp.variables.NotExistingVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -72,9 +72,9 @@ Different types of variables exist :
     They can be created from a TemplateVar (recommended):
 
     ```py
-    from bgc_data_processing import TemplateVar
+    import bgc_data_processing as bgc_dp
 
-    template = TemplateVar(
+    template = bgc_dp.variables.TemplateVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -93,9 +93,9 @@ Different types of variables exist :
     or they can be created from scratch:
 
     ```py
-    from bgc_data_processing import ExistingVar
+    import bgc_data_processing as bgc_dp
 
-    existing = ExistingVar(
+    existing = bgc_dp.variables.ExistingVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -108,23 +108,55 @@ Different types of variables exist :
     ```
 
 === "ParsedVar"
-    Variable partially reconstructed from a csv file saved with a [StorerSaver]({{fix_url("../reference/data_structures/io/savers/#bgc_data_processing.data_structures.io.savers.StorerSaver")}}).
+    Variable partially reconstructed from a csv file saved with a [`StorerSaver`]({{fix_url("../reference/core/io/savers/#bgc_data_processing.core.io.savers.StorerSaver")}}).
 
     They can be created from scratch but usually it useless to manually use them.
 
 
+=== "FeatureVar"
+    Variable which result from a [`feature`]({{fix_url("../reference/features/#bgc_data_processing.features.BaseFeature")}}). A feature variable is made out of operations over other variables.
+
+    For example, the `CPHL` (chlorophyll) variable, made from `DIAC`(diatoms) and `FLAC` (flagellates) :
+
+    ```py
+    import numpy as np
+
+    import bgc_data_processing as bgc_dp
+
+    feature_var = bgc_dp.variables.FeatureVar(
+        feature = bgc_dp.features.ChlorophyllFromDiatomFlagellate(
+            diatom_variable=DIATOM_VAR,                             # (1)!
+            flagellate_variable=FLAGELLATE_VAR,                     # (2)!
+            var_name = "CPHL",
+            var_unit = "[mg/m3]",
+            var_type = float,
+            var_default = np.nan,
+            var_name_format = "%-10s",
+            var_value_format = "%10.3f",
+        )
+    )
+    ```
+
+    1. Pre-defined `Existingvar` for diatom concentration
+    2. Pre-defined `Existingvar` for flagellate concentration
+
+    using the [`is_loadable`]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.FeatureVar.is_loadable")}}) from the feature will return True if the input list of variables contains all necessary variable to create the feature.
+
+    Then, using the [`insert_in_storer`]({{fix_url("../reference/features/#bgc_data_processing.features.BaseFeature.insert_in_storer")}}) of the FeatureVar.feature property makes it possible to insert the FeatureVar into a storer containing all required variables.
+
+
 !!! warning ""
-    Note that no variable is created by the loader. For example, if the 'DATE' variable is required in the loader's routine, then the variable must exists in the VariableStorer provided when initializating the object.
+    Note that no variable is created by the [`DataSource`]({{fix_url("../reference/core/sources/#bgc_data_processing.core.sources.DataSource")}}). For example, if the 'DATE' variable is required in the loader's routine, then the variable must exists in the [`SourceVariableSet`]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.SourceVariableSet")}}) provided when initializating the object.
 
 
 ## Corrections
 
-It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [.correct_with]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.ExistingVar.correct_with")}}) method. The function given to the method will then be applied to the column once the data loaded.
+It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [`.correct_with`]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.correct_with")}}) method. The function given to the method will then be applied to the column once the data loaded.
 
 ```py
-from bgc_data_processing import TemplateVar
+import bgc_data_processing as bgc_dp
 
-template = TemplateVar(
+template = bgc_dp.variables.TemplateVar(
     name = "LATITUDE",
     unit = "[deg_N]",
     var_type = float,
@@ -146,12 +178,12 @@ existing = template.in_file_as(
 It possible to specify settings for ExistingVar and NotExistingVar to remove the rows where the variable is NaN or where specific variable ar all NaN
 
 === "When a particular variable is NaN"
-    It can be done using the [.remove_when_nan]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.ExistingVar.remove_when_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
+    It can be done using the [.remove_when_nan]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.remove_when_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
 
     ```py
-    from bgc_data_processing import TemplateVar
+    import bgc_data_processing as bgc_dp
 
-    template = TemplateVar(
+    template = bgc_dp.variables.TemplateVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
@@ -167,19 +199,19 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
     1. If latitude value is NaN, the row is dropped.
 
 === "When many variables are Nan"
-    It can be done using the [.remove_when_all_nan]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.ExistingVar.remove_when_all_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
+    It can be done using the [`.remove_when_all_nan`]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.remove_when_all_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
 
     ```py
-    from bgc_data_processing import TemplateVar
+    import bgc_data_processing as bgc_dp
 
-    template_lat = TemplateVar(
+    template_lat = bgc_dp.variables.TemplateVar(
         name = "LATITUDE",
         unit = "[deg_N]",
         var_type = float,
         name_format = "%-12s",
         value_format = "%12.6f",
     )
-    template_lon = TemplateVar(
+    template_lon = bgc_dp.variables.TemplateVar(
         name = "LONGITUDE",
         unit = "[deg_E]",
         var_type = float,
@@ -197,12 +229,13 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
     1. If both latitude **and** longitude value are NaN, the row is dropped.
     2. If both latitude **and** longitude value are NaN, the row is dropped.
 
-## Variables Storer
+## Variables Sets
 
-All variables can then be stored in a [VariablesStorer]({{fix_url("../reference/data_structures/variables/#bgc_data_processing.data_structures.variables.VariablesStorer")}}) object so that loaders can easily interact with them.
+All variables can then be stored in a [`VariableSet`]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.VariableSet")}}) object so that loaders can easily interact with them.
 
 ``` py
-from bgc_data_processing import TemplateVar, VariablesStorer
+from bgc_data_processing.core.variables.vars import TemplateVar
+from bgc_data_processing.core.variables.sets import VariableSet
 
 template_lat = TemplateVar(
     name = "LATITUDE",
@@ -231,7 +264,7 @@ variables_storer = VariablesStorer(
 ```
 
 ## Default variables
-By default, some variables are alreadey defined in `variables.toml` as TemplateVar. These variables are the most common ones for this project and the templates can be used to instanciate the ExistingVar or notExistingvar depending on the source dataset.
+By default, some variables are alreadey defined in `config/variables.toml` (in [`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml)) as TemplateVar. These variables are the most common ones for this project and the templates can be used to instanciate the `ExistingVar` or `NotExistingvar` depending on the source dataset.
 
 One variable definition example can be found here:
 ``` toml
@@ -255,4 +288,4 @@ NAME_FORMAT="%-15s"
 VALUE_FORMAT="%15s"
 ```
 
-The lines starting with `#? ` are not mandatory, but they allow type hinting for the variables to ensure that the correct value type is inputed.
+The lines starting with `#? ` allow type hinting for the variables to ensure that the correct value type is inputed.

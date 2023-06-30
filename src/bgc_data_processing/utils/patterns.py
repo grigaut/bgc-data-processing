@@ -174,33 +174,33 @@ class FileNamePattern:
         """
         # Since this is can be abstract, an example is provided as commented values.
         # The example considers date_min = 2020-02-05 and date_max = 2023-03-30
-        # start = 2020-02-05
+        # -> start = 2020-02-05
         start = date_min
-        # end = 2023-03-30
+        # -> end = 2023-03-30
         end = date_max
-        # end_1st_month = 2020-02-29
+        # -> end_1st_month = 2020-02-29
         end_1st_month = dt.date(
             year=start.year,
             month=start.month + 1,
             day=1,
         ) - dt.timedelta(days=1)
-        # start_2nd_month = 2020-03-01
+        # -> start_2nd_month = 2020-03-01
         start_2nd_month = dt.date(year=start.year, month=start.month + 1, day=1)
-        # end_first_year = 2020-12-31
+        # -> end_first_year = 2020-12-31
         end_first_year = dt.date(year=start.year, month=12, day=31)
-        # start_2nd_year = 2021-01-01
+        # -> start_2nd_year = 2021-01-01
         start_2nd_year = dt.date(year=start.year + 1, month=1, day=1)
-        # end_penultimate_year = 2022-12-31
+        # -> end_penultimate_year = 2022-12-31
         end_penultimate_year = dt.date(year=end.year - 1, month=12, day=31)
-        # start_last_year = 2023-01-01
+        # -> start_last_year = 2023-01-01
         start_last_year = dt.date(year=end.year, month=1, day=1)
-        # end_penultimate_month = 2023-02-28
+        # -> end_penultimate_month = 2023-02-28
         end_penultimate_month = dt.date(
             year=end.year,
             month=end.month,
             day=1,
         ) - dt.timedelta(days=1)
-        # start_last_month = 2023-03-01
+        # -> start_last_month = 2023-03-01
         start_last_month = dt.date(year=end.year, month=end.month, day=1)
         return [
             # Interval between 2020-02-05 and 2020-02-29 -> every day in this interval
@@ -242,23 +242,23 @@ class FileNamePattern:
         """
         # Since this is can be abstract, an example is provided as commented values.
         # The example considers date_min = 2020-02-05 and date_max = 2020-08-27
-        # start = 2020-02-05
+        # -> start = 2020-02-05
         start = date_min
-        # end = 2020-08-27
+        # -> end = 2020-08-27
         end = date_max
-        # end_first_month = 2020-02-29
+        # -> end_first_month = 2020-02-29
         end_first_month = dt.date(
             year=start.year,
             month=start.month + 1,
             day=1,
         ) - dt.timedelta(days=1)
-        # start_second_month = 2020-03-01
+        # -> start_second_month = 2020-03-01
         start_second_month = dt.date(
             year=start.year,
             month=start.month + 1,
             day=1,
         )
-        # end_penultimate_month = 2020-07-31
+        # -> end_penultimate_month = 2020-07-31
         end_penultimate_month = dt.date(
             year=end.year,
             month=end.month,
@@ -266,7 +266,7 @@ class FileNamePattern:
         ) - dt.timedelta(
             days=1,
         )
-        # start_last_month = 2020-08-01
+        # -> start_last_month = 2020-08-01
         start_last_month = dt.date(year=end.year, month=end.month, day=1)
         return [
             # Interval between 2020-02-05 and 2020-02-29 -> every day in this interval

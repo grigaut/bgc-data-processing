@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     bgc_dp.set_verbose_level(CONFIG["VERBOSE"])
 
-    observations = bgc_dp.read_files(
+    observations = bgc_dp.io.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -89,8 +89,6 @@ if __name__ == "__main__":
         strategy=bgc_dp.comparison.NearestNeighborStrategy(metric="haversine"),
         dsource=bgc_dp.providers.PROVIDERS["HYCOM"],
     )
-    # selector.verbose = VERBOSE
-
     simulations = selector.load_all(bgc_dp.Constraints())
 
     interpolator = bgc_dp.comparison.Interpolator(
@@ -131,7 +129,7 @@ if __name__ == "__main__":
     int_saver.saving_order = save_vars
     int_saver.save_all_storer(SAVING_DIR.joinpath("simulations.txt"))
 
-    obs = bgc_dp.read_files(
+    obs = bgc_dp.io.read_files(
         SAVING_DIR.joinpath("observations.txt"),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -149,7 +147,7 @@ if __name__ == "__main__":
         delim_whitespace=True,
     )
 
-    sims = bgc_dp.read_files(
+    sims = bgc_dp.io.read_files(
         SAVING_DIR.joinpath("simulations.txt"),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,

@@ -17,10 +17,10 @@ if TYPE_CHECKING:
 def save_storer(
     storer: "Storer",
     filepath: Path | str,
-    saving_order: list[str] = [],
+    saving_order: list[str] | None = None,
     save_aggregated_data_only: bool = True,
 ) -> None:
-    """_summary_.
+    """Save en entire Storer to a given filepath.
 
     Parameters
     ----------
@@ -28,9 +28,9 @@ def save_storer(
         Storer to save.
     filepath : Path | str
         File in which to save the storer data.
-    saving_order : list[str], optional
+    saving_order : list[str] | None, optional
         Variable order to respect when saving. If the list is empty
-        , all variables are saved., by default []
+        , all variables are saved., by default None
     save_aggregated_data_only : bool, optional
         Whether to only save the aggregated data or not.
         If False, for every provider, a folder with the provider's
@@ -40,7 +40,7 @@ def save_storer(
         storer=storer,
         save_aggregated_data_only=save_aggregated_data_only,
     )
-    if saving_order:
+    if saving_order is not None:
         saver.saving_order = saving_order
     saver.save_all_storer(filepath=Path(filepath))
 

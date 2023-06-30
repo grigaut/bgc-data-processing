@@ -2,12 +2,12 @@
 
 Loading script to load year, latitude, longitude, phosphate and nitrate variables from 2 providers, 'provider1' and 'provider2'. Phosphate variable is not measured by provider1 and nitrate is not measured by provider2. <br />
 Therefore, template are created to store basic informations on variables and are then instanciated in order to create relevant ExistingVar or NotExistingVar depending on provider. <br />
-Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [Constraints]({{fix_url("../reference/data_structures/filtering/#bgc_data_processing.data_structures.filtering.Constraints")}}) objects. Passing a Constraints object to the loader's [\__call__]({{fix_url("../reference/loaders/csv_loaders/#bgc_data_processing.loaders.csv_loaders.CSVLoader.__call__")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
+Finally, latitude and longitude are applied in order to load the data only on a certain area. These are define using through the [`Constraints`]({{fix_url("../reference/core/filtering/#bgc_data_processing.core.filtering.Constraints")}}) objects. Passing a Constraints object to the data source's [`load_all`]({{fix_url("../reference/core/sources/#bgc_data_processing.core.sources.DataSource.load_all")}}) magic method will load the constraints to apply to the object and apply them when loading (or plotting) the data.
 
 ``` py
 import datetime as dt
 
-from bgc_data_processing import variables, loaders, data_classes
+import bgc_data_processing as bgc_dp
 
 # Boundaries definition
 latitude_min = 50
@@ -15,35 +15,35 @@ latitude_max = 89
 longitude_min = -40
 longitude_max = 40
 # Variables definition
-year_var = variables.TemplateVar(
+year_var = bgc_dp.variables.TemplateVar(
     name = "YEAR",
     unit = "[]",
     var_type = int,
     name_format = "%-4s",
     value_format = "%4f",
 )
-latitude_var = variables.TemplateVar(
+latitude_var = bgc_dp.variables.TemplateVar(
     name = "LATITUDE",
     unit = "[deg_N]",
     var_type = float,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
-longitude_var = variables.TemplateVar(
+longitude_var = bgc_dp.variables.TemplateVar(
     name = "LONGITUDE",
     unit = "[deg_E]",
     var_type = float,
     name_format = "%-12s",
     value_format = "%12.6f",
 )
-phos_var = TemplateVar(
+phos_var = bgc_dp.variables.TemplateVar(
     name="PHOS",
     unit="[umol/l]",
     var_type=float,
     name_format="%-10s",
     value_format="%10.3f",
 )
-ntra_var = TemplateVar(
+ntra_var = bgc_dp.variables.TemplateVar(
     name="NTRA",
     unit="[umol/l]",
     var_type=float,
@@ -51,12 +51,14 @@ ntra_var = TemplateVar(
     value_format="%10.3f",
 )
 # loaders definition
-loader_prov1 = loaders.from_csv(
+data_source1 = bgc_dp.DataSource(
     provider_name="provider1",
+    data_format="csv",
     dirin="~/provider1/data",
     category="in_situ",
-    files_pattern="prov1_data_({years}).csv",
-    variables=variables.VariablesStorer(
+    excluded_files=[],
+    files_pattern=bgc_dp.utils.patterns.FileNamePattern("prov1_data_{years}.csv"),
+    variables=bgc_dp.SourceVariableSet(
         year=year_var.in_file_as(("year",None,None)).remove_when_nan(),
         latitude=latitude_var.in_file_as(("lat",None,None)),
         longitude=longitude_var.in_file_as(("lon",None,None)),
@@ -65,12 +67,14 @@ loader_prov1 = loaders.from_csv(
         nitrate=ntra_var.in_file_as(("ntra",None,None)),
     )
 )
-loader_prov2 = loaders.from_csv(
+data_source2 = bgc_dp.DataSource(
     provider_name="provider2",
+    data_format="csv",
     dirin="~/provider2/data",
-    category="in_situ",
-    files_pattern="data_({years}).csv",
-    variables=variables.VariablesStorer(
+    data_category="in_situ",
+    excluded_files=[],
+    files_pattern=bgc_dp.utils.patterns.FileNamePattern("data_{years}.csv"),
+    variables=bgc_dp.SourceVariableSet(
         year=year_var.in_file_as(("year",None,None)).remove_when_nan(),
         latitude=latitude_var.in_file_as(("latitude",None,None)),
         longitude=longitude_var.in_file_as(("longitude",None,None)),
@@ -81,9 +85,9 @@ loader_prov2 = loaders.from_csv(
 )
 # apply boundaries
 storers = []
-for loader in [loader_prov1, loader_prov2]:
+for loader in [data_source1, data_source2]:
     variables = loader.variables
-    constraints = data_structures.filtering.Constraints()
+    constraints = bgc_dp.Constraints()
     constraints.add_boundary_constraint(
         field_label=variables.get(variables.latitude_var_name).label,
         minimal_value=LATITUDE_MIN,
@@ -102,13 +106,13 @@ for loader in [loader_prov1, loader_prov2]:
         latitude_min=latitude_min,
         latitude_max=latitude_max,
     )
-    storer = loader(constraints=constraints)
+    storer = loader.load_all(constraints=constraints)
     storers.append(storer)
 # Aggregation
 aggregated_storer = sum(storers)
 ```
 
-1. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the VariablesStorer, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.
-2. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the VariablesStorer, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.
+1. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the SourceVariableSet, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.
+2. This is just an example script to show the expected structure of a script file, some mandatory variables are missing to initialize the SourceVariableSet, such as 'provider', 'expocode', 'date', 'month', 'day', 'hour' and 'depth'.
 
-It is also possible to use [Constraints]({{fix_url("../reference/data_structures/filtering/#bgc_data_processing.data_structures.filtering.Constraints")}}) objects as argument when creating a plot. The plot will then follow the constraints defined in the object. Using Constraints object with plotting method allows to load a large dataset once and for all and then only plotting slices of this dataset.
+It is also possible to use [`Constraints`]({{fix_url("../reference/core/filtering/#bgc_data_processing.core.filtering.Constraints")}}) objects as argument when creating a plot. The plot will then follow the constraints defined in the object. Using Constraints object with plotting method allows to load a large dataset once and for all and then only plotting slices of this dataset.

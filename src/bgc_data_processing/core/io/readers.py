@@ -23,7 +23,7 @@ def read_files(
     latitude_column_label: str = "LATITUDE",
     longitude_column_label: str = "LONGITUDE",
     depth_column_label: str = "DEPH",
-    variables_reference: list[BaseVar] = [],
+    variables_reference: list[BaseVar] | None = None,
     category: str = "in_situ",
     unit_row_index: int = 1,
     delim_whitespace: bool = True,
@@ -54,9 +54,9 @@ def read_files(
         Longitude column in the dataframe., by default "LONGITUDE"
     depth_column_label : str, optional
         Depth column in the dataframe., by default "DEPH"
-    variables_reference: list[BaseVar]
+    variables_reference: list[BaseVar] | None
         List of variable to use as reference. If a variable label is a column name,
-         this variable will be used for the output storer., by default []
+         this variable will be used for the output storer., by default None
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
@@ -118,7 +118,7 @@ def read_files(
         path = Path(filepath)
     else:
         error_msg = (
-            f"Can't read filepaths from {filepath}. " "Accepted types are Path or str."
+            f"Can't read filepaths from {filepath}. Accepted types are Path or str."
         )
         raise TypeError(error_msg)
     reader = Reader(
@@ -168,9 +168,9 @@ class Reader:
         Longitude column in the dataframe., by default "LONGITUDE"
     depth_column_label : str, optional
         Depth column in the dataframe., by default "DEPH"
-    variables_reference: list[BaseVar]
+    variables_reference: list[BaseVar] | None
         List of variable to use as reference. If a variable label is a column name,
-         this variable will be used for the output storer., by default []
+         this variable will be used for the output storer., by default None
     category : str, optional
         Category of the loaded file., by default "in_situ"
     unit_row_index : int, optional
@@ -201,12 +201,15 @@ class Reader:
         latitude_column_label: str = "LATITUDE",
         longitude_column_label: str = "LONGITUDE",
         depth_column_label: str = "DEPH",
-        variables_reference: list[BaseVar] = [],
+        variables_reference: list[BaseVar] | None = None,
         category: str = "in_situ",
         unit_row_index: int = 1,
         delim_whitespace: bool = True,
     ):
-        self._reference_vars = {var.label: var for var in variables_reference}
+        if variables_reference is None:
+            variables_reference: dict[str, BaseVar] = {}
+        else:
+            self._reference_vars = {var.label: var for var in variables_reference}
 
         raw_df, unit_row = self._read(
             filepath=Path(filepath),

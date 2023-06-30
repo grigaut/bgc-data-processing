@@ -92,7 +92,6 @@ class SelectiveABFileLoader(ABFileLoader):
                 mask_2d: np.ma.masked_array = self.grid_file.read_field(name)
                 data_2d: np.ndarray = mask_2d.filled(np.nan)
                 data = mask(data_2d, name=variable.label)
-                # data = self._set_index(pd.Series(data_1d, name=variable.label))
                 # load flag
                 if flag_name is None or flag_values is None:
                     is_valid = self._set_index(pd.Series(True, index=mask.index))
@@ -533,8 +532,6 @@ class SelectiveDataSource(DataSource):
         Pattern to match to load files.
     variable_ensemble : SourceVariableSet
         Ensembles of variables to consider.
-    verbose : int, optional
-        Verbose., by default 1
     """
 
     _loader: SelectiveABFileLoader
@@ -571,6 +568,26 @@ class SelectiveDataSource(DataSource):
         provider_name: str,
         excluded_files: list[str],
     ) -> "SelectiveABFileLoader":
+        """Build the loader.
+
+        Parameters
+        ----------
+        provider_name : str
+            Name of the Data provider.
+            !!! At the moment, it is only possible to use "abfiles".
+        excluded_files : list[str]
+            Files to exclude.
+
+        Returns
+        -------
+        SelectiveABFileLoader
+            Selective Loader.
+
+        Raises
+        ------
+        UnsupportedLoadingFormatError
+            If the file format is not supported.
+        """
         if self._format == "abfiles":
             return SelectiveABFileLoader(
                 provider_name=provider_name,
@@ -713,7 +730,20 @@ class SelectiveDataSource(DataSource):
         filepath: Path | str,
         constraints: "Constraints",
     ) -> "Storer":
-        pass
+        """Create storer method definition to shadow DataSource's method.
+
+        Parameters
+        ----------
+        filepath : Path | str
+            File path.
+        constraints : Constraints
+            Constraints.
+
+        Returns
+        -------
+        Storer
+            Storer.
+        """
 
     def load_all(self, constraints: "Constraints") -> "Storer":
         """Load all files for the loader.

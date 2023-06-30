@@ -33,7 +33,7 @@ if __name__ == "__main__":
     SALINITY_DEFAULT = bgc_dp.defaults.VARS["salinity"]
     TEMPERATURE_DEFAULT = bgc_dp.defaults.VARS["temperature"]
 
-    storer = bgc_dp.read_files(
+    storer = bgc_dp.io.read_files(
         filepath=list(LOADING_DIR.glob("*.txt")),
         providers_column_label=bgc_dp.defaults.VARS["provider"].label,
         expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         salinity_name=SALINITY_DEFAULT.label,
         sigma_t_name=sigmat_feat.variable.label,
     )
-    bgc_dp.save_storer(
+    bgc_dp.io.save_storer(
         storer_wm,
         filepath=SAVING_DIR.joinpath("extracted_watermass.txt"),
         saving_order=[

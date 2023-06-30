@@ -141,6 +141,26 @@ class DataSource:
         provider_name: str,
         excluded_files: list[str],
     ) -> "BaseLoader":
+        """Build the loader.
+
+        Parameters
+        ----------
+        provider_name : str
+            Name of the Data provider.
+            !!! At the moment, it is only possible to use "csv","netcdf" or "abfiles".
+        excluded_files : list[str]
+            Files to exclude.
+
+        Returns
+        -------
+        SelectiveABFileLoader
+            Selective Loader.
+
+        Raises
+        ------
+        UnsupportedLoadingFormatError
+            If the file format is not supported.
+        """
         if self._format == "csv":
             return CSVLoader(
                 provider_name=provider_name,

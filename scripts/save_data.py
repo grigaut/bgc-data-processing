@@ -1,7 +1,6 @@
 """Data aggregation and saving script."""
 
 import datetime as dt
-import os
 from pathlib import Path
 from time import time
 
@@ -95,7 +94,7 @@ if __name__ == "__main__":
     for file in SAVING_DIR.glob("*.txt"):
         if VERBOSE > 0:
             print(f"Removing duplicates from: {file}")
-        storer = bgc_dp.read_files(
+        storer = bgc_dp.io.read_files(
             filepath=file,
             providers_column_label=bgc_dp.defaults.VARS["provider"].label,
             expocode_column_label=bgc_dp.defaults.VARS["expocode"].label,
@@ -112,11 +111,11 @@ if __name__ == "__main__":
             unit_row_index=1,
             delim_whitespace=True,
         )
-        os.remove(file)
+        file.unlink()
         storer.remove_duplicates(PRIORITY)
-        bgc_dp.save_storer(storer, filepath=file, saving_order=VARIABLES)
+        bgc_dp.io.save_storer(storer, filepath=file, saving_order=VARIABLES)
     if VERBOSE > 0:
-        print("\n" + "\t" + "-" * len(txt))
-        print("\t" + " " * (len(txt) // 2) + "DONE")
-        print("\t" + "-" * len(txt) + "\n")
+        print("\n\t-" * len(txt))
+        print("\t " * (len(txt) // 2) + "DONE")
+        print("\t-" * len(txt) + "\n")
     print(time() - t0)

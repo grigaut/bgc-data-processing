@@ -11,7 +11,8 @@ def set_verbose_level(level: int) -> None:
     level : int
         Verbose level.
     """
-    Verbose(level=level)
+    verbose = Verbose()
+    verbose.level = level
 
 
 class Verbose:
@@ -21,16 +22,11 @@ class Verbose:
     max_allowed: int = 2
     min_allowed: int = 0
 
-    def __new__(cls, level: int = 0) -> "Verbose":
+    def __new__(cls) -> "Verbose":
         """Instanciate new verbose singleton.
 
         Create an instance if there is no instance existing.
         Otherwise, return the existing one.
-
-        Parameters
-        ----------
-        level : int, optional
-            Verbose level, the higher the more verbose., by default 1
 
         Returns
         -------
@@ -39,8 +35,6 @@ class Verbose:
         """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            # Put any initialization here.
-            cls.level = level
         return cls._instance
 
     @property
@@ -109,7 +103,7 @@ def with_verbose(trigger_threshold: int, message: str):
                 # Replace placeholders
                 for key, value in kwargs.items():
                     content = content.replace("[" + key + "]", str(value))
-                    # print verbose
+                    # verbose
                 print(f"{offset}{content}")
             return func(*args, **kwargs)
 

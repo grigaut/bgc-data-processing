@@ -19,23 +19,24 @@ theme:
     - content.code.annotate         # Admonitions
     - content.code.copy             # copy code block
     - watch:
-        - "bgc_data_processing"
+        - "src/bgc_data_processing"
 
 nav:
   - Getting Started:
     - index.md
   - Scripts:
     - scripts/index.md
-    - scripts/save_data.md
+    - scripts/compare_sims_obs.md
+    - scripts/extract_data.md
+    - scripts/extract_water_mass.md
     - scripts/plot_data_density.md
-    - scripts/plot_profile.md
     - scripts/plot_interactive.md
+    - scripts/plot_profile.md
     - scripts/plot_ts_diagram.md
     - scripts/plot_var_boxplot.md
     - scripts/plot_var_histogram.md
     - scripts/plot_var_pressure.md
-    - scripts/match_hycom_obs.md
-    - scripts/compare_sims_obs.md
+    - scripts/save_data.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
@@ -65,13 +66,17 @@ plugins:
       handlers:
         python:
           options:
+            # General Options
+            # Headings Options
+            heading_level: 3                    # Heading size
+            # Members Options
+            members_order: source               # Member sorting
+            # Docstrings Options
             docstring_style: numpy              # To parse docstrings
-            docstring_section_style: spacy
-            heading_level: 3
-            show_root_toc_entry: false
-            show_if_no_docstring: true
-            showsubmodules: true
-
+            docstring_section_style: table      # Display section format
+            merge_init_into_class: true         # Merge __init__ docstring in Class'
+            show_if_no_docstring: true          # Show even if no docstring
+            # Signature Options
 
 markdown_extensions:
   - admonition

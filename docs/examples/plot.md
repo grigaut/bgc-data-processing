@@ -1,20 +1,23 @@
 # Density Map
 
-Example script to create a density map of the data. The data has previously been saved in the files "data1.csv", "data2.csv", "data3.csv", "data4.csv" and "data5.csv" and can be loaded from these files.
+Example script to create a density map of the data. The data has previously been saved in the files `"data1.txt"`, `"data2.txt"`, `"data3.txt"`, `"data4.txt"` and `"data5.txt"` and can be loaded from these files.
+
+In order to plot the data density, we use the [`DensityPlotter`]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}).
 
 ``` py
-from bgc_data_processing.data_structures import read_files
-from bgc_data_processing.tracers import DensityPlotter
+from pathlib import Path
+
+import bgc_data_processing as bgc_dp
 
 files = [
-    "path/to/data1.csv",
-    "path/to/data2.csv",
-    "path/to/data3.csv",
-    "path/to/data4.csv",
-    "path/to/data5.csv",
+    Path("path/to/data1.txt"),
+    Path("path/to/data2.txt"),
+    Path("path/to/data3.txt"),
+    Path("path/to/data4.txt"),
+    Path("path/to/data5.txt"),
 ]
 # Files Loading
-storer = read_files(
+storer = bgc_dp.io.read_files(
     filepath=files,
     providers_column_label = "PROVIDER",
     expocode_column_label = "EXPOCODE",
@@ -31,9 +34,9 @@ storer = read_files(
     delim_whitespace=False,
 )
 # Constraints
-constraints = data_structures.Constraints()            # (1)!
+constraints = bgc_dp.Constraints()            # (1)!
 # Mapping
-mesh = DensityPlotter(storer, constraints=constraints)
+mesh = bgc_dp.tracers.DensityPlotter(storer, constraints=constraints)
 mesh.set_bin_size(bins_size=[0.5,1.5])
 mesh.show(
     variable_name="PHOS",

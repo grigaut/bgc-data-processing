@@ -69,6 +69,10 @@ select = [
     "A",
     # flake8-unused-arguments
     "ARG",
+    # flake8-use-pathlib
+    "PTH",
+    # eradicate
+    "ERA",
     # flake8-bugbear
     'B',
     # flake8-commas
@@ -79,6 +83,14 @@ select = [
     'Q',
     # flake8-errmsg
     'EM',
+    # flake8-implicit-str-concat
+    "ISC",
+    # flake8-import-conventions
+    "ICN",
+    # flake8-pie
+    "PIE",
+    # flake8-quotes
+    "Q",
     # flake8-raise
     "RSE",
     # flake8-return
@@ -87,6 +99,8 @@ select = [
     "SLF",
     # flake8-simplify
     "SIM",
+    # flake8-tidy-imports
+    "TID",
     # flake8-type-checking
     "TCH",
     # pylint
@@ -96,16 +110,16 @@ select = [
     "PLW",
     # tryceratops
     "TRY",
+    # flynt
+    "FLY",
+    # Perflint
+    "PERF",
     # Ruff-specific rules
     'RUF',
 ]
 ignore = [
     # do not assign a lambda expression, use a def
     "E731",
-    # controversial
-    "B006",
-    # controversial
-    "B008",
     # Function definition does not bind loop variable
     "B023",
     # Too many arguments to function call

@@ -29,8 +29,8 @@ class CSVLoader(BaseLoader):
     variables : SourceVariableSet
         Storer object containing all variables to consider for this data,
         both the one in the data file but and the one not represented in the file.
-    read_params : dict, optional
-        Additional parameter to pass to pandas.read_csv., by default {}
+    read_params : dict | None, optional
+        Additional parameter to pass to pandas.read_csv., by default None
     """
 
     def __init__(
@@ -39,9 +39,12 @@ class CSVLoader(BaseLoader):
         category: str,
         exclude: list[str],
         variables: "SourceVariableSet",
-        read_params: dict = {},
+        read_params: dict | None = None,
     ) -> None:
-        self._read_params = read_params
+        if read_params is None:
+            self._read_params = {}
+        else:
+            self._read_params = read_params
         super().__init__(
             provider_name=provider_name,
             category=category,
@@ -193,7 +196,7 @@ class CSVLoader(BaseLoader):
     def load(
         self,
         filepath: Path | str,
-        constraints: Constraints = Constraints(),
+        constraints: Constraints | None = None,
     ) -> pd.DataFrame:
         """Load a csv file from filepath.
 
@@ -201,14 +204,16 @@ class CSVLoader(BaseLoader):
         ----------
         filepath: Path | str
             Path to the file to load.
-        constraints : Constraints, optional
-            Constraints slicer., by default Constraints()
+        constraints : Constraints| None, optional
+            Constraints slicer., by default None
 
         Returns
         -------
         pd.DataFrame
             DataFrame corresponding to the file.
         """
+        if constraints is None:
+            constraints = Constraints()
         df_raw = self._read(Path(filepath))
         df_form = self._format(df_raw)
         df_type = self._convert_types(df_form)
