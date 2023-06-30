@@ -146,5 +146,5 @@ Slice objects can be saved in the same way as any Storer:
 
 ```py
 import bgc_data_processing as bgc_dp
-bgc_dp.io.save_all_storer("filepath/to/save/in")
+bgc_dp.io.save_all_storer("filepath/to/save/in.txt")
 ```
