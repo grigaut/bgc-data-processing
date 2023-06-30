@@ -58,13 +58,15 @@ if __name__ == "__main__":
         depth_variable=variables.get(variables.depth_var_name),
         latitude_variable=variables.get(variables.latitude_var_name),
     )
-    pres_feat.insert_in_storer(storer)
+    if not storer.variables.has_name(pres_feat.variable.name):
+        pres_feat.insert_in_storer(storer)
     ptemp_feat = bgc_dp.features.PotentialTemperature(
         salinity_variable=SALINITY_DEFAULT,
         temperature_variable=TEMPERATURE_DEFAULT,
         pressure_variable=pres_feat.variable,
     )
-    ptemp_feat.insert_in_storer(storer)
+    if not storer.variables.has_name(ptemp_feat.variable.name):
+        ptemp_feat.insert_in_storer(storer)
     # Add global constraints
     constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(

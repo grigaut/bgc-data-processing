@@ -102,16 +102,20 @@ if __name__ == "__main__":
     )
     # Add pressure
     pres_feat = bgc_dp.features.Pressure(DEPTH_TEMPLATE, LATITUDE_TEMPLATE)
-    pres_feat.insert_in_storer(observations)
-    pres_feat.insert_in_storer(interpolated)
+    if not observations.variables.has_name(pres_feat.variable.name):
+        pres_feat.insert_in_storer(observations)
+    if not interpolated.variables.has_name(pres_feat.variable.name):
+        pres_feat.insert_in_storer(interpolated)
     # Add potential temperature
     ptemp_feat = bgc_dp.features.PotentialTemperature(
         SALINITY_TEMPLATE,
         TEMPERATURE_TEMPLATE,
         pres_feat.variable,
     )
-    ptemp_feat.insert_in_storer(observations)
-    ptemp_feat.insert_in_storer(interpolated)
+    if not observations.variables.has_name(ptemp_feat.variable.name):
+        ptemp_feat.insert_in_storer(observations)
+    if not interpolated.variables.has_name(ptemp_feat.variable.name):
+        ptemp_feat.insert_in_storer(interpolated)
     save_vars = [
         var.label
         for var in observations.variables
