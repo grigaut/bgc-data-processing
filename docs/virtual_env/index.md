@@ -1,6 +1,6 @@
 # Virtual Environment
 
-This project environment is build using [Anaconda](https://conda.io/projects/conda/en/latest/index.html), while the package management is done using the Python tool [Poetry](https://python-poetry.org/). The only requirement is to have anaconda installed and to be able to able to run commands using the `conda` methods in a terminal. More informations on enabling the `conda` method in Visual Studio Code [here](https://medium.com/analytics-vidhya/efficient-way-to-activate-conda-in-vscode-ef21c4c231f2).
+This project environment is build using [Anaconda](https://conda.io/projects/conda/en/latest/index.html), while the package management is done using the Python tool [Poetry](https://python-poetry.org/). The only requirement is to have anaconda installed and to be able to run commands using the `conda` methods in a terminal. More informations on enabling the `conda` method in Visual Studio Code [here](https://medium.com/analytics-vidhya/efficient-way-to-activate-conda-in-vscode-ef21c4c231f2).
 
 ## Conda
 
@@ -33,7 +33,7 @@ The dependencies versions are defined in the pyproject.toml file. This file cont
     ??? info "conda env create"
         <https://docs.conda.io/projects/conda/en/latest/commands/create.html>
 
-2. Activate the environment named `conda_venv`:
+2. Activate the virtual environment located in `./.venv`:
 TODO : add line about where to find the environment's name
 
     === "From a Bash terminal"

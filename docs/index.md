@@ -44,7 +44,7 @@ Having **GNU Make** installed can also simplify the project's setup.
     [More details on the virtual environment](virtual_env/)
 
 ## Configuration files
-Each scripts has an associated configuration to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default]({{repo_tree}}/config/default/). If these copies don't exist, the following command will create the files:
+Each scripts has an associated configuration file to set up all necessary parameters. By default, these configuration don't exists but can be created from a 'default configuration' existing in [config/default]({{repo_tree}}/config/default/). If these copies don't exist, the following command will create the files:
 
 === "With make"
     ``` bash
