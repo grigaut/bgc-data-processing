@@ -74,14 +74,6 @@ The following sections all relate to the python scripts defined [here]({{config.
 
 ## Compare Simulations to Observations
 
-??? question "How to find closest simulated points from given observations?"
-
-    Command: `make run-match-hycom-obs`
-
-    More informations there: [Simulation-Observation Matching Script]({{fix_url("scripts/match_hycom_obs.md")}})
-
-    ([Source]({{repo_blob}}/scripts/match_hycom_obs.py))
-
 ??? question "How to compare simulations to observations?"
 
     Command: `make run-compare-sims-obs`

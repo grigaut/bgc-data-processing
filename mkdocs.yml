@@ -34,7 +34,6 @@ nav:
     - scripts/plot_var_boxplot.md
     - scripts/plot_var_histogram.md
     - scripts/plot_var_pressure.md
-    - scripts/match_hycom_obs.md
     - scripts/compare_sims_obs.md
   - How does it work ?:
     - how_it_works/index.md
