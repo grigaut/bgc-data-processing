@@ -26,15 +26,16 @@ nav:
     - index.md
   - Scripts:
     - scripts/index.md
-    - scripts/save_data.md
+    - scripts/compare_sims_obs.md
+    - scripts/extract_data.md
     - scripts/plot_data_density.md
-    - scripts/plot_profile.md
     - scripts/plot_interactive.md
+    - scripts/plot_profile.md
     - scripts/plot_ts_diagram.md
     - scripts/plot_var_boxplot.md
     - scripts/plot_var_histogram.md
     - scripts/plot_var_pressure.md
-    - scripts/compare_sims_obs.md
+    - scripts/save_data.md
   - How does it work ?:
     - how_it_works/index.md
     - how_it_works/variables.md
