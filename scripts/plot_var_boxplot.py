@@ -72,13 +72,13 @@ if __name__ == "__main__":
         temperature_variable=TEMPERATURE_DEFAULT,
         pressure_variable=pres_feat.variable,
     )
-    if not storer.variables.has_name(pres_feat.variable.name):
+    if not storer.variables.has_name(ptemp_feat.variable.name):
         ptemp_feat.insert_in_storer(storer)
     sigmat_feat = bgc_dp.features.SigmaT(
         salinity_variable=SALINITY_DEFAULT,
         temperature_variable=TEMPERATURE_DEFAULT,
     )
-    if not storer.variables.has_name(pres_feat.variable.name):
+    if not storer.variables.has_name(sigmat_feat.variable.name):
         sigmat_feat.insert_in_storer(storer)
     constraints = bgc_dp.Constraints()
     constraints.add_superset_constraint(
