@@ -18,6 +18,13 @@ The following sections all relate to the python scripts defined [here]({{config.
     More informations here: [Data Extraction script]({{fix_url("scripts/extract_data.md")}})
 
     ([Source]({{repo_blob}}/scripts/extract_data.py))
+
+??? question "How to extract data from a given water mass ?"
+    Command: `make run-extract-water-mass`
+
+    More informations here: [Data Extraction script]({{fix_url("scripts/extract_water_mass.md")}})
+
+    ([Source]({{repo_blob}}/scripts/extract_water_mass.py))
 ## Overall Data Plotting
 
 ??? question "How to plot an interactive map of the data?"

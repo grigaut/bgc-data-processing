@@ -28,6 +28,7 @@ nav:
     - scripts/index.md
     - scripts/compare_sims_obs.md
     - scripts/extract_data.md
+    - scripts/extract_water_mass.md
     - scripts/plot_data_density.md
     - scripts/plot_interactive.md
     - scripts/plot_profile.md
