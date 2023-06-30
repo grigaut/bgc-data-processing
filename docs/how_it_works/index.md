@@ -40,7 +40,7 @@ variable = bgc_dp.variables.ExistingVar(
 
 ## Loading the data
 
-In order to load the data from a provider, one must instanciate a [DataSource]({{fix_url("reference/core/sources/#bgc_data_processing.core.sources.DataSource")}}). This data source instanciate a loader which correspond to the format of the data of the source ([CSV]({{fix_url("reference/core/loaders/csv_loaders/#bgc_data_processing.core.loaders.csv_loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/core/loaders/netcdf_loaders/#bgc_data_processing.core.loaders.netcdf_loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/core/loaders/abfile_loaders/#bgc_data_processing.core.loaders.abfile_loaders.ABFileLoader")}})). <br/>
+In order to load the data from a provider, one must instanciate a [`DataSource`]({{fix_url("reference/core/sources/#bgc_data_processing.core.sources.DataSource")}}). This data source instanciate a loader which correspond to the format of the data of the source ([CSV]({{fix_url("reference/core/loaders/csv_loaders/#bgc_data_processing.core.loaders.csv_loaders.CSVLoader")}}), [NetCDF]({{fix_url("reference/core/loaders/netcdf_loaders/#bgc_data_processing.core.loaders.netcdf_loaders.NetCDFLoader")}}) or [abfile]({{fix_url("reference/core/loaders/abfile_loaders/#bgc_data_processing.core.loaders.abfile_loaders.ABFileLoader")}})). <br/>
 This data source object contains all the informations on the provider (name, files location, required variables stored in a [variable storing object]({{fix_url("reference/core/variables/sets/#bgc_data_processing.core.variables.sets.SourceVariableSet")}})).
 
 Defining a DataSource for GLODAPv2.2022 :
@@ -82,7 +82,7 @@ storer = dsource.load_all()                                                 # (1
 if the pattern is "glodap_{years}.csv" and the years to load are 2007 and 2008, only the files matching the regex "glodap_(2007|2008).csv" will be loaded.
 10. Variables to load (if the variables are not in the data source, the column will still be created)
 11. Additionnal parameter passed to pd.read_csv
-12. The load_all method from the loader will then load the data and return a [storer]({{fix_url("reference/core/storers/#bgc_data_processing.core.storers.Storer")}}) containing the resulting dataframe.
+12. The load_all method from the loader will then load the data and return a [`Storer`]({{fix_url("reference/core/storers/#bgc_data_processing.core.storers.Storer")}}) containing the resulting dataframe.
 
 !!! note ""
     [More informations on loading]({{fix_url("how_it_works/loading.md")}})
@@ -90,7 +90,7 @@ if the pattern is "glodap_{years}.csv" and the years to load are 2007 and 2008, 
 ## Aggregating the data
 
 Once data has been loaded from some providers, the aggregation of the resulting storers can be done using the `+` operator. However, in order for the aggregation to work, all storer must have similar variables (to concatenates the data) and same category (category-different storers can't be aggregated together). <br/>
-Then, in order to save a storer, one has to use a [StorerSaver]({{fix_url("reference/core/io/savers/#bgc_data_processing.core.io.savers.StorerSaver")}}).
+Then, in order to save a storer, one has to use a [`StorerSaver`]({{fix_url("reference/core/io/savers/#bgc_data_processing.core.io.savers.StorerSaver")}}).
 
 ``` py
 storer_glodap = dsource_glodap.load_all()                   # (1)!
@@ -109,8 +109,8 @@ saver.save_all_storer(Path("path/to/save/file.txt"))        # (4)!
 
 ## Plotting the data
 
-To plot the data, one has to create a [DensityPlotter]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}) (to create 2D Mesh) and then call its [.show]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.show")}}) method.
-To save the data, one has to use the [.save]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.save")}}) method.
+To plot the data, one has to create a [`DensityPlotter`]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}) (to create 2D Mesh) and then call its [`.show`]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.show")}}) method.
+To save the data, one has to use the [`.save`]({{fix_url("reference/tracers/#bgc_data_processing.tracers.DensityPlotter.save")}}) method.
 
 ``` py
 import bgc_data_processing.tracers as bgc_dp

@@ -4,7 +4,7 @@ A few precautions must be taken when contributing to this project.
 
 ## Adding a new variable
 In order to register a new variable, one must create the variable entry in the `config/variables.toml` configuration file. In order for this addition to be permanent, the change must be done as well in the [`config/default/variables.toml`]({{repo_blob}}/config/default/variables.toml) file since `config/variables.toml` is only local.
-Once the variable is created, one must manually add this variable to all the loaders defined in every file of [providers]({{fix_url("reference/providers")}}). The variable template is automatically loaded in the `VARS` dictionnary if it has been properly defined in `config/variables.toml`.
+Once the variable is created, one must manually add this variable to all the loaders defined in every file of [`providers`]({{fix_url("reference/providers")}}). The variable template is automatically loaded in the `VARS` dictionnary if it has been properly defined in `config/variables.toml`.
 ### Example
 CMEMS's orginal loader's definition:
 ``` python title="src/bgc_data_processing/providers/cmems.py"
@@ -94,7 +94,7 @@ loader = DataSource(
 
 ## Adding a new provider
 In order to register a new provider, one must be create a new entry in the `config/providers.toml` configuration file. In order for this addition to be permanent, the change must be done as well in the [`config/default/providers.toml`]({{repo_blob}}/config/default/providers.toml) file since `config/providers.toml` is only local.
-Once the entry is created, one must manually create a file to define this provider's loader in [providers]({{repo_tree}}/src/bgc_data_processing/providers). All the available variables must be properly defined in the loader's VariablesStorer (proper names, correction functions, flag informations...).
+Once the entry is created, one must manually create a file to define this provider's loader in [`providers`]({{repo_tree}}/src/bgc_data_processing/providers). All the available variables must be properly defined in the loader's VariablesStorer (proper names, correction functions, flag informations...).
 
 ### Example
 Creating a new provider entry:
@@ -110,7 +110,7 @@ CATEGORY = "in_situ"
 EXCLUDE = []
 ```
 
-Creating a new file in [providers]({{repo_tree}}/src/bgc_data_processing/providers) :
+Creating a new file in [`providers`]({{repo_tree}}/src/bgc_data_processing/providers) :
 
 ``` py title="bgc_data_processing/providers/bgc_provider.py"
 """Specific parameters to load BGC_PROVIDER-provided data."""

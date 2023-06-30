@@ -9,8 +9,8 @@ When loading from a provider, the following arguments must be given to the DataS
 - The format of the data: `data_format`
 - The directory containing the files to load: `dirin`
 - The category of the data ('float' or 'in_situ'): `data_category`
-- The pattern of the names of the files to read (a [FileNamePattern]({{fix_url("../reference/utils/patterns/#bgc_data_processing.utils.patterns.FileNamePattern")}})): `files_pattern`
-- The [SourceVariableSet]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.SourceVariableSet")}}) object containing all variables: `variable_ensemble`
+- The pattern of the names of the files to read (a [`FileNamePattern`]({{fix_url("../reference/utils/patterns/#bgc_data_processing.utils.patterns.FileNamePattern")}})): `files_pattern`
+- The [`SourceVariableSet`]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.SourceVariableSet")}}) object containing all variables: `variable_ensemble`
 
 Behind the hood, theses `DataSource` object instantiate loaders, all deriving from [`BaseLoader`]({{fix_url("../reference/core/loaders/base/#bgc_data_processing.core.loaders.base.BaseLoader")}}). All loaders are file-format specific, meaning that at least one specific subclass of `Baseloader` exists for every supported data format.
 
@@ -78,7 +78,7 @@ storer = dsource.load_all()
 ```
 ## Loading from already processed file
 
-It is also possible to load data from files which have saved using the [read_files]({{fix_url("../reference/core/io/readers/#bgc_data_processing.core.io.readers.read_files")}}) function:
+It is also possible to load data from files which have saved using the [`read_files`]({{fix_url("../reference/core/io/readers/#bgc_data_processing.core.io.readers.read_files")}}) function:
 
 ```py
 from pathlib import Path
@@ -119,14 +119,14 @@ storer = bgc_dp.io.read_files(
 
 ## Storers
 
-Once the data in a Storer, it is easy to save this data to a file using the [save_storer]({{fix_url("../reference/core/io/savers/#bgc_data_processing.core.io.savers.save_storer")}}) function:
+Once the data in a Storer, it is easy to save this data to a file using the [`save_storer`]({{fix_url("../reference/core/io/savers/#bgc_data_processing.core.io.savers.save_storer")}}) function:
 
 ```py
 import bgc_data_processing as bgc_dp
 bgc_dp.io.save_all_storer(Path("filepath/to/save/in.txt"))
 ```
 
-It also possible to slice the Dataframe based on the dates of the rows using the [.slice_on_dates]({{fix_url("../reference/core/storers/#bgc_data_processing.core.storers.Storer.slice_on_dates")}}) method. This will return a Slice object, a child class of Storer but only storing indexes of the dataframe slice and not the dataframe slice itself (to reduce the amount of memory used) :
+It also possible to slice the Dataframe based on the dates of the rows using the [`.slice_on_dates`]({{fix_url("../reference/core/storers/#bgc_data_processing.core.storers.Storer.slice_on_dates")}}) method. This will return a Slice object, a child class of Storer but only storing indexes of the dataframe slice and not the dataframe slice itself (to reduce the amount of memory used) :
 
 ``` py
 import pandas as pd

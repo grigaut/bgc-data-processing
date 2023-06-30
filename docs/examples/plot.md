@@ -2,7 +2,7 @@
 
 Example script to create a density map of the data. The data has previously been saved in the files `"data1.txt"`, `"data2.txt"`, `"data3.txt"`, `"data4.txt"` and `"data5.txt"` and can be loaded from these files.
 
-In order to plot the data density, we use the [DensityPlotter]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}).
+In order to plot the data density, we use the [`DensityPlotter`]({{fix_url("../reference/tracers/#bgc_data_processing.tracers.DensityPlotter")}}).
 
 ``` py
 from pathlib import Path

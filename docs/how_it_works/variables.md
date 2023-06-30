@@ -32,7 +32,7 @@ Different types of variables exist :
     ```
 
     !!! tip "Usecase of TemplateVar"
-        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [.not_in_file]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.not_in_file")}}) and [.in_file_as]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.in_file_as")}}) methods.
+        When loading data from different sources, it is recommended to use TemplateVar to define all variable and then properly instantiate the variable for each source using the [`.not_in_file`]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.not_in_file")}}) and [`.in_file_as`]({{fix_url("../reference/core/variables/#bgc_data_processing.core.variables.TemplateVar.in_file_as")}}) methods.
 
 === "NotExistingVar"
     Variable which is known to not exist in the dataset. If needed, the corresponding column in the dataframe can be filled later or it will remain as nan.
@@ -108,13 +108,13 @@ Different types of variables exist :
     ```
 
 === "ParsedVar"
-    Variable partially reconstructed from a csv file saved with a [StorerSaver]({{fix_url("../reference/core/io/savers/#bgc_data_processing.core.io.savers.StorerSaver")}}).
+    Variable partially reconstructed from a csv file saved with a [`StorerSaver`]({{fix_url("../reference/core/io/savers/#bgc_data_processing.core.io.savers.StorerSaver")}}).
 
     They can be created from scratch but usually it useless to manually use them.
 
 
 === "FeatureVar"
-    Variable which result from a [feature]({{fix_url("../reference/features")}}). A feature variable is made out of operations over other variables.
+    Variable which result from a [`feature`]({{fix_url("../reference/features/#bgc_data_processing.features.BaseFeature")}}). A feature variable is made out of operations over other variables.
 
     For example, the `CPHL` (chlorophyll) variable, made from `DIAC`(diatoms) and `FLAC` (flagellates) :
 
@@ -151,7 +151,7 @@ Different types of variables exist :
 
 ## Corrections
 
-It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [.correct_with]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.correct_with")}}) method. The function given to the method will then be applied to the column once the data loaded.
+It is possible to specify corrections functions to apply to an ExistingVar in order to apply minor correction. This can be done using the [`.correct_with`]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.correct_with")}}) method. The function given to the method will then be applied to the column once the data loaded.
 
 ```py
 import bgc_data_processing as bgc_dp
@@ -199,7 +199,7 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
     1. If latitude value is NaN, the row is dropped.
 
 === "When many variables are Nan"
-    It can be done using the [.remove_when_all_nan]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.remove_when_all_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
+    It can be done using the [`.remove_when_all_nan`]({{fix_url("../reference/core/variables/vars/#bgc_data_processing.core.variables.vars.ExistingVar.remove_when_all_nan")}}) method. Then, when the values associated to the object returned by this method will be nan, the row will be deleted.
 
     ```py
     import bgc_data_processing as bgc_dp
@@ -231,7 +231,7 @@ It possible to specify settings for ExistingVar and NotExistingVar to remove the
 
 ## Variables Sets
 
-All variables can then be stored in a [VariableSet]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.VariableSet")}}) object so that loaders can easily interact with them.
+All variables can then be stored in a [`VariableSet`]({{fix_url("../reference/core/variables/sets/#bgc_data_processing.core.variables.sets.VariableSet")}}) object so that loaders can easily interact with them.
 
 ``` py
 from bgc_data_processing.core.variables.vars import TemplateVar
