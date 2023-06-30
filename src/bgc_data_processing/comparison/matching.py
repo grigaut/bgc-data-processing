@@ -561,7 +561,7 @@ class SelectiveDataSource(DataSource):
         )
         self.reference = reference.data
         self.strategy = strategy
-        self.grid = self._loader.grid_file
+        self.grid = self.loader.grid_file
 
     def _build_loader(
         self,
