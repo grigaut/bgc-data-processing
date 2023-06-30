@@ -18,6 +18,32 @@ has been imported as `bgc_dp`:
 ```
 >>> import bgc_data_processing as bgc_dp
 ```
+
+From this namespace are accessible:
+
+- `Constraints`             -> Constraints object to slice storers
+- `DataSource`              -> Providers defining object
+- `SelectiveDataSource`     -> Selective loader
+- `SourceVariableSet`       -> Set of variables to pass to datasource
+- `Storer`                  -> Biogeochemical data and metadat storer
+- `WaterMass`               -> Water mass defining object
+- `comparison`              -> Comparison tools to compare observations to simulations
+- `dateranges`              -> Daterange-related objects
+- `defaults`                -> Defaults objects parsed from the configuration files
+- `exceptions`              -> Exceptions fro the project
+- `features`                -> Features to compute new variables
+- `io`                      -> Input/Output tools
+- `metrics`                 -> Comparison metrics
+- `parsers`                 -> Configuartion parsing objects
+- `providers`               -> Providers loaders
+- `savers`                  -> Saving objects
+- `set_verbose_level`       -> Set the verbose level
+- `tracers`                 -> Plotting objects
+- `units`                   -> Unit conversion
+- `utils`                   -> Utilities
+- `variables`               -> Variables-related objects
+- `water_masses`            -> Water mass definition
+
 """  # noqa: D205, D400
 
 from pathlib import Path
@@ -49,15 +75,11 @@ from bgc_data_processing.water_masses import WaterMass
 BASE_DIR = Path(__file__).parent.resolve()
 
 __all__ = [
-    "BASE_DIR",
     "Constraints",
     "DataSource",
-    "PROVIDERS_CONFIG",
     "SelectiveDataSource",
     "SourceVariableSet",
     "Storer",
-    "VARS",
-    "WATER_MASSES",
     "WaterMass",
     "comparison",
     "dateranges",
