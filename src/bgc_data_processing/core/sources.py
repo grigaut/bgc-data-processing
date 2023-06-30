@@ -63,10 +63,9 @@ class DataSource:
         self._dirin = Path(dirin)
         self._provider = provider_name
         self._read_kwargs = kwargs
-        self._loader = self._build_loader(
-            provider_name,
-            excluded_files,
-        )
+        self._prov_name = provider_name
+        self._excl = excluded_files
+        self._loader = None
 
     @property
     def as_template(self) -> dict[str, Any]:
@@ -123,6 +122,11 @@ class DataSource:
     @property
     def loader(self) -> "BaseLoader":
         """Data loader."""
+        if self._loader is None:
+            self._loader = self._build_loader(
+                self._prov_name,
+                self._excl,
+            )
         return self._loader
 
     @property
@@ -236,11 +240,11 @@ class DataSource:
         Storer
             Storer.
         """
-        data = self._loader.load(filepath=filepath, constraints=constraints)
+        data = self.loader.load(filepath=filepath, constraints=constraints)
         storer = Storer(
             data=data,
             category=self._category,
-            providers=[self._loader.provider],
+            providers=[self.loader.provider],
             variables=self._store_vars,
         )
         self._insert_all_features(storer)
@@ -267,7 +271,7 @@ class DataSource:
         date_label = self._vars_ensemble.get(self._vars_ensemble.date_var_name).label
         date_constraint = constraints.get_constraint_parameters(date_label)
         pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self._loader.is_file_valid
+        pattern_matcher.validate = self.loader.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
         )
@@ -295,7 +299,7 @@ class DataSource:
         date_label = self._vars_ensemble.get(self._vars_ensemble.date_var_name).label
         date_constraint = constraints.get_constraint_parameters(date_label)
         pattern_matcher = self._files_pattern.build_from_constraint(date_constraint)
-        pattern_matcher.validate = self._loader.is_file_valid
+        pattern_matcher.validate = self.loader.is_file_valid
         filepaths = pattern_matcher.select_matching_filepath(
             research_directory=self._dirin,
         )
