@@ -139,3 +139,5 @@ If `SHOW_MAP` is set to `true`, a visualisation of the matched point is also dis
 This is an example of what this image could look like:
 
 ![matching map]({{fix_url("assets/plots/comparison_match.png")}}){width=750px}
+
+Source code: [:octicons-file-code-16:]({{repo_blob}}/scripts/compare_sim_obs.py)
