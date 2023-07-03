@@ -90,7 +90,7 @@ Install git pre-commit hooks to ensure that the code meets editing standards bef
 </details>
 
 <details close>
-<summary> <code>make install-with-hooks</code> </summary>
+<summary> <code>make install-dev</code> </summary>
 Install the environment as <code>make all</code> would do and install git hooks to ensure that the code meets editing standards before committing to github.
 </details>
 
