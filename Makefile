@@ -98,7 +98,7 @@ deploy-docs:
 
 # Development Rules
 
-.PHONY: poetry-dev
+.PHONY: poetry-install-dev
 poetry-install-dev: poetry.lock
 	$(BIN)poetry install
 
